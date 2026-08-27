@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 6,
+    "requiredFailed": 0,
+    "total": 6
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "63f108330de7a98637a5c959858372647494ea50",
+  "closedAt": "2026-08-27T15:11:05.753Z",
+  "closedGitSha": "63f108330de7a98637a5c959858372647494ea50",
+  "contractHash": "5a4b20f5b96d04b07e6122126e3ef7ee6bb490a45a9b21ac5760f1ff89c987f8",
+  "evidenceRunId": "run-2026-08-27T15-11-03-346Z-265065d2",
+  "fixCycles": 0,
+  "goal": "Ship a dependency-free local CLI that locks a version contract, captures Git-bound verification evidence, classifies release blockers, bounds fix loops, honors human stop, and closes a release with an auditable receipt.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "0.1.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

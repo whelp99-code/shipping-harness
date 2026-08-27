@@ -1,0 +1,53 @@
+import { lstat, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { walkFiles, relative } from './shared.mjs';
+import { assertContainedPath } from '../src/core/fs.mjs';
+
+const failures = [];
+const sourceFiles = await walkFiles(path.resolve('src'), (file) => file.endsWith('.mjs'));
+const forbidden = [
+  { name: 'eval', pattern: /\beval\s*\(/gu },
+  { name: 'Function constructor', pattern: /\bnew\s+Function\s*\(/gu },
+  { name: 'hardcoded OpenAI key', pattern: /\bsk-[A-Za-z0-9_-]{20,}\b/gu },
+  { name: 'hardcoded GitHub token', pattern: /\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}\b/gu },
+];
+for (const filePath of sourceFiles) {
+  const content = await readFile(filePath, 'utf8');
+  for (const rule of forbidden) {
+    if (rule.pattern.test(content)) failures.push(`${relative(filePath)} contains forbidden ${rule.name}`);
+    rule.pattern.lastIndex = 0;
+  }
+}
+
+const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
+if (Object.keys(packageJson.dependencies ?? {}).length > 0) failures.push('runtime dependencies must remain empty for v0.2.0');
+const ignore = await readFile('.gitignore', 'utf8');
+for (const entry of ['.shipping/evidence/', '.shipping/tmp/', '.chatgpt2codex/']) {
+  if (!ignore.split(/\r?\n/u).includes(entry)) failures.push(`.gitignore missing ${entry}`);
+}
+
+const tempRoot = await mkdtemp(path.join(process.cwd(), '.security-check-'));
+try {
+  const outside = path.join(tempRoot, 'outside');
+  const repo = path.join(tempRoot, 'repo');
+  await mkdir(outside);
+  await mkdir(repo);
+  await writeFile(path.join(outside, 'secret'), 'not readable through repo link');
+  await symlink(outside, path.join(repo, 'escape'));
+  let rejected = false;
+  try {
+    await assertContainedPath(repo, path.join(repo, 'escape', 'secret'));
+  } catch {
+    rejected = true;
+  }
+  if (!rejected) failures.push('symlink escape was not rejected');
+} finally {
+  await rm(tempRoot, { recursive: true, force: true });
+}
+
+if (failures.length > 0) {
+  process.stderr.write(`${failures.join('\n')}\n`);
+  process.exitCode = 1;
+} else {
+  process.stdout.write(`security: ${sourceFiles.length} files scanned; path escape rejected\n`);
+}

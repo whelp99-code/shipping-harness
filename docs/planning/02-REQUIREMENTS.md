@@ -54,6 +54,25 @@
 | REQ-HOOK-001 | Ingest normalized lifecycle events and return a machine-readable stop decision. | 0.2.0 |
 | REQ-HOOK-002 | Return `deny-continuation` whenever human stop, closed state, or exhausted budget applies. | 0.2.0 |
 
+### Beginner workflow and MCP
+
+| ID | Requirement | Release |
+|---|---|---|
+| REQ-ANALYZE-001 | Inspect only repository-owned manifests, README files, and package scripts to identify project type and candidate verification commands. | 0.3.0 |
+| REQ-ANALYZE-002 | Produce a minimal scope proposal from a natural-language goal without silently adding unrelated product features. | 0.3.0 |
+| REQ-ANALYZE-003 | Produce a deterministic short execution plan whose steps map to proposed acceptance criteria. | 0.3.0 |
+| REQ-PROPOSAL-001 | Bind every proposal to project root, Git SHA, proposal hash, release, goal, scope, acceptance, and expiry metadata. | 0.3.0 |
+| REQ-PROPOSAL-002 | Require an explicit confirmation and matching proposal hash before writing a contract. | 0.3.0 |
+| REQ-PROPOSAL-003 | Reject approval if the proposal is stale, the repository changed, or an active release is already locked. | 0.3.0 |
+| REQ-MCP-001 | Serve newline-delimited JSON-RPC 2.0 over STDIO without non-protocol output on stdout. | 0.3.0 |
+| REQ-MCP-002 | Support MCP `2026-07-28` discovery and per-request metadata while retaining the `2025-11-25` initialize handshake for local-client compatibility. | 0.3.0 |
+| REQ-MCP-003 | Expose a small user-oriented tool set for start, approve, execute, status, verify, blocker-only fix, pause, and close. | 0.3.0 |
+| REQ-MCP-004 | Return structured tool results and preserve actionable tool errors without crashing the STDIO server. | 0.3.0 |
+| REQ-MCP-005 | Bound message bytes, JSON depth, tool argument size, and concurrent in-flight requests. | 0.3.0 |
+| REQ-MCP-006 | Never expose an arbitrary shell command field through MCP tool schemas. | 0.3.0 |
+| REQ-MCP-007 | Execute only an adapter command already stored in the approved and locked repository contract. | 0.3.0 |
+| REQ-MCP-008 | Preserve human pause/abort and Shipping Harness release decisions as higher authority than agent continuation. | 0.3.0 |
+
 ## Non-functional requirements
 
 | ID | Requirement |
@@ -65,6 +84,9 @@
 | NFR-SEC-002 | No adapter may install software or alter credentials implicitly. |
 | NFR-COMPAT-001 | External CLI flag changes must degrade to a diagnostic, not fabricated success. |
 | NFR-TEST-001 | Unit, integration, adversarial, security, and license checks are repeatable offline. |
+| NFR-MCP-001 | The MCP runtime requires no network listener and no remote authentication in v0.3.0. |
+| NFR-MCP-002 | MCP logs go only to stderr or repository audit files, never protocol stdout. |
+| NFR-USABILITY-001 | A user can begin with a natural-language goal and one explicit scope approval rather than composing CLI commands. |
 
 ## Release acceptance criteria
 
@@ -99,6 +121,23 @@
 | AC-0208 | Stop decision denies continuation after abort, close, or budget exhaustion. |
 | AC-0209 | Live-vs-fixture integration status is emitted in a release report. |
 | AC-0210 | All v0.1.0 guarantees remain green after adapter addition. |
+
+### v0.3.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-0301 | `server/discover` reports supported protocol versions, identity, and tools capability. |
+| AC-0302 | A legacy `initialize` request negotiates `2025-11-25` and does not require a stateful session afterward. |
+| AC-0303 | `tools/list` exposes only the approved high-level Shipping Harness tools and no arbitrary command parameter. |
+| AC-0304 | `shipping_start` detects the fixture repository type and creates a minimal Git-bound proposal and short plan. |
+| AC-0305 | `shipping_approve_scope` rejects missing confirmation, a wrong proposal hash, and a changed Git SHA. |
+| AC-0306 | Approved scope writes a valid DRAFT contract and can lock only after the proposal is accepted. |
+| AC-0307 | `shipping_execute` refuses an adapter without a contract-configured command and ignores injected command-like arguments. |
+| AC-0308 | Status, verify, pause, fix, and close tools delegate to the existing deterministic core. |
+| AC-0309 | Malformed, oversized, deeply nested, and unknown MCP messages fail safely without stdout corruption. |
+| AC-0310 | A spawned STDIO smoke client completes discovery, tool listing, and a read-only status call. |
+| AC-0311 | Full v0.1.0 and v0.2.0 regression suites remain green. |
+| AC-0312 | The v0.3.0 release closes with zero release blockers and a clean tagged commit. |
 
 ## Definition of Done
 

@@ -1,0 +1,194 @@
+{
+  "schema": "shipping-harness/v1",
+  "project": "shipping-harness",
+  "worker": "shipping-harness",
+  "release": "0.2.0",
+  "goal": "Ship a stable adapter control layer that discovers and safely probes Codex, Gajae Code, Q00 Ouroboros, and OMO Native; negotiates truthful capabilities; ingests repository-local evidence and lifecycle events; and enforces Shipping Harness stop, budget, and closure authority without bundling or silently controlling third-party harnesses.",
+  "scope": {
+    "include": [
+      "A version-transition command for preparing the next release from CLOSED state.",
+      "Adapter SDK, registry, executable discovery, safe probe runner, and capability negotiation.",
+      "Generic and Codex adapters migrated onto the common adapter SDK.",
+      "Gajae adapter with configurable execution and repository-local goal/ledger artifact collection.",
+      "Ouroboros adapter with configurable execution and repository-local Seed/Ledger artifact collection.",
+      "OMO Native process/config/evidence bridge with normalized lifecycle event ingestion.",
+      "Deterministic Stop decision protocol where human stop, terminal state, and exhausted budget override continuation.",
+      "Compatibility reports, fixture-backed adapter tests, live non-mutating Codex probe, documentation, and regression verification."
+    ],
+    "exclude": [
+      "Vendoring, copying, patching, or redistributing Gajae, Ouroboros, or OMO source code.",
+      "Reading credential stores, private endpoints, home-directory agent state, or terminal scrollback.",
+      "Hardcoding unstable third-party execution flags as if they were guaranteed APIs.",
+      "Automatically invoking unbounded evolution, continuation, or autonomous multi-agent loops.",
+      "Web UI, cloud service, team accounts, automatic Git push, automatic deployment, or proprietary model runtime."
+    ],
+    "paths": {
+      "include": [
+        "src/**",
+        "bin/**",
+        "scripts/**",
+        "test/**",
+        "docs/**",
+        "README.md",
+        "BACKLOG.md",
+        "THIRD_PARTY.md",
+        "LICENSE",
+        "package.json"
+      ],
+      "exclude": [
+        ".shipping/contract.yaml",
+        ".shipping/contract.lock",
+        ".git/**",
+        "dist/**",
+        "coverage/**",
+        "node_modules/**"
+      ]
+    }
+  },
+  "acceptance": [
+    {
+      "id": "AC-001",
+      "description": "All source, adapter, hook, and test files pass syntax and repository lint checks.",
+      "type": "command",
+      "command": "npm run lint",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-002",
+      "description": "The static module graph and package entrypoints resolve.",
+      "type": "command",
+      "command": "npm run typecheck",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-003",
+      "description": "A distributable v0.2.0 dist tree and build manifest are produced.",
+      "type": "command",
+      "command": "npm run build",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-004",
+      "description": "All unit, integration, adapter, and adversarial tests pass.",
+      "type": "command",
+      "command": "npm test",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 360
+    },
+    {
+      "id": "AC-005",
+      "description": "Adapter-focused fixture and lifecycle bridge tests pass independently.",
+      "type": "command",
+      "command": "npm run test:adapter",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-006",
+      "description": "Security checks reject path escape, secret leakage, home-directory collection, and prohibited source patterns.",
+      "type": "command",
+      "command": "npm run security",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-007",
+      "description": "MIT metadata and third-party interoperability boundaries remain valid.",
+      "type": "command",
+      "command": "npm run license:check",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-0201",
+      "description": "All registered adapters return a truthful JSON capability report without mutating external tools.",
+      "type": "command",
+      "command": "node bin/shipping-harness.mjs adapter probe --all --root . --json",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-0202",
+      "description": "Doctor reports runtime, Git, contract, and adapter compatibility in JSON.",
+      "type": "command",
+      "command": "node bin/shipping-harness.mjs doctor --root . --json",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    }
+  ],
+  "blockerPolicy": [
+    "acceptance-failure",
+    "contract-tamper",
+    "stale-evidence",
+    "scope-drift",
+    "data-loss",
+    "critical-security",
+    "capability-overclaim",
+    "human-stop-override",
+    "unbounded-continuation"
+  ],
+  "budgets": {
+    "maxAgentRuns": 3,
+    "maxCommandSeconds": 900,
+    "maxFixCycles": 2,
+    "maxOutputBytes": 1048576
+  },
+  "stopPolicy": {
+    "humanInterruptWins": true,
+    "autoContinueAfterInterrupt": false,
+    "closeWhenRequiredGatesPass": true
+  },
+  "releasePolicy": {
+    "autoCommit": false,
+    "autoTag": false,
+    "autoPush": false,
+    "generateReport": true
+  },
+  "adapters": {
+    "generic": {
+      "command": null,
+      "artifactPaths": []
+    },
+    "codex": {
+      "command": null,
+      "artifactPaths": []
+    },
+    "gajae": {
+      "command": null,
+      "artifactPaths": [
+        ".gjc/goals.json",
+        ".gjc/ledger.jsonl",
+        ".omc/ultragoal/goals.json",
+        ".omc/ultragoal/ledger.jsonl"
+      ]
+    },
+    "ouroboros": {
+      "command": null,
+      "artifactPaths": [
+        ".ouroboros/seed.json",
+        ".ouroboros/ledger.jsonl",
+        ".ouro/seed.json",
+        ".ouro/ledger.jsonl"
+      ]
+    },
+    "omo": {
+      "command": null,
+      "artifactPaths": [
+        ".omo/omo.jsonc",
+        ".omo/omo.json"
+      ]
+    }
+  }
+}

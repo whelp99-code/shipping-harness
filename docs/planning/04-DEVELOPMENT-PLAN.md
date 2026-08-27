@@ -83,6 +83,49 @@ git status --short == empty after release artifacts committed
 tag v0.2.0
 ```
 
+## v0.3.0 — Beginner MCP Control Surface
+
+### PR-009: Repository analysis and scope proposal
+
+- Manifest and package-script inspection without command execution.
+- Minimal scope, explicit exclusions, acceptance candidates, and a short plan.
+- Git-SHA-bound proposal receipt with hash and expiry.
+- **Maps:** REQ-ANALYZE-001..003, REQ-PROPOSAL-001.
+
+### PR-010: Proposal approval and safe core orchestration
+
+- Explicit confirmation, hash validation, stale-proposal rejection.
+- First-release initialization and next-release DRAFT preparation.
+- Contract-configured adapter execution only; no MCP command argument.
+- **Maps:** REQ-PROPOSAL-002..003, REQ-MCP-006..008.
+
+### PR-011: STDIO MCP server
+
+- Newline-delimited JSON-RPC 2.0 transport with bounded messages.
+- MCP 2026-07-28 `server/discover`, `tools/list`, and `tools/call`.
+- Backward-compatible 2025-11-25 `initialize` response.
+- Structured results, protocol errors, stderr-only diagnostics.
+- **Maps:** REQ-MCP-001..005.
+
+### PR-012: Installation, compatibility, and adversarial verification
+
+- `shipping-harness-mcp` binary and client configuration examples.
+- Protocol fixture client and live STDIO smoke test.
+- Injection, stale proposal, path escape, oversized input, stdout purity, and regression tests.
+- **Maps:** AC-0301..0312.
+
+### v0.3.0 release gate
+
+```text
+npm run release:verify
+npm run test:mcp
+node scripts/mcp-smoke.mjs
+shipping-harness verify
+shipping-harness close
+git status --short == empty after release artifacts committed
+tag v0.3.0
+```
+
 ## Commit strategy
 
 1. Commit validated v0.1.0 implementation and docs.

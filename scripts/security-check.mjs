@@ -2,6 +2,8 @@ import { lstat, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs
 import path from 'node:path';
 import { walkFiles, relative } from './shared.mjs';
 import { assertContainedPath } from '../src/core/fs.mjs';
+import { validateArtifactCandidate } from '../src/adapters/artifacts.mjs';
+import { sanitizeHookPayload } from '../src/core/hooks.mjs';
 
 const failures = [];
 const sourceFiles = await walkFiles(path.resolve('src'), (file) => file.endsWith('.mjs'));
@@ -10,6 +12,7 @@ const forbidden = [
   { name: 'Function constructor', pattern: /\bnew\s+Function\s*\(/gu },
   { name: 'hardcoded OpenAI key', pattern: /\bsk-[A-Za-z0-9_-]{20,}\b/gu },
   { name: 'hardcoded GitHub token', pattern: /\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}\b/gu },
+  { name: 'home-directory inspection', pattern: /\b(?:homedir\s*\(|process\.env\.(?:HOME|USERPROFILE))/gu },
 ];
 for (const filePath of sourceFiles) {
   const content = await readFile(filePath, 'utf8');
@@ -24,6 +27,25 @@ if (Object.keys(packageJson.dependencies ?? {}).length > 0) failures.push('runti
 const ignore = await readFile('.gitignore', 'utf8');
 for (const entry of ['.shipping/evidence/', '.shipping/tmp/', '.chatgpt2codex/']) {
   if (!ignore.split(/\r?\n/u).includes(entry)) failures.push(`.gitignore missing ${entry}`);
+}
+
+for (const candidate of ['~/.omo/state.json', '/tmp/ledger.jsonl', '../ledger.jsonl', '.shipping/state.json', '.env']) {
+  let rejected = false;
+  try {
+    validateArtifactCandidate(candidate);
+  } catch {
+    rejected = true;
+  }
+  if (!rejected) failures.push(`unsafe artifact path was accepted: ${candidate}`);
+}
+
+const sanitizedPayload = sanitizeHookPayload({
+  token: 'security-check-secret-token',
+  nested: { message: 'api_key=abcdefghijklmnopqrstuvwxyz' },
+});
+const sanitizedText = JSON.stringify(sanitizedPayload);
+if (sanitizedText.includes('security-check-secret-token') || sanitizedText.includes('abcdefghijklmnopqrstuvwxyz')) {
+  failures.push('hook payload secret redaction failed');
 }
 
 const tempRoot = await mkdtemp(path.join(process.cwd(), '.security-check-'));
@@ -49,5 +71,5 @@ if (failures.length > 0) {
   process.stderr.write(`${failures.join('\n')}\n`);
   process.exitCode = 1;
 } else {
-  process.stdout.write(`security: ${sourceFiles.length} files scanned; path escape rejected\n`);
+  process.stdout.write(`security: ${sourceFiles.length} files scanned; artifact/home/secret/path escapes rejected\n`);
 }

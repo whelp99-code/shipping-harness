@@ -39,7 +39,13 @@ export function renderHelp() {
     `  init [--project NAME] [--root PATH]\n` +
     `  contract check|show [--json]\n` +
     `  lock\n` +
-    `  run --host generic|codex --command "..." [--verify]\n` +
+    `  release prepare --version X.Y.Z [--goal TEXT]\n` +
+    `  adapter list\n` +
+    `  adapter probe NAME|--all [--json]\n` +
+    `  adapter collect NAME [--json]\n` +
+    `  run --host generic|codex|gajae|ouroboros|omo --command "..." [--verify]\n` +
+    `  hook ingest --adapter omo --event Stop [--payload-file FILE]\n` +
+    `  hook decision --adapter omo --event Stop\n` +
     `  verify\n` +
     `  fix\n` +
     `  pause [--reason TEXT]\n` +

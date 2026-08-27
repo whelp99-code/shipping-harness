@@ -22,7 +22,26 @@ src/core/issues.mjs         REQ-ISSUE-*
 src/core/gate.mjs           REQ-GATE-*, REQ-CLOSE-*
 src/adapters/*.mjs          REQ-ADAPTER-*
 src/core/hooks.mjs          REQ-HOOK-*
+src/core/release-transition.mjs REQ-CLOSE-003, AC-0210
+src/adapters/sdk.mjs        REQ-ADAPTER-001..003
+src/adapters/artifacts.mjs  REQ-ADAPTER-003..006, REQ-SEC-001..003
+src/adapters/registry.mjs   REQ-ADAPTER-001..006
 src/cli.mjs                 user flows and orchestration
 ```
+
+## v0.2 verification mapping
+
+| Acceptance | Proof |
+|---|---|
+| AC-0201 | `adapter probe --all --json`; strict five-adapter capability schema |
+| AC-0202 | `doctor --json`; Node, Git, contract, and adapter compatibility |
+| AC-0203 | Gajae executable fixture and Goal/Ledger metadata receipt test |
+| AC-0204 | Ouroboros executable fixture, Seed evidence, Ledger receipt, and explicit-only evolution policy |
+| AC-0205 | OMO project-config evidence and bridge-without-native-plugin test |
+| AC-0206 | Repository-relative artifact, credential-path, raw-content, and symlink escape tests |
+| AC-0207 | Hook payload limit, recursive redaction, and normalized audit-stream tests |
+| AC-0208 | Human stop and terminal-state override tests |
+| AC-0209 | Remaining blocker, exhausted budget, verification-required, and SHIPPABLE Stop decisions |
+| AC-0210 | Semver, source-drift guard, archive, lock removal, and CLOSED-to-DRAFT transition tests |
 
 Any implementation that cannot map to a requirement is out of scope or must amend this matrix before coding.

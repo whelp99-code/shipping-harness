@@ -3,14 +3,14 @@ import path from 'node:path';
 import { walkFiles, relative } from './shared.mjs';
 
 const requested = process.argv[2] ?? 'all';
-const valid = new Set(['all', 'unit', 'integration', 'adversarial']);
+const valid = new Set(['all', 'unit', 'integration', 'adapter', 'adversarial']);
 if (!valid.has(requested)) {
   process.stderr.write(`Unknown test suite: ${requested}\n`);
   process.exit(2);
 }
 
 const roots = requested === 'all'
-  ? ['test/unit', 'test/integration', 'test/adversarial']
+  ? ['test/unit', 'test/integration', 'test/adapter', 'test/adversarial']
   : [`test/${requested}`];
 const files = (await Promise.all(
   roots.map((root) => walkFiles(path.resolve(root), (file) => file.endsWith('.test.mjs'))),

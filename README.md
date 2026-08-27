@@ -45,6 +45,54 @@ node ./bin/shipping-harness.mjs close
 
 The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency-free and deterministic parser.
 
+## Adapter control plane
+
+Shipping Harness v0.2.0 exposes one stable capability model across five adapters:
+
+```bash
+node ./bin/shipping-harness.mjs adapter list
+node ./bin/shipping-harness.mjs adapter probe --all --json
+node ./bin/shipping-harness.mjs adapter collect gajae --json
+node ./bin/shipping-harness.mjs doctor --json
+```
+
+Capability reports use only four evidence levels:
+
+- `live` — a non-mutating executable probe succeeded.
+- `configured` — a repository command or repository-local integration artifact exists, but a live executable proof is incomplete.
+- `fixture` — behavior was verified only against an isolated test fixture.
+- `unavailable` — neither a live probe nor repository-owned configuration is present.
+
+Executable discovery never proves authentication, provider access, model quota, or successful autonomous execution. Shipping Harness invokes only an operator-supplied command or a command explicitly stored in the locked contract.
+
+## Lifecycle and stop governance
+
+OMO and other hosts can forward lifecycle events through a repository-local bridge:
+
+```bash
+node ./bin/shipping-harness.mjs hook ingest \
+  --adapter omo \
+  --event Stop \
+  --payload-file .shipping/tmp/stop-event.json \
+  --json
+
+node ./bin/shipping-harness.mjs hook decision --adapter omo --event Stop --json
+```
+
+Stop decisions are deterministic. Human pause/abort and terminal release states outrank automatic continuation; exhausted budgets stop the loop; remaining blockers or missing verification request continuation; a `SHIPPABLE` release allows the host to stop. Exit code `3` means `CONTINUE`, not a command failure.
+
+## Prepare the next version
+
+A closed release cannot be edited in place. After committing its receipt, create a greater draft version:
+
+```bash
+node ./bin/shipping-harness.mjs release prepare \
+  --version 0.3.0 \
+  --goal "Describe the next shippable outcome"
+```
+
+The command archives the closed contract and lock, rejects uncommitted source drift, resets bounded counters, and creates a new `DRAFT`. Edit and commit that contract before running `lock` again.
+
 ## Version boundaries
 
 ### v0.1.0 — Finish One Version
@@ -68,4 +116,6 @@ Capability-negotiated adapters for Generic shell execution, Codex CLI, Gajae Cod
 
 ## Safety boundary
 
-Shipping Harness runs only commands explicitly stored in a repository-owned contract or supplied by the operator. It does not auto-push, auto-deploy, mutate provider credentials, install external harnesses, or bypass a human stop.
+See [`docs/ADAPTERS.md`](docs/ADAPTERS.md) for the capability, artifact, and lifecycle protocols.
+
+Shipping Harness runs only commands explicitly stored in a repository-owned contract or supplied by the operator. Artifact collection accepts only validated repository-relative paths, stores metadata and hashes rather than raw third-party content, and rejects home directories, credential-like files, protected runtime paths, and symlink escapes. It does not auto-push, auto-deploy, mutate provider credentials, install external harnesses, or bypass a human stop.

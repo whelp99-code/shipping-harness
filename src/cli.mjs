@@ -3,16 +3,20 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs, booleanOption, stringOption } from './cli/args.mjs';
 import { printJson, renderHelp, renderStatus } from './cli/output.mjs';
 import { initializeContract, loadContract, lockContract, contractHash } from './core/contract.mjs';
-import { exists, readText } from './core/fs.mjs';
+import { assertContainedPath, exists, fileSize, readText } from './core/fs.mjs';
 import { findGitRoot, currentGitSha } from './core/git.mjs';
 import { runtimePaths } from './core/paths.mjs';
 import { abort, initializeState, pause, readState, resume, transitionState } from './core/state.mjs';
 import { addManualIssue } from './core/issues.mjs';
 import { beginFixCycle, closeRelease, releaseStatus, verifyRelease } from './core/gate.mjs';
-import { coreDoctor, executeCoreHost } from './core/host.mjs';
+import { coreDoctor } from './core/host.mjs';
 import { normalizeError, ShippingError } from './core/errors.mjs';
+import { collectAdapterArtifacts, listAdapters, probeAdapter, probeAllAdapters } from './adapters/registry.mjs';
+import { executeAdapter } from './adapters/runner.mjs';
+import { decideStop, ingestLifecycleEvent } from './core/hooks.mjs';
+import { prepareNextRelease } from './core/release-transition.mjs';
 
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {
@@ -87,11 +91,72 @@ export async function main(argv = process.argv.slice(2)) {
     return 0;
   }
 
+  if (command === 'release') {
+    const action = positionals[1];
+    if (action !== 'prepare') throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown release action: ${action ?? '(missing)'}`);
+    const release = stringOption(options, 'version');
+    if (!release) throw new ShippingError('ERR_RELEASE_VERSION', '--version is required');
+    const result = await prepareNextRelease(root, {
+      release,
+      goal: stringOption(options, 'goal'),
+    });
+    const output = {
+      fromRelease: result.fromRelease,
+      release: result.release,
+      state: result.state,
+      contract: path.relative(root, result.contract).replaceAll('\\', '/'),
+      archivedContract: path.relative(root, result.archivedContract).replaceAll('\\', '/'),
+      archivedLock: result.archivedLock ? path.relative(root, result.archivedLock).replaceAll('\\', '/') : null,
+    };
+    if (json) printJson(output);
+    else process.stdout.write(`Prepared ${output.release} from ${output.fromRelease}. Edit and commit ${output.contract}, then lock it.\n`);
+    return 0;
+  }
+
+  if (command === 'adapter') {
+    const action = positionals[1] ?? 'list';
+    if (action === 'list') {
+      const result = listAdapters().map((adapter) => ({
+        name: adapter.name,
+        displayName: adapter.displayName,
+        aliases: adapter.aliases,
+      }));
+      if (json) printJson(result);
+      else for (const adapter of result) process.stdout.write(`${adapter.name}\t${adapter.displayName}\t${adapter.aliases.join(',')}\n`);
+      return 0;
+    }
+    const contract = await loadContract(paths.contract);
+    if (action === 'probe') {
+      const all = booleanOption(options, 'all');
+      const requested = positionals[2];
+      if (!all && !requested) throw new ShippingError('ERR_ADAPTER_REQUIRED', 'Provide an adapter name or --all');
+      const result = all
+        ? probeAllAdapters({ contract, root })
+        : probeAdapter(requested, { contract, root });
+      if (json) printJson(result);
+      else {
+        const reports = Array.isArray(result) ? result : [result];
+        for (const report of reports) {
+          process.stdout.write(`${report.name}: ${report.verificationLevel}${report.version ? ` (${report.version})` : ''}\n`);
+        }
+      }
+      return 0;
+    }
+    if (action === 'collect') {
+      const requested = positionals[2] ?? stringOption(options, 'adapter');
+      if (!requested) throw new ShippingError('ERR_ADAPTER_REQUIRED', 'Provide an adapter name');
+      const result = await collectAdapterArtifacts(requested, { contract, root });
+      if (json) printJson(result);
+      else process.stdout.write(`${result.adapter}: collected ${result.collected.length}, missing ${result.missing.length}\n`);
+      return 0;
+    }
+    throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown adapter action: ${action}`);
+  }
+
   if (command === 'run') {
     const host = stringOption(options, 'host', 'generic');
-    if (!['generic', 'codex'].includes(host)) throw new ShippingError('ERR_HOST_UNKNOWN', `Unsupported v0.1 host: ${host}`);
-    const manifest = await executeCoreHost(root, {
-      host,
+    const manifest = await executeAdapter(root, {
+      adapter: host,
       command: stringOption(options, 'command'),
       cwd: stringOption(options, 'cwd', '.'),
     });
@@ -101,6 +166,38 @@ export async function main(argv = process.argv.slice(2)) {
     if (json) printJson(result);
     else process.stdout.write(`Agent run ${manifest.runId} finished. ${verification ? `Decision: ${verification.decision}` : 'Verification pending.'}\n`);
     return manifest.result.exitCode === 0 ? 0 : 2;
+  }
+
+  if (command === 'hook') {
+    const action = positionals[1];
+    const adapter = stringOption(options, 'adapter', 'omo');
+    const event = stringOption(options, 'event', 'Stop');
+    const runId = stringOption(options, 'run-id');
+    if (action === 'decision') {
+      const result = await decideStop(root, { adapter, event, runId });
+      if (json) printJson(result);
+      else process.stdout.write(`${result.action}: ${result.reasonCode} (state=${result.state}, blockers=${result.blockers})\n`);
+      return result.continue ? 3 : 0;
+    }
+    if (action === 'ingest') {
+      let payload = null;
+      const payloadFile = stringOption(options, 'payload-file');
+      const inlinePayload = stringOption(options, 'payload');
+      if (payloadFile) {
+        const absolute = path.resolve(root, payloadFile);
+        await assertContainedPath(root, absolute);
+        const bytes = await fileSize(absolute);
+        if (bytes > 64 * 1024) throw new ShippingError('ERR_HOOK_PAYLOAD_TOO_LARGE', 'Hook payload file exceeds 64 KiB', { bytes });
+        payload = JSON.parse(await readFile(absolute, 'utf8'));
+      } else if (inlinePayload) {
+        payload = JSON.parse(inlinePayload);
+      }
+      const result = await ingestLifecycleEvent(root, { adapter, event, runId, payload });
+      if (json) printJson(result);
+      else process.stdout.write(`Recorded ${result.event.event} from ${result.event.adapter}${result.decision ? `; ${result.decision.action}` : ''}.\n`);
+      return result.decision?.continue ? 3 : 0;
+    }
+    throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown hook action: ${action ?? '(missing)'}`);
   }
 
   if (command === 'verify') {
@@ -179,7 +276,7 @@ export async function main(argv = process.argv.slice(2)) {
     if (json) printJson(result);
     else {
       process.stdout.write(`Node ${result.node.version}: ${result.node.supported ? 'supported' : 'unsupported'}\n`);
-      for (const host of result.hosts) process.stdout.write(`${host.name}: ${host.verificationLevel}${host.version ? ` (${host.version})` : ''}\n`);
+      for (const adapter of result.adapters) process.stdout.write(`${adapter.name}: ${adapter.verificationLevel}${adapter.version ? ` (${adapter.version})` : ''}\n`);
     }
     return result.node.supported && result.git.executable ? 0 : 2;
   }

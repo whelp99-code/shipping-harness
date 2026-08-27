@@ -1,8 +1,8 @@
 {
   "agentRuns": 0,
-  "baselineSha": null,
+  "baselineSha": "a9e54ac40b18f8dfc0d03778d403a408621b546c",
   "blockerCount": 0,
-  "contractHash": null,
+  "contractHash": "48841997ec5eb19f913ac3b7b6dd39af48a65f7e840cd77b41707d63fdafc373",
   "createdAt": "2026-08-27T15:14:16.783Z",
   "currentEvidenceSha": null,
   "fixCycles": 0,
@@ -13,7 +13,7 @@
   "release": "0.2.0",
   "resumeState": null,
   "schema": "shipping-harness/state-v1",
-  "state": "DRAFT",
+  "state": "LOCKED",
   "unknownCount": 0,
-  "updatedAt": "2026-08-27T15:14:16.783Z"
+  "updatedAt": "2026-08-27T15:14:35.235Z"
 }

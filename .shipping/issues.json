@@ -1,4 +1,11 @@
 {
+  "counts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
   "issues": [],
-  "schema": "shipping-harness/issues-v1"
+  "schema": "shipping-harness/issues-v1",
+  "updatedAt": "2026-08-27T15:39:36.415Z"
 }

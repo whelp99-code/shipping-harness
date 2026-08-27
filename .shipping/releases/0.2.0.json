@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 9,
+    "requiredFailed": 0,
+    "total": 9
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "a9e54ac40b18f8dfc0d03778d403a408621b546c",
+  "closedAt": "2026-08-27T15:39:36.468Z",
+  "closedGitSha": "48f8fd63019effac44f6c36ca4201936afe11546",
+  "contractHash": "48841997ec5eb19f913ac3b7b6dd39af48a65f7e840cd77b41707d63fdafc373",
+  "evidenceRunId": "run-2026-08-27T15-39-32-722Z-653d611a",
+  "fixCycles": 0,
+  "goal": "Ship a stable adapter control layer that discovers and safely probes Codex, Gajae Code, Q00 Ouroboros, and OMO Native; negotiates truthful capabilities; ingests repository-local evidence and lifecycle events; and enforces Shipping Harness stop, budget, and closure authority without bundling or silently controlling third-party harnesses.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "0.2.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

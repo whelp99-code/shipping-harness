@@ -1,0 +1,71 @@
+# Shipping Harness
+
+**Worker name:** `shipping-harness`  
+**Current target:** `v0.2.0`  
+**Product category:** Shipping Governance / Completion Control Plane
+
+Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
+
+> **Your coding agent writes code. Shipping Harness closes the version.**
+
+## Why
+
+Vibe coding often stalls at 80–90% because planning, implementation, review, and improvement happen without a binding release contract. Reviewers keep finding optional improvements, agents keep resuming, scope grows, and the project never reaches a durable version boundary.
+
+Shipping Harness adds an independent governance layer:
+
+```text
+Contract Lock → Agent Execution → Evidence → Release Gate
+              → BLOCKER / NEXT / IGNORE → Bounded Fix → Version Close
+```
+
+It is not a coding model, another autonomous agent, or a replacement for Codex, Gajae Code, Ouroboros, or OMO Native. It wraps those tools with deterministic completion policy.
+
+## Core guarantees
+
+- Completion is proven by evidence, not by an agent saying “done”.
+- Evidence is bound to both the contract hash and current Git SHA.
+- A release blocker must cite an acceptance criterion or policy rule.
+- Optional improvements move to the next-version backlog.
+- Fix loops, agent runs, command duration, and output size are bounded.
+- A human pause or abort always wins over automatic continuation.
+- A closed version cannot silently reopen; further changes require a new release contract.
+
+## Quick start
+
+```bash
+node ./bin/shipping-harness.mjs init
+# Edit .shipping/contract.yaml, commit the baseline, then:
+node ./bin/shipping-harness.mjs contract check
+node ./bin/shipping-harness.mjs lock
+node ./bin/shipping-harness.mjs verify
+node ./bin/shipping-harness.mjs status
+node ./bin/shipping-harness.mjs close
+```
+
+The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency-free and deterministic parser.
+
+## Version boundaries
+
+### v0.1.0 — Finish One Version
+
+Local Git repository support, contract lock, state/ledger persistence, command acceptance gates, Git-SHA-bound evidence, scope drift detection, issue classification, bounded fix policy, pause/abort precedence, backlog generation, and version closure.
+
+### v0.2.0 — Harness Adapter Layer
+
+Capability-negotiated adapters for Generic shell execution, Codex CLI, Gajae Code, Q00 Ouroboros, and OMO Native; external artifact collection; hook event ingestion; live capability probes; and fixture-based integration verification when a harness is not installed.
+
+## Documentation
+
+- [`docs/planning/00-INTAKE.md`](docs/planning/00-INTAKE.md)
+- [`docs/planning/01-CHARTER-AND-SCOPE.md`](docs/planning/01-CHARTER-AND-SCOPE.md)
+- [`docs/planning/02-REQUIREMENTS.md`](docs/planning/02-REQUIREMENTS.md)
+- [`docs/planning/03-SYSTEM-ARCHITECTURE.md`](docs/planning/03-SYSTEM-ARCHITECTURE.md)
+- [`docs/planning/04-DEVELOPMENT-PLAN.md`](docs/planning/04-DEVELOPMENT-PLAN.md)
+- [`docs/planning/05-TEST-AND-RELEASE-GATE.md`](docs/planning/05-TEST-AND-RELEASE-GATE.md)
+- [`docs/planning/06-ADAPTER-INTEGRATION.md`](docs/planning/06-ADAPTER-INTEGRATION.md)
+- [`docs/TRACEABILITY.md`](docs/TRACEABILITY.md)
+
+## Safety boundary
+
+Shipping Harness runs only commands explicitly stored in a repository-owned contract or supplied by the operator. It does not auto-push, auto-deploy, mutate provider credentials, install external harnesses, or bypass a human stop.

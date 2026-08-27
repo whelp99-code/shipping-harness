@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.finisher/evidence/
+.shipping/evidence/
+.shipping/tmp/
+.shipping/*.lock.tmp
+*.log
+.DS_Store
+.chatgpt2codex/

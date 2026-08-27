@@ -9,6 +9,8 @@
 | GOAL-005 human authority | REQ-STOP-001, REQ-HOOK-002 | AC-0109, AC-0208 | state, hooks | adversarial/human-stop |
 | GOAL-006 close with debt | REQ-ISSUE-001..002, REQ-CLOSE-001..003 | AC-0111, AC-0112 | issues, closure | integration/close |
 | GOAL-007 harness integration | REQ-ADAPTER-001..006, REQ-HOOK-001..002 | AC-0201..0210 | adapters, hooks | adapter fixtures/regression |
+| GOAL-008 beginner release intake | REQ-ANALYZE-001..003, REQ-PROPOSAL-001..003 | AC-0304..0306 | analysis, proposals | MCP proposal tests |
+| GOAL-009 model-accessible governance | REQ-MCP-001..008 | AC-0301..0312 | MCP protocol, tools, STDIO | MCP protocol/transport/adversarial tests |
 
 ## Source layout mapping
 
@@ -26,6 +28,11 @@ src/core/release-transition.mjs REQ-CLOSE-003, AC-0210
 src/adapters/sdk.mjs        REQ-ADAPTER-001..003
 src/adapters/artifacts.mjs  REQ-ADAPTER-003..006, REQ-SEC-001..003
 src/adapters/registry.mjs   REQ-ADAPTER-001..006
+src/core/project-analysis.mjs REQ-ANALYZE-*
+src/core/proposals.mjs      REQ-PROPOSAL-*
+src/mcp/tools.mjs           REQ-MCP-003, REQ-MCP-006..008
+src/mcp/protocol.mjs        REQ-MCP-002..005
+src/mcp/stdio.mjs           REQ-MCP-001, REQ-MCP-005
 src/cli.mjs                 user flows and orchestration
 ```
 
@@ -43,5 +50,16 @@ src/cli.mjs                 user flows and orchestration
 | AC-0208 | Human stop and terminal-state override tests |
 | AC-0209 | Remaining blocker, exhausted budget, verification-required, and SHIPPABLE Stop decisions |
 | AC-0210 | Semver, source-drift guard, archive, lock removal, and CLOSED-to-DRAFT transition tests |
+
+## v0.3 verification mapping
+
+| Acceptance | Proof |
+|---|---|
+| AC-0301..0303 | `test/mcp/protocol.test.mjs`; discovery, legacy compatibility, and bounded high-level tool schemas |
+| AC-0304..0306 | `test/mcp/proposal.test.mjs`; repository analysis, explicit approval, stale/dirty/tampered rejection |
+| AC-0307..0308 | `test/mcp/tools.test.mjs`; host-agent work order, no command injection, and core delegation |
+| AC-0309..0310 | `test/mcp/stdio.test.mjs` and `scripts/mcp-smoke.mjs`; framing, input bounds, and spawned client |
+| AC-0311 | `npm test`; v0.1 and v0.2 regression suites plus MCP suite |
+| AC-0312 | `.shipping/releases/0.3.0.json`; own release contract closure |
 
 Any implementation that cannot map to a requirement is out of scope or must amend this matrix before coding.

@@ -6,7 +6,7 @@ if (packageJson.license !== 'MIT') failures.push(`package license is ${String(pa
 const license = await readFile('LICENSE', 'utf8');
 if (!license.startsWith('MIT License')) failures.push('LICENSE is not the expected MIT text');
 const inventory = await readFile('THIRD_PARTY.md', 'utf8');
-for (const project of ['Codex', 'Gajae', 'Ouroboros', 'OMO']) {
+for (const project of ['Model Context Protocol', 'Codex', 'Gajae', 'Ouroboros', 'OMO']) {
   if (!inventory.includes(project)) failures.push(`THIRD_PARTY.md missing ${project}`);
 }
 for (const directory of ['vendor', 'third_party', 'third-party']) {

@@ -55,5 +55,6 @@ export function renderHelp() {
     `  close\n` +
     `  status [--json]\n` +
     `  doctor [--json]\n` +
+    `  MCP server: shipping-harness-mcp --root /absolute/project/path\n` +
     `  version\n`;
 }

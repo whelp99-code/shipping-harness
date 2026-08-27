@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -9,7 +9,8 @@
   },
   "bin": {
     "shipping-harness": "./bin/shipping-harness.mjs",
-    "shiph": "./bin/shipping-harness.mjs"
+    "shiph": "./bin/shipping-harness.mjs",
+    "shipping-harness-mcp": "./bin/shipping-harness-mcp.mjs"
   },
   "files": [
     "bin/",
@@ -27,6 +28,7 @@
     "test:unit": "node scripts/run-tests.mjs unit",
     "test:integration": "node scripts/run-tests.mjs integration",
     "test:adapter": "node scripts/run-tests.mjs adapter",
+    "test:mcp": "node scripts/run-tests.mjs mcp",
     "test:adversarial": "node scripts/run-tests.mjs adversarial",
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",

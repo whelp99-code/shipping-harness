@@ -15,6 +15,9 @@ test('generic host execution produces evidence and requires verification', async
       command: `node -e "console.log('agent-finished')"`,
     });
     assert.equal(run.result.exitCode, 0);
+    assert.equal(typeof run.commandDigest, 'string');
+    assert.equal(run.commandDigest.length, 64);
+    assert.equal('command' in run, false);
     const verification = await verifyRelease(fixture.root);
     assert.equal(verification.decision, 'SHIPPABLE');
   } finally {

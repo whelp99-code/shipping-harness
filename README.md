@@ -1,7 +1,7 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`  
-**Current target:** `v0.2.0`  
+**Current target:** `v0.3.0`
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -45,6 +45,37 @@ node ./bin/shipping-harness.mjs close
 
 The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency-free and deterministic parser.
 
+## Beginner use: connect it as an MCP server
+
+Install the local package once:
+
+```bash
+cd /path/to/shipping-harness
+npm link
+```
+
+Connect one target repository to Codex:
+
+```bash
+codex mcp add shipping-harness -- \
+  shipping-harness-mcp --root /absolute/path/to/target-project
+```
+
+Restart the MCP client, then ask in ordinary language:
+
+```text
+Use Shipping Harness to finish this project as version 0.1.0.
+Keep only the smallest useful scope and show me the scope before approving it.
+```
+
+The agent calls `shipping_start`, presents detected project facts, scope, exclusions, acceptance checks, and a four-step plan. It may call `shipping_approve_scope` only after explicit user approval with the exact proposal hash. After approval, the host agent implements the locked goal and uses `shipping_verify`, `shipping_fix_blockers`, and `shipping_close`.
+
+The local MCP server validates the explicit confirmation field and proposal hash, but the MCP client must be configured to ask the user before mutating tools are invoked. A dedicated approval-card plugin UI remains outside v0.3.0.
+
+No MCP tool accepts a raw shell command. When no approved adapter command exists, `shipping_execute` returns a work order to the connected host agent instead of inventing CLI flags.
+
+See [`docs/MCP.md`](docs/MCP.md) for installation, tool behavior, compatibility, and limitations.
+
 ## Adapter control plane
 
 Shipping Harness v0.2.0 exposes one stable capability model across five adapters:
@@ -87,7 +118,7 @@ A closed release cannot be edited in place. After committing its receipt, create
 
 ```bash
 node ./bin/shipping-harness.mjs release prepare \
-  --version 0.3.0 \
+  --version 0.4.0 \
   --goal "Describe the next shippable outcome"
 ```
 
@@ -103,6 +134,10 @@ Local Git repository support, contract lock, state/ledger persistence, command a
 
 Capability-negotiated adapters for Generic shell execution, Codex CLI, Gajae Code, Q00 Ouroboros, and OMO Native; external artifact collection; hook event ingestion; live capability probes; and fixture-based integration verification when a harness is not installed.
 
+### v0.3.0 — Beginner MCP Control Surface
+
+A local STDIO MCP server, natural-language goal intake, repository analysis, minimal scope and acceptance proposal, explicit Git-bound approval, safe host-agent work orders, configured-adapter execution without raw command inputs, and deterministic verification/closure tools.
+
 ## Documentation
 
 - [`docs/planning/00-INTAKE.md`](docs/planning/00-INTAKE.md)
@@ -113,6 +148,7 @@ Capability-negotiated adapters for Generic shell execution, Codex CLI, Gajae Cod
 - [`docs/planning/05-TEST-AND-RELEASE-GATE.md`](docs/planning/05-TEST-AND-RELEASE-GATE.md)
 - [`docs/planning/06-ADAPTER-INTEGRATION.md`](docs/planning/06-ADAPTER-INTEGRATION.md)
 - [`docs/TRACEABILITY.md`](docs/TRACEABILITY.md)
+- [`docs/MCP.md`](docs/MCP.md)
 
 ## Safety boundary
 

@@ -8,7 +8,7 @@ import { stableStringify } from '../../src/core/crypto.mjs';
 import { runtimePaths } from '../../src/core/paths.mjs';
 
 /**
- * @param {{testScript?: string, contract?: (contract: Record<string, any>) => Record<string, any>}} [options]
+ * @param {{testScript?: string, packageScripts?: Record<string, string>, initializeShipping?: boolean, contract?: (contract: Record<string, any>) => Record<string, any>}} [options]
  */
 export async function createFixtureRepo(options = {}) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'shipping-harness-test-'));
@@ -20,13 +20,16 @@ export async function createFixtureRepo(options = {}) {
     private: true,
     scripts: {
       test: options.testScript ?? `node -e "process.stdout.write('fixture-pass')"`,
+      ...(options.packageScripts ?? {}),
     },
   }, null, 2)}\n`, 'utf8');
   await writeFile(path.join(root, '.gitignore'), '.shipping/evidence/\n.shipping/tmp/\n', 'utf8');
   await writeFile(path.join(root, 'README.md'), '# Fixture\n', 'utf8');
-  await initializeContract(root, 'fixture');
-  await initializeState(root);
-  if (options.contract) {
+  if (options.initializeShipping !== false) {
+    await initializeContract(root, 'fixture');
+    await initializeState(root);
+  }
+  if (options.contract && options.initializeShipping !== false) {
     const paths = runtimePaths(root);
     const contract = options.contract(await loadContract(paths.contract));
     await writeFile(paths.contract, stableStringify(contract), 'utf8');
@@ -37,6 +40,7 @@ export async function createFixtureRepo(options = {}) {
     root,
     paths: runtimePaths(root),
     async lock() {
+      if (options.initializeShipping === false) throw new Error('Shipping Harness is not initialized in this fixture');
       const sha = currentGitSha(root);
       const { contract, lock } = await lockContract(root, sha);
       await transitionState(root, 'LOCKED', {

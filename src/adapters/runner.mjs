@@ -6,6 +6,7 @@ import { runtimePaths } from '../core/paths.mjs';
 import { runBoundedCommand } from '../core/process.mjs';
 import { beginAgentRun, finishAgentRun } from '../core/gate.mjs';
 import { invariant } from '../core/errors.mjs';
+import { sha256 } from '../core/crypto.mjs';
 import { adapterConfiguration, configuredCommand } from './sdk.mjs';
 import { collectAdapterArtifacts, probeAdapter, resolveAdapter } from './registry.mjs';
 
@@ -41,9 +42,10 @@ export async function executeAdapter(root, request) {
   });
 
   const logPath = path.join(runDirectory, 'agent.log');
+  const commandDigest = sha256(command);
   await writeAtomic(logPath, [
     `adapter: ${adapter.name}`,
-    `command: ${command}`,
+    `commandDigest: ${commandDigest}`,
     `exitCode: ${String(result.exitCode)}`,
     `timedOut: ${String(result.timedOut)}`,
     `outputLimitExceeded: ${String(result.outputLimitExceeded)}`,
@@ -65,7 +67,7 @@ export async function executeAdapter(root, request) {
     adapterReport: report,
     artifacts,
     contractHash: lock.contractHash,
-    command,
+    commandDigest,
     cwd: path.relative(root, cwd).replaceAll('\\', '/') || '.',
     result: {
       ...result,

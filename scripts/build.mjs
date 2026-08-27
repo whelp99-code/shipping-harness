@@ -21,6 +21,7 @@ const distributionPackage = {
 };
 await writeFile(path.join(destination, 'package.json'), `${JSON.stringify(distributionPackage, null, 2)}\n`, 'utf8');
 await chmod(path.join(destination, 'bin', 'shipping-harness.mjs'), 0o755);
+await chmod(path.join(destination, 'bin', 'shipping-harness-mcp.mjs'), 0o755);
 
 const files = await walkFiles(destination);
 const manifest = [];

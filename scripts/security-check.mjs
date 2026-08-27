@@ -4,6 +4,7 @@ import { walkFiles, relative } from './shared.mjs';
 import { assertContainedPath } from '../src/core/fs.mjs';
 import { validateArtifactCandidate } from '../src/adapters/artifacts.mjs';
 import { sanitizeHookPayload } from '../src/core/hooks.mjs';
+import { SHIPPING_TOOLS } from '../src/mcp/tools.mjs';
 
 const failures = [];
 const sourceFiles = await walkFiles(path.resolve('src'), (file) => file.endsWith('.mjs'));
@@ -23,10 +24,24 @@ for (const filePath of sourceFiles) {
 }
 
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
-if (Object.keys(packageJson.dependencies ?? {}).length > 0) failures.push('runtime dependencies must remain empty for v0.2.0');
+if (Object.keys(packageJson.dependencies ?? {}).length > 0) failures.push('runtime dependencies must remain empty for v0.3.0');
+if (packageJson.bin?.['shipping-harness-mcp'] !== './bin/shipping-harness-mcp.mjs') failures.push('shipping-harness-mcp package binary is missing or incorrect');
 const ignore = await readFile('.gitignore', 'utf8');
 for (const entry of ['.shipping/evidence/', '.shipping/tmp/', '.chatgpt2codex/']) {
   if (!ignore.split(/\r?\n/u).includes(entry)) failures.push(`.gitignore missing ${entry}`);
+}
+
+const forbiddenToolProperties = new Set(['command', 'shell', 'args', 'argv', 'env', 'environment']);
+for (const tool of SHIPPING_TOOLS) {
+  if (tool.inputSchema?.additionalProperties !== false) failures.push(`${tool.name} must reject additional properties`);
+  for (const property of Object.keys(tool.inputSchema?.properties ?? {})) {
+    if (forbiddenToolProperties.has(property)) failures.push(`${tool.name} exposes forbidden arbitrary execution property: ${property}`);
+  }
+}
+const mcpFiles = await walkFiles(path.resolve('src/mcp'), (file) => file.endsWith('.mjs'));
+for (const filePath of mcpFiles) {
+  const content = await readFile(filePath, 'utf8');
+  if (/from\s+['"]node:(?:http|https|http2|net|tls)['"]/gu.test(content)) failures.push(`${relative(filePath)} opens a network-capable runtime in local-only v0.3.0`);
 }
 
 for (const candidate of ['~/.omo/state.json', '/tmp/ledger.jsonl', '../ledger.jsonl', '.shipping/state.json', '.env']) {
@@ -71,5 +86,5 @@ if (failures.length > 0) {
   process.stderr.write(`${failures.join('\n')}\n`);
   process.exitCode = 1;
 } else {
-  process.stdout.write(`security: ${sourceFiles.length} files scanned; artifact/home/secret/path escapes rejected\n`);
+  process.stdout.write(`security: ${sourceFiles.length} files scanned; MCP command/network exposure and artifact/home/secret/path escapes rejected\n`);
 }

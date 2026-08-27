@@ -1,0 +1,136 @@
+{
+  "schema": "shipping-harness/v1",
+  "project": "shipping-harness",
+  "worker": "shipping-harness",
+  "release": "0.1.0",
+  "goal": "Ship a dependency-free local CLI that locks a version contract, captures Git-bound verification evidence, classifies release blockers, bounds fix loops, honors human stop, and closes a release with an auditable receipt.",
+  "scope": {
+    "include": [
+      "Contract initialization, validation, hashing, locking, and tamper detection.",
+      "Persistent state machine and append-only ledger.",
+      "Git SHA-bound command evidence with timeout, output bounds, and redaction.",
+      "Scope drift detection and deterministic BLOCKER/NEXT/IGNORE/UNKNOWN triage.",
+      "Bounded fix cycles, human pause/abort precedence, and version closure.",
+      "Generic and Codex-oriented command execution profiles.",
+      "CLI, build scripts, security checks, license checks, unit, integration, and adversarial tests."
+    ],
+    "exclude": [
+      "Gajae, Ouroboros, and OMO adapters; these belong to v0.2.0.",
+      "Web UI, cloud control plane, multi-user features, automatic Git push, and automatic deployment.",
+      "A proprietary coding agent or model runtime."
+    ],
+    "paths": {
+      "include": [
+        "src/**",
+        "bin/**",
+        "scripts/**",
+        "test/**",
+        "docs/**",
+        "README.md",
+        "BACKLOG.md",
+        "THIRD_PARTY.md",
+        "LICENSE",
+        "package.json"
+      ],
+      "exclude": [
+        ".shipping/contract.yaml",
+        ".shipping/contract.lock",
+        ".git/**",
+        "dist/**",
+        "coverage/**",
+        "node_modules/**"
+      ]
+    }
+  },
+  "acceptance": [
+    {
+      "id": "AC-001",
+      "description": "All source and test files pass syntax and repository lint checks.",
+      "type": "command",
+      "command": "npm run lint",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-002",
+      "description": "The static module graph and package entrypoints resolve.",
+      "type": "command",
+      "command": "npm run typecheck",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-003",
+      "description": "A distributable dist tree and build manifest are produced.",
+      "type": "command",
+      "command": "npm run build",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-004",
+      "description": "All unit, integration, and adversarial tests pass.",
+      "type": "command",
+      "command": "npm test",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-005",
+      "description": "Security checks reject path escape and detect prohibited source patterns.",
+      "type": "command",
+      "command": "npm run security",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-006",
+      "description": "MIT license metadata and third-party interoperability inventory are valid.",
+      "type": "command",
+      "command": "npm run license:check",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    }
+  ],
+  "blockerPolicy": [
+    "acceptance-failure",
+    "contract-tamper",
+    "stale-evidence",
+    "scope-drift",
+    "data-loss",
+    "critical-security"
+  ],
+  "budgets": {
+    "maxAgentRuns": 3,
+    "maxCommandSeconds": 900,
+    "maxFixCycles": 2,
+    "maxOutputBytes": 1048576
+  },
+  "stopPolicy": {
+    "humanInterruptWins": true,
+    "autoContinueAfterInterrupt": false,
+    "closeWhenRequiredGatesPass": true
+  },
+  "releasePolicy": {
+    "autoCommit": false,
+    "autoTag": false,
+    "autoPush": false,
+    "generateReport": true
+  },
+  "adapters": {
+    "generic": {
+      "command": null,
+      "artifactPaths": []
+    },
+    "codex": {
+      "command": null,
+      "artifactPaths": []
+    }
+  }
+}

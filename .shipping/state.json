@@ -1,0 +1,18 @@
+{
+  "agentRuns": 0,
+  "baselineSha": null,
+  "blockerCount": 0,
+  "contractHash": null,
+  "createdAt": "2026-08-27T15:09:32.922Z",
+  "currentEvidenceSha": null,
+  "fixCycles": 0,
+  "humanStop": false,
+  "ignoreCount": 0,
+  "lastRunId": null,
+  "nextCount": 0,
+  "release": null,
+  "resumeState": null,
+  "schema": "shipping-harness/state-v1",
+  "state": "DRAFT",
+  "updatedAt": "2026-08-27T15:09:32.922Z"
+}

@@ -2,22 +2,25 @@
   "schema": "shipping-harness/v1",
   "project": "shipping-harness",
   "worker": "shipping-harness",
-  "release": "0.1.0",
-  "goal": "Ship a dependency-free local CLI that locks a version contract, captures Git-bound verification evidence, classifies release blockers, bounds fix loops, honors human stop, and closes a release with an auditable receipt.",
+  "release": "0.2.0",
+  "goal": "Ship a stable adapter control layer that discovers and safely probes Codex, Gajae Code, Q00 Ouroboros, and OMO Native; negotiates truthful capabilities; ingests repository-local evidence and lifecycle events; and enforces Shipping Harness stop, budget, and closure authority without bundling or silently controlling third-party harnesses.",
   "scope": {
     "include": [
-      "Contract initialization, validation, hashing, locking, and tamper detection.",
-      "Persistent state machine and append-only ledger.",
-      "Git SHA-bound command evidence with timeout, output bounds, and redaction.",
-      "Scope drift detection and deterministic BLOCKER/NEXT/IGNORE/UNKNOWN triage.",
-      "Bounded fix cycles, human pause/abort precedence, and version closure.",
-      "Generic and Codex-oriented command execution profiles.",
-      "CLI, build scripts, security checks, license checks, unit, integration, and adversarial tests."
+      "A version-transition command for preparing the next release from CLOSED state.",
+      "Adapter SDK, registry, executable discovery, safe probe runner, and capability negotiation.",
+      "Generic and Codex adapters migrated onto the common adapter SDK.",
+      "Gajae adapter with configurable execution and repository-local goal/ledger artifact collection.",
+      "Ouroboros adapter with configurable execution and repository-local Seed/Ledger artifact collection.",
+      "OMO Native process/config/evidence bridge with normalized lifecycle event ingestion.",
+      "Deterministic Stop decision protocol where human stop, terminal state, and exhausted budget override continuation.",
+      "Compatibility reports, fixture-backed adapter tests, live non-mutating Codex probe, documentation, and regression verification."
     ],
     "exclude": [
-      "Gajae, Ouroboros, and OMO adapters; these belong to v0.2.0.",
-      "Web UI, cloud control plane, multi-user features, automatic Git push, and automatic deployment.",
-      "A proprietary coding agent or model runtime."
+      "Vendoring, copying, patching, or redistributing Gajae, Ouroboros, or OMO source code.",
+      "Reading credential stores, private endpoints, home-directory agent state, or terminal scrollback.",
+      "Hardcoding unstable third-party execution flags as if they were guaranteed APIs.",
+      "Automatically invoking unbounded evolution, continuation, or autonomous multi-agent loops.",
+      "Web UI, cloud service, team accounts, automatic Git push, automatic deployment, or proprietary model runtime."
     ],
     "paths": {
       "include": [
@@ -45,7 +48,7 @@
   "acceptance": [
     {
       "id": "AC-001",
-      "description": "All source and test files pass syntax and repository lint checks.",
+      "description": "All source, adapter, hook, and test files pass syntax and repository lint checks.",
       "type": "command",
       "command": "npm run lint",
       "cwd": ".",
@@ -63,7 +66,7 @@
     },
     {
       "id": "AC-003",
-      "description": "A distributable dist tree and build manifest are produced.",
+      "description": "A distributable v0.2.0 dist tree and build manifest are produced.",
       "type": "command",
       "command": "npm run build",
       "cwd": ".",
@@ -72,16 +75,25 @@
     },
     {
       "id": "AC-004",
-      "description": "All unit, integration, and adversarial tests pass.",
+      "description": "All unit, integration, adapter, and adversarial tests pass.",
       "type": "command",
       "command": "npm test",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 300
+      "timeoutSeconds": 360
     },
     {
       "id": "AC-005",
-      "description": "Security checks reject path escape and detect prohibited source patterns.",
+      "description": "Adapter-focused fixture and lifecycle bridge tests pass independently.",
+      "type": "command",
+      "command": "npm run test:adapter",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-006",
+      "description": "Security checks reject path escape, secret leakage, home-directory collection, and prohibited source patterns.",
       "type": "command",
       "command": "npm run security",
       "cwd": ".",
@@ -89,10 +101,28 @@
       "timeoutSeconds": 120
     },
     {
-      "id": "AC-006",
-      "description": "MIT license metadata and third-party interoperability inventory are valid.",
+      "id": "AC-007",
+      "description": "MIT metadata and third-party interoperability boundaries remain valid.",
       "type": "command",
       "command": "npm run license:check",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-0201",
+      "description": "All registered adapters return a truthful JSON capability report without mutating external tools.",
+      "type": "command",
+      "command": "node bin/shipping-harness.mjs adapter probe --all --root . --json",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-0202",
+      "description": "Doctor reports runtime, Git, contract, and adapter compatibility in JSON.",
+      "type": "command",
+      "command": "node bin/shipping-harness.mjs doctor --root . --json",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 120
@@ -104,7 +134,10 @@
     "stale-evidence",
     "scope-drift",
     "data-loss",
-    "critical-security"
+    "critical-security",
+    "capability-overclaim",
+    "human-stop-override",
+    "unbounded-continuation"
   ],
   "budgets": {
     "maxAgentRuns": 3,
@@ -131,6 +164,31 @@
     "codex": {
       "command": null,
       "artifactPaths": []
+    },
+    "gajae": {
+      "command": null,
+      "artifactPaths": [
+        ".gjc/goals.json",
+        ".gjc/ledger.jsonl",
+        ".omc/ultragoal/goals.json",
+        ".omc/ultragoal/ledger.jsonl"
+      ]
+    },
+    "ouroboros": {
+      "command": null,
+      "artifactPaths": [
+        ".ouroboros/seed.json",
+        ".ouroboros/ledger.jsonl",
+        ".ouro/seed.json",
+        ".ouro/ledger.jsonl"
+      ]
+    },
+    "omo": {
+      "command": null,
+      "artifactPaths": [
+        ".omo/omo.jsonc",
+        ".omo/omo.json"
+      ]
     }
   }
 }

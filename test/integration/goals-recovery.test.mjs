@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { appendFile, readFile, writeFile } from 'node:fs/promises';
 import test from 'node:test';
 import { compileGoalGraph } from '../../src/core/goals/compiler.mjs';
+import { createTaskEvidenceReceipt } from '../../src/core/goals/freshness.mjs';
 import { readExecutionLedger } from '../../src/core/goals/ledger.mjs';
 import { recoverGoalRuntime } from '../../src/core/goals/recovery.mjs';
 import {
@@ -13,6 +14,7 @@ import {
   transitionStoredTask,
 } from '../../src/core/goals/store.mjs';
 import { goalRuntimePaths } from '../../src/core/goals/paths.mjs';
+import { currentGitSha } from '../../src/core/git.mjs';
 import { createFixtureRepo } from '../helpers/repo.mjs';
 
 const contract = {
@@ -55,7 +57,21 @@ test('append-only Goal ledger rebuilds corrupted snapshots without replaying com
       });
     }
     await transitionStoredTask(fixture.root, taskId, 'VERIFYING', next());
-    await transitionStoredTask(fixture.root, taskId, 'DONE', next());
+    const current = await readGoalRuntime(fixture.root);
+    const task = current.tasks.find((candidate) => candidate.id === taskId);
+    const gitSha = currentGitSha(fixture.root);
+    const done = next();
+    await transitionStoredTask(fixture.root, taskId, 'DONE', {
+      ...done,
+      currentGitSha: gitSha,
+      evidence: createTaskEvidenceReceipt({
+        graph: current,
+        task,
+        gitSha,
+        evidenceRef: `evidence://${task.consumer.id}`,
+        recordedAt: done.at,
+      }),
+    });
   }
   await transitionStoredGoal(fixture.root, goalId, 'VERIFYING', next());
   await transitionStoredGoal(fixture.root, goalId, 'DONE', next());

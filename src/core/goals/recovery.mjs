@@ -17,7 +17,10 @@ function applyEvent(graph, event) {
     const index = graph.tasks.findIndex((task) => task.id === event.entityId);
     invariant(index >= 0, 'ERR_GOAL_RECOVERY', `Recovery event references missing Task ${event.entityId}`);
     invariant(graph.tasks[index].state === event.payload.from, 'ERR_GOAL_RECOVERY', `Task ${event.entityId} recovery source state mismatch`);
-    graph.tasks[index] = transitionTaskRecord(graph.tasks[index], event.payload.to);
+    const transitioned = transitionTaskRecord(graph.tasks[index], event.payload.to);
+    graph.tasks[index] = event.payload.evidence
+      ? { ...transitioned, evidenceRefs: [...new Set([...transitioned.evidenceRefs, event.payload.evidence.evidenceRef])] }
+      : transitioned;
     return;
   }
   if (event.type === 'ATTEMPT_RECORDED') {

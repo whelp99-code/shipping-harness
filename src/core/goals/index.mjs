@@ -1,4 +1,6 @@
 export { compileGoalGraph } from './compiler.mjs';
+export { applyTaskFailurePolicy, createFailureFingerprint, normalizeFailureText } from './failure-fingerprint.mjs';
+export { assertFreshTaskEvidence, createTaskEvidenceReceipt } from './freshness.mjs';
 export { readyTaskIds, validateGoalGraph } from './graph.mjs';
 export { appendExecutionEvent, readExecutionLedger } from './ledger.mjs';
 export { recoverGoalRuntime, replayGoalRuntime } from './recovery.mjs';

@@ -2,6 +2,7 @@ import { hashObject } from '../crypto.mjs';
 import { invariant } from '../errors.mjs';
 import { ensureDir, exists, readJson, writeJsonAtomic } from '../fs.mjs';
 import { validateGoalGraph } from './graph.mjs';
+import { assertFreshTaskEvidence } from './freshness.mjs';
 import { appendExecutionEvent, readExecutionLedger } from './ledger.mjs';
 import { attemptPath, checkpointPath, goalRuntimePaths } from './paths.mjs';
 import { transitionGoalRecord, transitionTaskRecord } from './states.mjs';
@@ -82,6 +83,10 @@ export async function transitionStoredGoal(root, goalId, nextState, options = {}
   const index = graph.goals.findIndex((goal) => goal.id === goalId);
   invariant(index >= 0, 'ERR_GOAL_NOT_FOUND', `Goal not found: ${goalId}`);
   const previous = graph.goals[index];
+  if (nextState === 'DONE') {
+    const ownedTasks = graph.tasks.filter((task) => task.goalId === goalId);
+    invariant(ownedTasks.length > 0 && ownedTasks.every((task) => task.state === 'DONE' && task.evidenceRefs.length > 0), 'ERR_GOAL_EVIDENCE_REQUIRED', `Goal ${goalId} cannot become DONE until every owned Task is DONE with evidence`);
+  }
   graph.goals[index] = transitionGoalRecord(previous, nextState);
   const event = await appendExecutionEvent(root, {
     type: 'GOAL_TRANSITION',
@@ -98,13 +103,21 @@ export async function transitionStoredGoal(root, goalId, nextState, options = {}
   return { graph, event };
 }
 
-/** @param {string} root @param {string} taskId @param {string} nextState @param {{reason?: string, at?: string, eventId?: string}} [options] */
+/** @param {string} root @param {string} taskId @param {string} nextState @param {{reason?: string, at?: string, eventId?: string, evidence?: unknown, currentGitSha?: string}} [options] */
 export async function transitionStoredTask(root, taskId, nextState, options = {}) {
   const graph = await readGoalRuntime(root);
   const index = graph.tasks.findIndex((task) => task.id === taskId);
   invariant(index >= 0, 'ERR_TASK_NOT_FOUND', `Task not found: ${taskId}`);
   const previous = graph.tasks[index];
-  graph.tasks[index] = transitionTaskRecord(previous, nextState);
+  let evidence = null;
+  if (nextState === 'DONE') {
+    invariant(typeof options.currentGitSha === 'string', 'ERR_TASK_EVIDENCE_REQUIRED', `Task ${taskId} completion requires the current Git SHA`);
+    evidence = assertFreshTaskEvidence(graph, previous, options.evidence, options.currentGitSha);
+  }
+  const transitioned = transitionTaskRecord(previous, nextState);
+  graph.tasks[index] = evidence
+    ? { ...transitioned, evidenceRefs: [...new Set([...transitioned.evidenceRefs, evidence.evidenceRef])] }
+    : transitioned;
   const event = await appendExecutionEvent(root, {
     type: 'TASK_TRANSITION',
     release: graph.release,
@@ -112,7 +125,7 @@ export async function transitionStoredTask(root, taskId, nextState, options = {}
     graphHash: graph.graphHash,
     entityType: 'task',
     entityId: taskId,
-    payload: { from: previous.state, to: nextState, reason: options.reason ?? null },
+    payload: { from: previous.state, to: nextState, reason: options.reason ?? null, evidence },
     at: options.at,
     eventId: options.eventId,
   });

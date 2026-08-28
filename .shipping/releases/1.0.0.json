@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 28,
+    "requiredFailed": 0,
+    "total": 28
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "4bb1bd3cc2c3f778b80d8f1cf65118d8bfa51ad0",
+  "closedAt": "2026-08-28T15:11:09.912Z",
+  "closedGitSha": "2dfd76fdee4f940f26216e76b72d208b012e2071",
+  "contractHash": "4ba1df073720f3de8e653ccad0864206b333e87d6ee74cc3d75e610fa4de180d",
+  "evidenceRunId": "run-2026-08-28T15-10-38-072Z-8a14376a",
+  "fixCycles": 0,
+  "goal": "Freeze Shipping Harness as a stable internal control plane with versioned schemas, explicit v0.6-v0.9 migration and compatibility, truthful health and event surfaces, reproducible package/plugin/OMO/remote verification, operations handover, and a closed v1.0.0 release without enabling Team/DAG or adding public/customer scope.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.0.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

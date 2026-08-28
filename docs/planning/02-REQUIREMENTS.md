@@ -159,6 +159,21 @@
 | REQ-REMOTE-004 | Back up and restore Shipping state plus the minimum required OMO runtime state without breaking evidence links or release authority. | 0.9.0 |
 | REQ-REMOTE-005 | Provide health, upgrade, migration, rollback, notification, and cross-project-isolation operations for the internal deployment. | 0.9.0 |
 
+### Stable internal control plane
+
+| ID | Requirement | Release |
+|---|---|---|
+| REQ-STABLE-001 | Freeze and document supported contract, decision, Goal/Task, evidence, MCP, bridge, graph, remote, backup, and release schemas with limits and canonical hashing rules. | 1.0.0 |
+| REQ-STABLE-002 | Provide tested migration, deprecation, compatibility, and rollback policy for supported prior releases and persisted states. | 1.0.0 |
+| REQ-STABLE-003 | Maintain a tested compatibility matrix for Shipping Core, plugin/MCP, private OMO runtime, bridge schema, and optional Team/DAG profile. | 1.0.0 |
+| REQ-OPS-001 | Provide proven installation, upgrade, backup, restore, observability, incident, recovery, and rollback runbooks. | 1.0.0 |
+| REQ-OPS-002 | Define internal owners, support boundaries, retention policy, review cadence, and direction/license reconsideration triggers. | 1.0.0 |
+| REQ-BENCH-001 | Provide repeatable direct-agent, Shipping-only, private OMO, and optional Team/DAG benchmark scenarios. | 1.0.0 |
+| REQ-BENCH-002 | Measure ship rate, false-done rate, scope drift, stale evidence, retries, interventions, elapsed time, cost when available, recovery, and question count. | 1.0.0 |
+| REQ-SECURITY-001 | Complete final authorization, path, secret, replay, isolation, runtime-boundary, denial-of-service, and internal-distribution security review. | 1.0.0 |
+| REQ-HANDOVER-001 | Produce release notes, operator handover, known limitations, support boundaries, and next-version backlog. | 1.0.0 |
+| REQ-RELEASE-001 | Close v1.0.0 with zero release blockers while preserving every governance invariant across supported execution paths. | 1.0.0 |
+
 ## Non-functional requirements
 
 | ID | Requirement |
@@ -179,6 +194,8 @@
 | NFR-LICENSE-001 | Internal upstream use remains auditable through pins, notices, modification records, and an external-distribution reconsideration gate. |
 | NFR-RUNTIME-001 | Shipping Core and the internal OMO runtime can be upgraded, disabled, and rolled back independently. |
 | NFR-RUNTIME-002 | The core remains operable with a truthful Codex/Generic fallback or durable BLOCKED result when OMO is unavailable. |
+| NFR-OPS-001 | Every supported upgrade, backup, restore, and rollback path is verified through a repeatable drill. |
+| NFR-STABLE-001 | Unsupported schema or component combinations fail with stable diagnostics and never fabricate compatibility. |
 
 ## Release acceptance criteria
 
@@ -247,6 +264,112 @@
 | AC-0410 | The default approval brief contains all required sections while detailed evidence remains separately inspectable. |
 | AC-0411 | Full v0.1.0–v0.3.0 regression, security, MCP, and license suites remain green. |
 | AC-0412 | v0.4.0 closes with zero blockers, no unapproved drift, and a clean tagged commit. |
+
+### v0.5.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-0501 | A locked contract compiles deterministically into stable Goals and Tasks with requirement and acceptance links. |
+| AC-0502 | Orphan tasks, duplicate IDs, invalid dependencies, and cycles are rejected before execution. |
+| AC-0503 | Goal, Task, attempt, checkpoint, blocker, and evidence events are persisted in an append-only ledger. |
+| AC-0504 | State is restored after process restart without replaying completed work. |
+| AC-0505 | A Goal or Task cannot become DONE without current contract-hash and Git-SHA evidence. |
+| AC-0506 | Identical failures on unchanged state stop at the configured retry limit. |
+| AC-0507 | Changed source or approved task input creates a new bounded attempt without erasing prior evidence. |
+| AC-0508 | Exhausted planning/review paths end in PLANNING_STUCK or BLOCKED with an inspectable reason. |
+| AC-0509 | Human pause/abort overrides task recovery and continuation. |
+| AC-0510 | Finisher and release closure remain independent from Goal/Task completion state. |
+| AC-0511 | Full v0.1.0–v0.4.0 regression, MCP, security, and license suites remain green. |
+| AC-0512 | v0.5.0 closes with zero blockers, clean state, release receipt, and annotated tag. |
+
+### v0.6.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-0601 | One documented local install path registers the MCP server, skill, and agent instructions. |
+| AC-0602 | A normal user can start a release without editing JSON/YAML or running project-specific CLI commands. |
+| AC-0603 | The normal flow presents one concise approval surface before execution. |
+| AC-0604 | Progress surfaces truthfully map core state to PLANNING, RUNNING, PAUSED, BLOCKED, SHIPPABLE, or CLOSED. |
+| AC-0605 | Every blocker surface includes reason, evidence, required action, and remaining budget. |
+| AC-0606 | The user can pause or abort from the connected agent surface and the core stops continuation. |
+| AC-0607 | Doctor and repair recover common registration/install faults without resetting repository release state. |
+| AC-0608 | Upgrade, uninstall, and reinstall preserve contract, ledger, evidence, and closed receipts. |
+| AC-0609 | No local plugin tool exposes arbitrary shell, public listener, customer endpoint, or automatic approval. |
+| AC-0610 | Detailed evidence remains inspectable without appearing in the default concise view. |
+| AC-0611 | Full v0.1.0–v0.5.0 regression, MCP, security, and license suites remain green. |
+| AC-0612 | v0.6.0 closes with a successful beginner scenario, zero blockers, clean commit, and annotated tag. |
+
+### v0.7.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-0701 | A separate private runtime is reproducible from recorded upstream pin, internal patch commit, build digest, and compatibility version. |
+| AC-0702 | Upstream notices and an internal modification inventory are preserved. |
+| AC-0703 | Work orders and receipts bind release, contract hash, Git SHA, session, Goal/Task, scope, acceptance, and budgets. |
+| AC-0704 | OMO cannot modify or approve the Shipping contract, increase budgets, or transition SHIPPABLE/CLOSED. |
+| AC-0705 | The default profile enforces workers <= 2, depth <= 1, continuations <= 3, Team/DAG disabled, and no unlimited values. |
+| AC-0706 | Shipping pause/abort/close denies continuation, revival, and late work. |
+| AC-0707 | Foreign-session, stale-SHA, wrong-task, or out-of-scope receipts are rejected. |
+| AC-0708 | OMO task completion remains untrusted until current Shipping acceptance checks pass. |
+| AC-0709 | Runtime/model unavailability results in approved fallback or durable BLOCKED, never fabricated success. |
+| AC-0710 | Runtime crash/restart does not replay terminal work and completion delivery is deduplicated. |
+| AC-0711 | An upstream update is promoted only after selected tests, bridge tests, canary, and compatibility checks pass. |
+| AC-0712 | The previous runtime pin and artifact can be restored without reopening or amending the active Shipping contract. |
+| AC-0713 | No public/customer package, source, binary, image, container, or endpoint is produced. |
+| AC-0714 | v0.7.0 closes after one real internal OMO-backed release, all regressions pass, and zero blockers remain. |
+
+### v0.8.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-0801 | v0.8 activation is backed by recorded v0.7 pilot evidence of a real coordination bottleneck. |
+| AC-0802 | Every graph node maps to a locked Goal/Task and requirement or acceptance consumer. |
+| AC-0803 | Missing dependencies, cycles, stale bindings, invalid scope, and oversized graphs are rejected. |
+| AC-0804 | Finisher is outside the OMO team and no agent can expand top-level release scope. |
+| AC-0805 | Members, parallelism, depth, time, turns, tools, retries, amendments, and graph size remain within policy; unlimited values are impossible. |
+| AC-0806 | Failed or changed nodes can be retried/amended without rerunning unrelated successful nodes. |
+| AC-0807 | No-progress, oscillation, repetitive review, and role ping-pong end with an inspectable terminal reason. |
+| AC-0808 | Pause/abort/cancel prevents child continuation and late results cannot change Shipping state. |
+| AC-0809 | Crash recovery preserves node ownership and deduplicates completion delivery. |
+| AC-0810 | Team/DAG can be disabled and the release can continue through the approved v0.7 or direct fallback path. |
+| AC-0811 | Benchmark evidence compares direct, v0.7, and v0.8 modes and records coordination overhead. |
+| AC-0812 | v0.8.0 closes only when Team/DAG improves a real pilot without regression in contract, stop, evidence, or Finisher authority. |
+
+### v0.9.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-0901 | All remote access is authenticated, encrypted, replay-protected, bounded, and restricted to explicit project allowlists. |
+| AC-0902 | Per-project permissions prevent unauthorized read, approval, execution, pause, or close actions. |
+| AC-0903 | No remote schema exposes raw command, argv, environment, arbitrary path execution, or policy override. |
+| AC-0904 | Remote approval is signed and bound to exact actor, project, release, proposal hash, Git SHA, expiry, and nonce. |
+| AC-0905 | Expired, replayed, transferred, wrong-SHA, or unauthorized approvals are rejected. |
+| AC-0906 | A trusted web/mobile client can view status, approve, pause, inspect blockers, and receive completion notification. |
+| AC-0907 | Local pause/abort remains stronger than any remote execute or resume request. |
+| AC-0908 | Notifications are deduplicated and notification failure cannot change release state. |
+| AC-0909 | Backup/restore preserves contract, Goal/Task state, evidence links, receipts, runtime pin, and CLOSED authority. |
+| AC-0910 | Restored non-terminal work remains paused until ownership and runtime health are proven; terminal work is never replayed. |
+| AC-0911 | Cross-project isolation, upgrade, migration, rollback, health, and incident runbooks pass operational drills. |
+| AC-0912 | v0.9.0 closes after an internal mobile/web pilot, restore drill, security suite, all regressions, and zero blockers. |
+
+### v1.0.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-1001 | All supported contract, decision, Goal/Task, evidence, MCP, bridge, graph, remote, backup, and release schemas are versioned and documented. |
+| AC-1002 | Supported prior versions and states migrate and roll back without weakening contract, evidence, stop, or CLOSED authority. |
+| AC-1003 | Unsupported component/runtime combinations fail truthfully through the compatibility matrix. |
+| AC-1004 | Clean install, upgrade, rollback, backup, restore, observability, and incident runbooks pass practical drills. |
+| AC-1005 | Representative non-developers can start, approve, monitor, pause, recover, and receive CLOSED releases without project-specific CLI knowledge. |
+| AC-1006 | Benchmark and adversarial suites produce zero false SHIPPABLE transitions, stale-evidence acceptance, human-stop violations, or unapproved scope changes. |
+| AC-1007 | Every accepted completion claim is bound to current contract and Git evidence. |
+| AC-1008 | Direct, private OMO, and any enabled Team/DAG modes can be disabled or rolled back without corrupting Shipping governance state. |
+| AC-1009 | Remote access remains authenticated, allowlisted, bounded, replay-protected, and free of arbitrary shell or policy override. |
+| AC-1010 | OMO pins, internal modifications, notices, build digests, tests, and rollback artifacts are complete and private. |
+| AC-1011 | The internal-only boundary is enforced and any public/customer distribution path triggers a blocking review. |
+| AC-1012 | Final security, license, support, retention, and operational ownership reviews are complete. |
+| AC-1013 | Optional findings are moved to NEXT and do not keep v1.0 open after all release blockers reach zero. |
+| AC-1014 | v1.0.0 closes with a clean committed release receipt, annotated tag, known limitations, operator handover, and zero blockers. |
 
 ## Definition of Done
 

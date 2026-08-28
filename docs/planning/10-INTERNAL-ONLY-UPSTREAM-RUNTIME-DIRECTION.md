@@ -1,11 +1,26 @@
 # Internal-Only Upstream Runtime Direction
 
-**Status:** Accepted
+**Status:** DIRECTION LOCKED
 **Decision date:** 2026-08-28
 **Applies from:** roadmap planning after v0.4.0
 **Canonical rule:** Shipping Harness is for the owner's personal use and, later, private use inside the owner's company. It is not planned for customer delivery, resale, public SaaS, or public binary/container distribution.
 
 **Use boundary:** personal and company-internal use only.
+
+## Direction lock
+
+This direction is the source of truth for v0.4.0 through v1.0.0. Version plans may add implementation detail, but they may not change the following without a new explicit direction decision:
+
+1. the user states the outcome and approves one brief rather than answering a technical interview;
+2. Shipping Core owns contract, scope, budgets, human stop, evidence acceptance, Finisher, SHIPPABLE, and CLOSED;
+3. Gajae and Ouroboros mechanisms are absorbed only where they fit Shipping schemas and bounded release behavior;
+4. actual OMO source runs only in a separately pinned private internal runtime;
+5. OMO task/runtime state never becomes release authority;
+6. Team/DAG is conditional on measured need and remains bounded;
+7. external/customer/public distribution is outside scope and triggers a new review;
+8. every version must close before the next version starts.
+
+Canonical version-specific development plans are listed in [`09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md).
 
 ## 1. Decision
 

@@ -22,6 +22,8 @@ Shipping Harness exists to turn coding-agent execution into a bounded, auditable
 | GOAL-012 | Absorb proven ideas selectively. | Durable goals, evaluation, and roles remain bounded by Shipping Harness closure policy. |
 | GOAL-013 | Reuse proven internal runtimes without surrendering release authority. | An OMO task result can never transition a release to SHIPPABLE or CLOSED. |
 | GOAL-014 | Preserve the accepted internal-only product boundary. | No customer/public distribution artifact is produced without a new direction and license review. |
+| GOAL-015 | Control internal development safely from trusted remote clients. | Remote users see only allowlisted projects and never receive arbitrary shell or policy authority. |
+| GOAL-016 | Operate Shipping Harness as a stable internal product. | Supported installs, upgrades, backups, restores, rollbacks, and benchmark releases pass repeatable drills. |
 
 ## v0.1.0 scope
 

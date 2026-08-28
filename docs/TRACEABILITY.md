@@ -13,9 +13,11 @@
 | GOAL-009 model-accessible governance | REQ-MCP-001..008 | AC-0301..0312 | MCP protocol, tools, STDIO | MCP protocol/transport/adversarial tests |
 | GOAL-010 user as approver | REQ-MODE-001..003, REQ-APPROVAL-001..004 | AC-0401..0402, AC-0407, AC-0409..0410 | decision modes, approval brief | planned decision/MCP tests |
 | GOAL-011 risk-based autonomy | REQ-DECISION-001..008, REQ-ESCALATE-001..006, REQ-POLICY-001..004 | AC-0403..0408 | decision evidence, policy validator, escalation | planned decision/adversarial tests |
-| GOAL-012 selective bounded absorption | REQ-GOAL-001..008, REQ-TEAM-001..006, REQ-POLICY-003..004 | v0.5/v0.8 roadmap gates plus AC-0411..0412 regression authority | Goal/Evidence runtime, bounded team graph, Finisher | planned Goal/runtime/team suites |
-| GOAL-013 governed internal runtime reuse | REQ-UPSTREAM-001..002, REQ-OMO-001..008 | v0.7 internal-runtime acceptance plan | internal OMO bridge, private pinned runtime, Shipping verification | planned bridge/runtime/adversarial/canary suites |
-| GOAL-014 internal-only product boundary | REQ-INTERNAL-001, REQ-OMO-009, NFR-LICENSE-001 | distribution guard and v1.0 license/modification inventory | third-party policy, runtime promotion, release operations | planned policy/packaging/release tests |
+| GOAL-012 selective bounded absorption | REQ-GOAL-001..008, REQ-TEAM-001..006, REQ-POLICY-003..004 | AC-0501..0512, AC-0801..0812 | Goal/Evidence runtime, bounded team graph, Finisher | planned Goal/runtime/team suites |
+| GOAL-013 governed internal runtime reuse | REQ-UPSTREAM-001..002, REQ-OMO-001..009, NFR-RUNTIME-001..002 | AC-0701..0714 | internal OMO bridge, private pinned runtime, Shipping verification | planned bridge/runtime/adversarial/canary/rollback suites |
+| GOAL-014 internal-only product boundary | REQ-INTERNAL-001, REQ-OMO-009, NFR-LICENSE-001 | AC-0713, AC-1010..1012 | third-party policy, runtime promotion, release operations | planned policy/packaging/release tests |
+| GOAL-015 safe internal remote control | REQ-REMOTE-001..005 | AC-0901..0912 | internal gateway, signed approval, backup/restore | planned remote/security/operations suites |
+| GOAL-016 stable internal product | REQ-STABLE-001..003, REQ-OPS-001..002, REQ-BENCH-001..002, REQ-SECURITY-001, REQ-HANDOVER-001, REQ-RELEASE-001 | AC-1001..1014 | schema registry, migrations, operations, benchmark, handover | planned v1.0 full release gate |
 
 ## Source layout mapping
 
@@ -46,6 +48,9 @@ packages/internal-omo-bridge/* REQ-OMO-* (planned v0.7)
 private shipping-harness-omo-runtime REQ-UPSTREAM-*, REQ-OMO-* (separate internal runtime, planned v0.7)
 src/core/team-policy/*.mjs  REQ-TEAM-* (planned v0.8)
 src/remote/*                REQ-REMOTE-* (planned v0.9)
+src/core/schema-registry/*  REQ-STABLE-* (planned v1.0)
+docs/operations/*           REQ-OPS-*, REQ-HANDOVER-* (planned v1.0)
+benchmarks/*                REQ-BENCH-* (planned v1.0)
 src/cli.mjs                 user flows and orchestration
 ```
 
@@ -91,11 +96,11 @@ src/cli.mjs                 user flows and orchestration
 
 | Release | Planned proof |
 |---|---|
-| v0.5 | Goal/Task schema and cycle tests; append-only replay/recovery; stale-proof and repeated-failure adversarial tests; single-agent real-project pilot |
-| v0.6 | clean install/doctor/reinstall/uninstall; no-CLI beginner workflow; approval/progress/blocker/completion surface tests |
-| v0.7 | exact upstream/internal pins and notices; work-order/receipt validation; OMO task/routing/continuation/recovery tests; Shipping re-verification; canary and previous-pin rollback |
-| v0.8 | graph ownership and cycle checks; bounded team/depth/parallelism; node-scoped retry/amend; no-progress/oscillation tests; benchmark against v0.7 |
-| v0.9 | authentication/allowlist/replay/cross-project tests; signed approvals; backup/restore; mobile/web internal pilot; runtime migration and rollback |
-| v1.0 | compatibility matrix, completion benchmark, security/license/modification inventory, operations and non-developer end-to-end acceptance |
+| v0.5 / AC-0501..0512 | Goal/Task schema and cycle tests; append-only replay/recovery; stale-proof and repeated-failure adversarial tests; single-agent real-project pilot |
+| v0.6 / AC-0601..0612 | clean install/doctor/reinstall/uninstall; no-CLI beginner workflow; approval/progress/blocker/completion surface tests |
+| v0.7 / AC-0701..0714 | exact upstream/internal pins and notices; work-order/receipt validation; OMO task/routing/continuation/recovery tests; Shipping re-verification; canary and previous-pin rollback |
+| v0.8 / AC-0801..0812 | graph ownership and cycle checks; bounded team/depth/parallelism; node-scoped retry/amend; no-progress/oscillation tests; benchmark against v0.7 |
+| v0.9 / AC-0901..0912 | authentication/allowlist/replay/cross-project tests; signed approvals; backup/restore; mobile/web internal pilot; runtime migration and rollback |
+| v1.0 / AC-1001..1014 | schema/migration matrix, all regressions, completion benchmark, operations drills, security/license/modification inventory, and handover |
 
 Any implementation that cannot map to a requirement is out of scope or must amend this matrix before coding.

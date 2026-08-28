@@ -1,5 +1,8 @@
 # Sequential Roadmap and Development Plan — v0.4.0 to v1.0.0
 
+**Status:** ROADMAP LOCKED
+**Canonical direction:** [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md)
+
 ## Delivery rule
 
 Each version must be completed and closed before the next version begins.
@@ -10,6 +13,22 @@ DRAFT -> scope approved -> LOCKED -> BUILD -> VERIFY -> blocker-only FIX
 ```
 
 New ideas never enter an active release unless they repair an accepted requirement. They move to the next-version backlog.
+
+## Canonical version plans
+
+The roadmap below defines sequence and dependency. Implementation must use the corresponding version-specific plan as the detailed source of truth.
+
+| Version | Detailed development plan |
+|---|---|
+| v0.4.0 | [`11-V0.4.0-AUTO-DECISION-DEVELOPMENT-PLAN.md`](11-V0.4.0-AUTO-DECISION-DEVELOPMENT-PLAN.md) |
+| v0.5.0 | [`12-V0.5.0-GOAL-EVIDENCE-RUNTIME-DEVELOPMENT-PLAN.md`](12-V0.5.0-GOAL-EVIDENCE-RUNTIME-DEVELOPMENT-PLAN.md) |
+| v0.6.0 | [`13-V0.6.0-BEGINNER-PLUGIN-DEVELOPMENT-PLAN.md`](13-V0.6.0-BEGINNER-PLUGIN-DEVELOPMENT-PLAN.md) |
+| v0.7.0 | [`14-V0.7.0-INTERNAL-OMO-RUNTIME-DEVELOPMENT-PLAN.md`](14-V0.7.0-INTERNAL-OMO-RUNTIME-DEVELOPMENT-PLAN.md) |
+| v0.8.0 | [`15-V0.8.0-BOUNDED-TEAM-DAG-DEVELOPMENT-PLAN.md`](15-V0.8.0-BOUNDED-TEAM-DAG-DEVELOPMENT-PLAN.md) |
+| v0.9.0 | [`16-V0.9.0-INTERNAL-REMOTE-OPERATIONS-DEVELOPMENT-PLAN.md`](16-V0.9.0-INTERNAL-REMOTE-OPERATIONS-DEVELOPMENT-PLAN.md) |
+| v1.0.0 | [`17-V1.0.0-STABLE-INTERNAL-CONTROL-PLANE-DEVELOPMENT-PLAN.md`](17-V1.0.0-STABLE-INTERNAL-CONTROL-PLANE-DEVELOPMENT-PLAN.md) |
+
+If this summary conflicts with a version-specific plan, the direction document wins first, then the version-specific plan, then this summary.
 
 ## Accepted upstream direction
 

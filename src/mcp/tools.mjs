@@ -1,3 +1,4 @@
+import { executeShippingPrivateOmo } from '../../packages/internal-omo-bridge/index.mjs';
 import { executeAdapter } from '../adapters/runner.mjs';
 import { configuredCommand } from '../adapters/sdk.mjs';
 import { assertLockedContract } from '../core/contract.mjs';
@@ -276,6 +277,11 @@ export async function callShippingTool(root, name, rawArguments) {
     rejectUnknownKeys(args, ['adapter', 'verifyAfter']);
     if (args.adapter !== undefined) invariant(ADAPTERS.includes(args.adapter), 'ERR_MCP_ARGUMENTS', `Unsupported adapter: ${String(args.adapter)}`);
     const { contract } = await assertLockedContract(root);
+    if (args.adapter === undefined && contract.internalRuntime?.profile === 'private-omo-v0.7') {
+      const result = await executeShippingPrivateOmo(root, { mode: 'native', verifyAfter: args.verifyAfter !== false });
+      const decision = result.verification?.decision ?? (result.mode === 'blocked' ? 'BLOCKED' : 'VERIFYING');
+      return complete(result, `Approved private OMO execution finished in mode ${result.mode}; Shipping decision: ${decision}.`);
+    }
     const adapter = chooseConfiguredAdapter(contract, args.adapter);
     if (!adapter) {
       const data = workOrder(contract);
@@ -299,6 +305,10 @@ export async function callShippingTool(root, name, rawArguments) {
     if (state.state === 'BLOCKED') return complete({ state }, 'Fix budget is exhausted. The release is BLOCKED and automation stopped.');
     if (args.runConfiguredAdapter === true || args.adapter) {
       const { contract } = await assertLockedContract(root);
+      if (args.adapter === undefined && contract.internalRuntime?.profile === 'private-omo-v0.7') {
+        const result = await executeShippingPrivateOmo(root, { mode: 'native', verifyAfter: args.verifyAfter !== false });
+        return complete({ state, ...result }, `Fix cycle ${state.fixCycles} executed through the approved private OMO runtime; Shipping decision ${result.verification?.decision ?? 'VERIFYING'}.`);
+      }
       const adapter = chooseConfiguredAdapter(contract, args.adapter);
       invariant(adapter, 'ERR_ADAPTER_COMMAND_REQUIRED', 'No approved adapter command is configured; the MCP host agent must fix blockers directly');
       const agent = await executeAdapter(root, { adapter });

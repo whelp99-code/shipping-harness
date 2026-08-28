@@ -15,8 +15,7 @@ import { collectAdapterArtifacts, listAdapters, probeAdapter, probeAllAdapters }
 import { executeAdapter } from './adapters/runner.mjs';
 import { decideStop, ingestLifecycleEvent } from './core/hooks.mjs';
 import { prepareNextRelease } from './core/release-transition.mjs';
-
-const VERSION = '0.3.0';
+import { VERSION } from './version.mjs';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {

@@ -24,7 +24,7 @@ for (const filePath of sourceFiles) {
 }
 
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
-if (Object.keys(packageJson.dependencies ?? {}).length > 0) failures.push('runtime dependencies must remain empty for v0.3.0');
+if (Object.keys(packageJson.dependencies ?? {}).length > 0) failures.push('runtime dependencies must remain empty for the current local-first release');
 if (packageJson.bin?.['shipping-harness-mcp'] !== './bin/shipping-harness-mcp.mjs') failures.push('shipping-harness-mcp package binary is missing or incorrect');
 const ignore = await readFile('.gitignore', 'utf8');
 for (const entry of ['.shipping/evidence/', '.shipping/tmp/', '.chatgpt2codex/']) {
@@ -41,7 +41,7 @@ for (const tool of SHIPPING_TOOLS) {
 const mcpFiles = await walkFiles(path.resolve('src/mcp'), (file) => file.endsWith('.mjs'));
 for (const filePath of mcpFiles) {
   const content = await readFile(filePath, 'utf8');
-  if (/from\s+['"]node:(?:http|https|http2|net|tls)['"]/gu.test(content)) failures.push(`${relative(filePath)} opens a network-capable runtime in local-only v0.3.0`);
+  if (/from\s+['"]node:(?:http|https|http2|net|tls)['"]/gu.test(content)) failures.push(`${relative(filePath)} opens a network-capable runtime in the current local-only release`);
 }
 
 for (const candidate of ['~/.omo/state.json', '/tmp/ledger.jsonl', '../ledger.jsonl', '.shipping/state.json', '.env']) {

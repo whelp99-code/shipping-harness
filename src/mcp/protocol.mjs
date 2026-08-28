@@ -1,10 +1,11 @@
 import { ShippingError, normalizeError } from '../core/errors.mjs';
+import { VERSION } from '../version.mjs';
 import { SHIPPING_TOOLS, callShippingTool } from './tools.mjs';
 
 export const MCP_PROTOCOL_VERSION = '2026-07-28';
 export const MCP_LEGACY_VERSION = '2025-11-25';
 export const MCP_SUPPORTED_VERSIONS = Object.freeze([MCP_PROTOCOL_VERSION, MCP_LEGACY_VERSION]);
-export const MCP_SERVER_INFO = Object.freeze({ name: 'shipping-harness', version: '0.3.0' });
+export const MCP_SERVER_INFO = Object.freeze({ name: 'shipping-harness', version: VERSION });
 export const MCP_MAX_MESSAGE_BYTES = 1024 * 1024;
 export const MCP_MAX_TOOL_ARGUMENT_BYTES = 64 * 1024;
 export const MCP_MAX_RESULT_BYTES = 1024 * 1024;

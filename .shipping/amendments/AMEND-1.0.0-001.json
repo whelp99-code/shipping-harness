@@ -1,0 +1,25 @@
+{
+  "actor": "human-approved-sequential-build",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": "test/plugin/doctor-repair.test.mjs"
+    }
+  ],
+  "correctedContractHash": "4ba1df073720f3de8e653ccad0864206b333e87d6ee74cc3d75e610fa4de180d",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-1.0.0-001",
+  "kind": "version-independent-regression-test-correction",
+  "previousContractHash": "02311cf8e5704d58c95a07c48c615bd74ad9ac6cc3c55e39bea4ea6b44657473",
+  "previousScopeRevision": 1,
+  "previousState": "LOCKED",
+  "productionCodeChanged": false,
+  "project": "shipping-harness",
+  "reason": "The mandatory v1 plugin regression suite contains one historical assertion fixed to v0.6.0. The product upgrade path already passes v0.6.0 to v1.0.0; this amendment permits only that test to compare against the current package version.",
+  "recordedAt": "2026-08-28T15:05:20.610Z",
+  "release": "1.0.0",
+  "removed": [],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticProductScopeExpansion": false,
+  "sourceGitSha": "d910a3ea2399b4825e4f7a12d4e945fdbd1499de"
+}

@@ -4,6 +4,9 @@ import { normalizeError } from '../../../src/core/errors.mjs';
 import { installShippingPlugin } from './install.mjs';
 import { createPluginInstallPlan } from './plan.mjs';
 import { uninstallShippingPlugin } from './uninstall.mjs';
+import { doctorShippingPlugin } from '../doctor/doctor.mjs';
+import { repairShippingPlugin } from '../doctor/repair.mjs';
+import { rollbackShippingPlugin, upgradeShippingPlugin } from './upgrade.mjs';
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 
@@ -17,7 +20,7 @@ function flag(name) {
 }
 
 function help() {
-  return `Shipping Harness Plugin ${process.env.npm_package_version ?? ''}\n\nUsage:\n  shipping-harness-plugin plan --install-root <path> [--host generic|codex] [--codex-home <path>] [--project-root <path>]\n  shipping-harness-plugin install --install-root <path> [--host generic|codex] [--codex-home <path>] [--project-root <path>] [--apply] [--replace]\n  shipping-harness-plugin uninstall --install-root <path> [--apply]\n\nNormal safety:\n  Without --apply, install and uninstall are dry-runs. Codex apply requires an explicit --codex-home.\n`;
+  return `Shipping Harness Plugin ${process.env.npm_package_version ?? ''}\n\nUsage:\n  shipping-harness-plugin plan --install-root <path> [--host generic|codex] [--codex-home <path>] [--project-root <path>]\n  shipping-harness-plugin install --install-root <path> [--host generic|codex] [--codex-home <path>] [--project-root <path>] [--apply] [--replace]\n  shipping-harness-plugin doctor --install-root <path> [--project-root <path>]\n  shipping-harness-plugin repair --install-root <path> [--host generic|codex] [--codex-home <path>] [--project-root <path>] [--apply]\n  shipping-harness-plugin upgrade --install-root <path> [--host generic|codex] [--codex-home <path>] [--project-root <path>] [--apply]\n  shipping-harness-plugin rollback --install-root <path> [--backup-id <id>] [--apply]\n  shipping-harness-plugin uninstall --install-root <path> [--apply]\n\nNormal safety:\n  Without --apply, install and uninstall are dry-runs. Codex apply requires an explicit --codex-home.\n`;
 }
 
 function input() {
@@ -30,6 +33,7 @@ function input() {
     projectRoot: option('--project-root'),
     dryRun: !flag('--apply'),
     replace: flag('--replace'),
+    backupId: option('--backup-id'),
   };
 }
 
@@ -42,6 +46,10 @@ export async function main() {
   let result;
   if (command === 'plan') result = await createPluginInstallPlan(input());
   else if (command === 'install') result = await installShippingPlugin(input());
+  else if (command === 'doctor') result = await doctorShippingPlugin(input());
+  else if (command === 'repair') result = await repairShippingPlugin(input());
+  else if (command === 'upgrade') result = await upgradeShippingPlugin(input());
+  else if (command === 'rollback') result = await rollbackShippingPlugin(input());
   else if (command === 'uninstall') result = await uninstallShippingPlugin(input());
   else throw new Error(`Unknown plugin command: ${command}`);
   if (flag('--json')) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);

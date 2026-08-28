@@ -37,6 +37,8 @@ export function pluginPaths(installRoot) {
     registration: path.join(pluginHome, 'registration.json'),
     receipt: path.join(pluginHome, 'install-receipt.json'),
     backup: path.join(pluginHome, 'registration-backup.json'),
+    backups: path.join(pluginHome, 'backups'),
+    upgradeHistory: path.join(pluginHome, 'upgrade-history.json'),
   };
 }
 

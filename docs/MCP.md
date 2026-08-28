@@ -138,6 +138,10 @@ Every protocol message occupies one stdout line. Logs and startup errors use std
 
 Those capabilities require separate version contracts and remain in `BACKLOG.md`.
 
+## Planned internal runtime path
+
+The accepted roadmap keeps these v0.3 limitations intact. v0.6 packages the local beginner experience; v0.7 later adds a separately pinned private OMO runtime through a versioned work-order/receipt bridge. No raw OMO command or unrestricted task/team surface is exposed directly to the user-facing MCP. Shipping continues to enforce approval, scope, budgets, human stop, evidence freshness, blockers, and version closure. See [`planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md).
+
 ## Troubleshooting
 
 Check the binaries and protocol:

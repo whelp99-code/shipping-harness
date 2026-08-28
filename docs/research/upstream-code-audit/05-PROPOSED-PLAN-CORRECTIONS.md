@@ -1,129 +1,190 @@
-# Proposed Shipping Harness Plan Corrections After Upstream Audit
+# Accepted Plan Corrections After Upstream Audit
 
-## Status
+**Status:** Accepted on 2026-08-28
+**Supersedes:** the pre-audit v0.5–v0.7 sequence and the blanket clean-room-only OMO recommendation
 
-This document is an audit recommendation. It does not silently change a locked release contract. v0.4 remains the active DRAFT and keeps the already approved product direction: **AI decides, human approves**.
+## Why the plan changed
 
-## What the code audit changed
+The code audit established three different realities:
 
-The previous roadmap grouped too many upstream ideas into v0.5. The source audit showed that:
+1. Ouroboros has the strongest automatic-decision implementation for v0.4.
+2. Gajae has compact, useful Goal/Ledger and repeated-failure mechanisms for v0.5.
+3. OMO's useful execution behavior is a large, tested multi-package runtime rather than one small hook.
 
-- Gajae Goal/Ledger and freshness mechanisms are separable and small enough for one release.
-- Ouroboros decision provenance and safe-default recovery belong in v0.4, before execution orchestration.
-- OMO's real orchestration is a large multi-package task/team/DAG/recovery runtime, not one small hook.
-- A general-user plugin should be delivered before adding a large multi-agent runtime.
+The owner also fixed the product boundary as personal and future company-internal use only. Under that boundary, direct internal OMO use is acceptable as an engineering direction, provided notices and internal-use restrictions are preserved.
 
-Therefore OMO-style role orchestration should move later rather than being bundled into the first durable-execution release.
+Therefore:
 
-## Recommended sequence
+```text
+Do not rebuild all OMO behavior inside Shipping Core.
+Do not mix the OMO monorepo into Shipping Core.
+Use actual OMO code in a separately pinned private internal runtime.
+Keep Shipping governance and Finisher independent.
+```
+
+## Accepted version sequence
 
 ### v0.4.0 — AI Decides, Human Approves
 
-Keep the current goal, but implement it with the audited Ouroboros mechanisms:
+Primary source influence: Ouroboros.
 
-- decision source/provenance classes;
-- repository facts, existing conventions, user goals, conservative defaults, assumptions, conflicts;
-- deterministic source priority;
-- ambiguity/completeness gate;
-- reversible safe defaults;
-- rollback to `NEEDS_USER_INPUT` or durable `BLOCKED` when inference is unsafe;
+Deliver:
+
+- decision provenance;
+- safe reversible defaults;
+- conflict/ambiguity detection;
+- mandatory-risk escalation;
 - one approval brief;
-- at most one bounded proposal-critic pass.
-
-Explicitly exclude Goal runtime, subagents, teams, model routing, evolution generations, and plugin UI.
+- rollback to durable BLOCKED;
+- no Goal runtime, OMO runtime, team, or DAG.
 
 ### v0.5.0 — Durable Goal and Evidence Runtime
 
-Use the audited Gajae mechanisms plus the existing Shipping core:
+Primary source influence: Gajae plus selected Ouroboros authority rules.
 
-- minimal `goals.json`-equivalent state, preferably integrated into `.shipping` schemas;
-- append-only goal/evidence ledger;
-- acceptance-criterion mapping;
-- evidence bound to current contract and Git SHA;
-- stale-receipt rejection;
-- bounded continuation with progress signature;
-- stagnation/oscillation detection;
-- terminal `CLOSED` or `BLOCKED` outcome.
+Deliver:
 
-No permanent multi-agent team and no model router in this release.
+- contract-to-Goal/Task compiler;
+- stable IDs and dependencies;
+- append-only Goal/Task/Evidence ledger;
+- restart recovery;
+- current-contract/current-SHA proof;
+- repeated-failure fingerprints;
+- durable planning-stuck and blocked outcomes;
+- single coding-agent pilot.
 
-### v0.6.0 — Beginner Plugin and Approval UI
+Do not add OMO, team, or general DAG in this version.
 
-Keep the usability priority:
+### v0.6.0 — Beginner Plugin and Local Agent UX
 
-- package the MCP, skill, and policies as a plugin;
-- scope approval card;
-- simple `RUNNING / BLOCKED / CLOSED` status;
-- blocker explanation and next-version backlog;
-- hide CLI details from the user;
-- require client-side confirmation for mutations.
+Deliver:
 
-This release proves that a non-developer can use the decision and completion runtime before orchestration complexity is added.
+- local plugin + MCP + skill bundle;
+- one install path;
+- one approval surface;
+- simple progress/blocker/completion surfaces;
+- guided project selection and doctor;
+- normal use without CLI or JSON editing.
 
-### v0.7.0 — Bounded Role Orchestration
+This version proves usability before OMO complexity is introduced.
 
-Reimplement only a small clean-room OMO subset:
+### v0.7.0 — Internal OMO Runtime Foundation
 
-- logical roles: Planner, Builder, Tester, Reviewer, Finisher;
-- capability-based route selection with provenance;
-- default depth 1;
-- small explicit concurrency cap;
-- same-release ownership checks;
-- exactly-once terminal result ingestion;
-- bounded restart/recovery;
-- Shipping human pause and budget authority above all continuations.
+Use actual OMO source from a private pinned runtime/fork.
 
-Do not implement OMO Team Mode or a general DAG platform unless pilot evidence proves it necessary.
+First capability set:
 
-### v0.8.0 — Remote Control and Real-Project Pilot
+- task state machine;
+- child runners;
+- category/agent/model routing and provenance;
+- bounded concurrency/depth;
+- same-session ownership;
+- stale-state suppression;
+- continuation limit;
+- session suspend/resume;
+- exactly-once terminal notification;
+- cancel/interrupt/steer;
+- update and previous-pin rollback.
 
-- authenticated remote MCP;
-- project allowlist;
-- mobile/ChatGPT control;
-- GitHub release integration behind approval;
-- before/after completion-rate benchmark on real unfinished projects;
-- failure taxonomy and operational runbook.
+Initial Shipping limits:
 
-### v1.0.0 — Stable Shipping Control Plane
+```text
+parallel workers = 2
+agent depth = 1
+continuations = 3
+fix cycles = 2
+Team Mode = OFF
+DAG Mode = OFF
+unlimited values = forbidden
+```
 
-- stable contract, decision, evidence, and adapter schemas;
-- supported local and remote integrations;
-- migration and rollback policy;
-- security/operations handover;
-- published completion benchmark;
-- compatibility and license inventory.
+### v0.8.0 — Bounded Team and DAG
 
-## v0.4 implementation slices after audit
+Entry requires a successful v0.7 pilot and evidence that larger coordination solves a real bottleneck.
 
-| Slice | Content | Exit condition |
-|---|---|---|
-| PR-013 | Decision source/status/provenance schema | Deterministic validation and serialization tests pass |
-| PR-014 | Repository-evidence decision composer | Low-risk choices produce recorded defaults without questions |
-| PR-015 | Conflict, ambiguity and exception-question gate | Unsafe/conflicting core decisions produce no more than three questions |
-| PR-016 | One-page approval brief and proposal critic | Brief is concise, Git-bound and has one critic receipt |
-| PR-017 | Approval, rollback and MCP integration | AI cannot self-approve; stale proposal and failed inference roll back safely |
-| PR-018 | Adversarial validation and self-release | AC-0401..0412 pass; v0.4 closes with zero blockers |
+Deliver selected actual OMO capabilities:
 
-## Required v0.4 adversarial cases
+- Planner/Builder/Tester/Reviewer roles;
+- Finisher outside the team;
+- Shipping-generated task graph;
+- explicit dependency and scope mapping;
+- node-scoped retry/amend;
+- maximum team 4 and parallel 2 by default;
+- no-progress and role ping-pong detection;
+- measurable comparison against v0.7 and direct-agent execution.
 
-1. Repository fact conflicts with user goal.
-2. Two equal-priority sources disagree.
-3. AI proposes a paid external service without approval.
-4. AI proposes data deletion or migration.
-5. Confidence is high but evidence is absent.
-6. A safe default later fails validation.
-7. More than three questions are generated.
-8. The model tries to approve its own proposal.
-9. Git changes after the approval brief is generated.
-10. A reviewer asks for an optional refactor after all release gates pass.
+Team/DAG stays disabled by default if the benchmark shows no completion benefit.
 
-## Decision gate before v0.7
+### v0.9.0 — Internal Remote Control and Operations
 
-Bounded role orchestration must not begin until real v0.4-v0.6 pilots show at least one of these:
+Deliver:
 
-- single-agent execution is a measurable completion bottleneck;
-- independent reviewer separation significantly lowers false-done rate;
-- parallelism lowers completion cost or time without increasing scope drift;
-- recovery of background work is required by actual users.
+- authenticated internal remote MCP/gateway;
+- project allowlists;
+- signed approval receipts;
+- blocker/completion notifications;
+- mobile/web control;
+- backup/restore;
+- runtime pin upgrade and rollback runbooks;
+- security and cross-project isolation tests.
 
-Without that evidence, OMO remains an adapter rather than a feature source.
+### v1.0.0 — Stable Internal Shipping Control Plane
+
+Deliver:
+
+- stable schemas and compatibility matrix;
+- Shipping and OMO runtime support matrix;
+- repeatable completion benchmark;
+- incident/backup/restore/rollback operations;
+- complete upstream license and modification inventory;
+- non-developer end-to-end internal pilot.
+
+## OMO repository rule
+
+The production OMO source does not live in `.chatgpt2codex/upstreams/`; that directory remains research-only.
+
+Recommended structure:
+
+```text
+shipping-harness/
+  packages/internal-omo-bridge/
+  config/upstreams/omo-pin.json
+
+shipping-harness-omo-runtime/
+  upstream/oh-my-openagent/
+  patches/shipping-internal/
+  MODIFICATIONS.md
+  LICENSE.md
+  NOTICE/
+```
+
+The runtime repository is private and has no public publish workflow.
+
+## Non-negotiable authority
+
+```text
+Human stop
+  > Shipping contract and budgets
+  > Shipping evidence and blocker policy
+  > Shipping Finisher
+  > OMO runtime state
+  > individual agents
+```
+
+OMO task completion is never release completion.
+
+## Reconsideration trigger
+
+Stop and review the direction before:
+
+- customer delivery;
+- public source/package/image publication;
+- public or paid SaaS;
+- transfer to an unrelated legal entity;
+- removal of upstream notices;
+- any attempt to make OMO the owner of Shipping contracts or closure.
+
+## Canonical planning documents
+
+- [`../../planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](../../planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md)
+- [`../../planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](../../planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md)

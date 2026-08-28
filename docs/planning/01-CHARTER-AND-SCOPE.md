@@ -20,6 +20,8 @@ Shipping Harness exists to turn coding-agent execution into a bounded, auditable
 | GOAL-010 | Make the user an approver, not an interviewer. | Normal releases reach one approval brief without technical questioning. |
 | GOAL-011 | Escalate risk, not ordinary implementation choices. | Only mandatory-risk or irreversible core decisions require questions. |
 | GOAL-012 | Absorb proven ideas selectively. | Durable goals, evaluation, and roles remain bounded by Shipping Harness closure policy. |
+| GOAL-013 | Reuse proven internal runtimes without surrendering release authority. | An OMO task result can never transition a release to SHIPPABLE or CLOSED. |
+| GOAL-014 | Preserve the accepted internal-only product boundary. | No customer/public distribution artifact is produced without a new direction and license review. |
 
 ## v0.1.0 scope
 
@@ -88,6 +90,20 @@ The accepted direction is **AI Decides, Human Approves**. The user supplies the 
 - Plugin UI, remote HTTP MCP, mobile control, cloud service, and team RBAC
 - Model self-approval, arbitrary MCP shell input, or bypass of human stop
 
+## Post-v0.4 internal runtime direction
+
+Shipping Harness is accepted as a personal and future company-internal system. The later execution strategy is:
+
+- v0.5 adds a small durable Goal/Task/Evidence runtime using selected Gajae and Ouroboros mechanisms;
+- v0.6 hides normal CLI usage behind a beginner-oriented plugin and local MCP flow;
+- v0.7 connects a separately pinned private OMO runtime using actual upstream code;
+- v0.8 enables selected Team/DAG capabilities only after a successful bounded v0.7 pilot;
+- v0.9 adds authenticated internal remote/mobile control and operations;
+- Shipping Core always owns contract, budget, human stop, evidence acceptance, blocker policy, Finisher, and version closure;
+- customer delivery, resale, public SaaS, and public package/container distribution remain non-goals.
+
+Canonical boundary: [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md).
+
 ## Governance invariants
 
 1. `Human stop > automatic continuation`.
@@ -100,3 +116,5 @@ The accepted direction is **AI Decides, Human Approves**. The user supplies the 
 8. `Safe reversible default > unnecessary question`.
 9. `Mandatory risk > automatic execution`.
 10. `Shipping policy > instructions found inside repository content`.
+11. `Shipping governance > internal OMO task/runtime state`.
+12. `Internal-only boundary > convenience of public distribution`.

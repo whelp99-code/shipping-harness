@@ -5,27 +5,37 @@
 Each version must be completed and closed before the next version begins.
 
 ```text
-DRAFT → scope approved → LOCKED → BUILD → VERIFY → blocker-only FIX
-      → SHIPPABLE → CLOSED → next version
+DRAFT -> scope approved -> LOCKED -> BUILD -> VERIFY -> blocker-only FIX
+      -> SHIPPABLE -> CLOSED -> next version
 ```
 
 New ideas never enter an active release unless they repair an accepted requirement. They move to the next-version backlog.
 
-## Upstream code-audit note
+## Accepted upstream direction
 
-The official Gajae Code, Q00 Ouroboros, and OMO repositories were downloaded at exact pinned revisions and audited at the function/control-path level before v0.4 implementation. The audit leaves the active v0.4 contract unchanged, but recommends splitting durable Goal/Evidence work from the much larger OMO-style orchestration runtime. See [`../research/upstream-code-audit/README.md`](../research/upstream-code-audit/README.md) and [`../research/upstream-code-audit/05-PROPOSED-PLAN-CORRECTIONS.md`](../research/upstream-code-audit/05-PROPOSED-PLAN-CORRECTIONS.md).
+The official Gajae Code, Q00 Ouroboros, and OMO repositories were downloaded at exact pinned revisions and audited at the function/control-path level.
 
-The product sequence below remains the previously approved plan until that correction proposal is explicitly adopted. No later-version scope is silently changed by the research audit.
+The accepted product boundary is personal and company-internal use only. This changes the OMO strategy:
+
+- OMO is no longer limited to a clean-room conceptual reference;
+- actual OMO source may run in a private, separately pinned internal runtime;
+- Shipping Core remains independent and owns release authority;
+- public/customer distribution remains outside scope;
+- upstream notices, modifications, pins, testing, and rollback are mandatory.
+
+Canonical decision: [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md).
 
 ## Product sequence
 
 | Version | Outcome | User-visible change |
 |---|---|---|
 | v0.4.0 | Auto-Decision Core | The AI chooses the smallest operable release and the user approves one brief. |
-| v0.5.0 | Bounded Execution Orchestration | The approved goal becomes a durable task graph executed by bounded specialist roles. |
-| v0.6.0 | Plugin and Approval UX | The user installs one package and uses approval, progress, blocker, and completion cards. |
-| v0.7.0 | Remote Control and Pilot Hardening | Authenticated remote/mobile control, allowlisted projects, notifications, and pilot evidence. |
-| v1.0.0 | Stable Shipping Control Plane | Stable schemas, supported integrations, operations, benchmarks, and production handover. |
+| v0.5.0 | Durable Goal and Evidence Runtime | Approved work survives sessions and can prove exactly what remains and what passed. |
+| v0.6.0 | Beginner Plugin and Local Agent UX | The user installs one package and normally never uses the CLI. |
+| v0.7.0 | Internal OMO Runtime Foundation | OMO's real task, routing, continuation, and recovery code executes under Shipping control. |
+| v0.8.0 | Bounded Team and DAG Orchestration | Selected OMO team/DAG capabilities handle larger work without unbounded autonomy. |
+| v0.9.0 | Internal Remote Control and Operations | Authenticated mobile/web control, allowlists, backup, monitoring, and upgrade rollback. |
+| v1.0.0 | Stable Internal Shipping Control Plane | Stable schemas, supported internal runtimes, benchmarks, and operational handover. |
 
 ---
 
@@ -35,16 +45,38 @@ The product sequence below remains the previously approved plan until that corre
 
 A connected agent receives one user outcome, analyzes bounded repository evidence, decides safe defaults, escalates only mandatory risks, and presents one approval brief. The deterministic core validates and locks the approved decision.
 
-## Scope
+## Primary upstream influence
+
+Q00 Ouroboros:
+
+- decision provenance;
+- evidence-backed vs inferred decisions;
+- conservative defaults;
+- conflict/ambiguity gates;
+- rollback to a durable blocked state;
+- outcome-first stop conditions.
+
+The Python runtime is not embedded. Small mechanisms are ported into the Node core with attribution and tests.
+
+## Included
 
 - `AUTO` default mode plus optional `SAFE` and `INTERVIEW` modes;
 - repository evidence pack and decision context;
-- structured decision package with decisions, assumptions, confidence, reversibility, risks, and questions;
+- structured decisions, assumptions, confidence, reversibility, risks, and questions;
 - risk/escalation policy;
 - one-screen approval brief;
 - exact-hash approval and contract compilation;
 - repository prompt-injection defense;
 - no embedded model provider and no arbitrary MCP command field.
+
+## Excluded
+
+- durable Goal/Task execution runtime;
+- OMO runtime integration;
+- Team Mode or DAG execution;
+- plugin card UI;
+- remote MCP;
+- current-release evolution.
 
 ## PR plan
 
@@ -52,7 +84,7 @@ A connected agent receives one user outcome, analyzes bounded repository evidenc
 
 - Add mode schema: `AUTO`, `SAFE`, `INTERVIEW`.
 - Extend bounded analysis into a decision evidence pack.
-- Include current release history, manifests, scripts, existing docs, changed paths, and detected operational surface without executing project code.
+- Include release history, manifests, scripts, existing docs, changed paths, and detected operational surface without executing project code.
 - Mark repository text as untrusted data.
 - Add stable evidence references and byte/depth limits.
 - **Maps:** REQ-DECISION-001..003, REQ-MODE-001..003.
@@ -87,224 +119,447 @@ A connected agent receives one user outcome, analyzes bounded repository evidenc
 - **Maps:** AC-0401..0412.
 - **Exit:** all v0.1–v0.3 regressions pass and v0.4 closes with zero blockers.
 
-## v0.4.0 acceptance criteria
+## Acceptance summary
 
-| ID | Acceptance criterion |
-|---|---|
-| AC-0401 | `AUTO` is the default when mode is omitted. |
-| AC-0402 | A normal repository fixture produces a complete approval brief with zero questions. |
-| AC-0403 | Reversible low-confidence choices use a documented safe assumption rather than blocking. |
-| AC-0404 | Destructive data, paid service, external impact, credential, privacy/legal/security, and mutually exclusive core-outcome cases escalate. |
-| AC-0405 | No proposal contains more than three questions, and all questions are returned in one batch. |
-| AC-0406 | Every decision cites repository evidence or is explicitly labeled an assumption. |
-| AC-0407 | The submitting model cannot approve its own proposal; exact user confirmation and proposal hash remain mandatory. |
-| AC-0408 | Repository prompt-injection text cannot change mode, policy, tools, or approval state. |
-| AC-0409 | `SAFE` escalates configured risk classes and `INTERVIEW` remains opt-in. |
-| AC-0410 | The approval brief contains outcome, included scope, deferred scope, acceptance, important assumptions, risks, and limits. |
-| AC-0411 | Full v0.1–v0.3 regression, security, MCP, and license suites remain green. |
-| AC-0412 | v0.4.0 closes with a clean tagged commit, zero blockers, and no unapproved drift. |
-
-## v0.4.0 release gate
-
-```text
-npm run release:verify
-npm run test:mcp
-npm run test:decision
-node scripts/mcp-smoke.mjs
-shipping-harness verify
-shipping-harness close
-git status --short == empty after release artifacts are committed
-tag v0.4.0
-```
+- Normal repositories reach one approval brief with zero technical questions.
+- Every decision is grounded or explicitly labeled as an assumption.
+- Mandatory-risk decisions are escalated.
+- The decision agent cannot approve its own proposal.
+- Existing release-governance invariants remain green.
 
 ---
 
-# v0.5.0 — Bounded Execution Orchestration
+# v0.5.0 — Durable Goal and Evidence Runtime
 
 ## Outcome
 
-The approved contract becomes a durable execution graph. Existing coding agents perform specialist roles, but Shipping Harness controls task state, evidence, budgets, stop conditions, and release closure.
+The approved contract becomes a restart-safe Goal and Task ledger. Work progress, blockers, attempts, and proof are independent of the chat transcript.
 
-## Selective absorption
+## Primary upstream influence
 
-- Gajae: durable goal/task ledger and evidence receipts;
-- Ouroboros: immutable goal/spec alignment and bounded evaluation;
-- OMO: role routing and limited parallel execution;
-- Shipping Harness: scope, budgets, blocker triage, human stop, and Finisher authority.
+Gajae Code plus selected Ouroboros mechanisms:
+
+- Gajae `goals.json` and append-only ledger patterns;
+- plan/goal receipts independent of assistant prose;
+- repeated-failure fingerprints and bounded planning-stuck outcomes;
+- Ouroboros source/provenance classes and current-outcome authority;
+- Shipping's existing contract/Git-SHA-bound evidence.
+
+MIT-licensed source may be adapted when it is smaller and safer than reimplementation. Adapted code must use Shipping schemas and retain required notices.
+
+## Included
+
+- contract-to-Goal compiler;
+- stable Goal and Task IDs;
+- dependencies, owner role, status, attempts, and retry budget;
+- append-only Goal/Task/Evidence ledger;
+- crash/restart recovery;
+- repeated-failure and stale-evidence detection;
+- mechanical evaluation per acceptance criterion;
+- durable `PLANNING_STUCK`, `BLOCKED`, `DONE`, and `SUPERSEDED` states;
+- blocker-only repair planning.
+
+## Excluded
+
+- multi-agent teams;
+- general DAG runtime;
+- model routing across multiple agents;
+- OMO process/session runtime;
+- remote execution;
+- plugin card UI beyond current MCP results.
 
 ## PR plan
 
-### PR-017 — Durable goal and task graph
+### PR-017 — Goal and Task schema
 
-- Contract-to-task compiler.
-- Stable goal/task IDs, dependencies, status, owner role, evidence, and retry budget.
-- Restart-safe ledger and task recovery.
-- No task without a requirement and acceptance consumer.
+- Compile locked requirements and acceptance criteria into stable Goals/Tasks.
+- Require every task to map to a Goal, requirement, or acceptance consumer.
+- Add state transitions, dependency validation, and cycle rejection.
+- **Exit:** no orphan task or cyclic dependency can be accepted.
 
-### PR-018 — Bounded role router
+### PR-018 — Durable ledger and recovery
 
-- Minimal roles: Planner, Builder, Tester, Reviewer, Finisher.
-- Capability-based routing to host agent or configured adapters.
-- Maximum depth, parallel workers, turns, tool calls, time, and cost metadata.
-- Human stop and release policy override every role.
+- Add append-only Goal/Task/Evidence records.
+- Rebuild current state from checkpoints and ledger.
+- Add atomic writes, corruption detection, and last-known-good recovery.
+- **Exit:** process restart preserves state without replaying completed work.
 
-### PR-019 — Evaluation and Finisher
+### PR-019 — Freshness and repeated-failure guards
 
-- Mechanical checks first, semantic review only where required.
-- Findings mapped to acceptance/policy IDs.
-- BLOCKER/NEXT/IGNORE enforcement.
-- Finisher closes when blockers reach zero; it does not optimize indefinitely.
+- Bind task evidence to contract hash and Git SHA.
+- Fingerprint repeated failures on unchanged source/state.
+- Stop identical no-progress retries with a durable reason.
+- **Exit:** stale proof and repeated identical failures cannot create activity loops.
 
-### PR-020 — Orchestration adversarial validation
+### PR-020 — Goal runtime adversarial validation
 
-- Crash/restart, duplicate task, cyclic graph, runaway spawn, reviewer scope creep, stale evidence, and conflicting-agent tests.
-- Pilot comparison against direct single-agent execution.
+- Test crash/restart, ledger truncation, duplicate task, cycle, stale evidence, task self-completion, budget exhaustion, and human pause.
+- Run one real internal project pilot with a single coding agent.
+- **Exit:** Goal state remains auditable and bounded.
 
-## v0.5.0 acceptance summary
+## Acceptance summary
 
-- Every task maps to a locked goal or acceptance criterion.
-- No agent may create an unlimited child-agent chain.
-- Parallelism remains within contract budget.
-- Failed tasks end as BLOCKED with evidence rather than looping forever.
-- Optional reviewer findings never reopen completed goals.
-- All prior release guarantees remain green.
+- Conversation loss does not lose work state.
+- Agent text cannot complete a Goal without current evidence.
+- Completed tasks are never replayed after restart.
+- Identical failure without code/state progress terminates safely.
+- Shipping remains the only release Finisher.
 
 ---
 
-# v0.6.0 — Plugin and Approval UX
+# v0.6.0 — Beginner Plugin and Local Agent UX
 
 ## Outcome
 
-A non-developer installs one package, asks for an outcome, approves one card, and monitors only meaningful states.
+A non-developer installs one local package, says the desired outcome, approves one brief, and sees only meaningful progress, blocker, and completion states.
+
+## Included
+
+- local Shipping plugin package;
+- Shipping MCP server and skill bundle;
+- supported ChatGPT/Codex/agent registration path;
+- approval, progress, blocker, and completion cards or equivalent structured results;
+- guided project selection and doctor;
+- no CLI knowledge for normal use;
+- safe uninstall and state preservation.
+
+## Excluded
+
+- remote/public HTTP endpoint;
+- company RBAC;
+- OMO internal runtime;
+- multi-agent teams;
+- automatic public packaging.
 
 ## PR plan
 
 ### PR-021 — Plugin package and skill
 
-- Package MCP server, Shipping Harness skill, agent instructions, and lifecycle hooks.
-- One supported install path for ChatGPT/Codex-compatible environments.
-- Compatibility and upgrade checks.
+- Package MCP server, Shipping skill, agent instructions, and lifecycle rules.
+- Provide one supported local install path.
+- Add compatibility and upgrade checks.
 
-### PR-022 — Approval and status cards
+### PR-022 — Approval and status surfaces
 
-- Approval card for the v0.4 decision brief.
-- Progress card with `PLANNING`, `RUNNING`, `BLOCKED`, `SHIPPABLE`, and `CLOSED`.
-- Blocker card with reason, evidence, recommended action, and remaining budget.
-- Completion card with release report and deferred backlog.
+- Approval brief surface.
+- `PLANNING`, `RUNNING`, `BLOCKED`, `SHIPPABLE`, and `CLOSED` progress surface.
+- Blocker surface with evidence and recommended action.
+- Completion surface with release report and deferred backlog.
 
 ### PR-023 — Guided setup and recovery
 
-- Project selection, MCP registration, doctor, and repair flow.
-- No CLI knowledge required for normal use.
-- Safe uninstall and state preservation.
+- Project selection, MCP registration, doctor, repair, and uninstall.
+- Preserve existing `.shipping` state during reinstall.
 
 ### PR-024 — Beginner usability validation
 
-- First-run, approval, pause, blocker, recovery, and close tests with non-developer fixtures.
-- Accessibility and concise-language checks.
+- First-run, approval, pause, blocker, restart, and close scenarios.
+- Concise-language and accessibility checks.
+- Pilot with a user who does not edit JSON or run project-specific CLI commands.
 
-## v0.6.0 acceptance summary
+## Acceptance summary
 
-- A first-time user completes setup without editing JSON or running project-specific CLI commands.
-- The user sees no more than one normal approval before execution.
-- Dangerous actions remain separately approved.
-- All detailed evidence remains available without cluttering the default view.
+- Normal use begins with a natural-language outcome.
+- No manual contract file editing is required.
+- The user normally approves once.
+- Detailed evidence remains available without cluttering the default experience.
 
 ---
 
-# v0.7.0 — Remote Control and Pilot Hardening
+# v0.7.0 — Internal OMO Runtime Foundation
 
 ## Outcome
 
-The same governed workflow works from web/mobile clients against allowlisted development servers without exposing arbitrary shell access.
+Shipping Harness uses actual OMO execution code through a private, separately pinned internal runtime while preserving Shipping's independent governance and closure authority.
+
+## Internal runtime boundary
+
+```text
+Shipping Core
+  -> signed/hashed work order
+  -> internal OMO bridge
+  -> private pinned OMO runtime
+  -> normalized task/event/evidence receipts
+  -> Shipping verification and Finisher
+```
+
+OMO source is not mixed into Shipping Core. The private runtime preserves license notices and modification records and is not publicly distributed.
+
+## First enabled OMO capabilities
+
+- durable task state machine;
+- in-process or process child runner selected by policy;
+- category/agent/model routing with provenance;
+- bounded concurrency and depth;
+- same-session ownership checks;
+- stale-state suppression;
+- continuation cap;
+- session suspend/resume;
+- exactly-once terminal notification;
+- task cancel/interrupt/steer;
+- truthful unavailable/fallback behavior.
+
+## Default Shipping profile
+
+```yaml
+parallel_workers: 2
+agent_depth: 1
+continuation_limit: 3
+fix_cycles: 2
+team_mode: false
+dag_mode: false
+unlimited_values_allowed: false
+human_stop_wins: true
+shipping_finisher_only: true
+```
+
+## Excluded
+
+- OMO branding and marketplace;
+- public packages or images;
+- customer distribution;
+- Team Mode;
+- general DAG runtime;
+- OMO memory/reflection subsystem;
+- OMO telemetry unless explicitly disabled and reviewed;
+- unrestricted provider/model tables;
+- unlimited cap values.
 
 ## PR plan
 
-### PR-025 — Remote MCP gateway
+### PR-025 — Private runtime repository and pin contract
 
-- Streamable HTTP MCP.
-- OAuth/session authentication.
-- Explicit project allowlist and per-project permissions.
-- TLS and replay protection.
+- Create private `shipping-harness-omo-runtime` workspace/repository.
+- Pin upstream commit and internal patch commit.
+- Preserve license/notices and add `MODIFICATIONS.md`.
+- Disable public publish paths.
+- Define build artifact digest and compatibility metadata.
+- **Exit:** runtime can be reproduced and identified from pins.
 
-### PR-026 — Remote approval and notifications
+### PR-026 — Shipping/OMO bridge protocol
 
-- Signed approval receipts.
-- Blocker and completion notifications.
-- No remote raw-shell endpoint.
+- Define `shipping-omo/v1` work orders and receipts.
+- Bind release, contract hash, Git SHA, Goal/Task IDs, scope paths, acceptance IDs, and budgets.
+- Reject unknown fields, stale work orders, path escape, and budget expansion.
+- **Exit:** OMO cannot alter Shipping-owned policy or state.
 
-### PR-027 — Pilot operations
+### PR-027 — Task, routing, and evidence integration
 
-- Multi-project inventory and basic completion metrics.
-- Backup/restore for Shipping Harness state.
-- Upgrade and rollback runbooks.
+- Connect selected task manager and child-runner surfaces.
+- Add agent/model routing provenance.
+- Normalize changed paths, task result, usage, and evidence references.
+- Require Shipping to re-run acceptance checks.
+- **Exit:** OMO task completion remains a claim until Shipping verifies it.
 
-### PR-028 — Security and pilot validation
+### PR-028 — Continuation and recovery integration
+
+- Enforce human stop before every continuation/revival.
+- Add same-session ownership, stale signature, continuation cap, and bounded recovery.
+- Verify terminal work is not replayed.
+- **Exit:** pause/abort and closed versions never auto-resume.
+
+### PR-029 — Internal runtime pilot and rollback
+
+- Run selected upstream package tests.
+- Run Shipping integration/adversarial tests.
+- Run a disposable canary and one real internal project.
+- Prove fallback to approved Codex/Generic adapter or durable BLOCKED.
+- Prove rollback to the previous runtime pin.
+- **Exit:** one release closes through OMO with zero false-completion paths.
+
+## Acceptance summary
+
+- OMO cannot edit/approve the Shipping contract.
+- OMO cannot increase budgets or continue after pause/abort.
+- OMO task completion alone cannot make a release SHIPPABLE.
+- Runtime pins and modifications are auditable.
+- Previous runtime artifact can be restored without reopening the release contract.
+- No external/public distribution is produced.
+
+---
+
+# v0.8.0 — Bounded Team and DAG Orchestration
+
+## Entry gate
+
+v0.8 starts only if v0.7 evidence shows that a single OMO runtime with at most two workers closes real releases reliably and that additional coordination would solve an observed bottleneck.
+
+## Outcome
+
+Selected OMO Team and DAG capabilities execute larger projects, but only inside a Shipping-generated graph with explicit dependency, ownership, concurrency, and release budgets.
+
+## Included
+
+- logical roles: Planner, Builder, Tester, Reviewer;
+- Finisher remains outside the OMO team;
+- team maximum 4, parallel maximum 2 by default;
+- task dependency graph generated from locked Goals;
+- node retry/amend only for failed or changed nodes;
+- durable mail/task receipts;
+- graph fingerprint and replay protection;
+- role/model routing receipts;
+- no-progress, oscillation, and repeated-review stop signals.
+
+## Excluded
+
+- unlimited Team/DAG values;
+- agent-created top-level scope;
+- current-release evolution;
+- autonomous deployment/push;
+- more than one nested delegation level by default;
+- enabling every OMO built-in component.
+
+## PR plan
+
+### PR-030 — Shipping Goal to OMO DAG compiler
+
+- Compile only approved Goals/Tasks.
+- Validate dependency cycles, scope, acceptance consumers, and graph size.
+- Persist graph fingerprint with contract hash and Git SHA.
+
+### PR-031 — Bounded team and role policy
+
+- Map Planner/Builder/Tester/Reviewer to approved task categories.
+- Cap members, parallelism, depth, time, turns, and tool calls.
+- Keep Finisher independent.
+
+### PR-032 — Recovery, retry, and no-progress controls
+
+- Use node-scoped retry/amend.
+- Add stale/repeated finding suppression.
+- Stop evaluation plateau and role ping-pong.
+
+### PR-033 — Team/DAG pilot validation
+
+- Compare direct agent, v0.7 runtime, and v0.8 team/DAG execution.
+- Measure completion, cost, interventions, false-done, and coordination overhead.
+- Disable Team/DAG by default if it does not improve real completion.
+
+## Acceptance summary
+
+- Every DAG node maps to a locked Goal or acceptance criterion.
+- Finisher is never a team member.
+- Parallelism and depth cannot exceed Shipping policy.
+- Failed nodes do not cause unrelated successful nodes to rerun.
+- Team/DAG can be disabled without losing the release contract or ledger.
+
+---
+
+# v0.9.0 — Internal Remote Control and Operations
+
+## Outcome
+
+The governed workflow can be controlled from the owner's web/mobile clients and future company accounts against allowlisted internal development servers without exposing arbitrary shell access.
+
+## Included
+
+- authenticated Streamable HTTP MCP or equivalent internal gateway;
+- owner/company identity and project allowlist;
+- per-project permissions;
+- signed approval receipts;
+- blocker and completion notifications;
+- backup/restore for Shipping and OMO runtime state;
+- versioned upgrade/rollback runbooks;
+- runtime health and completion metrics;
+- internal-only network and deployment policy.
+
+## Excluded
+
+- public anonymous endpoint;
+- customer tenancy;
+- customer billing;
+- arbitrary command execution;
+- public SaaS support commitments.
+
+## PR plan
+
+### PR-034 — Internal remote gateway
+
+- Authentication, TLS, replay protection, and project allowlists.
+- No remote raw shell or contract-command injection.
+
+### PR-035 — Remote approval and notification
+
+- Signed proposal/approval receipts.
+- Pause, blocker, and completion notifications.
+
+### PR-036 — Backup, restore, upgrade, and rollback
+
+- Back up Shipping contract/ledger/evidence and required OMO runtime state.
+- Test runtime pin rollback and schema migration rollback.
+
+### PR-037 — Security and operational pilot
 
 - Cross-project isolation, authorization bypass, replay, token leakage, request forgery, and denial-of-service tests.
-- Real-project pilot with before/after completion measurements.
+- Mobile/web pilot against the Ubuntu server.
 
-## v0.7.0 acceptance summary
+## Acceptance summary
 
 - Unauthorized users and non-allowlisted projects are inaccessible.
-- Remote clients cannot supply arbitrary commands or override local human stop.
-- State survives gateway restart.
-- Pilot releases produce measurable completion evidence.
+- Remote clients cannot override local human stop or submit arbitrary commands.
+- State survives gateway and runtime restart.
+- Backup restoration preserves release authority and evidence links.
 
 ---
 
-# v1.0.0 — Stable Shipping Control Plane
+# v1.0.0 — Stable Internal Shipping Control Plane
 
 ## Outcome
 
-Shipping Harness is an operable, documented, model-agnostic product that converts a user outcome into a closed software version with bounded autonomy and auditable evidence.
+Shipping Harness is an operable, documented internal system that converts a user outcome into a closed software version with bounded autonomy, actual OMO-backed execution when selected, and auditable evidence.
 
 ## PR plan
 
-### PR-029 — Stable schemas and compatibility
+### PR-038 — Stable schemas and compatibility
 
-- Freeze supported contract, decision, task, evidence, release, MCP, and adapter schemas.
+- Freeze supported contract, decision, Goal/Task, evidence, release, MCP, adapter, work-order, and runtime-receipt schemas.
 - Define migration and deprecation policy.
 
-### PR-030 — Production operations
+### PR-039 — Internal production operations
 
 - Installation, upgrade, backup, restore, observability, incident, and rollback runbooks.
-- Supported environment matrix.
+- Supported Shipping and OMO runtime version matrix.
+- Internal-use and redistribution-change checklist.
 
-### PR-031 — Completion benchmark
+### PR-040 — Completion benchmark
 
-- Publish repeatable direct-agent versus Shipping Harness scenarios.
-- Measure ship rate, false-done rate, scope drift, fix cycles, intervention count, and completion cost.
+- Repeatable direct-agent, Shipping-only, OMO-runtime, and bounded-team scenarios.
+- Measure ship rate, false-done rate, scope drift, fix cycles, intervention count, elapsed time, and completion cost.
 
-### PR-032 — Release and handover
+### PR-041 — Release and handover
 
-- Security review, license inventory, support boundaries, release notes, and operator handover.
-- Close all 1.0 blockers; move optional improvements to the next roadmap.
+- Security review, license inventory, modification inventory, support boundaries, release notes, and operator handover.
+- Close all 1.0 blockers and move optional improvements to the next roadmap.
 
-## v1.0.0 acceptance summary
+## Acceptance summary
 
 - Stable upgrade path from v0.3+.
 - No false SHIPPABLE transition in benchmark/adversarial suites.
-- Human authority, evidence freshness, scope lock, and bounded execution remain invariant.
+- Human authority, evidence freshness, scope lock, and bounded execution remain invariant across every runtime.
 - Representative non-developers can start, approve, monitor, and receive a closed release without learning the CLI.
-- Production and rollback documentation are complete.
+- OMO runtime pins, modifications, tests, and rollback are complete and internal-only.
+- Operations and recovery documentation are complete.
 
 ---
 
 # Dependency and stop rules
 
-1. v0.4 must prove decision quality before role orchestration begins.
-2. v0.5 must prove bounded orchestration before plugin UI hides operational detail.
-3. v0.6 must prove beginner usability before remote execution is exposed.
-4. v0.7 must prove isolation and operations before v1.0 stability claims.
-5. A version with unresolved blockers cannot be bypassed by starting the next version.
-6. Missing external harnesses use fixtures and truthful `unavailable` status; they never become fabricated live integrations.
-7. No roadmap item may weaken contract lock, human stop, evidence freshness, or bounded execution.
+1. v0.4 must prove decision quality before execution-state expansion.
+2. v0.5 must prove durable Goal/Evidence behavior with one coding agent.
+3. v0.6 must prove beginner usability before OMO complexity is introduced.
+4. v0.7 must prove private OMO runtime boundaries, stop authority, and rollback before Team/DAG work.
+5. v0.8 starts only from measured need; OMO feature availability alone is not justification.
+6. v0.9 exposes only internal authenticated control after local runtime stability.
+7. A version with unresolved blockers cannot be bypassed by starting the next version.
+8. No roadmap item may weaken contract lock, human stop, evidence freshness, bounded execution, or Finisher authority.
+9. External/customer distribution immediately triggers a direction and license review.
+10. Missing or unhealthy OMO runtime produces truthful fallback or durable BLOCKED, never fabricated success.
 
 # Commit strategy
 
-- Commit accepted direction and development planning as the v0.4.0 DRAFT baseline.
-- Do not lock v0.4.0 until the user explicitly starts implementation.
+- Keep v0.4.0 as the active DRAFT until implementation is explicitly started.
 - Implement one PR slice at a time and run its closest tests before the next slice.
 - Close and tag each version before preparing the next release.
+- Store OMO source in a separate private runtime repository/workspace, not inside Shipping Core.
+- Record every upstream pin and internal modification.
 - Push only when a remote exists and the user explicitly requests it.

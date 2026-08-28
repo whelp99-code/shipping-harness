@@ -1,5 +1,9 @@
 # Audit Scope, Pins, and Method
 
+## Post-audit direction note
+
+The audit itself copied no upstream source into Shipping Harness. After the audit, the owner accepted a personal/company-internal product boundary. That later decision permits actual OMO source to run in a separate private pinned runtime from v0.7, with notices, modification records, tests, and rollback. It does not change the audit evidence or permit mixing the OMO monorepo into Shipping Core. See [`../../planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](../../planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md).
+
 ## Question being answered
 
 Before Shipping Harness implements v0.4 and later absorption work, determine from the actual upstream code:

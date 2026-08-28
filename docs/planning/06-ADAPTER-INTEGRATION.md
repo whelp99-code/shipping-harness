@@ -71,6 +71,14 @@ Verification levels:
 - Exposes normalized event ingestion for `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, `SubagentStop`, and custom events.
 - A native OMO plugin is not claimed unless independently installed and exercised; the v0.2.0 integration is a process/config/evidence bridge.
 
+### Planned v0.7 internal runtime
+
+The current adapter remains a truthful lightweight bridge. It is not silently upgraded into the future runtime.
+
+From v0.7, a separate private pinned OMO runtime may use actual upstream task/routing/continuation/recovery code through the versioned `shipping-omo/v1` work-order and receipt protocol. That runtime remains independently upgradeable and removable, preserves upstream notices and modification records, and cannot mutate Shipping contracts, budgets, human stop, blocker policy, or release closure. Team/DAG capabilities remain disabled until the v0.8 entry gate passes.
+
+Canonical direction: [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md).
+
 ## Stop decision protocol
 
 Input:

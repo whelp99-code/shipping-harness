@@ -1,53 +1,58 @@
 # Upstream Absorption Decision Matrix
 
-## Decision rule
+## Accepted product rule
 
-Shipping Harness absorbs a mechanism only when it strengthens one of these product outcomes:
+Shipping Harness is a personal and future company-internal system. This permits direct internal use of OMO under its current license boundary, but does not change the release-governance hierarchy.
 
-1. AI can safely decide without interrogating the user.
+A mechanism is accepted only when it strengthens one of these outcomes:
+
+1. AI decides ordinary choices without interrogating the user.
 2. The approved release contract remains immutable.
 3. Work state and proof survive sessions.
 4. Loops terminate with `CLOSED` or a durable `BLOCKED` reason.
 5. Human pause/abort remains absolute.
-6. The implementation is small enough to finish and legally safe to distribute.
+6. Shipping Core remains independently upgradeable and able to run without OMO.
+7. Internal upstream use remains pinned, attributed, testable, and rollbackable.
 
 ## Final matrix
 
-| Capability | Gajae evidence | Ouroboros evidence | OMO evidence | Shipping decision | Target |
-|---|---|---|---|---|---|
-| Repository facts vs product decisions | Deep interview separates research/repo facts from user decisions | Ledger source types distinguish facts, preferences, defaults and inference | Plan gates distinguish real user request from model action | Reimplement provenance classes | v0.4 |
-| AI-first reversible defaults | Only fallback after user uncertainty | Automatic driver applies conservative defaults with ambiguity/rollback gates | Model/category routing uses deterministic fallbacks | Use Ouroboros pattern as primary reference | v0.4 |
-| Exception-only questions | Interview asks one question at a time by default | Unsafe/conflicting slots remain blocked and require resolution | Plan-gated agents require genuine user action | Ask only for high-risk, irreversible, external or unresolved-core decisions | v0.4 |
-| Immutable release definition | Interview/plan outputs feed execution | Frozen Seed and executable contract | Plans and goals are durable sources of truth | Extend Shipping Contract; no second Seed format | v0.4 |
-| Decision provenance ledger | Interview state and ambiguity | Source/status/provenance histogram and conflict priority | Model routing provenance | Reimplement in Shipping proposal/contract | v0.4 |
-| Proposal critic | Architect/Critic bounded plan review | Ledger completeness and Seed validation | Metis/Momus plan gates | One bounded critic pass; no planning council | v0.4 |
-| Goal state | `goals.json` canonical state | Seed/ledger/event store | ULW goals and Boulder checklist | Reimplement minimal Goal/Task state | v0.5 |
-| Append-only proof ledger | `ledger.jsonl` | EventStore and decision ledger | Task JSONL/WAL/mailbox receipts | Extend existing Shipping ledger | v0.5 |
-| Evidence freshness | Source/cohort receipt freshness | Seed/event authority and evaluation gates | Run epoch and exactly-once terminal notices | Reimplement current-SHA/current-contract proof | v0.5 |
-| Continuation cap | Bounded nudge/review/critic ceilings | Generation/time/stagnation caps | Two inspected continuation caps of 8 plus stale-signature suppression | Reimplement shared bounded continuation policy | v0.5 |
-| Stagnation/oscillation stop | Planning and critic ceilings | Plateau, stagnation, A/B oscillation and repetitive-feedback detectors | Stale status/signature suppression | Reimplement small deterministic detectors | v0.5 |
-| Human pause authority | Human-blocked paths exist but goal execution pushes forward | Watchdog creates durable blocked state | Boulder `paused` can still auto-continue | Shipping policy overrides all upstream behavior | v0.5 |
-| Role orchestration | Planner/Architect/Critic roles | Interview/evaluator/evolution roles | Task agents, categories, teams and DAG | Five logical roles only | v0.7 |
-| Model routing | Not primary | Model use exists but not target mechanism | Deterministic overrides/category/provider fallback with provenance | Clean-room capability router | v0.7 |
-| Concurrency/depth budgets | Worker/iteration caps | Generation and wall-clock budgets | Default/global/provider/model concurrency, depth and residency limits | Explicit bounded policy; never allow unlimited | v0.7 |
-| Durable task recovery | Goal state persists | EventStore/watchdog/Ralph state | Suspend/resume, leases, owner checks, exact-once notification | Reimplement only after single-agent pilots | v0.7+ |
-| Full deep interview | Strong implementation | Alternate automatic interview | Not central | Optional `INTERVIEW` mode only | Later |
-| Full evolutionary runtime | No | Large core capability | No | Exclude from active release; next-version proposal only | Later/adapter |
-| Full team/DAG runtime | tmux workers | Workflow/evolution runtime | Large durable team/DAG engine | Adapter or defer; do not duplicate | Later/adapter |
-| Upstream source inclusion | MIT permits with notices | MIT permits with notices | Default license restricts commercial redistribution | No source copying from any upstream; clean-room implementation for all | Always |
+| Capability | Best upstream source | Accepted use | Target |
+|---|---|---|---|
+| Repository facts vs product decisions | Ouroboros ledger source/provenance | Port into Shipping decision records | v0.4 |
+| AI-first reversible defaults | Ouroboros automatic decision pipeline | Port safe-default, conflict, ambiguity, and rollback behavior | v0.4 |
+| Exception-only questions | Ouroboros unsafe/conflicting gap handling | Ask only for high-risk, irreversible, external, or unresolved-core decisions | v0.4 |
+| Immutable release definition | Ouroboros Seed plus Shipping Contract | Extend Shipping Contract; no second release constitution | v0.4 |
+| Proposal critic | Gajae ralplan and Ouroboros grade gate | One bounded critic/policy pass; no planning council | v0.4 |
+| Goal/Task state | Gajae Goal runtime | Adapt selected MIT code/algorithms into Shipping-owned schemas | v0.5 |
+| Append-only proof ledger | Gajae ledger plus Shipping ledger | Extend Shipping ledger with Goal/Task checkpoints and failure fingerprints | v0.5 |
+| Evidence freshness | Gajae receipts, Ouroboros authority, Shipping SHA gate | Current-contract/current-SHA proof only | v0.5 |
+| Repeated failure and planning-stuck | Gajae bounded loops | Durable no-progress terminal states | v0.5 |
+| Beginner install and approval UX | Shipping MCP/plugin | Shipping-owned plugin; no OMO dependency yet | v0.6 |
+| Durable task state machine and child runners | OMO `senpi-task` | Use actual source in a separate private pinned internal runtime | v0.7 |
+| Model/category routing with provenance | OMO `model-core` and task category resolver | Use selected actual runtime paths behind Shipping policy | v0.7 |
+| Continuation ownership and stale-state suppression | OMO Senpi continuation components | Use actual runtime behavior, capped by stricter Shipping limits | v0.7 |
+| Session suspend/resume and exactly-once completion | OMO `senpi-task` lifecycle/completion | Use actual runtime behavior; Shipping verifies resulting repository state | v0.7 |
+| Human pause authority | Shipping Harness | Override OMO `paused` continuation semantics; Shipping pause always wins | v0.7 |
+| Concurrency/depth budgets | OMO config/task engine plus Shipping contract | Actual runtime limits, but no unlimited values; initial max workers 2/depth 1 | v0.7 |
+| Team and DAG orchestration | OMO team/DAG engines | Enable selected actual capabilities only after v0.7 pilot evidence | v0.8 |
+| Full deep interview | Gajae/Ouroboros | Optional bounded `INTERVIEW` mode only | Later |
+| Current-release evolutionary loop | Ouroboros | Exclude; improvement becomes a next-version proposal | Later/adapter |
+| OMO memory/reflection/telemetry/branding | OMO | Exclude until a concrete internal requirement is accepted | Post-v1.0 or never |
+| External/customer distribution | N/A | Outside accepted product direction; triggers a new license/architecture review | Always |
 
-## Product architecture after audit
+## Product architecture
 
 ```text
 User outcome
-   -> Decision Composer              (Ouroboros-inspired, v0.4)
+   -> Decision Composer                   (Ouroboros-derived, v0.4)
    -> One approval brief
    -> Immutable Shipping Contract
-   -> Goal/Evidence Runtime          (Gajae-inspired, v0.5)
-   -> Beginner Plugin / Approval UI  (v0.6)
-   -> Bounded Role Router            (OMO-inspired, v0.7)
-   -> Deterministic Verification
-   -> Finisher / Release Judge       (Shipping-owned)
+   -> Goal/Evidence Runtime               (Gajae-derived, v0.5)
+   -> Beginner Plugin / Local MCP         (Shipping-owned, v0.6)
+   -> Internal OMO Runtime Bridge         (actual private runtime, v0.7)
+   -> Optional bounded Team/DAG           (actual selected OMO runtime, v0.8)
+   -> Deterministic Shipping Verification
+   -> Finisher / Release Judge            (Shipping-owned)
    -> CLOSED or BLOCKED
 ```
 
@@ -58,13 +63,31 @@ User outcome
 2. Locked Shipping Contract
 3. Release budgets and blocker policy
 4. Fresh deterministic evidence
-5. Finisher closure decision
-6. Planner / Builder / Reviewer preferences
-7. External harness continuation requests
+5. Shipping Finisher closure decision
+6. OMO task/team/DAG runtime state
+7. Individual agent preferences and continuation requests
 ```
 
-No upstream agent or loop may move above this order.
+No upstream agent, OMO task record, or internal runtime may move above this order.
 
-## Clean-room rule
+## Source-use boundary
 
-The implementation team may use the reports and public contracts to design behavior. It must not paste or mechanically translate substantial upstream source. OMO in particular remains an adapter boundary because its repository default license is not a permissive commercial distribution license.
+### Gajae and Ouroboros
+
+Both audited repositories use MIT licenses. Selected code may be adapted with required notices when it is smaller and safer than reimplementation. The adapted result must use Shipping schemas and tests rather than importing unnecessary runtime scope.
+
+### OMO
+
+Actual OMO source may be used because the accepted product is personal/company-internal only. The source is kept in a separately pinned private runtime/fork with:
+
+- intact license and copyright notices;
+- `MODIFICATIONS.md`;
+- upstream and internal patch commit pins;
+- build digest and compatibility record;
+- selected upstream tests plus Shipping integration tests;
+- previous-pin rollback;
+- no public/customer distribution path.
+
+OMO source is not pasted into Shipping Core. The runtime may be disabled or replaced without changing the release contract or Finisher.
+
+Canonical decision: [`../../planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](../../planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md).

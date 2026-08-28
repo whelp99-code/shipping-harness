@@ -13,7 +13,9 @@
 | GOAL-009 model-accessible governance | REQ-MCP-001..008 | AC-0301..0312 | MCP protocol, tools, STDIO | MCP protocol/transport/adversarial tests |
 | GOAL-010 user as approver | REQ-MODE-001..003, REQ-APPROVAL-001..004 | AC-0401..0402, AC-0407, AC-0409..0410 | decision modes, approval brief | planned decision/MCP tests |
 | GOAL-011 risk-based autonomy | REQ-DECISION-001..008, REQ-ESCALATE-001..006, REQ-POLICY-001..004 | AC-0403..0408 | decision evidence, policy validator, escalation | planned decision/adversarial tests |
-| GOAL-012 selective bounded absorption | REQ-POLICY-003..004 | AC-0411..0412 | future goal graph, role router, Finisher | v0.5 planned orchestration suite |
+| GOAL-012 selective bounded absorption | REQ-GOAL-001..008, REQ-TEAM-001..006, REQ-POLICY-003..004 | v0.5/v0.8 roadmap gates plus AC-0411..0412 regression authority | Goal/Evidence runtime, bounded team graph, Finisher | planned Goal/runtime/team suites |
+| GOAL-013 governed internal runtime reuse | REQ-UPSTREAM-001..002, REQ-OMO-001..008 | v0.7 internal-runtime acceptance plan | internal OMO bridge, private pinned runtime, Shipping verification | planned bridge/runtime/adversarial/canary suites |
+| GOAL-014 internal-only product boundary | REQ-INTERNAL-001, REQ-OMO-009, NFR-LICENSE-001 | distribution guard and v1.0 license/modification inventory | third-party policy, runtime promotion, release operations | planned policy/packaging/release tests |
 
 ## Source layout mapping
 
@@ -38,6 +40,12 @@ src/mcp/protocol.mjs        REQ-MCP-002..005
 src/mcp/stdio.mjs           REQ-MCP-001, REQ-MCP-005
 src/core/decision-*.mjs     REQ-DECISION-*, REQ-ESCALATE-*, REQ-POLICY-* (planned v0.4)
 src/mcp/tools.mjs           REQ-MODE-*, REQ-APPROVAL-* (planned extension v0.4)
+src/core/goals/*.mjs        REQ-GOAL-* (planned v0.5)
+plugin/* / skill/*          REQ-PLUGIN-* (planned v0.6)
+packages/internal-omo-bridge/* REQ-OMO-* (planned v0.7)
+private shipping-harness-omo-runtime REQ-UPSTREAM-*, REQ-OMO-* (separate internal runtime, planned v0.7)
+src/core/team-policy/*.mjs  REQ-TEAM-* (planned v0.8)
+src/remote/*                REQ-REMOTE-* (planned v0.9)
 src/cli.mjs                 user flows and orchestration
 ```
 
@@ -78,5 +86,16 @@ src/cli.mjs                 user flows and orchestration
 | AC-0409..0410 | mode-selection and concise approval-brief MCP tests |
 | AC-0411 | `npm run release:verify`, `npm run test:mcp`, and planned `npm run test:decision` |
 | AC-0412 | v0.4.0 release receipt, clean status, and annotated tag |
+
+## Later-version planned proof
+
+| Release | Planned proof |
+|---|---|
+| v0.5 | Goal/Task schema and cycle tests; append-only replay/recovery; stale-proof and repeated-failure adversarial tests; single-agent real-project pilot |
+| v0.6 | clean install/doctor/reinstall/uninstall; no-CLI beginner workflow; approval/progress/blocker/completion surface tests |
+| v0.7 | exact upstream/internal pins and notices; work-order/receipt validation; OMO task/routing/continuation/recovery tests; Shipping re-verification; canary and previous-pin rollback |
+| v0.8 | graph ownership and cycle checks; bounded team/depth/parallelism; node-scoped retry/amend; no-progress/oscillation tests; benchmark against v0.7 |
+| v0.9 | authentication/allowlist/replay/cross-project tests; signed approvals; backup/restore; mobile/web internal pilot; runtime migration and rollback |
+| v1.0 | compatibility matrix, completion benchmark, security/license/modification inventory, operations and non-developer end-to-end acceptance |
 
 Any implementation that cannot map to a requirement is out of scope or must amend this matrix before coding.

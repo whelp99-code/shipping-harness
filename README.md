@@ -155,7 +155,9 @@ Model-agnostic automatic decision mode, bounded repository evidence, assumptions
 
 ### v0.5.0 onward
 
-Bounded goal/role orchestration, plugin and approval UX, authenticated remote control, pilot hardening, and a stable v1.0 control plane are sequenced in [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md).
+The accepted internal-only sequence is: durable Goal/Evidence runtime, beginner plugin/local MCP, a separately pinned private OMO execution runtime, bounded Team/DAG only after pilot proof, authenticated internal remote/mobile control, and a stable v1.0 control plane. See [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md).
+
+Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
 
 ## Documentation
 
@@ -172,8 +174,10 @@ Bounded goal/role orchestration, plugin and approval UX, authenticated remote co
 - [`docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md`](docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md)
 - [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md)
 
+- [`docs/planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](docs/planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md)
+
 ## Safety boundary
 
 See [`docs/ADAPTERS.md`](docs/ADAPTERS.md) for the capability, artifact, and lifecycle protocols.
 
-Shipping Harness runs only commands explicitly stored in a repository-owned contract or supplied by the operator. Artifact collection accepts only validated repository-relative paths, stores metadata and hashes rather than raw third-party content, and rejects home directories, credential-like files, protected runtime paths, and symlink escapes. It does not auto-push, auto-deploy, mutate provider credentials, install external harnesses, or bypass a human stop.
+Shipping Harness runs only commands explicitly stored in a repository-owned contract or supplied by the operator. Artifact collection accepts only validated repository-relative paths, stores metadata and hashes rather than raw third-party content, and rejects home directories, credential-like files, protected runtime paths, and symlink escapes. It does not auto-push, auto-deploy, mutate provider credentials, install external harnesses, or bypass a human stop. The planned private OMO runtime remains subordinate to the same policy and is not a public/customer distribution target.

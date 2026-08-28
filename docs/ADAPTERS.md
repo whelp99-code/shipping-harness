@@ -1,6 +1,6 @@
 # Adapter and Lifecycle Protocol
 
-Version: 0.2.0  
+Version: 0.2.0
 Owner: `shipping-harness`
 
 ## Purpose
@@ -46,6 +46,8 @@ Detects `ooo`, then `ouroboros`. Seed and Ledger candidates are collected only w
 ### OMO Native
 
 Detects `omo`; `opencode` may be reported only as an observed host. Project `.omo/omo.jsonc` or `.omo/omo.json` can establish configured evidence. The integration is a process/config/event bridge, not a native-plugin claim.
+
+This describes the implemented v0.2 adapter only. The accepted v0.7 direction adds a separately pinned private internal OMO runtime behind a versioned bridge; it does not change this adapter's truthful capability report. The internal runtime may execute selected upstream task/routing/continuation/recovery code, but Shipping remains authoritative for contracts, budgets, human stop, accepted evidence, blockers, SHIPPABLE, and CLOSED. See [`planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md).
 
 ## Artifact receipt
 

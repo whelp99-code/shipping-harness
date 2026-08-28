@@ -3,26 +3,27 @@
 ## Context
 
 ```text
-Operator
-   │
-   ▼
-Shipping Harness CLI ──────────────┐
-   │                               │
-   ├─ Contract Engine              │
-   ├─ State + Ledger               │ governance ownership
-   ├─ Evidence Runner              │
-   ├─ Scope Guard                  │
-   ├─ Gate + Closure Engine        │
-   └─ Adapter Registry ────────────┘
+User / connected agent
           │
-          ├─ Generic
-          ├─ Codex
-          ├─ Gajae Code
-          ├─ Ouroboros
-          └─ OMO Native
+          ▼
+Plugin / MCP / CLI ─────────────────────────┐
+          │                                 │
+          ├─ Contract + Decision Engine     │
+          ├─ State + Goal/Evidence Ledger   │ governance ownership
+          ├─ Scope + Evidence Guard         │
+          ├─ Gate + Closure Engine          │
+          └─ Runtime/Adapter Registry ──────┘
+                    │
+                    ├─ Generic / Codex adapters
+                    ├─ Gajae / Ouroboros adapters
+                    └─ Internal OMO Bridge
+                              │
+                              ▼
+                    Private pinned OMO runtime
+                    (task/routing/recovery only)
 ```
 
-External harnesses own code-generation sessions. Shipping Harness owns the release contract and final state transition.
+External and internal runtimes may own code-generation sessions. Shipping Harness owns the release contract, accepted evidence, budgets, blocker policy, human stop, and final state transition.
 
 ## Repository state
 
@@ -121,6 +122,23 @@ execute, resume, cancel, jsonOutput, hooks,
 durableGoals, durableLedger, artifactCollection, costTelemetry
 ```
 
+## Planned internal OMO boundary
+
+From v0.7, actual OMO code runs outside Shipping Core in a private pinned runtime. Shipping sends a hash-bound work order and receives normalized task/event/evidence receipts.
+
+Shipping remains authoritative for:
+
+- contract and scope;
+- acceptance and current Git-SHA evidence;
+- execution budgets;
+- pause and abort;
+- blocker classification;
+- SHIPPABLE and CLOSED.
+
+OMO remains authoritative only for its child-task/process lifecycle, model/category routing inside allowed policy, and internal recovery. Team/DAG capabilities stay disabled until v0.8 entry criteria pass.
+
+The bridge is fail-closed: an absent, stale, incompatible, or unhealthy runtime becomes truthful fallback or durable BLOCKED, never inferred success.
+
 ## Security boundaries
 
 - Repository path containment is checked after realpath resolution.
@@ -142,3 +160,5 @@ durableGoals, durableLedger, artifactCollection, costTelemetry
 | ADR-005 | Adapter commands configurable. | External harness CLI flags evolve. |
 | ADR-006 | Evidence stores digests and redacted logs. | Fresh proof without credential leakage. |
 | ADR-007 | Closure receipt is tracked; raw evidence is ignored. | Audit trail without repository bloat. |
+| ADR-008 | Actual OMO code runs in a separate private internal runtime from v0.7. | Preserve tested upstream interactions, license boundary, independent updates, and rollback. |
+| ADR-009 | OMO task completion is never release completion. | Keep Finisher and acceptance authority deterministic and Shipping-owned. |

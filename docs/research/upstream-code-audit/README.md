@@ -4,26 +4,24 @@
 
 | Phase | Status |
 |---|---|
-| Official repositories downloaded locally | COMPLETE |
-| Exact revisions pinned | COMPLETE — see `UPSTREAM-PINS.json` |
-| Shipping-relevant file/function control-flow audit | COMPLETE |
-| License boundary review | COMPLETE for engineering decisions |
-| Dependency-free syntax check | COMPLETE for selected Ouroboros Python control paths |
-| Full upstream dependency install/build/test suites | NOT RUN — Bun and repository dependencies are not installed |
+| Official repositories downloaded at pinned revisions | COMPLETE |
+| Static source audit | COMPLETE for Shipping-relevant paths |
+| File/function control-flow mapping | COMPLETE for decision, Goal/Ledger, task, routing, continuation, recovery, and stop paths |
+| License review | COMPLETE for the accepted engineering direction; not legal advice |
+| Selected source syntax/path validation | COMPLETE |
+| Full Gajae and OMO dependency install/test suites | NOT RUN — Bun/dependencies were not installed |
 | Provider-authenticated end-to-end runs | NOT RUN |
-| Shipping roadmap correction | COMPLETE as an audit recommendation; implementation remains a separate release |
+| Shipping roadmap correction | ACCEPTED on 2026-08-28 |
 
-This is a **code-level control-path audit**, not a claim that every file in all three repositories was reviewed. The reviewed paths cover the features Shipping Harness may absorb: requirement decision, immutable specification, Goal/Ledger persistence, evidence freshness, bounded continuation, role/model routing, concurrency, human stop, recovery, and release authority.
+## Audited pins
 
-## Local pins
-
-| Repository | Pin | Version observed | License boundary |
-|---|---:|---|---|
+| Upstream | Commit | Version observed | License boundary |
+|---|---|---|---|
 | Gajae Code | `103659a2ebf6` | 0.15.3 | MIT |
 | Q00 Ouroboros | `6db4d70cca2d` | 0.51.16 | MIT |
 | Oh My OpenAgent / OMO Native | `43d9c058e08b` | 5.0.0-beta.23 | Sustainable Use License 1.0 by default; selected portions differ |
 
-Full commit hashes and origins are stored in [`UPSTREAM-PINS.json`](UPSTREAM-PINS.json). The clones live only under ignored `.chatgpt2codex/upstreams/`; no upstream source is committed or redistributed by Shipping Harness.
+Exact metadata is in [`UPSTREAM-PINS.json`](UPSTREAM-PINS.json).
 
 ## Reports
 
@@ -34,16 +32,22 @@ Full commit hashes and origins are stored in [`UPSTREAM-PINS.json`](UPSTREAM-PIN
 5. [`04-ABSORPTION-DECISION-MATRIX.md`](04-ABSORPTION-DECISION-MATRIX.md)
 6. [`05-PROPOSED-PLAN-CORRECTIONS.md`](05-PROPOSED-PLAN-CORRECTIONS.md)
 7. [`06-CODE-PATH-INVENTORY.md`](06-CODE-PATH-INVENTORY.md)
-8. [`UPSTREAM-PINS.json`](UPSTREAM-PINS.json)
 
-## Main result
+## Accepted result
 
 ```text
-v0.4 AI decision contract          <- Ouroboros is the primary code reference
-v0.5 durable Goal/Evidence runtime <- Gajae + existing Shipping core
-v0.6 beginner plugin and approval  <- prove non-developer usability first
-v0.7 bounded role orchestration    <- small clean-room OMO subset
-release authority                  <- Shipping Harness only
+v0.4 automatic product decision      <- Ouroboros-derived mechanisms
+v0.5 durable Goal/Evidence runtime    <- selected Gajae + Ouroboros mechanisms
+v0.6 beginner plugin/local MCP        <- Shipping-owned UX
+v0.7 internal OMO runtime foundation  <- actual private pinned OMO source
+v0.8 bounded Team/DAG                 <- selected actual OMO capabilities after pilot proof
+v0.9 internal remote/mobile ops       <- authenticated and allowlisted
+final release authority               <- Shipping Harness only
 ```
 
-Shipping Harness should **not merge or fork all three runtimes**. It should independently reimplement a small set of verified mechanisms, preserve attribution and license boundaries, and leave the complete upstream runtimes behind adapters.
+The product is accepted for the owner's personal use and future private company-internal use. Under this boundary, actual OMO source may be used in a separate private runtime with preserved notices, modification records, exact pins, tests, and rollback. It is not mixed into Shipping Core and is not planned for public/customer distribution.
+
+Canonical direction:
+
+- [`../../planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](../../planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md)
+- [`../../planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](../../planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md)

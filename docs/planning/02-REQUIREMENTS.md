@@ -103,6 +103,62 @@
 | REQ-POLICY-003 | Preserve human stop, bounded execution, evidence freshness, and release closure invariants. | 0.4.0 |
 | REQ-POLICY-004 | Reject silent mode changes, question flooding, automatic approval, and policy weakening. | 0.4.0 |
 
+### Durable Goal, Task, and Evidence runtime
+
+| ID | Requirement | Release |
+|---|---|---|
+| REQ-GOAL-001 | Compile a locked release contract into stable Goal and Task records with requirement and acceptance links. | 0.5.0 |
+| REQ-GOAL-002 | Reject orphan tasks, duplicate IDs, invalid dependencies, and cyclic task graphs. | 0.5.0 |
+| REQ-GOAL-003 | Persist Goal, Task, attempt, blocker, checkpoint, and evidence transitions in an append-only ledger. | 0.5.0 |
+| REQ-GOAL-004 | Restore the current Goal/Task state after process restart without replaying completed work. | 0.5.0 |
+| REQ-GOAL-005 | Require current-contract and current-Git-SHA evidence before a Goal or Task can become DONE. | 0.5.0 |
+| REQ-GOAL-006 | Fingerprint repeated failures and stop identical no-progress retries on unchanged source/state. | 0.5.0 |
+| REQ-GOAL-007 | Represent exhausted planning/review/repair paths as durable PLANNING_STUCK or BLOCKED outcomes. | 0.5.0 |
+| REQ-GOAL-008 | Keep human pause/abort, release budgets, and Shipping Finisher authority above Goal/Task execution state. | 0.5.0 |
+
+### Beginner plugin and local agent experience
+
+| ID | Requirement | Release |
+|---|---|---|
+| REQ-PLUGIN-001 | Package the local MCP server, Shipping skill, agent instructions, and lifecycle rules through one supported install path. | 0.6.0 |
+| REQ-PLUGIN-002 | Allow normal start, approval, status, pause, blocker handling, and close flows without project-specific CLI commands or JSON editing. | 0.6.0 |
+| REQ-PLUGIN-003 | Present concise approval, progress, blocker, and completion surfaces while keeping full evidence separately inspectable. | 0.6.0 |
+| REQ-PLUGIN-004 | Provide doctor, repair, upgrade, uninstall, and reinstall flows that preserve repository Shipping state. | 0.6.0 |
+| REQ-PLUGIN-005 | Expose no public listener, customer endpoint, or arbitrary shell surface in the local plugin release. | 0.6.0 |
+
+### Internal upstream runtime and OMO boundary
+
+| ID | Requirement | Release |
+|---|---|---|
+| REQ-INTERNAL-001 | Treat the integrated product as personal/company-internal only; any customer/public distribution requirement must block promotion pending a new direction and license review. | 0.7.0 |
+| REQ-UPSTREAM-001 | Record the exact upstream commit, internal patch commit, runtime build digest, and compatibility version for every promoted OMO runtime. | 0.7.0 |
+| REQ-UPSTREAM-002 | Preserve upstream license/copyright notices and maintain an internal modification inventory. | 0.7.0 |
+| REQ-OMO-001 | Run actual OMO source through a separately pinned private runtime and a narrow Shipping bridge rather than importing the upstream monorepo into Shipping Core. | 0.7.0 |
+| REQ-OMO-002 | Prevent the OMO runtime from editing or approving Shipping contracts, increasing budgets, changing blocker policy, or transitioning SHIPPABLE/CLOSED. | 0.7.0 |
+| REQ-OMO-003 | Bind every OMO work order and receipt to release ID, contract hash, Git SHA, Shipping Goal/Task IDs, scope paths, acceptance IDs, and budgets. | 0.7.0 |
+| REQ-OMO-004 | Deny OMO continuation, revival, or child work whenever Shipping is paused, aborted, closed, out of budget, or unable to prove session ownership. | 0.7.0 |
+| REQ-OMO-005 | Forbid unlimited concurrency/depth/continuation values and start with team/DAG disabled, parallel workers <= 2, depth <= 1, and continuation limit <= 3. | 0.7.0 |
+| REQ-OMO-006 | Treat OMO task completion as an untrusted claim until current Shipping acceptance checks verify the resulting repository state. | 0.7.0 |
+| REQ-OMO-007 | Report an unavailable/unhealthy/incompatible OMO runtime truthfully and use only contract-approved fallback or a durable BLOCKED result. | 0.7.0 |
+| REQ-OMO-008 | Retain the previous promoted runtime pin and prove rollback before accepting an OMO runtime update. | 0.7.0 |
+| REQ-OMO-009 | Keep public package, image, source, and customer-deployment publishing paths disabled for the integrated internal runtime. | 0.7.0 |
+
+### Bounded Team/DAG and internal remote operation
+
+| ID | Requirement | Release |
+|---|---|---|
+| REQ-TEAM-001 | Start Team/DAG integration only after a v0.7 pilot proves a concrete coordination bottleneck and stable single-runtime closure. | 0.8.0 |
+| REQ-TEAM-002 | Compile only locked Shipping Goals/Tasks into a graph whose nodes map to requirement or acceptance consumers. | 0.8.0 |
+| REQ-TEAM-003 | Keep the Shipping Finisher outside every OMO team and deny agents authority to expand top-level scope. | 0.8.0 |
+| REQ-TEAM-004 | Enforce bounded members, parallelism, depth, time, turns, tool calls, retries, and graph size; unlimited values are forbidden. | 0.8.0 |
+| REQ-TEAM-005 | Retry or amend only failed/changed nodes and preserve successful unrelated node evidence. | 0.8.0 |
+| REQ-TEAM-006 | Detect no-progress, oscillation, repetitive review, and role ping-pong, then stop with an inspectable terminal reason. | 0.8.0 |
+| REQ-REMOTE-001 | Expose remote control only through authenticated, encrypted, replay-protected internal access and explicit project allowlists. | 0.9.0 |
+| REQ-REMOTE-002 | Prevent remote clients from supplying arbitrary commands or overriding local human stop, budgets, contract lock, or Finisher. | 0.9.0 |
+| REQ-REMOTE-003 | Bind remote approval to a signed proposal/approval receipt and exact project/release identity. | 0.9.0 |
+| REQ-REMOTE-004 | Back up and restore Shipping state plus the minimum required OMO runtime state without breaking evidence links or release authority. | 0.9.0 |
+| REQ-REMOTE-005 | Provide health, upgrade, migration, rollback, notification, and cross-project-isolation operations for the internal deployment. | 0.9.0 |
+
 ## Non-functional requirements
 
 | ID | Requirement |
@@ -120,6 +176,9 @@
 | NFR-USABILITY-002 | In `AUTO`, ordinary fixtures should require zero technical questions before the approval brief. |
 | NFR-DECISION-001 | The core remains model-agnostic and does not require network model calls. |
 | NFR-DECISION-002 | Decision inputs, outputs, questions, and evidence have bounded byte, depth, item, and expiry limits. |
+| NFR-LICENSE-001 | Internal upstream use remains auditable through pins, notices, modification records, and an external-distribution reconsideration gate. |
+| NFR-RUNTIME-001 | Shipping Core and the internal OMO runtime can be upgraded, disabled, and rolled back independently. |
+| NFR-RUNTIME-002 | The core remains operable with a truthful Codex/Generic fallback or durable BLOCKED result when OMO is unavailable. |
 
 ## Release acceptance criteria
 

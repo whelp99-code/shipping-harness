@@ -1,22 +1,31 @@
 # OMO Native / Oh My OpenAgent — Code-Level Audit
 
-## Verdict
+## Updated verdict
 
-OMO is the strongest reference for role/model routing, durable child-task orchestration, continuation hooks, concurrency control, and crash recovery. However, `packages/omo-native` is primarily a branded launcher/distribution adapter over a pinned Senpi engine and a staged `omo-senpi` plugin. The real orchestration code is distributed across `omo-senpi`, `senpi-task`, `team-core`, `delegate-core`, `model-core`, and related packages.
+OMO is the strongest source for role/model routing, durable child-task orchestration, continuation hooks, concurrency control, and crash recovery.
 
-Shipping should independently reimplement only a small bounded subset. The repository's default Sustainable Use License also makes source copying or commercial redistribution unsuitable without separate permission.
+The code audit showed that `packages/omo-native` is mainly a branded launcher/distribution adapter over a pinned Senpi engine and staged plugin. The execution behavior is spread across:
+
+- `packages/omo-senpi/`;
+- `packages/senpi-task/`;
+- `packages/team-core/`;
+- `packages/delegate-core/`;
+- `packages/model-core/`;
+- `packages/omo-config-core/`.
+
+The owner's accepted product boundary is personal and future company-internal use only. Therefore the recommended direction is no longer to rebuild every useful OMO mechanism from scratch. Actual OMO source may run in a separately pinned private internal runtime, while Shipping Core remains independent and authoritative for release governance.
 
 ## Actual implementation layers
 
-| Layer | Source path | Role |
-|---|---|---|
-| Native distribution | `packages/omo-native/` | Launcher, branding, setup/import, signals, doctor, pinned Senpi startup |
-| Senpi adapter | `packages/omo-senpi/` | Component composition, hooks, task/team UI and host integration |
-| Task engine | `packages/senpi-task/` | Durable task state machine, store, runners, concurrency, DAG, recovery |
-| Team persistence | `packages/team-core/` | Mailboxes, tasklist, locks, reservations, resume |
-| Delegation | `packages/delegate-core/` | Harness-neutral delegation contracts |
-| Model routing | `packages/model-core/` | Overrides, category defaults, availability, provider fallback, provenance |
-| Configuration | `packages/omo-config-core/` | Task/team/DAG bounds and defaults |
+| Layer | Source path | Role | Shipping use |
+|---|---|---|---|
+| Native distribution | `packages/omo-native/` | Launcher, branding, setup/import, signals, doctor, pinned Senpi startup | Use only the runtime/termination patterns needed for the private launcher; exclude branding/import UX |
+| Senpi adapter | `packages/omo-senpi/` | Component composition, hooks, task/team UI and host integration | Use selected task, continuation, and lifecycle integration paths |
+| Task engine | `packages/senpi-task/` | Durable task state, store, runners, concurrency, DAG, recovery | Primary internal runtime source from v0.7 |
+| Team persistence | `packages/team-core/` | Mailboxes, tasklist, locks, reservations, resume | Defer to v0.8 after a v0.7 pilot |
+| Delegation | `packages/delegate-core/` | Harness-neutral delegation contracts | Use as required by selected task runtime paths |
+| Model routing | `packages/model-core/` | Overrides, category defaults, availability, provider fallback, provenance | Use selected routing paths behind Shipping policy |
+| Configuration | `packages/omo-config-core/` | Task/team/DAG bounds and defaults | Use schema/validation while overriding broad or unlimited defaults |
 
 ## OMO Native launcher
 
@@ -24,7 +33,7 @@ Shipping should independently reimplement only a small bounded subset. The repos
 
 ### Shipping decision
 
-Keep process-group termination, bounded grace, and exact-child ownership principles. Do not reproduce the branded launcher or provider import system.
+The private runtime may preserve exact-child ownership, asynchronous signal forwarding, bounded grace, and stale-process diagnostics. It does not need OMO branding, public publishing, provider import UX, or automatic self-update.
 
 ## Continuation hooks
 
@@ -33,12 +42,12 @@ Keep process-group termination, bounded grace, and exact-child ownership princip
 `packages/omo-senpi/src/components/ulw-execute-continuation/index.ts`:
 
 - listens on `agent_end`;
-- requires same-session owned Boulder work;
+- requires same-session Boulder work;
 - reads checklist/ledger state rather than model memory;
 - suppresses stale repeated signatures;
 - caps consecutive automatic continuations at 8;
 - resets the cap on real user input;
-- can continue `active` or `paused` Boulder work.
+- considers both `active` and `paused` Boulder work continuable.
 
 ### ulw-loop continuation
 
@@ -53,13 +62,23 @@ Keep process-group termination, bounded grace, and exact-child ownership princip
 
 ### Shipping decision
 
-Adopt stale-signature suppression, ownership checks, and a finite continuation cap. Do **not** treat Shipping's human `PAUSED` state as continuable. Shipping human pause remains stronger than every OMO-style continuation hook.
+Use the actual continuation runtime where useful, but apply stricter Shipping policy:
+
+```text
+human pause/abort = no continuation
+closed/blocked/out-of-budget = no continuation
+session ownership unavailable = no continuation
+initial Shipping continuation cap = 3
+stale signature/status = no continuation
+```
+
+Shipping `PAUSED` is never treated as OMO-continuable work.
 
 ## Task and role orchestration
 
 `packages/senpi-task` implements:
 
-- seven task statuses and explicit transition audits;
+- seven task statuses and audited transitions;
 - JSONL persistent records;
 - in-process and RPC-process child runners;
 - concurrency and depth admission;
@@ -69,17 +88,29 @@ Adopt stale-signature suppression, ownership checks, and a finite continuation c
 - DAG compilation, WAL/checkpoint persistence, retry, amend, and recovery;
 - seeded adversarial/chaos tests for notification, terminal idempotence, slot leaks, and rejection handling.
 
-The curated agents are `explore`, `librarian`, `metis`, and `momus`. Plan-review agents are protected by `packages/senpi-task/src/agents/invocation-guard.ts`, which requires a genuine user request and a real plan artifact, and rejects attempts after execution has begun.
-
 ### Shipping decision
 
-Shipping v0.6 should start with only five logical roles:
+v0.7 uses only the foundation:
+
+- task state and child runners;
+- task cancel/interrupt/steer;
+- bounded concurrency and depth;
+- session suspend/resume;
+- exactly-once terminal notification;
+- routing provenance.
+
+Team and general DAG capabilities remain disabled until v0.8 entry criteria are met.
+
+Logical Shipping roles are:
 
 ```text
-Planner -> Builder -> Tester -> Reviewer -> Finisher
+Planner -> Builder -> Tester -> Reviewer
+                    |
+                    v
+          independent Shipping Finisher
 ```
 
-This is a policy graph, not a permanent multi-process team. Parallel workers are created only when expected benefit exceeds coordination cost and all work maps to the locked release contract.
+Finisher is not an OMO team member.
 
 ## Model routing
 
@@ -95,55 +126,89 @@ Availability and connected-provider checks prevent claiming an unavailable model
 
 ### Shipping decision
 
-Reimplement a simpler capability router in v0.6. Shipping must route by task requirement and observed availability, while recording why a model/agent was selected. It should not copy OMO's provider tables.
+Use selected actual routing code inside the internal runtime, but constrain it with the Shipping work order:
+
+- only approved roles/categories;
+- only observed available models/providers;
+- recorded route and reason;
+- no route may expand scope or budget;
+- fallback failure becomes truthful unavailable/BLOCKED.
+
+Shipping does not need to copy provider tables into Core.
 
 ## Bounded defaults
 
-`packages/omo-config-core/src/schema/task.ts` includes explicit defaults and caps:
+`packages/omo-config-core/src/schema/task.ts` includes defaults such as task concurrency 5, global concurrency at least 8, depth 1, resident child caps, team maximum 8, parallel team maximum 4, 120-minute team wall clock, and DAG limits. Some zero values mean unlimited.
 
-- task default concurrency 5;
-- global concurrency dynamically at least 8;
-- default depth 1;
-- resident child cap dynamically at least 8;
-- team maximum 8 members, 4 parallel members, 120-minute wall clock;
-- DAG maximum 64 nodes per run and 16 runs per session;
-- continuation cap 8 in the inspected hooks.
+The first Shipping profile deliberately narrows them:
 
-A value of 0 can mean unlimited for some task caps. Shipping must not inherit that spelling: Shipping production policy should forbid unlimited execution.
+```yaml
+parallel_workers: 2
+agent_depth: 1
+continuation_limit: 3
+fix_cycles: 2
+team_mode: false
+dag_mode: false
+unlimited_values_allowed: false
+```
 
 ## Recovery and delivery
 
 The task engine suspends children on session shutdown, uses owner/lease checks, revives only the resumed session's children, avoids replaying terminal work, and preserves exactly-once completion delivery. Admission overflow remains suspended instead of being lost. Retryable recovery failure rolls back; unrecoverable nonterminal work becomes lost.
 
-These are valuable patterns for a later durable orchestration layer, but too large for v0.4.
+### Shipping decision
 
-## License boundary
+Use selected recovery paths from v0.7, but require:
 
-The repository default is Sustainable Use License 1.0, limiting use/modification mainly to internal business or non-commercial/personal purposes and limiting distribution. Selected files or incorporated third-party components may carry separate licenses; for example, the staged Senpi plugin license covers only specific LSP adapter portions under MIT.
+- same Shipping release/work-order identity;
+- current contract hash and allowed Git state;
+- no revival after pause/abort/close/budget exhaustion;
+- terminal OMO state is not sufficient for Shipping completion;
+- fallback or durable BLOCKED when recovery cannot be proven safe.
 
-Therefore:
+## License and internal-use boundary
 
-- no OMO source is copied into Shipping Harness;
-- no substantial OMO runtime is vendored;
-- design behavior is independently reimplemented from observed contracts;
-- any future direct dependency or distribution requires a new legal review.
+The repository default is Sustainable Use License 1.0. It allows the accepted personal/company-internal direction, subject to its terms, but constrains distribution. Selected files or incorporated third-party components may carry separate licenses.
 
-## Absorption decision
+Accepted engineering policy:
 
-| Feature | Decision | Reason |
+- actual OMO source may run in a private internal runtime/fork;
+- license and copyright notices remain intact;
+- internal modifications are recorded;
+- exact upstream and internal patch commits are pinned;
+- public package/image/source publishing is disabled;
+- customer installation, resale, public SaaS, or unrelated-company distribution is outside scope;
+- any external-distribution requirement triggers a new review before work continues.
+
+This is an engineering interpretation, not legal advice.
+
+## Final absorption decision
+
+| Feature | Decision | Target |
 |---|---|---|
-| Native launcher/branding/import | `EXCLUDE` | Not a Shipping product need |
-| Continuation cap and stale signature | `REIMPLEMENT v0.5` | Prevents repeated empty turns |
-| Same-session ownership checks | `REIMPLEMENT v0.5` | Prevents cross-session continuation |
-| Human-pause behavior | `OVERRIDE` | Shipping pause must always win |
-| Durable task state machine | `REIMPLEMENT SMALL v0.6` | Useful, but full engine is too large |
-| Role/category routing | `REIMPLEMENT SMALL v0.6` | Five roles and capability-based routing only |
-| Model fallback provenance | `REIMPLEMENT SMALL v0.6` | Record why a route was chosen |
-| Team runtime | `DEFER` | No need before single-release pilots |
-| DAG engine | `DEFER/ADAPT` | Existing coding hosts can execute graphs |
-| Exactly-once completion ideas | `REIMPLEMENT v0.6+` | Important for durable background work |
-| Full OMO source/runtime | `ADAPTER ONLY` | License and complexity boundary |
+| Native branding/onboarding/provider import | EXCLUDE | — |
+| Exact-child launcher and signal handling | SELECTIVE INTERNAL USE | v0.7 |
+| Task state machine and child runners | ACTUAL PRIVATE RUNTIME | v0.7 |
+| Model/category routing provenance | ACTUAL PRIVATE RUNTIME | v0.7 |
+| Continuation ownership/stale suppression | ACTUAL PRIVATE RUNTIME + SHIPPING OVERRIDE | v0.7 |
+| Session recovery/exactly-once completion | ACTUAL PRIVATE RUNTIME | v0.7 |
+| Human pause and release closure | SHIPPING ONLY | Always |
+| Team runtime | SELECTIVE ACTUAL RUNTIME AFTER PILOT | v0.8 |
+| DAG runtime | SELECTIVE ACTUAL RUNTIME AFTER PILOT | v0.8 |
+| Memory/reflection/telemetry/marketplace | DEFER OR EXCLUDE | Post-v1.0 or never |
+| Full OMO source inside Shipping Core | EXCLUDE | Always |
+| Private separately pinned OMO runtime | ACCEPT | v0.7 |
 
 ## Main risk to avoid
 
-OMO optimizes for keeping an active plan moving. Shipping Harness optimizes for a bounded release decision. OMO-style continuation is subordinate to Shipping budgets, blocker policy, human stop, and Finisher closure.
+OMO optimizes for keeping active work moving. Shipping Harness optimizes for a bounded, evidence-backed release decision.
+
+```text
+Human stop
+  > Shipping contract/budget/evidence
+  > Shipping Finisher
+  > OMO runtime state
+  > individual agent continuation
+```
+
+Canonical direction: [`../../planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](../../planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md).

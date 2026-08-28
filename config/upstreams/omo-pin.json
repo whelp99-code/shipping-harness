@@ -14,15 +14,15 @@
   "expected": {
     "runtimeVersion": "0.7.0",
     "upstreamCommit": "43d9c058e08b00a3629319df82e6a647de2b8490",
-    "internalPatchCommit": "07b4108",
-    "releaseCommit": "2cec938c34cef1bf209b830a3ae6a8aa7869fcfe",
-    "tag": "v0.7.0-runtime",
-    "buildDigest": "sha256:8e2697f133af9736df737fa731ff33af701a3f9bf94187b19d6e1dae88c78c91",
+    "internalPatchCommit": "2aac9960d037bd8817911622ee6526648be88fb0",
+    "releaseCommit": "ef82b4cda5d8688840780ca5a09bd0a5fa11d5bc",
+    "tag": "shipping-runtime-v0.7.0-r1",
+    "buildDigest": "sha256:c78bc68993cfaa121eac550ca6043cce2002ef63f9255a9f4b669f27ec7324b5",
     "compatibilityVersion": "shipping-omo/v1+shipping-omo-receipt/v1",
     "artifact": ".internal-artifacts/v0.7.0/shipping-harness-omo-runtime-0.7.0.tgz",
-    "artifactSha256": "2b24cc9ef19a6a230611de0747be5e156b5558964db5603955922f4a98c53e46",
-    "omoVersion": "5.0.0-0.beta.23",
-    "senpiVersion": "2026.8.27"
+    "artifactSha256": "34a989bbaa0d24cc1afd10adfc3a317d4f3dd064ea78721f5b5c14de3cf2b3b0",
+    "omoVersion": "5.0.0-0.beta.24",
+    "senpiVersion": "2026.8.28"
   },
   "evidence": {
     "manifest": "/home/jm/orca/projects/shipping-harness-omo-runtime/shipping-internal/runtime-manifest.json",

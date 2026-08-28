@@ -7,6 +7,7 @@ import { beginFixCycle, closeRelease, releaseStatus, verifyRelease } from '../co
 import { runtimePaths } from '../core/paths.mjs';
 import { approveScopeProposal, createScopeProposal } from '../core/proposals.mjs';
 import { abort, pause, readState, resume } from '../core/state.mjs';
+import { buildBlockerView, buildUserStatusView } from './user-view.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from '../core/goals/authority.mjs';
 
 const ADAPTERS = ['generic', 'codex', 'gajae', 'ouroboros', 'omo'];
@@ -223,6 +224,19 @@ export async function callShippingTool(root, name, rawArguments) {
       diagnostics: proposal.diagnostics,
       proposalPath,
       approvalRequired: true,
+      userView: {
+        schema: 'shipping-harness/approval-user-view-v1',
+        userState: proposal.readyForApproval ? 'AWAITING_APPROVAL' : 'PLANNING',
+        outcome: proposal.approvalBrief.outcome,
+        included: proposal.approvalBrief.included,
+        deferred: proposal.approvalBrief.deferred,
+        acceptance: proposal.approvalBrief.acceptance,
+        assumptions: proposal.approvalBrief.assumptions,
+        risks: proposal.approvalBrief.risks,
+        questions: proposal.approvalBrief.questions,
+        limits: proposal.approvalBrief.limits,
+        actions: proposal.readyForApproval ? ['approve', 'edit-scope', 'stop'] : ['answer-questions', 'stop'],
+      },
     };
     const next = proposal.readyForApproval
       ? 'Review the one-screen approval brief, then call shipping_approve_scope with the exact proposal ID and hash.'
@@ -253,7 +267,9 @@ export async function callShippingTool(root, name, rawArguments) {
   if (name === 'shipping_status') {
     rejectUnknownKeys(args, []);
     const status = await statusOrUninitialized(root);
-    return complete(status, status.initialized ? `Release state: ${status.state.state}. Blockers: ${status.issues.counts.BLOCKER}.` : status.nextAction);
+    const userView = buildUserStatusView(status);
+    const blockerView = status.initialized ? buildBlockerView(status) : { schema: 'shipping-harness/blocker-view-v1', blockers: [], remainingFixCycles: 0 };
+    return complete({ ...status, userView, blockerView }, userView.summary + ` Next: ${userView.nextAction}`);
   }
 
   if (name === 'shipping_execute') {

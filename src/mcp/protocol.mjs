@@ -1,6 +1,7 @@
 import { ShippingError, normalizeError } from '../core/errors.mjs';
 import { VERSION } from '../version.mjs';
 import { SHIPPING_TOOLS, callShippingTool } from './tools.mjs';
+import { listShippingResources, readShippingResource } from './resources.mjs';
 
 export const MCP_PROTOCOL_VERSION = '2026-07-28';
 export const MCP_LEGACY_VERSION = '2025-11-25';
@@ -160,7 +161,7 @@ export function createMcpProtocol(root) {
           state.legacyInitialized = true;
           return success(request.id, {
             protocolVersion: MCP_LEGACY_VERSION,
-            capabilities: { tools: { listChanged: false } },
+            capabilities: { tools: { listChanged: false }, resources: { listChanged: false } },
             serverInfo: MCP_SERVER_INFO,
             instructions: 'Use shipping_start to propose a small release. Never approve scope without explicit user review and confirmation.',
           });
@@ -173,7 +174,7 @@ export function createMcpProtocol(root) {
           return success(request.id, withServerMeta({
             resultType: 'complete',
             supportedVersions: MCP_SUPPORTED_VERSIONS,
-            capabilities: { tools: { listChanged: false } },
+            capabilities: { tools: { listChanged: false }, resources: { listChanged: false } },
             instructions: 'Start with shipping_start, show the proposal to the user, require explicit approval, then implement only the locked scope and verify before closing.',
             ttlMs: 300000,
             cacheScope: 'public',
@@ -189,6 +190,26 @@ export function createMcpProtocol(root) {
             ? { resultType: 'complete', tools: SHIPPING_TOOLS, ttlMs: 300000, cacheScope: 'private' }
             : { tools: SHIPPING_TOOLS };
           return success(request.id, withServerMeta(result, protocolVersion));
+        }
+
+        if (request.method === 'resources/list') {
+          const resources = listShippingResources();
+          const result = protocolVersion === MCP_PROTOCOL_VERSION
+            ? { resultType: 'complete', resources, ttlMs: 300000, cacheScope: 'private' }
+            : { resources };
+          return success(request.id, withServerMeta(result, protocolVersion));
+        }
+
+        if (request.method === 'resources/read') {
+          const uri = params.uri;
+          if (typeof uri !== 'string' || uri.length > 500) throw new McpProtocolError(-32602, 'A bounded resource uri is required');
+          try {
+            const content = await readShippingResource(root, uri);
+            return success(request.id, withServerMeta({ contents: [content] }, protocolVersion));
+          } catch (error) {
+            if (error instanceof ShippingError && error.code === 'ERR_MCP_RESOURCE_UNKNOWN') throw new McpProtocolError(-32602, error.message);
+            return success(request.id, toolErrorResult(error, protocolVersion));
+          }
         }
 
         if (request.method === 'tools/call') {

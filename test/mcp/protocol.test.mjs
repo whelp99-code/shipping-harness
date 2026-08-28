@@ -18,7 +18,7 @@ test('latest MCP discovery and tool listing expose a bounded beginner surface', 
     const discover = await protocol.handle({ jsonrpc: '2.0', id: 1, method: 'server/discover', params: { _meta: latestMeta() } });
     assert.equal(discover.result.resultType, 'complete');
     assert.ok(discover.result.supportedVersions.includes('2026-07-28'));
-    assert.deepEqual(discover.result.capabilities, { tools: { listChanged: false } });
+    assert.deepEqual(discover.result.capabilities, { tools: { listChanged: false }, resources: { listChanged: false } });
 
     const listed = await protocol.handle({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: { _meta: latestMeta() } });
     assert.equal(listed.result.resultType, 'complete');

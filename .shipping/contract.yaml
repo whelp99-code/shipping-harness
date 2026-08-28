@@ -1,195 +1,382 @@
 {
+  "schema": "shipping-harness/v1",
+  "project": "shipping-harness",
+  "worker": "shipping-harness",
+  "release": "1.0.0",
+  "goal": "Freeze Shipping Harness as a stable internal control plane with versioned schemas, explicit v0.6-v0.9 migration and compatibility, truthful health and event surfaces, reproducible package/plugin/OMO/remote verification, operations handover, and a closed v1.0.0 release without enabling Team/DAG or adding public/customer scope.",
+  "requirements": [
+    "REQ-STABLE-001",
+    "REQ-STABLE-002",
+    "REQ-STABLE-003",
+    "REQ-OPS-001",
+    "REQ-OPS-002",
+    "REQ-BENCH-001",
+    "REQ-BENCH-002",
+    "REQ-SECURITY-001",
+    "REQ-HANDOVER-001",
+    "REQ-RELEASE-001"
+  ],
+  "scope": {
+    "include": [
+      "Versioned JSON schemas and examples for the stable contract, lock, state, evidence, Goal/Task, release, MCP, OMO bridge, internal remote, approval, notification, and backup boundaries.",
+      "A stable-control library for schema registry, compatibility diagnostics, side-by-side migration, rollback receipts, health snapshots, and bounded internal event envelopes.",
+      "Explicit compatibility and migration policy for supported v0.6.0 through v0.9.0 persisted state and component combinations.",
+      "Final reproducible benchmark, security inventory, status report, documentation audit, isolated package install, and end-to-end smoke evidence.",
+      "Installation, upgrade, rollback, backup, restore, observability, incident, recovery, retention, ownership, support, limitations, and handover documentation.",
+      "Final package metadata, distribution contents, release notes, traceability, known limitations, and next-version backlog.",
+      "Existing plugin/MCP, private OMO runtime, Team/DAG disabled decision, and internal remote behavior are regression-tested but not expanded."
+    ],
+    "exclude": [
+      "New product capabilities, new Shipping actions, new remote endpoints, new adapter commands, model-provider integration, deployment, push, merge, purchase, or customer communication.",
+      "Enabling Team Mode, DAG Mode, multi-agent orchestration, graph execution, role routing, or unlimited values.",
+      "Public internet listener, public SaaS, marketplace distribution, customer tenants, resale, or customer installation of the integrated private OMO runtime.",
+      "Automatic migration of unknown future schemas, destructive in-place migration, silent downgrade, or rollback without receipts.",
+      "Changing v0.9 remote authorization, approval, replay, backup, or human-stop behavior except to fix a proven release blocker.",
+      "Changing the promoted private OMO runtime source, tag, artifact, license boundary, or execution authority."
+    ],
+    "paths": {
+      "include": [
+        "packages/stable-control/**",
+        "schemas/v1/**",
+        "scripts/v1-acceptance.mjs",
+        "scripts/v1-completion-benchmark.mjs",
+        "scripts/v1-final-smoke.mjs",
+        "scripts/v1-security-inventory.mjs",
+        "scripts/v1-status-report.mjs",
+        "scripts/v1-doc-audit.mjs",
+        "scripts/build.mjs",
+        "test/stable/**",
+        "test/adversarial/stable-control-attacks.test.mjs",
+        "docs/COMPATIBILITY.md",
+        "docs/MIGRATION.md",
+        "docs/HANDOVER.md",
+        "docs/SECURITY-INVENTORY.md",
+        "docs/internal-runtime/OMO-RUNTIME.md",
+        "docs/operations/**",
+        "docs/reports/v1-*.json",
+        "docs/reports/v1-*.md",
+        "docs/TRACEABILITY.md",
+        "docs/MCP.md",
+        "README.md",
+        "BACKLOG.md",
+        "THIRD_PARTY.md",
+        "package.json",
+        "config/upstreams/omo-pin.json"
+      ],
+      "exclude": [
+        ".shipping/contract.yaml",
+        ".shipping/contract.lock",
+        ".git/**",
+        "dist/**",
+        "coverage/**",
+        "node_modules/**",
+        "packages/team-dag/**",
+        "packages/internal-team/**",
+        "packages/internal-dag/**",
+        "packages/internal-remote/**",
+        "packages/internal-omo-bridge/**",
+        "src/mcp/**",
+        "src/core/**",
+        "bin/**"
+      ]
+    }
+  },
   "acceptance": [
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0901",
+      "id": "AC-1001",
+      "description": "All supported schemas are versioned, documented, bounded, and covered by canonical examples.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1001",
       "cwd": ".",
-      "description": "Remote access is authenticated, encrypted, replay-protected, bounded, and restricted to explicit project allowlists.",
-      "id": "AC-0901",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0902",
+      "id": "AC-1002",
+      "description": "Supported v0.6 through v0.9 states migrate and roll back without weakening contract, evidence, stop, or terminal authority.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1002",
       "cwd": ".",
-      "description": "Per-project permissions prevent unauthorized read, approval, execution, pause, restore, or close actions.",
-      "id": "AC-0902",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0903",
+      "id": "AC-1003",
+      "description": "The compatibility matrix accepts only supported Core, plugin, OMO bridge/runtime, Team/DAG, and remote combinations.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1003",
       "cwd": ".",
-      "description": "No remote schema exposes raw command, argv, environment, arbitrary path execution, credential, or policy-override fields.",
-      "id": "AC-0903",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0904",
+      "id": "AC-1004",
+      "description": "Clean install, upgrade, rollback, backup, restore, observability, incident, and recovery drills are recorded and pass.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1004",
       "cwd": ".",
-      "description": "Remote approval is signed and bound to exact actor, project, release, proposal ID and hash, Git SHA, expiry, nonce, and request identity.",
-      "id": "AC-0904",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0905",
+      "id": "AC-1005",
+      "description": "The beginner no-CLI workflow remains usable for start, approval, monitoring, pause, recovery, and CLOSED delivery.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1005",
       "cwd": ".",
-      "description": "Expired, replayed, transferred, wrong-SHA, wrong-project, or unauthorized approvals are rejected and one-time receipts cannot be reused.",
-      "id": "AC-0905",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0906",
+      "id": "AC-1006",
+      "description": "Benchmark and adversarial evidence reports zero false SHIPPABLE, stale-evidence acceptance, human-stop violations, and scope drift.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1006",
       "cwd": ".",
-      "description": "A trusted HTTPS pilot client can view status, approve, pause, inspect blockers and evidence, and receive completion notification.",
-      "id": "AC-0906",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0907",
+      "id": "AC-1007",
+      "description": "Every accepted completion claim remains bound to the current contract hash and Git SHA.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1007",
       "cwd": ".",
-      "description": "Local pause and abort remain stronger than every remote execute or resume request, including races and restarts.",
-      "id": "AC-0907",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0908",
+      "id": "AC-1008",
+      "description": "Direct, private OMO, and disabled Team/DAG execution profiles can be disabled or rolled back without governance corruption.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1008",
       "cwd": ".",
-      "description": "Notifications are deduplicated, bounded, auditable, and notification failure cannot change release state.",
-      "id": "AC-0908",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0909",
+      "id": "AC-1009",
+      "description": "Internal remote access remains authenticated, allowlisted, bounded, replay-protected, and free of arbitrary execution fields.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1009",
       "cwd": ".",
-      "description": "Backup and restore preserve contracts, Goal and Task state, evidence links, receipts, runtime pin, and CLOSED authority without credentials.",
-      "id": "AC-0909",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0910",
+      "id": "AC-1010",
+      "description": "OMO pins, notices, modifications, digests, selected tests, canary, and rollback evidence remain complete and private.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1010",
       "cwd": ".",
-      "description": "Restored non-terminal work remains paused until ownership and runtime health are proven; terminal work is never replayed.",
-      "id": "AC-0910",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0911",
+      "id": "AC-1011",
+      "description": "The internal-only boundary is explicit and public/customer distribution is a blocking reconsideration trigger.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1011",
       "cwd": ".",
-      "description": "Cross-project isolation, health, upgrade, rollback, restart, restore, and incident drills pass with inspectable evidence.",
-      "id": "AC-0911",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
-      "command": "node scripts/remote-acceptance.mjs AC-0912",
+      "id": "AC-1012",
+      "description": "Final security, license, ownership, retention, support, and operational reviews are complete.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1012",
       "cwd": ".",
-      "description": "The internal HTTPS pilot, restore drill, security suite, all regressions, and zero-blocker release gate pass.",
-      "id": "AC-0912",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
+      "id": "AC-1013",
+      "description": "Optional findings migrate to NEXT/backlog and do not keep v1 open after release blockers reach zero.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1013",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-1014",
+      "description": "v1.0.0 has final release notes, limitations, operator handover, clean install evidence, zero blockers, receipt, and tag readiness.",
+      "type": "command",
+      "command": "node scripts/v1-acceptance.mjs AC-1014",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-10-R01",
+      "description": "All source, scripts, schemas, docs validation code, and tests pass lint.",
+      "type": "command",
       "command": "npm run lint",
       "cwd": ".",
-      "description": "All v0.9 source, tests, scripts, documentation, and package files pass lint.",
-      "id": "AC-09-R01",
       "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
+      "id": "AC-10-R02",
+      "description": "All modules and package entrypoints resolve.",
+      "type": "command",
       "command": "npm run typecheck",
       "cwd": ".",
-      "description": "All v0.9 modules and package entrypoints resolve.",
-      "id": "AC-09-R02",
       "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
+      "id": "AC-10-R03",
+      "description": "The distributable v1 package is built with schemas, packages, config, docs, and binaries.",
+      "type": "command",
       "command": "npm run build",
       "cwd": ".",
-      "description": "A distributable v0.9 package containing the internal remote CLI and no sensitive runtime material is produced.",
-      "id": "AC-09-R03",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
+      "id": "AC-10-R04",
+      "description": "All core, adapter, MCP, decision, Goal, plugin, usability, and adversarial regressions pass.",
+      "type": "command",
       "command": "npm test",
       "cwd": ".",
-      "description": "All existing Shipping Core regressions pass.",
-      "id": "AC-09-R04",
       "required": true,
-      "timeoutSeconds": 600,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
-      "command": "npm run test:remote",
+      "id": "AC-10-R05",
+      "description": "Beginner plugin, installer, doctor, repair, upgrade, uninstall, and reinstall regressions pass.",
+      "type": "command",
+      "command": "npm run test:plugin",
       "cwd": ".",
-      "description": "The dedicated remote gateway unit, integration, HTTPS, backup, and adversarial suite passes.",
-      "id": "AC-09-R05",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
-      "command": "npm run smoke:remote",
+      "id": "AC-10-R06",
+      "description": "Local MCP protocol, bounded tool surface, user view, and lifecycle regressions pass.",
+      "type": "command",
+      "command": "npm run test:mcp",
       "cwd": ".",
-      "description": "The real local HTTPS remote gateway, notification, backup, restore, restart, and close pilot passes.",
-      "id": "AC-09-R06",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-10-R07",
+      "description": "Private OMO bridge pin, work-order, receipt, fallback, stop, and pilot regressions pass.",
+      "type": "command",
       "command": "npm run test:omo-bridge",
       "cwd": ".",
-      "description": "The private OMO bridge remains regression-clean and independently bounded.",
-      "id": "AC-09-R07",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
-      "command": "npm run security",
+      "id": "AC-10-R08",
+      "description": "Internal remote HTTPS, approval, replay, notification, backup, restore, and adversarial regressions pass.",
+      "type": "command",
+      "command": "npm run test:remote",
       "cwd": ".",
-      "description": "Security checks preserve internal-only network, no-shell, identity, replay, path, data-redaction, and human-stop boundaries.",
-      "id": "AC-09-R08",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-10-R09",
+      "description": "Stable schema, migration, health, event, compatibility, and adversarial tests pass.",
+      "type": "command",
+      "command": "npm run test:stable",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-10-R10",
+      "description": "The repeatable completion benchmark matches the recorded v1 evidence.",
+      "type": "command",
+      "command": "npm run benchmark:completion",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-10-R11",
+      "description": "The final isolated install and end-to-end stable-control smoke passes.",
+      "type": "command",
+      "command": "npm run smoke:stable",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 600
+    },
+    {
+      "id": "AC-10-R12",
+      "description": "The final security inventory and executable security checks pass.",
+      "type": "command",
+      "command": "npm run security && npm run security:inventory",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-10-R13",
+      "description": "License and internal modification inventories pass.",
+      "type": "command",
       "command": "npm run license:check",
       "cwd": ".",
-      "description": "License and private third-party boundary inventory remains valid.",
-      "id": "AC-09-R09",
       "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-10-R14",
+      "description": "Compatibility, migration, operations, handover, security, and release documents pass the documentation audit.",
+      "type": "command",
+      "command": "npm run verify:docs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
     }
   ],
+  "blockerPolicy": [
+    "acceptance-failure",
+    "contract-tamper",
+    "stale-evidence",
+    "scope-drift",
+    "data-loss",
+    "critical-security",
+    "human-stop-override",
+    "automatic-approval",
+    "model-self-approval",
+    "raw-command-surface",
+    "public-listener",
+    "false-user-state",
+    "hidden-blocker",
+    "unbounded-card-content",
+    "installer-path-escape",
+    "destructive-migration",
+    "migration-without-rollback",
+    "unsupported-schema-accepted",
+    "compatibility-fabrication",
+    "terminal-state-replay",
+    "internal-boundary-violation",
+    "missing-handover",
+    "missing-fallback-renderer"
+  ],
+  "budgets": {
+    "maxFixCycles": 2,
+    "maxAgentRuns": 2,
+    "maxCommandSeconds": 1200,
+    "maxOutputBytes": 1048576
+  },
+  "stopPolicy": {
+    "humanInterruptWins": true,
+    "autoContinueAfterInterrupt": false,
+    "closeWhenRequiredGatesPass": true
+  },
+  "releasePolicy": {
+    "autoCommit": false,
+    "autoTag": false,
+    "autoPush": false,
+    "generateReport": true
+  },
   "adapters": {
     "codex": {
       "artifactPaths": [],
@@ -211,111 +398,5 @@
       "artifactPaths": [],
       "command": null
     }
-  },
-  "blockerPolicy": [
-    "acceptance-failure",
-    "contract-tamper",
-    "stale-evidence",
-    "scope-drift",
-    "data-loss",
-    "critical-security",
-    "human-stop-override",
-    "automatic-approval",
-    "model-self-approval",
-    "raw-command-surface",
-    "public-listener",
-    "false-user-state",
-    "hidden-blocker",
-    "unauthenticated-remote",
-    "unencrypted-remote",
-    "remote-command-surface",
-    "remote-credential-surface",
-    "replay-acceptance",
-    "cross-project-access",
-    "remote-human-stop-override",
-    "backup-sensitive-data",
-    "backup-integrity",
-    "terminal-replay",
-    "missing-mobile-pilot",
-    "missing-restore-drill",
-    "notification-state-mutation"
-  ],
-  "budgets": {
-    "maxAgentRuns": 3,
-    "maxCommandSeconds": 900,
-    "maxFixCycles": 2,
-    "maxOutputBytes": 1048576
-  },
-  "goal": "Allow the owner to securely control explicitly allowlisted Shipping projects from trusted web and mobile clients over authenticated encrypted internal transport, with replay protection, auditable approvals, notifications, and proven backup and restore, while exposing no arbitrary shell, public listener, or customer surface.",
-  "project": "shipping-harness",
-  "release": "0.9.0",
-  "releasePolicy": {
-    "autoCommit": false,
-    "autoPush": false,
-    "autoTag": false,
-    "generateReport": true
-  },
-  "schema": "shipping-harness/v1",
-  "scope": {
-    "exclude": [
-      "Anonymous, public-internet, customer, multi-tenant, billing, SLA, or public SaaS access.",
-      "Remote arbitrary shell, executable, command, argv, environment, working-directory, provider credential, raw path execution, contract-byte editing, budget expansion, policy override, push, merge, deploy, or purchase fields.",
-      "Remote authority that can outrank local human pause or abort, reopen CLOSED work, replay terminal work, or fabricate recovery when runtime ownership evidence is missing.",
-      "Public OMO runtime exposure, public listeners, automatic DNS or firewall changes, or automatic internet exposure.",
-      "Team/DAG implementation or v1.0 schema-stability, migration-compatibility, benchmark, and final-installation work."
-    ],
-    "include": [
-      "An owner/company-internal HTTPS gateway bound only to loopback or private network addresses and requiring TLS certificate and key material.",
-      "Short-lived authenticated actor requests signed with bounded HMAC credentials, exact project allowlists, per-action permissions, timestamp checks, nonce replay protection, rate limits, payload limits, and audit request IDs.",
-      "High-level Shipping status, start, exact proposal approval, pause, resume, abort, verify, close, blocker/evidence summary, notification, backup, restore, and health operations only.",
-      "Signed approval receipts bound to actor, project, release, proposal ID and hash, current Git SHA, expiry, nonce, and one-time consumption where applicable.",
-      "Deduplicated approval-required, BLOCKED, PAUSED, and CLOSED notifications whose delivery failure cannot mutate Shipping authority state.",
-      "Integrity-signed backup and restore of Shipping contracts, locks, state, Goal and Task snapshots, ledgers, issues, backlog, proposals, evidence, release receipts, runtime pins, and minimum non-terminal private OMO ownership state.",
-      "Restore-to-paused and terminal-non-replay rules, cross-project isolation, upgrade, rollback, incident runbooks, health evidence, and one real local HTTPS mobile/web-style pilot against a disposable allowlisted repository.",
-      "Regression, adversarial, package, security, license, backup and restore, restart, and pilot evidence sufficient to close v0.9.0 with zero blockers.",
-      "The distributable build includes the existing packages and config trees and marks the internal remote CLI executable; this is packaging of the locked v0.9 behavior, not new product scope."
-    ],
-    "paths": {
-      "exclude": [
-        ".shipping/contract.yaml",
-        ".shipping/contract.lock",
-        ".git/**",
-        "dist/**",
-        "coverage/**",
-        "node_modules/**",
-        "packages/stable-control/**",
-        "test/stable/**",
-        "test/adversarial/stable-control-attacks.test.mjs",
-        "scripts/v1-**",
-        "docs/SECURITY-INVENTORY.md",
-        "packages/internal-omo-bridge/stable.mjs"
-      ],
-      "include": [
-        "bin/shipping-harness-remote.mjs",
-        "packages/internal-remote/**",
-        "scripts/remote-acceptance.mjs",
-        "scripts/remote-gateway-smoke.mjs",
-        "scripts/security-check.mjs",
-        "test/remote/**",
-        "test/adversarial/remote-attacks.test.mjs",
-        "docs/internal-remote/**",
-        "docs/operations/**",
-        "docs/reports/v0.9-remote-pilot.json",
-        "docs/reports/v0.9-remote-pilot.md",
-        "config/internal-remote.example.json",
-        "README.md",
-        "THIRD_PARTY.md",
-        "docs/MCP.md",
-        "package.json",
-        "scripts/build.mjs",
-        "scripts/amend-v09-packaging-scope.mjs"
-      ]
-    }
-  },
-  "stopPolicy": {
-    "autoContinueAfterInterrupt": false,
-    "closeWhenRequiredGatesPass": true,
-    "humanInterruptWins": true
-  },
-  "worker": "shipping-harness"
+  }
 }

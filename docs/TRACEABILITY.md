@@ -104,3 +104,13 @@ src/cli.mjs                 user flows and orchestration
 | v1.0 / AC-1001..1014 | schema/migration matrix, all regressions, completion benchmark, operations drills, security/license/modification inventory, and handover |
 
 Any implementation that cannot map to a requirement is out of scope or must amend this matrix before coding.
+
+## v0.7.0 Private OMO Runtime Traceability
+
+| Requirement / acceptance | Implementation | Verification |
+|---|---|---|
+| REQ-INTERNAL-001, REQ-UPSTREAM-001..005 | `config/upstreams/omo-pin.json`, separate `shipping-harness-omo-runtime` | AC-0701, AC-0702, AC-0711, AC-0712, AC-0713 |
+| REQ-OMO-001..007 | `packages/internal-omo-bridge/` | `npm run test:omo-bridge`, AC-0703..AC-0710 |
+| Shipping-only Finisher and current evidence | `bridge.mjs`, `receipt.mjs`, core release gate | AC-0708, AC-0714 |
+| Real installation and operations | sibling runtime verification evidence, `scripts/omo-pilot.mjs` | AC-0711, AC-0714 |
+| Conditional Team/DAG entry gate | `docs/internal-runtime/v0.7-pilot.json` | v0.8 decision = DISABLED |

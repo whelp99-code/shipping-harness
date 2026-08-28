@@ -1,6 +1,6 @@
 # Third-Party Integration Inventory
 
-The current Shipping Harness v0.3 core has no runtime package dependencies and vendors no third-party source. The accepted future internal-only direction allows selected upstream code to be used under explicit pins and license boundaries without importing the upstream monorepos into Shipping Core.
+Shipping Harness v0.7 has no runtime package dependencies and vendors no third-party source. The separately pinned private OMO runtime is installed and verified outside Shipping Core under an internal-only license boundary; Shipping stores only interoperability code, exact pins, digests, notices, and evidence references.
 
 | Project | Current use | Accepted future use | License and boundary |
 |---|---|---|---|
@@ -8,7 +8,7 @@ The current Shipping Harness v0.3 core has no runtime package dependencies and v
 | OpenAI Codex CLI | Coding-agent host | Direct/fallback execution runtime | PATH discovery and configured command; authentication and provider access remain environment facts |
 | Gajae Code | `gjc` adapter and code-audit reference | Selected MIT Goal/Ledger/receipt mechanisms may be adapted into the v0.5 Shipping runtime | MIT; preserve notices for copied/adapted portions; full Gajae runtime remains optional behind the adapter |
 | Q00 Ouroboros | `ooo`/`ouroboros` adapter and primary v0.4 decision reference | Selected decision provenance, safe-default, conflict, rollback, and stop mechanisms may be ported with attribution | MIT; the Python runtime is not required by Shipping Core; evolution remains explicit and outside current-release closure |
-| OMO Native / Oh My OpenAgent | `omo` process/config/event bridge and code-audit reference | Actual source may run from v0.7 in a separately pinned private internal runtime with its own notices, modification log, tests, artifact digest, and rollback pin | Repository default Sustainable Use License permits the accepted personal/company-internal direction but constrains distribution; no public/customer bundle is planned |
+| OMO Native / Oh My OpenAgent | `omo` process/config/event bridge and code-audit reference | Actual source runs in v0.7 from a separately pinned private internal runtime with its own notices, modification log, tests, artifact digest, and rollback pin | Repository default Sustainable Use License permits the accepted personal/company-internal direction but constrains distribution; no public/customer bundle is planned |
 
 ## Internal OMO conditions
 

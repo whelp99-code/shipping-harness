@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current stable:** `v0.5.0 — Durable Goal and Evidence Runtime` (`CLOSED`)
-**Current development:** `v0.6.0 — Beginner Plugin and Local Agent Experience` (`DRAFT`)
+**Current stable:** `v0.7.0 — Private OMO Runtime Bridge` (`CLOSED`)
+**Current development:** `v0.8.0 — Team/DAG Entry Gate` (`DISABLED by v0.7 pilot evidence`)
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -157,9 +157,17 @@ Model-agnostic automatic decision mode, bounded repository evidence, assumptions
 
 Locked contracts compile into stable Goal and Task records with append-only execution evidence, restart recovery, current-SHA completion proof, bounded retries, planning-stuck termination, human pause/abort propagation, and concise MCP status. Released and closed as `v0.5.0`.
 
-### v0.6.0 onward
+### v0.6.0 — Beginner Plugin and Local MCP
 
-The accepted internal-only sequence is: durable Goal/Evidence runtime, beginner plugin/local MCP, a separately pinned private OMO execution runtime, bounded Team/DAG only after pilot proof, authenticated internal remote/mobile control, and a stable v1.0 control plane. See [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md).
+Local plugin installer, concise approval/progress/blocker/completion views, MCP resources, doctor/repair/upgrade/rollback, isolated package installation, and a non-developer flow without project-specific CLI or JSON editing. Released and closed as `v0.6.0`.
+
+### v0.7.0 — Private OMO Runtime Bridge
+
+A separately pinned private OMO runtime, signed work orders and receipts, bounded execution, session ownership, human-stop precedence, package/install/canary/rollback proof, approved fallback or durable BLOCKED, and mandatory Shipping re-verification. OMO source is not bundled into Shipping Core. See [`docs/internal-runtime/README.md`](docs/internal-runtime/README.md).
+
+### v0.8.0 onward
+
+The v0.7 real pilot found no coordination bottleneck or parallel critical work, so Team/DAG remains disabled. The accepted sequence continues with authenticated internal remote/mobile control and a stable v1.0 control plane. See [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md).
 
 Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
 

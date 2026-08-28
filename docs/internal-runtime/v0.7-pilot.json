@@ -1,0 +1,65 @@
+{
+  "schema": "shipping-harness/v0.7-pilot-v1",
+  "generatedAt": "2026-08-28T08:36:06.788Z",
+  "passed": true,
+  "runtime": {
+    "runtimeVersion": "0.7.0",
+    "releaseCommit": "2cec938c34cef1bf209b830a3ae6a8aa7869fcfe",
+    "upstreamCommit": "43d9c058e08b00a3629319df82e6a647de2b8490",
+    "internalPatchCommit": "07b4108",
+    "buildDigest": "sha256:8e2697f133af9736df737fa731ff33af701a3f9bf94187b19d6e1dae88c78c91"
+  },
+  "contract": {
+    "baselineSha": "4564535fda2d5e7ae5292106b4cf5dcbc175d55e",
+    "contractHash": "c5c8969cfb5a3c716ecb30436335f99819768eda892e6c2bdf81e0ab9ac9dfb9",
+    "acceptanceCount": 1,
+    "goalCount": 1,
+    "taskCount": 1
+  },
+  "privateOmoReceipt": {
+    "status": "completed",
+    "receiptHash": "5ff9abf86ff60e6cac7ad828deed37f666d6bcf3aaeecaa86a37169938cae9f9",
+    "selectedAgent": "runtime-probe",
+    "observedModels": [],
+    "usage": {
+      "turns": 0,
+      "tool_calls": 0,
+      "continuations": 0,
+      "wall_clock_ms": 86
+    },
+    "changedPaths": [],
+    "releaseCompletionTrusted": false,
+    "requiresShippingVerification": true
+  },
+  "shippingVerification": {
+    "decision": "SHIPPABLE",
+    "requiredFailed": 0,
+    "blockers": 0
+  },
+  "finalRelease": {
+    "state": "CLOSED",
+    "release": "0.7.0",
+    "backlogCount": 0
+  },
+  "metrics": {
+    "completionRate": 1,
+    "falseDoneCount": 0,
+    "humanInterventions": 1,
+    "humanStopViolations": 0,
+    "scopeViolations": 0,
+    "runtimeContinuations": 0,
+    "runtimeToolCalls": 0,
+    "runtimeTurns": 0,
+    "durationMs": 418,
+    "parallelizableTaskCount": 0,
+    "coordinationWaitCount": 0,
+    "repeatedReviewCount": 0
+  },
+  "entryGate": {
+    "coordinationBottleneckProven": false,
+    "completionBenefitFromTeamDagProven": false,
+    "v08TeamDagRecommended": false,
+    "decision": "DISABLED",
+    "reason": "The real v0.7 pilot completed one Goal/Task with zero coordination waits, zero scope violations, zero false-done events, and no parallelizable critical work. Team/DAG would add complexity without proven completion benefit."
+  }
+}

@@ -1,7 +1,8 @@
 # Shipping Harness
 
-**Worker name:** `shipping-harness`  
-**Current target:** `v0.3.0`
+**Worker name:** `shipping-harness`
+**Current stable:** `v0.3.0`
+**Next planned:** `v0.4.0 — AI Decides, Human Approves` (`DRAFT`)
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -30,6 +31,16 @@ It is not a coding model, another autonomous agent, or a replacement for Codex, 
 - Fix loops, agent runs, command duration, and output size are bounded.
 - A human pause or abort always wins over automatic continuation.
 - A closed version cannot silently reopen; further changes require a new release contract.
+
+## Product direction from v0.4.0
+
+The user states the desired outcome. The connected agent chooses safe technical defaults, the smallest operable scope, acceptance checks, and deferred work. The user reviews one concise release brief and approves or edits it.
+
+```text
+User outcome → AI decision → one approval → bounded execution → verified close
+```
+
+`AUTO` is the default mode. Questions are exceptional and are limited to high-risk, irreversible, externally consequential, or genuinely unresolved core-product decisions. See [`docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md`](docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md).
 
 ## Quick start
 
@@ -138,6 +149,14 @@ Capability-negotiated adapters for Generic shell execution, Codex CLI, Gajae Cod
 
 A local STDIO MCP server, natural-language goal intake, repository analysis, minimal scope and acceptance proposal, explicit Git-bound approval, safe host-agent work orders, configured-adapter execution without raw command inputs, and deterministic verification/closure tools.
 
+### v0.4.0 — AI Decides, Human Approves (planned)
+
+Model-agnostic automatic decision mode, bounded repository evidence, assumptions/confidence/reversibility, risk-based exception questions, one-screen approval brief, and deterministic decision-policy validation. The v0.4.0 contract is intentionally left `DRAFT` until implementation is explicitly started.
+
+### v0.5.0 onward
+
+Bounded goal/role orchestration, plugin and approval UX, authenticated remote control, pilot hardening, and a stable v1.0 control plane are sequenced in [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md).
+
 ## Documentation
 
 - [`docs/planning/00-INTAKE.md`](docs/planning/00-INTAKE.md)
@@ -149,6 +168,8 @@ A local STDIO MCP server, natural-language goal intake, repository analysis, min
 - [`docs/planning/06-ADAPTER-INTEGRATION.md`](docs/planning/06-ADAPTER-INTEGRATION.md)
 - [`docs/TRACEABILITY.md`](docs/TRACEABILITY.md)
 - [`docs/MCP.md`](docs/MCP.md)
+- [`docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md`](docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md)
+- [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md)
 
 ## Safety boundary
 

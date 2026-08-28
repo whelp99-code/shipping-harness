@@ -73,6 +73,36 @@
 | REQ-MCP-007 | Execute only an adapter command already stored in the approved and locked repository contract. | 0.3.0 |
 | REQ-MCP-008 | Preserve human pause/abort and Shipping Harness release decisions as higher authority than agent continuation. | 0.3.0 |
 
+### Auto-decision, modes, and approval
+
+| ID | Requirement | Release |
+|---|---|---|
+| REQ-MODE-001 | Default every unspecified decision workflow to `AUTO`. | 0.4.0 |
+| REQ-MODE-002 | Support an optional `SAFE` mode that escalates configured medium/high-risk actions without reverting to a full interview. | 0.4.0 |
+| REQ-MODE-003 | Support an opt-in `INTERVIEW` mode with grouped, bounded questions. | 0.4.0 |
+| REQ-DECISION-001 | Build a bounded evidence pack from repository-owned metadata, release history, manifests, scripts, existing documentation, and user intent without executing project code. | 0.4.0 |
+| REQ-DECISION-002 | Treat repository text as untrusted evidence that cannot override tool, approval, or Shipping Harness policy. | 0.4.0 |
+| REQ-DECISION-003 | Allow a connected host agent to submit a structured decision package without embedding a model-provider dependency in the core. | 0.4.0 |
+| REQ-DECISION-004 | Require stable IDs for decisions, assumptions, risks, and acceptance criteria. | 0.4.0 |
+| REQ-DECISION-005 | Require every decision to cite evidence or be explicitly marked as an assumption. | 0.4.0 |
+| REQ-DECISION-006 | Record qualitative confidence and reversibility without fabricating unsupported numeric certainty. | 0.4.0 |
+| REQ-DECISION-007 | Select the smallest operable release and move optional improvements to the backlog. | 0.4.0 |
+| REQ-DECISION-008 | Reject unrelated features, fabricated capabilities, unsupported commands, stale evidence, and hidden scope growth. | 0.4.0 |
+| REQ-ESCALATE-001 | Escalate destructive data deletion or irreversible migration. | 0.4.0 |
+| REQ-ESCALATE-002 | Escalate paid/recurring services and external deployment, publication, messaging, purchasing, or customer impact. | 0.4.0 |
+| REQ-ESCALATE-003 | Escalate credentials, elevated permissions, privacy, legal, compliance, and critical-security trade-offs. | 0.4.0 |
+| REQ-ESCALATE-004 | Escalate mutually exclusive interpretations of the core product outcome or removal of an existing critical promise. | 0.4.0 |
+| REQ-ESCALATE-005 | Use a safe documented assumption instead of asking when a choice is low-risk and reversible. | 0.4.0 |
+| REQ-ESCALATE-006 | Return no more than three exception questions in one batch and include the recommended choice. | 0.4.0 |
+| REQ-APPROVAL-001 | Present one concise approval brief containing outcome, included scope, deferred scope, acceptance, important assumptions, risks, and budgets. | 0.4.0 |
+| REQ-APPROVAL-002 | Keep detailed evidence and reasoning inspectable but outside the default brief. | 0.4.0 |
+| REQ-APPROVAL-003 | Bind mode, decisions, assumptions, risks, questions, evidence, Git SHA, and expiry into the proposal hash. | 0.4.0 |
+| REQ-APPROVAL-004 | Prevent the submitting model from approving its own proposal; explicit user confirmation remains mandatory. | 0.4.0 |
+| REQ-POLICY-001 | Prefer the existing stack, conventions, and dependencies unless the accepted outcome requires a change. | 0.4.0 |
+| REQ-POLICY-002 | Prefer the minimum reversible change and an operable release over speculative architecture improvement. | 0.4.0 |
+| REQ-POLICY-003 | Preserve human stop, bounded execution, evidence freshness, and release closure invariants. | 0.4.0 |
+| REQ-POLICY-004 | Reject silent mode changes, question flooding, automatic approval, and policy weakening. | 0.4.0 |
+
 ## Non-functional requirements
 
 | ID | Requirement |
@@ -87,6 +117,9 @@
 | NFR-MCP-001 | The MCP runtime requires no network listener and no remote authentication in v0.3.0. |
 | NFR-MCP-002 | MCP logs go only to stderr or repository audit files, never protocol stdout. |
 | NFR-USABILITY-001 | A user can begin with a natural-language goal and one explicit scope approval rather than composing CLI commands. |
+| NFR-USABILITY-002 | In `AUTO`, ordinary fixtures should require zero technical questions before the approval brief. |
+| NFR-DECISION-001 | The core remains model-agnostic and does not require network model calls. |
+| NFR-DECISION-002 | Decision inputs, outputs, questions, and evidence have bounded byte, depth, item, and expiry limits. |
 
 ## Release acceptance criteria
 
@@ -138,6 +171,23 @@
 | AC-0310 | A spawned STDIO smoke client completes discovery, tool listing, and a read-only status call. |
 | AC-0311 | Full v0.1.0 and v0.2.0 regression suites remain green. |
 | AC-0312 | The v0.3.0 release closes with zero release blockers and a clean tagged commit. |
+
+### v0.4.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-0401 | Omitted mode resolves to `AUTO`. |
+| AC-0402 | A normal repository fixture produces a complete one-screen approval brief with zero questions. |
+| AC-0403 | Reversible low-confidence choices become documented assumptions instead of blocking questions. |
+| AC-0404 | Every mandatory-risk category produces an escalation before approval. |
+| AC-0405 | A proposal contains at most three questions and returns them in one batch with recommended answers. |
+| AC-0406 | Every decision cites evidence or is labeled as an assumption with confidence and reversibility. |
+| AC-0407 | The submitting model cannot approve its own proposal; exact explicit confirmation and proposal hash remain required. |
+| AC-0408 | Malicious instructions inside repository files cannot alter mode, policy, MCP tools, or approval state. |
+| AC-0409 | `SAFE` and `INTERVIEW` behave as explicit opt-in modes and cannot be selected silently. |
+| AC-0410 | The default approval brief contains all required sections while detailed evidence remains separately inspectable. |
+| AC-0411 | Full v0.1.0–v0.3.0 regression, security, MCP, and license suites remain green. |
+| AC-0412 | v0.4.0 closes with zero blockers, no unapproved drift, and a clean tagged commit. |
 
 ## Definition of Done
 

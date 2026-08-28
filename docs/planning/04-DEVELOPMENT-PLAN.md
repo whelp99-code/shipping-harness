@@ -1,4 +1,4 @@
-# Development Plan through v0.2.0
+# Historical Development Plan through v0.3.0
 
 ## Delivery rule
 
@@ -126,6 +126,15 @@ git status --short == empty after release artifacts committed
 tag v0.3.0
 ```
 
+## v0.4.0 onward
+
+The accepted product direction, v0.4.0 PR slices, and sequential roadmap through v1.0.0 are maintained in:
+
+- [`08-V0.4-AUTO-DECISION-DIRECTION.md`](08-V0.4-AUTO-DECISION-DIRECTION.md)
+- [`09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md)
+
+The v0.4.0 contract remains `DRAFT` until implementation is explicitly started. Planning approval does not authorize code execution or Scope Lock.
+
 ## Commit strategy
 
 1. Commit validated v0.1.0 implementation and docs.
@@ -134,6 +143,9 @@ tag v0.3.0
 4. Commit validated v0.2.0 implementation and docs.
 5. Create annotated `v0.2.0` tag.
 6. Push branch and tags only when a configured remote and permissions exist.
+7. Close and tag `v0.3.0` before preparing the v0.4.0 DRAFT.
+8. Commit the accepted v0.4.0 direction and development plan without locking or implementing it.
+9. Start v0.4.0 implementation only after a separate explicit instruction.
 
 ## Rollback
 

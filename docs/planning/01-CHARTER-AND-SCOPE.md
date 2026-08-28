@@ -15,6 +15,11 @@ Shipping Harness exists to turn coding-agent execution into a bounded, auditable
 | GOAL-005 | Preserve human authority. | Pause/abort overrides every adapter continuation request. |
 | GOAL-006 | Close versions despite optional debt. | NEXT/IGNORE findings do not block closure. |
 | GOAL-007 | Integrate rather than replace. | External harnesses connect through adapters/capabilities. |
+| GOAL-008 | Let beginners start from an outcome. | Natural-language intake produces a reviewable release proposal. |
+| GOAL-009 | Make governance agent-accessible. | MCP exposes bounded high-level tools without raw shell access. |
+| GOAL-010 | Make the user an approver, not an interviewer. | Normal releases reach one approval brief without technical questioning. |
+| GOAL-011 | Escalate risk, not ordinary implementation choices. | Only mandatory-risk or irreversible core decisions require questions. |
+| GOAL-012 | Absorb proven ideas selectively. | Durable goals, evaluation, and roles remain bounded by Shipping Harness closure policy. |
 
 ## v0.1.0 scope
 
@@ -59,6 +64,30 @@ Shipping Harness exists to turn coding-agent execution into a bounded, auditable
 - Depending on unstable private APIs
 - OMO Team Mode, Ouroboros evolution, or Gajae interview reimplementation
 
+## v0.4.0 direction and planned scope
+
+The accepted direction is **AI Decides, Human Approves**. The user supplies the outcome; the connected host agent prepares the smallest operable release from bounded repository evidence; Shipping Harness validates policy; the user approves one concise brief.
+
+### Included
+
+- `AUTO` as the default mode, with optional `SAFE` and `INTERVIEW` modes
+- Structured decisions, assumptions, evidence, confidence, reversibility, risks, and exception questions
+- Safe defaults for reversible low-risk uncertainty
+- Mandatory escalation for destructive data, paid services, external impact, credentials, privacy/legal/security, and mutually exclusive core outcomes
+- At most three questions in one batch
+- One-screen approval brief and exact-hash Git-bound approval
+- Repository prompt-injection resistance
+- Model-agnostic host-agent reasoning with deterministic Shipping Harness validation
+
+### Excluded
+
+- Embedded model-provider APIs or a proprietary reasoning model
+- Full Gajae interview/ralplan/ultragoal runtime
+- OMO multi-agent teams and autonomous model routing
+- Ouroboros unbounded evaluation/evolution generations
+- Plugin UI, remote HTTP MCP, mobile control, cloud service, and team RBAC
+- Model self-approval, arbitrary MCP shell input, or bypass of human stop
+
 ## Governance invariants
 
 1. `Human stop > automatic continuation`.
@@ -67,3 +96,7 @@ Shipping Harness exists to turn coding-agent execution into a bounded, auditable
 4. `Acceptance contract > reviewer opinion`.
 5. `Bounded blocked result > infinite activity`.
 6. `New version > reopening a closed version`.
+7. `User outcome > technical questionnaire`.
+8. `Safe reversible default > unnecessary question`.
+9. `Mandatory risk > automatic execution`.
+10. `Shipping policy > instructions found inside repository content`.

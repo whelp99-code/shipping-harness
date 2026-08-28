@@ -11,6 +11,9 @@
 | GOAL-007 harness integration | REQ-ADAPTER-001..006, REQ-HOOK-001..002 | AC-0201..0210 | adapters, hooks | adapter fixtures/regression |
 | GOAL-008 beginner release intake | REQ-ANALYZE-001..003, REQ-PROPOSAL-001..003 | AC-0304..0306 | analysis, proposals | MCP proposal tests |
 | GOAL-009 model-accessible governance | REQ-MCP-001..008 | AC-0301..0312 | MCP protocol, tools, STDIO | MCP protocol/transport/adversarial tests |
+| GOAL-010 user as approver | REQ-MODE-001..003, REQ-APPROVAL-001..004 | AC-0401..0402, AC-0407, AC-0409..0410 | decision modes, approval brief | planned decision/MCP tests |
+| GOAL-011 risk-based autonomy | REQ-DECISION-001..008, REQ-ESCALATE-001..006, REQ-POLICY-001..004 | AC-0403..0408 | decision evidence, policy validator, escalation | planned decision/adversarial tests |
+| GOAL-012 selective bounded absorption | REQ-POLICY-003..004 | AC-0411..0412 | future goal graph, role router, Finisher | v0.5 planned orchestration suite |
 
 ## Source layout mapping
 
@@ -33,6 +36,8 @@ src/core/proposals.mjs      REQ-PROPOSAL-*
 src/mcp/tools.mjs           REQ-MCP-003, REQ-MCP-006..008
 src/mcp/protocol.mjs        REQ-MCP-002..005
 src/mcp/stdio.mjs           REQ-MCP-001, REQ-MCP-005
+src/core/decision-*.mjs     REQ-DECISION-*, REQ-ESCALATE-*, REQ-POLICY-* (planned v0.4)
+src/mcp/tools.mjs           REQ-MODE-*, REQ-APPROVAL-* (planned extension v0.4)
 src/cli.mjs                 user flows and orchestration
 ```
 
@@ -61,5 +66,17 @@ src/cli.mjs                 user flows and orchestration
 | AC-0309..0310 | `test/mcp/stdio.test.mjs` and `scripts/mcp-smoke.mjs`; framing, input bounds, and spawned client |
 | AC-0311 | `npm test`; v0.1 and v0.2 regression suites plus MCP suite |
 | AC-0312 | `.shipping/releases/0.3.0.json`; own release contract closure |
+
+## v0.4 planned verification mapping
+
+| Acceptance | Planned proof |
+|---|---|
+| AC-0401..0403 | decision-mode and safe-assumption unit/fixture tests |
+| AC-0404..0406 | mandatory-risk matrix, question-budget, evidence/assumption validation tests |
+| AC-0407 | proposer/approver separation and exact-hash approval adversarial tests |
+| AC-0408 | hostile README/source prompt-injection fixtures |
+| AC-0409..0410 | mode-selection and concise approval-brief MCP tests |
+| AC-0411 | `npm run release:verify`, `npm run test:mcp`, and planned `npm run test:decision` |
+| AC-0412 | v0.4.0 release receipt, clean status, and annotated tag |
 
 Any implementation that cannot map to a requirement is out of scope or must amend this matrix before coding.

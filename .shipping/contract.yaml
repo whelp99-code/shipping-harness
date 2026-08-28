@@ -1,259 +1,45 @@
 {
-  "acceptance": [
-    {
-      "id": "AC-0801",
-      "description": "The v0.7 pilot is authentic and records no proven coordination bottleneck.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0801",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0802",
-      "description": "No Team/DAG compiler, execution package, member runtime, or graph code is added.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0802",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0803",
-      "description": "The private OMO profile remains pinned and compatible with Team/DAG disabled.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0803",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0804",
-      "description": "Shipping remains the external Finisher and no team-member authority surface exists.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0804",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0805",
-      "description": "Concurrency, depth, continuations, fix cycles and unlimited-value policy remain bounded.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0805",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0806",
-      "description": "No selective retry/amend claim is made because Team/DAG was not activated.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0806",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0807",
-      "description": "No-progress and oscillation risk is avoided by leaving orchestration disabled.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0807",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0808",
-      "description": "Pause, abort, cancellation and late-result Shipping invariants still pass.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0808",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0809",
-      "description": "v0.7 session ownership, deduplication and recovery evidence remains valid.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0809",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0810",
-      "description": "The system can continue through the approved v0.7 profile with Team/DAG disabled.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0810",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0811",
-      "description": "The decision report truthfully compares direct, v0.7 and disabled v0.8 modes without invented results.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0811",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0812",
-      "description": "v0.8 closes only as an evidence-backed DISABLED decision with all governance invariants intact.",
-      "type": "command",
-      "command": "node scripts/team-dag-entry-gate.mjs AC-0812",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0890",
-      "description": "All Shipping regressions pass.",
-      "type": "command",
-      "command": "npm test",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 600
-    },
-    {
-      "id": "AC-0891",
-      "description": "Private OMO bridge regressions pass.",
-      "type": "command",
-      "command": "npm run test:omo-bridge",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0892",
-      "description": "Security boundaries pass.",
-      "type": "command",
-      "command": "npm run security",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0893",
-      "description": "License and third-party inventories pass.",
-      "type": "command",
-      "command": "npm run license:check",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-0894",
-      "description": "The package builds without Team/DAG source.",
-      "type": "command",
-      "command": "npm run build",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    }
-  ],
-  "adapters": {
-    "codex": {
-      "artifactPaths": [],
-      "command": null
-    },
-    "gajae": {
-      "artifactPaths": [],
-      "command": null
-    },
-    "generic": {
-      "artifactPaths": [],
-      "command": null
-    },
-    "omo": {
-      "artifactPaths": [],
-      "command": null
-    },
-    "ouroboros": {
-      "artifactPaths": [],
-      "command": null
-    }
-  },
-  "blockerPolicy": [
-    "acceptance-failure",
-    "contract-tamper",
-    "stale-evidence",
-    "scope-drift",
-    "critical-security",
-    "team-dag-unjustified-activation",
-    "team-dag-code-present",
-    "team-dag-config-enabled",
-    "unlimited-execution",
-    "fabricated-benchmark",
-    "finisher-authority-regression"
-  ],
-  "budgets": {
-    "maxFixCycles": 1,
-    "maxAgentRuns": 1,
-    "maxCommandSeconds": 900,
-    "maxOutputBytes": 1048576
-  },
-  "goal": "Close v0.8.0 by recording and enforcing the evidence-based decision that Team and DAG orchestration remain disabled because the v0.7 real pilot did not prove a coordination bottleneck or completion benefit.",
-  "internalRuntime": {
-    "configPath": "config/upstreams/omo-pin.json",
-    "dagMode": false,
-    "fallback": [
-      "codex",
-      "generic",
-      "blocked"
-    ],
-    "humanStopWins": true,
-    "maxAgentDepth": 1,
-    "maxContinuations": 3,
-    "maxFixCycles": 2,
-    "maxParallelWorkers": 2,
-    "profile": "private-omo-v0.7",
-    "publicPublish": false,
-    "receiptSchema": "shipping-omo-receipt/v1",
-    "schema": "shipping-harness/private-runtime-profile-v1",
-    "shippingFinisherOnly": true,
-    "teamMode": false,
-    "workOrderSchema": "shipping-omo/v1"
-  },
-  "project": "shipping-harness",
-  "release": "0.8.0",
-  "releasePolicy": {
-    "autoCommit": false,
-    "autoPush": false,
-    "autoTag": false,
-    "generateReport": true
-  },
   "schema": "shipping-harness/v1",
+  "project": "shipping-harness",
+  "worker": "shipping-harness",
+  "release": "0.9.0",
+  "goal": "Allow the owner to securely control explicitly allowlisted Shipping projects from trusted web and mobile clients over authenticated encrypted internal transport, with replay protection, auditable approvals, notifications, and proven backup and restore, while exposing no arbitrary shell, public listener, or customer surface.",
   "scope": {
     "include": [
-      "A machine-readable and human-readable v0.8 Team/DAG entry-gate decision bound to the v0.7 pilot report, v0.7 release receipt, private runtime pin, and current Git SHA.",
-      "A deterministic gate that rejects Team/DAG activation unless concrete coordination bottleneck and likely completion benefit are both proven.",
-      "The v0.7 single private-runtime profile remains the default with Team Mode and DAG Mode false and no unlimited values.",
-      "A small comparison record for direct Shipping, v0.7 private OMO, and v0.8 Team/DAG marked NOT_RUN/DISABLED when the entry gate fails.",
-      "Regression evidence that fallback, pause, evidence, and Finisher authority remain unchanged.",
-      "Package, documentation, traceability, and release receipts for the disabled decision."
+      "An owner/company-internal HTTPS gateway bound only to loopback or private network addresses and requiring TLS certificate and key material.",
+      "Short-lived authenticated actor requests signed with bounded HMAC credentials, exact project allowlists, per-action permissions, timestamp checks, nonce replay protection, rate limits, payload limits, and audit request IDs.",
+      "High-level Shipping status, start, exact proposal approval, pause, resume, abort, verify, close, blocker/evidence summary, notification, backup, restore, and health operations only.",
+      "Signed approval receipts bound to actor, project, release, proposal ID and hash, current Git SHA, expiry, nonce, and one-time consumption where applicable.",
+      "Deduplicated approval-required, BLOCKED, PAUSED, and CLOSED notifications whose delivery failure cannot mutate Shipping authority state.",
+      "Integrity-signed backup and restore of Shipping contracts, locks, state, Goal and Task snapshots, ledgers, issues, backlog, proposals, evidence, release receipts, runtime pins, and minimum non-terminal private OMO ownership state.",
+      "Restore-to-paused and terminal-non-replay rules, cross-project isolation, upgrade, rollback, incident runbooks, health evidence, and one real local HTTPS mobile/web-style pilot against a disposable allowlisted repository.",
+      "Regression, adversarial, package, security, license, backup and restore, restart, and pilot evidence sufficient to close v0.9.0 with zero blockers."
     ],
     "exclude": [
-      "Team/DAG graph compiler, team members, graph execution, node retry, graph amendment, role routing, or multi-agent orchestration code.",
-      "Enabling any OMO Team or DAG configuration.",
-      "Synthetic benchmark results that pretend disabled Team/DAG execution occurred.",
-      "New agent roles, concurrency above the v0.7 profile, depth above one, or unlimited values.",
-      "Remote/mobile control, organization RBAC, backup service, or v1.0 schema freeze.",
-      "Public, customer, SaaS, or external tenant delivery."
+      "Anonymous, public-internet, customer, multi-tenant, billing, SLA, or public SaaS access.",
+      "Remote arbitrary shell, executable, command, argv, environment, working-directory, provider credential, raw path execution, contract-byte editing, budget expansion, policy override, push, merge, deploy, or purchase fields.",
+      "Remote authority that can outrank local human pause or abort, reopen CLOSED work, replay terminal work, or fabricate recovery when runtime ownership evidence is missing.",
+      "Public OMO runtime exposure, public listeners, automatic DNS or firewall changes, or automatic internet exposure.",
+      "Team/DAG implementation or v1.0 schema-stability, migration-compatibility, benchmark, and final-installation work."
     ],
     "paths": {
       "include": [
-        "scripts/team-dag-entry-gate.mjs",
-        "test/team-dag/**",
-        "docs/internal-runtime/v0.8-team-dag-decision.json",
-        "docs/internal-runtime/v0.8-team-dag-decision.md",
-        "docs/TRACEABILITY.md",
+        "bin/shipping-harness-remote.mjs",
+        "packages/internal-remote/**",
+        "scripts/remote-acceptance.mjs",
+        "scripts/remote-gateway-smoke.mjs",
+        "scripts/security-check.mjs",
+        "test/remote/**",
+        "test/adversarial/remote-attacks.test.mjs",
+        "docs/internal-remote/**",
+        "docs/operations/**",
+        "docs/reports/v0.9-remote-pilot.json",
+        "docs/reports/v0.9-remote-pilot.md",
+        "config/internal-remote.example.json",
         "README.md",
-        "BACKLOG.md",
-        "package.json",
-        "config/upstreams/omo-pin.json"
+        "THIRD_PARTY.md",
+        "docs/MCP.md",
+        "package.json"
       ],
       "exclude": [
         ".shipping/contract.yaml",
@@ -262,31 +48,271 @@
         "dist/**",
         "coverage/**",
         "node_modules/**",
-        "packages/team-dag/**",
-        "packages/internal-team/**",
-        "packages/internal-dag/**"
+        "packages/stable-control/**",
+        "test/stable/**",
+        "test/adversarial/stable-control-attacks.test.mjs",
+        "scripts/v1-**",
+        "docs/SECURITY-INVENTORY.md",
+        "packages/internal-omo-bridge/stable.mjs"
       ]
     }
   },
-  "stopPolicy": {
-    "autoContinueAfterInterrupt": false,
-    "closeWhenRequiredGatesPass": true,
-    "humanInterruptWins": true
+  "acceptance": [
+    {
+      "id": "AC-0901",
+      "description": "Remote access is authenticated, encrypted, replay-protected, bounded, and restricted to explicit project allowlists.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0901",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0902",
+      "description": "Per-project permissions prevent unauthorized read, approval, execution, pause, restore, or close actions.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0902",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0903",
+      "description": "No remote schema exposes raw command, argv, environment, arbitrary path execution, credential, or policy-override fields.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0903",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0904",
+      "description": "Remote approval is signed and bound to exact actor, project, release, proposal ID and hash, Git SHA, expiry, nonce, and request identity.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0904",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0905",
+      "description": "Expired, replayed, transferred, wrong-SHA, wrong-project, or unauthorized approvals are rejected and one-time receipts cannot be reused.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0905",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0906",
+      "description": "A trusted HTTPS pilot client can view status, approve, pause, inspect blockers and evidence, and receive completion notification.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0906",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0907",
+      "description": "Local pause and abort remain stronger than every remote execute or resume request, including races and restarts.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0907",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0908",
+      "description": "Notifications are deduplicated, bounded, auditable, and notification failure cannot change release state.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0908",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0909",
+      "description": "Backup and restore preserve contracts, Goal and Task state, evidence links, receipts, runtime pin, and CLOSED authority without credentials.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0909",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0910",
+      "description": "Restored non-terminal work remains paused until ownership and runtime health are proven; terminal work is never replayed.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0910",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0911",
+      "description": "Cross-project isolation, health, upgrade, rollback, restart, restore, and incident drills pass with inspectable evidence.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0911",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-0912",
+      "description": "The internal HTTPS pilot, restore drill, security suite, all regressions, and zero-blocker release gate pass.",
+      "type": "command",
+      "command": "node scripts/remote-acceptance.mjs AC-0912",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-09-R01",
+      "description": "All v0.9 source, tests, scripts, documentation, and package files pass lint.",
+      "type": "command",
+      "command": "npm run lint",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-09-R02",
+      "description": "All v0.9 modules and package entrypoints resolve.",
+      "type": "command",
+      "command": "npm run typecheck",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-09-R03",
+      "description": "A distributable v0.9 package containing the internal remote CLI and no sensitive runtime material is produced.",
+      "type": "command",
+      "command": "npm run build",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-09-R04",
+      "description": "All existing Shipping Core regressions pass.",
+      "type": "command",
+      "command": "npm test",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 600
+    },
+    {
+      "id": "AC-09-R05",
+      "description": "The dedicated remote gateway unit, integration, HTTPS, backup, and adversarial suite passes.",
+      "type": "command",
+      "command": "npm run test:remote",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-09-R06",
+      "description": "The real local HTTPS remote gateway, notification, backup, restore, restart, and close pilot passes.",
+      "type": "command",
+      "command": "npm run smoke:remote",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-09-R07",
+      "description": "The private OMO bridge remains regression-clean and independently bounded.",
+      "type": "command",
+      "command": "npm run test:omo-bridge",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-09-R08",
+      "description": "Security checks preserve internal-only network, no-shell, identity, replay, path, data-redaction, and human-stop boundaries.",
+      "type": "command",
+      "command": "npm run security",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-09-R09",
+      "description": "License and private third-party boundary inventory remains valid.",
+      "type": "command",
+      "command": "npm run license:check",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    }
+  ],
+  "blockerPolicy": [
+    "acceptance-failure",
+    "contract-tamper",
+    "stale-evidence",
+    "scope-drift",
+    "data-loss",
+    "critical-security",
+    "human-stop-override",
+    "automatic-approval",
+    "model-self-approval",
+    "raw-command-surface",
+    "public-listener",
+    "false-user-state",
+    "hidden-blocker",
+    "unauthenticated-remote",
+    "unencrypted-remote",
+    "remote-command-surface",
+    "remote-credential-surface",
+    "replay-acceptance",
+    "cross-project-access",
+    "remote-human-stop-override",
+    "backup-sensitive-data",
+    "backup-integrity",
+    "terminal-replay",
+    "missing-mobile-pilot",
+    "missing-restore-drill",
+    "notification-state-mutation"
+  ],
+  "budgets": {
+    "maxFixCycles": 2,
+    "maxAgentRuns": 3,
+    "maxCommandSeconds": 900,
+    "maxOutputBytes": 1048576
   },
-  "worker": "shipping-harness",
-  "teamDagDecision": {
-    "schema": "shipping-harness/team-dag-entry-gate-v1",
-    "sourcePilot": "docs/internal-runtime/v0.7-pilot.json",
-    "requiredSignals": [
-      "coordinationBottleneckProven",
-      "completionBenefitFromTeamDagProven"
-    ],
-    "activationRequiresAll": true,
-    "expectedDecision": "DISABLED",
-    "preserveProfile": "private-omo-v0.7",
-    "teamMode": false,
-    "dagMode": false,
-    "unlimitedValuesAllowed": false,
-    "finisherOutsideTeam": true
+  "stopPolicy": {
+    "humanInterruptWins": true,
+    "autoContinueAfterInterrupt": false,
+    "closeWhenRequiredGatesPass": true
+  },
+  "releasePolicy": {
+    "autoCommit": false,
+    "autoTag": false,
+    "autoPush": false,
+    "generateReport": true
+  },
+  "adapters": {
+    "generic": {
+      "command": null,
+      "artifactPaths": []
+    },
+    "codex": {
+      "command": null,
+      "artifactPaths": []
+    },
+    "gajae": {
+      "command": null,
+      "artifactPaths": []
+    },
+    "ouroboros": {
+      "command": null,
+      "artifactPaths": []
+    },
+    "omo": {
+      "command": null,
+      "artifactPaths": []
+    }
   }
 }

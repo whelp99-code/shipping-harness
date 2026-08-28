@@ -1,0 +1,292 @@
+{
+  "acceptance": [
+    {
+      "id": "AC-0801",
+      "description": "The v0.7 pilot is authentic and records no proven coordination bottleneck.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0801",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0802",
+      "description": "No Team/DAG compiler, execution package, member runtime, or graph code is added.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0802",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0803",
+      "description": "The private OMO profile remains pinned and compatible with Team/DAG disabled.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0803",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0804",
+      "description": "Shipping remains the external Finisher and no team-member authority surface exists.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0804",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0805",
+      "description": "Concurrency, depth, continuations, fix cycles and unlimited-value policy remain bounded.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0805",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0806",
+      "description": "No selective retry/amend claim is made because Team/DAG was not activated.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0806",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0807",
+      "description": "No-progress and oscillation risk is avoided by leaving orchestration disabled.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0807",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0808",
+      "description": "Pause, abort, cancellation and late-result Shipping invariants still pass.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0808",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0809",
+      "description": "v0.7 session ownership, deduplication and recovery evidence remains valid.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0809",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0810",
+      "description": "The system can continue through the approved v0.7 profile with Team/DAG disabled.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0810",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0811",
+      "description": "The decision report truthfully compares direct, v0.7 and disabled v0.8 modes without invented results.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0811",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0812",
+      "description": "v0.8 closes only as an evidence-backed DISABLED decision with all governance invariants intact.",
+      "type": "command",
+      "command": "node scripts/team-dag-entry-gate.mjs AC-0812",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0890",
+      "description": "All Shipping regressions pass.",
+      "type": "command",
+      "command": "npm test",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 600
+    },
+    {
+      "id": "AC-0891",
+      "description": "Private OMO bridge regressions pass.",
+      "type": "command",
+      "command": "npm run test:omo-bridge",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0892",
+      "description": "Security boundaries pass.",
+      "type": "command",
+      "command": "npm run security",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0893",
+      "description": "License and third-party inventories pass.",
+      "type": "command",
+      "command": "npm run license:check",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-0894",
+      "description": "The package builds without Team/DAG source.",
+      "type": "command",
+      "command": "npm run build",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    }
+  ],
+  "adapters": {
+    "codex": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "gajae": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "generic": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "omo": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "ouroboros": {
+      "artifactPaths": [],
+      "command": null
+    }
+  },
+  "blockerPolicy": [
+    "acceptance-failure",
+    "contract-tamper",
+    "stale-evidence",
+    "scope-drift",
+    "critical-security",
+    "team-dag-unjustified-activation",
+    "team-dag-code-present",
+    "team-dag-config-enabled",
+    "unlimited-execution",
+    "fabricated-benchmark",
+    "finisher-authority-regression"
+  ],
+  "budgets": {
+    "maxFixCycles": 1,
+    "maxAgentRuns": 1,
+    "maxCommandSeconds": 900,
+    "maxOutputBytes": 1048576
+  },
+  "goal": "Close v0.8.0 by recording and enforcing the evidence-based decision that Team and DAG orchestration remain disabled because the v0.7 real pilot did not prove a coordination bottleneck or completion benefit.",
+  "internalRuntime": {
+    "configPath": "config/upstreams/omo-pin.json",
+    "dagMode": false,
+    "fallback": [
+      "codex",
+      "generic",
+      "blocked"
+    ],
+    "humanStopWins": true,
+    "maxAgentDepth": 1,
+    "maxContinuations": 3,
+    "maxFixCycles": 2,
+    "maxParallelWorkers": 2,
+    "profile": "private-omo-v0.7",
+    "publicPublish": false,
+    "receiptSchema": "shipping-omo-receipt/v1",
+    "schema": "shipping-harness/private-runtime-profile-v1",
+    "shippingFinisherOnly": true,
+    "teamMode": false,
+    "workOrderSchema": "shipping-omo/v1"
+  },
+  "project": "shipping-harness",
+  "release": "0.8.0",
+  "releasePolicy": {
+    "autoCommit": false,
+    "autoPush": false,
+    "autoTag": false,
+    "generateReport": true
+  },
+  "schema": "shipping-harness/v1",
+  "scope": {
+    "include": [
+      "A machine-readable and human-readable v0.8 Team/DAG entry-gate decision bound to the v0.7 pilot report, v0.7 release receipt, private runtime pin, and current Git SHA.",
+      "A deterministic gate that rejects Team/DAG activation unless concrete coordination bottleneck and likely completion benefit are both proven.",
+      "The v0.7 single private-runtime profile remains the default with Team Mode and DAG Mode false and no unlimited values.",
+      "A small comparison record for direct Shipping, v0.7 private OMO, and v0.8 Team/DAG marked NOT_RUN/DISABLED when the entry gate fails.",
+      "Regression evidence that fallback, pause, evidence, and Finisher authority remain unchanged.",
+      "Package, documentation, traceability, and release receipts for the disabled decision."
+    ],
+    "exclude": [
+      "Team/DAG graph compiler, team members, graph execution, node retry, graph amendment, role routing, or multi-agent orchestration code.",
+      "Enabling any OMO Team or DAG configuration.",
+      "Synthetic benchmark results that pretend disabled Team/DAG execution occurred.",
+      "New agent roles, concurrency above the v0.7 profile, depth above one, or unlimited values.",
+      "Remote/mobile control, organization RBAC, backup service, or v1.0 schema freeze.",
+      "Public, customer, SaaS, or external tenant delivery."
+    ],
+    "paths": {
+      "include": [
+        "scripts/team-dag-entry-gate.mjs",
+        "test/team-dag/**",
+        "docs/internal-runtime/v0.8-team-dag-decision.json",
+        "docs/internal-runtime/v0.8-team-dag-decision.md",
+        "docs/TRACEABILITY.md",
+        "README.md",
+        "BACKLOG.md",
+        "package.json",
+        "config/upstreams/omo-pin.json"
+      ],
+      "exclude": [
+        ".shipping/contract.yaml",
+        ".shipping/contract.lock",
+        ".git/**",
+        "dist/**",
+        "coverage/**",
+        "node_modules/**",
+        "packages/team-dag/**",
+        "packages/internal-team/**",
+        "packages/internal-dag/**"
+      ]
+    }
+  },
+  "stopPolicy": {
+    "autoContinueAfterInterrupt": false,
+    "closeWhenRequiredGatesPass": true,
+    "humanInterruptWins": true
+  },
+  "worker": "shipping-harness",
+  "teamDagDecision": {
+    "schema": "shipping-harness/team-dag-entry-gate-v1",
+    "sourcePilot": "docs/internal-runtime/v0.7-pilot.json",
+    "requiredSignals": [
+      "coordinationBottleneckProven",
+      "completionBenefitFromTeamDagProven"
+    ],
+    "activationRequiresAll": true,
+    "expectedDecision": "DISABLED",
+    "preserveProfile": "private-omo-v0.7",
+    "teamMode": false,
+    "dagMode": false,
+    "unlimitedValuesAllowed": false,
+    "finisherOutsideTeam": true
+  }
+}

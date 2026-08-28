@@ -1,20 +1,22 @@
 {
   "agentRuns": 0,
-  "baselineSha": "72508d4267e924edd5fe9a984f07ad82ebbdea06",
+  "baselineSha": null,
   "blockerCount": 0,
-  "contractHash": "f742daa47648e2d98ebf0470cd7d6684c76a2b7de5d469371501da4816057206",
+  "contractHash": null,
   "createdAt": "2026-08-28T08:14:42.858Z",
   "currentEvidenceSha": null,
   "fixCycles": 0,
   "humanStop": false,
   "ignoreCount": 0,
   "lastRunId": null,
+  "lastVerifiedAt": null,
   "nextCount": 0,
   "previousRelease": "0.6.0",
   "release": "0.7.0",
   "resumeState": null,
   "schema": "shipping-harness/state-v1",
-  "state": "LOCKED",
+  "scopeAmendmentId": "AMEND-0.7.0-001",
+  "state": "DRAFT",
   "unknownCount": 0,
-  "updatedAt": "2026-08-28T08:16:28.584Z"
+  "updatedAt": "2026-08-28T08:42:48.154Z"
 }

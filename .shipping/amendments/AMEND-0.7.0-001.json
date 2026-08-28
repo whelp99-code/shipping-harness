@@ -1,0 +1,25 @@
+{
+  "actor": "human-directed-recovery",
+  "added": [],
+  "correctedContractHash": "dd08362081994ec564d5a4b6362de9a2fb5d1f5611351da52928546a74104598",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-0.7.0-001",
+  "kind": "non-semantic-invalid-path-correction",
+  "previousContractHash": "f742daa47648e2d98ebf0470cd7d6684c76a2b7de5d469371501da4816057206",
+  "previousScopeRevision": 1,
+  "previousState": "VERIFYING",
+  "project": "shipping-harness",
+  "reason": "A repository-outside path was mistakenly placed in a repository-relative scope list. The sibling runtime remains external by architecture and cannot be included by this contract.",
+  "recordedAt": "2026-08-28T08:42:48.151Z",
+  "release": "0.7.0",
+  "removed": [
+    {
+      "field": "scope.paths.exclude",
+      "value": "../shipping-harness-omo-runtime/**"
+    }
+  ],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticScopeExpansion": false,
+  "siblingRuntimeBoundaryChanged": false,
+  "sourceGitSha": "124e3dd09a84b6708837b313e49ab27d9a8861d3"
+}

@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 21,
+    "requiredFailed": 0,
+    "total": 21
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "1c557a16c2dcdd02e76fd8a87b443e4ff52decf7",
+  "closedAt": "2026-08-28T13:32:44.243Z",
+  "closedGitSha": "3f2787fa35b378144f8ef493bba4591db801fbaf",
+  "contractHash": "455059b1971936435c0ab8c8853ae7e6eb94662904fc53d4a277870f6df9be21",
+  "evidenceRunId": "run-2026-08-28T13-32-25-918Z-3726d068",
+  "fixCycles": 0,
+  "goal": "Allow the owner to securely control explicitly allowlisted Shipping projects from trusted web and mobile clients over authenticated encrypted internal transport, with replay protection, auditable approvals, notifications, and proven backup and restore, while exposing no arbitrary shell, public listener, or customer surface.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "0.9.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

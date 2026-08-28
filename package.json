@@ -18,6 +18,7 @@
     "src/",
     "packages/",
     "scripts/goal-runtime-smoke.mjs",
+    "scripts/plugin-smoke.mjs",
     "docs/",
     "LICENSE",
     "README.md",

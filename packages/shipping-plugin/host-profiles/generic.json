@@ -1,0 +1,19 @@
+{
+  "schema": "shipping-harness/host-profile-v1",
+  "host": "generic-mcp",
+  "registration": {
+    "name": "shipping-harness",
+    "transport": "stdio",
+    "commandSource": "current-node-executable",
+    "arguments": ["<package-root>/bin/shipping-harness-mcp.mjs"],
+    "workingDirectory": "project-root",
+    "supportsDryRun": true
+  },
+  "requiredConfirmationTools": [
+    "shipping_approve_scope",
+    "shipping_execute",
+    "shipping_fix_blockers",
+    "shipping_pause",
+    "shipping_close"
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -10,11 +10,13 @@
   "bin": {
     "shipping-harness": "./bin/shipping-harness.mjs",
     "shiph": "./bin/shipping-harness.mjs",
-    "shipping-harness-mcp": "./bin/shipping-harness-mcp.mjs"
+    "shipping-harness-mcp": "./bin/shipping-harness-mcp.mjs",
+    "shipping-harness-plugin": "./bin/shipping-harness-plugin.mjs"
   },
   "files": [
     "bin/",
     "src/",
+    "packages/",
     "scripts/goal-runtime-smoke.mjs",
     "docs/",
     "LICENSE",
@@ -32,6 +34,8 @@
     "test:mcp": "node scripts/run-tests.mjs mcp",
     "test:decision": "node --test --test-reporter=spec test/unit/decision-evidence.test.mjs test/unit/decision-package.test.mjs test/unit/decision-policy.test.mjs test/adversarial/decision-attacks.test.mjs",
     "test:goals": "node --test --test-reporter=spec test/unit/goals-compiler.test.mjs test/unit/goals-freshness.test.mjs test/integration/goals-recovery.test.mjs test/integration/goals-failure-policy.test.mjs test/integration/goals-control.test.mjs test/adversarial/goals-attacks.test.mjs",
+    "test:plugin": "node --test --test-reporter=spec test/plugin/*.test.mjs",
+    "test:usability": "node --test --test-reporter=spec test/usability/*.test.mjs",
     "test:adversarial": "node scripts/run-tests.mjs adversarial",
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",

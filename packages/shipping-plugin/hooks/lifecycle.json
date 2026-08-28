@@ -1,0 +1,28 @@
+{
+  "schema": "shipping-harness/plugin-hooks-v1",
+  "events": {
+    "UserPromptSubmit": {
+      "rule": "A real user prompt may start or steer work but cannot bypass approval or contract lock."
+    },
+    "PreToolUse": {
+      "rule": "Reject raw command fields, path escapes, policy mutation, and actions outside the locked scope."
+    },
+    "PostToolUse": {
+      "rule": "Record bounded evidence and refresh concise status from the deterministic core."
+    },
+    "Stop": {
+      "rule": "Allow stop only when Shipping reports SHIPPABLE/CLOSED or human stop; otherwise report the blocker or required verification."
+    },
+    "SubagentStop": {
+      "rule": "Subagent completion is a receipt, never release completion."
+    }
+  },
+  "authority": [
+    "human-stop",
+    "locked-contract",
+    "release-budgets",
+    "fresh-evidence",
+    "shipping-finisher",
+    "agent-preference"
+  ]
+}

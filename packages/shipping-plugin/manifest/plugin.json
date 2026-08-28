@@ -1,0 +1,28 @@
+{
+  "schema": "shipping-harness/plugin-v1",
+  "name": "shipping-harness",
+  "displayName": "Shipping Harness",
+  "version": "0.6.0",
+  "localOnly": true,
+  "mcp": {
+    "transport": "stdio",
+    "binary": "shipping-harness-mcp",
+    "arbitraryCommandInput": false,
+    "publicListener": false
+  },
+  "userFlow": [
+    "shipping_start",
+    "shipping_approve_scope",
+    "shipping_execute",
+    "shipping_status",
+    "shipping_pause",
+    "shipping_fix_blockers",
+    "shipping_verify",
+    "shipping_close"
+  ],
+  "approval": {
+    "humanConfirmationRequired": true,
+    "modelSelfApprovalForbidden": true
+  },
+  "surfaces": ["approval", "progress", "blocker", "completion", "evidence-detail"]
+}

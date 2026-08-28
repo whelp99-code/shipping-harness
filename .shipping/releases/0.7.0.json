@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 19,
+    "requiredFailed": 0,
+    "total": 19
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "d6997b1db7c683e06551459416d88a5b20e95271",
+  "closedAt": "2026-08-28T08:44:15.974Z",
+  "closedGitSha": "0c7317b48e1c401e168ded2232bb363046e40302",
+  "contractHash": "dd08362081994ec564d5a4b6362de9a2fb5d1f5611351da52928546a74104598",
+  "evidenceRunId": "run-2026-08-28T08-43-50-640Z-2bf0cd44",
+  "fixCycles": 0,
+  "goal": "Delegate bounded personal/company-internal execution to the verified private OMO runtime while Shipping retains exclusive authority over scope, approval, budgets, human stop, evidence, blockers, SHIPPABLE, and CLOSED.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "0.7.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

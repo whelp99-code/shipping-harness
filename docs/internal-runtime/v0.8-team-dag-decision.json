@@ -1,0 +1,95 @@
+{
+  "schema": "shipping-harness/team-dag-decision-v1",
+  "release": "0.8.0",
+  "generatedAt": "2026-08-28T12:34:46.390Z",
+  "sourceGitSha": "ff3b6f3cb1c1e00ef91c9baa7902c2b2d856adb1",
+  "decision": "DISABLED",
+  "enabled": false,
+  "reason": "The required coordination bottleneck and completion-benefit signals were not both proven.",
+  "activationRule": {
+    "requiresAll": [
+      "coordinationBottleneckProven",
+      "completionBenefitFromTeamDagProven"
+    ],
+    "result": false
+  },
+  "signals": {
+    "coordinationBottleneckProven": false,
+    "completionBenefitFromTeamDagProven": false,
+    "parallelizableTaskCount": 0,
+    "coordinationWaitCount": 0,
+    "repeatedReviewCount": 0,
+    "falseDoneCount": 0,
+    "scopeViolations": 0,
+    "v07Closed": true
+  },
+  "evidence": {
+    "v07Pilot": {
+      "path": "docs/internal-runtime/v0.7-pilot.json",
+      "sha256": "0ea3ae8e680e560d4d7601e2112d168ad1507f24ac984a9474f8c9145fb7053d",
+      "generatedAt": "2026-08-28T08:36:06.788Z"
+    },
+    "v07Release": {
+      "path": ".shipping/releases/0.7.0.json",
+      "sha256": "4d4c637fd9ec2143dabaf3a57a11e3f7e0a398c15c6721afcbf14ac3b762dd70",
+      "closedAt": "2026-08-28T08:44:15.974Z"
+    },
+    "privateRuntime": {
+      "releaseCommit": "ef82b4cda5d8688840780ca5a09bd0a5fa11d5bc",
+      "buildDigest": "sha256:c78bc68993cfaa121eac550ca6043cce2002ef63f9255a9f4b669f27ec7324b5",
+      "runtimeVersion": "0.7.0"
+    }
+  },
+  "sourceInspection": {
+    "forbiddenDirectories": [
+      "packages/team-dag",
+      "packages/internal-team",
+      "packages/internal-dag"
+    ],
+    "presentForbiddenDirectories": [],
+    "enabledMarkers": [],
+    "scannedFiles": 84,
+    "teamDagSourcePresent": false,
+    "teamDagEnabledMarkerPresent": false
+  },
+  "preservedProfile": {
+    "name": "private-omo-v0.7",
+    "parallelWorkers": 2,
+    "agentDepth": 1,
+    "continuations": 3,
+    "fixCycles": 2,
+    "teamMode": false,
+    "dagMode": false,
+    "unlimitedValuesAllowed": false,
+    "humanStopWins": true,
+    "shippingFinisherOnly": true
+  },
+  "comparison": {
+    "directShipping": {
+      "status": "AVAILABLE_FALLBACK_NOT_RUN_IN_V0.7_PILOT",
+      "measuredResult": null
+    },
+    "privateOmoV07": {
+      "status": "MEASURED_PASS",
+      "completionRate": 1,
+      "durationMs": 418,
+      "humanInterventions": 1,
+      "falseDoneCount": 0,
+      "coordinationWaitCount": 0
+    },
+    "teamDagV08": {
+      "status": "NOT_RUN_ENTRY_GATE_FAILED",
+      "measuredResult": null,
+      "inventedMetrics": false
+    }
+  },
+  "claims": {
+    "selectiveRetryImplemented": false,
+    "graphAmendmentImplemented": false,
+    "orchestrationStallDetectorImplemented": false,
+    "teamMemberRuntimeImplemented": false,
+    "finisherRemainsOutsideTeam": true,
+    "v07FallbackPreserved": true,
+    "publicPublish": false
+  }
+}

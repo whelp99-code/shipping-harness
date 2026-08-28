@@ -6,7 +6,9 @@ import { assertContainedPath, exists, readJson, writeAtomic, writeJsonAtomic } f
 import { currentGitSha, gitStatus } from './git.mjs';
 import { invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
-import { analyzeRepository, buildAcceptanceCriteria, buildMinimalScope, buildShortPlan } from './project-analysis.mjs';
+import { buildShortPlan } from './project-analysis.mjs';
+import { buildDecisionEvidence } from './decision-evidence.mjs';
+import { compileDecisionContract, composeDefaultDecision } from './decision-package.mjs';
 import { prepareNextRelease } from './release-transition.mjs';
 import { initializeState, readState, recordLedger, transitionState } from './state.mjs';
 
@@ -52,7 +54,7 @@ async function currentReleaseContext(root) {
 /**
  * Create a reviewable, Git-bound release proposal without locking a release.
  * @param {string} root
- * @param {{goal: string, release?: string | null, projectName?: string | null}} input
+ * @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, proposerId?: string | null}} input
  */
 export async function createScopeProposal(root, input) {
   invariant(typeof input.goal === 'string' && input.goal.trim().length >= 5, 'ERR_PROPOSAL_GOAL', 'A concrete goal of at least 5 characters is required');
@@ -61,7 +63,8 @@ export async function createScopeProposal(root, input) {
   if (context.state) {
     invariant(['DRAFT', 'CLOSED'].includes(context.state.state), 'ERR_PROPOSAL_ACTIVE_RELEASE', `Cannot propose a new scope while release state is ${context.state.state}`);
   }
-  const analysis = await analyzeRepository(root);
+  const evidence = await buildDecisionEvidence(root, { goal: input.goal.trim(), mode: input.mode ?? undefined });
+  const analysis = evidence.analysis;
   const release = input.release?.trim()
     || (context.state?.state === 'DRAFT'
       ? (context.state.release || context.contract?.release || '0.1.0')
@@ -70,26 +73,18 @@ export async function createScopeProposal(root, input) {
         : '0.1.0');
   invariant(SEMVER.test(release), 'ERR_RELEASE_VERSION', `Invalid semantic version: ${release}`);
   const goal = input.goal.trim();
-  const acceptance = buildAcceptanceCriteria(analysis);
-  const scope = buildMinimalScope(analysis, goal);
   const projectName = safeProjectName(input.projectName, safeProjectName(analysis.projectName, path.basename(root)));
   const base = context.contract ? structuredClone(context.contract) : createDefaultContract(projectName);
   const inheritedCommands = Object.entries(base.adapters ?? {})
     .filter(([, config]) => typeof config?.command === 'string' && config.command.trim())
     .map(([name]) => name);
-  const safeAdapters = Object.fromEntries(Object.entries(base.adapters ?? {}).map(([name, config]) => [name, { ...config, command: null }]));
-  const contract = {
-    ...base,
-    project: projectName,
-    worker: 'shipping-harness',
+  const decision = composeDefaultDecision(evidence, {
     release,
-    goal,
-    scope,
-    acceptance,
-    adapters: safeAdapters,
-    releasePolicy: { ...base.releasePolicy, autoCommit: false, autoTag: false, autoPush: false, generateReport: true },
-  };
-  validateContract(contract);
+    projectName,
+    proposerId: typeof input.proposerId === 'string' && input.proposerId.trim() ? input.proposerId.trim().slice(0, 160) : undefined,
+  });
+  const contract = compileDecisionContract(base, decision);
+  const acceptance = contract.acceptance;
   const now = new Date();
   const gitSha = currentGitSha(root);
   const sourceChanges = nonRuntimeChanges(root);
@@ -102,9 +97,12 @@ export async function createScopeProposal(root, input) {
     goal,
     createdAt: now.toISOString(),
     expiresAt: new Date(now.getTime() + PROPOSAL_TTL_MS).toISOString(),
-    readyForApproval: sourceChanges.length === 0,
+    mode: decision.mode,
+    readyForApproval: sourceChanges.length === 0 && decision.questions.length === 0,
     sourceChanges,
     analysis,
+    evidence,
+    decision,
     contract,
     plan: buildShortPlan(analysis, acceptance),
     diagnostics: [

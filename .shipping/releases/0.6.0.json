@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 11,
+    "requiredFailed": 0,
+    "total": 11
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "6e605c695acbd0371c687866a1bdb996093139a1",
+  "closedAt": "2026-08-28T06:35:25.218Z",
+  "closedGitSha": "a8c3010648a097b747c88f1d62f3b1a33496af78",
+  "contractHash": "8859851816a53f10c6fd40d0037a3862392a30cd6fd384bdfe541edc8c394b83",
+  "evidenceRunId": "run-2026-08-28T06-35-00-646Z-f6322cef",
+  "fixCycles": 0,
+  "goal": "Let a non-developer install one local plugin bundle, ask an agent to finish a project, approve one concise brief, monitor truthful progress and blockers, pause safely, repair setup, and receive a closed release without project-specific CLI knowledge.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "0.6.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

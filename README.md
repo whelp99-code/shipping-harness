@@ -2,7 +2,7 @@
 
 **Worker name:** `shipping-harness`
 **Current stable:** `v0.5.0 — Durable Goal and Evidence Runtime` (`CLOSED`)
-**Next planned:** `v0.6.0 — Beginner Plugin and Local Agent Experience`
+**Current development:** `v0.6.0 — Beginner Plugin and Local Agent Experience` (`DRAFT`)
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.

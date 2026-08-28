@@ -2,31 +2,31 @@
   "schema": "shipping-harness/v1",
   "project": "shipping-harness",
   "worker": "shipping-harness",
-  "release": "0.5.0",
-  "goal": "Compile the locked release into durable Goal and Task state with append-only evidence, restart recovery, current-SHA completion proof, and bounded failure termination.",
+  "release": "0.6.0",
+  "goal": "Let a non-developer install one local plugin bundle, ask an agent to finish a project, approve one concise brief, monitor truthful progress and blockers, pause safely, repair setup, and receive a closed release without project-specific CLI knowledge.",
   "scope": {
     "include": [
-      "Deterministic compilation of the locked Shipping contract into stable Goal and Task records.",
-      "Requirement and acceptance-consumer links for every Task, with orphan, duplicate, invalid dependency, and cycle rejection.",
-      "Explicit bounded Goal and Task state machines, including DONE, BLOCKED, and PLANNING_STUCK terminal outcomes.",
-      "Append-only execution ledger plus atomic Goal, Task, attempt, checkpoint, blocker, and evidence snapshots.",
-      "Restart recovery that rebuilds state without replaying completed work or mutable commands.",
-      "Current contract-hash and Git-SHA evidence freshness checks before any Goal or Task becomes DONE.",
-      "Repeated-failure fingerprints, retry budgets, unchanged-state no-progress suppression, and changed-source bounded retry reset.",
-      "Human pause and abort propagation above task recovery and continuation.",
-      "Concise Goal and Task status integrated into CLI and MCP status while Shipping Finisher remains the only release closure authority.",
-      "Offline unit, integration, adversarial, package-install, and real disposable-repository smoke validation for v0.5.0."
+      "One local plugin bundle containing Shipping MCP registration profiles, a Shipping skill, concise agent instructions, lifecycle guidance, renderers, installer, uninstaller, doctor, and repair tools.",
+      "A supported local Codex registration profile plus a generic MCP profile; all registration changes are explicit, bounded, previewable, and local-only.",
+      "Natural-language start, one concise approval surface, truthful progress, blocker, completion, pause, abort, and detailed-evidence surfaces driven only by existing Shipping Core and MCP state.",
+      "Plain-language user-state mapping that never reports CLOSED, SHIPPABLE, or success when the deterministic core disagrees.",
+      "Project selection and repository readiness checks without scanning outside explicit allowlisted roots.",
+      "Idempotent install, dry-run, doctor, repair, upgrade metadata, uninstall, and reinstall flows that preserve repository .shipping state.",
+      "Fallback structured-text rendering when a host cannot display richer cards.",
+      "No-CLI scripted beginner scenarios covering start, approve, status, pause/resume, blocker handling, verify, and close through MCP and plugin APIs.",
+      "Offline unit, integration, usability, adversarial, package-install, and live local plugin smoke validation."
     ],
     "exclude": [
-      "Multi-agent teams, model routing, background RPC child processes, OMO runtime integration, Team Mode, or DAG execution.",
-      "Plugin installation UX, approval cards, mobile UI, remote HTTP MCP, OAuth, cloud services, or multi-user/RBAC.",
-      "A general-purpose workflow engine, dynamic top-level graph expansion, or current-release evolution.",
-      "Unlimited attempts, retries, depth, continuation, time, output, or cost.",
-      "Goal or Task state overriding the locked Shipping contract, human pause/abort, blocker policy, Finisher, SHIPPABLE, or CLOSED.",
-      "Implementation of v0.6.0 or later roadmap items."
+      "Remote HTTP MCP, public listeners, mobile access, cloud services, customer accounts, team RBAC, or web dashboards.",
+      "Arbitrary shell, command, argv, environment, credential, deployment, push, purchase, or automatic-approval fields in plugin or MCP surfaces.",
+      "OMO internal runtime, multi-agent teams, model routing, Team Mode, DAG execution, or v0.7 and later roadmap work.",
+      "Automatic mutation of unrecognized host configuration formats or user-global files without explicit preview and confirmation.",
+      "Deletion or reset of repository contracts, ledgers, evidence, release receipts, locked releases, or closed releases during repair, uninstall, upgrade, or reinstall.",
+      "A public marketplace dependency or public package/runtime distribution."
     ],
     "paths": {
       "include": [
+        "packages/**",
         "src/**",
         "bin/**",
         "scripts/**",
@@ -51,7 +51,7 @@
   "acceptance": [
     {
       "id": "AC-001",
-      "description": "All source, Goal runtime, MCP, and test files pass repository lint checks.",
+      "description": "All plugin, renderer, installer, MCP, source, and test files pass lint.",
       "type": "command",
       "command": "npm run lint",
       "cwd": ".",
@@ -60,7 +60,7 @@
     },
     {
       "id": "AC-002",
-      "description": "The complete v0.5.0 module graph and package entrypoints resolve.",
+      "description": "The v0.6 module graph and package entrypoints resolve.",
       "type": "command",
       "command": "npm run typecheck",
       "cwd": ".",
@@ -69,7 +69,7 @@
     },
     {
       "id": "AC-003",
-      "description": "A distributable v0.5.0 tree with CLI and MCP binaries is produced.",
+      "description": "A distributable v0.6 package containing plugin assets, CLI, and MCP binaries is produced.",
       "type": "command",
       "command": "npm run build",
       "cwd": ".",
@@ -78,52 +78,61 @@
     },
     {
       "id": "AC-004",
-      "description": "All unit, integration, adapter, MCP, decision, Goal runtime, and adversarial tests pass.",
+      "description": "All v0.1 through v0.6 unit, integration, adapter, MCP, decision, Goal, plugin, usability, and adversarial tests pass.",
       "type": "command",
       "command": "npm test",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 480
+      "timeoutSeconds": 600
     },
     {
       "id": "AC-005",
-      "description": "Goal/Task compilation, ledger, recovery, freshness, and failure-guard tests pass independently.",
+      "description": "Plugin package, installer, manifest, skill, renderer, doctor, repair, uninstall, and reinstall tests pass independently.",
       "type": "command",
-      "command": "npm run test:goals",
+      "command": "npm run test:plugin",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 240
+      "timeoutSeconds": 300
     },
     {
       "id": "AC-006",
-      "description": "MCP protocol and Goal/Task status integration tests pass independently.",
+      "description": "No-CLI non-developer usability scenarios pass independently.",
+      "type": "command",
+      "command": "npm run test:usability",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-007",
+      "description": "MCP protocol and user-view integration tests pass independently.",
       "type": "command",
       "command": "npm run test:mcp",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 240
+      "timeoutSeconds": 300
     },
     {
-      "id": "AC-007",
-      "description": "Adversarial stale-proof, cycle, replay, retry, scope-reopen, pause, and ledger-corruption tests pass.",
+      "id": "AC-008",
+      "description": "Adversarial self-approval, raw-command, hidden-blocker, false-state, path-escape, destructive-uninstall, and renderer-fallback tests pass.",
       "type": "command",
       "command": "npm run test:adversarial",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 240
-    },
-    {
-      "id": "AC-008",
-      "description": "A disposable repository completes compile, checkpoint, interruption, restart recovery, fresh evidence, and DONE flow.",
-      "type": "command",
-      "command": "node scripts/goal-runtime-smoke.mjs",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 180
+      "timeoutSeconds": 300
     },
     {
       "id": "AC-009",
-      "description": "Security checks preserve contract, path, command, secret, human-stop, and Finisher boundaries.",
+      "description": "An isolated packaged plugin installs, registers a disposable local host profile, discovers Shipping tools, completes a no-CLI beginner scenario, preserves state through uninstall/reinstall, and opens no listener.",
+      "type": "command",
+      "command": "node scripts/plugin-smoke.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 240
+    },
+    {
+      "id": "AC-010",
+      "description": "Security checks preserve local-only, no-shell, approval, human-stop, path, secret, and repository-state boundaries.",
       "type": "command",
       "command": "npm run security",
       "cwd": ".",
@@ -131,8 +140,8 @@
       "timeoutSeconds": 120
     },
     {
-      "id": "AC-010",
-      "description": "License and third-party interoperability boundaries remain valid.",
+      "id": "AC-011",
+      "description": "License and third-party integration inventory remain valid.",
       "type": "command",
       "command": "npm run license:check",
       "cwd": ".",
@@ -148,16 +157,20 @@
     "data-loss",
     "critical-security",
     "human-stop-override",
-    "unbounded-continuation",
-    "goal-task-orphan",
-    "goal-task-cycle",
-    "invalid-goal-task-transition",
-    "completed-work-replay",
-    "stale-task-evidence",
-    "unbounded-task-retry",
-    "no-progress-retry",
-    "goal-overrides-finisher",
-    "ledger-corruption-without-diagnostic"
+    "automatic-approval",
+    "model-self-approval",
+    "raw-command-surface",
+    "public-listener",
+    "false-user-state",
+    "hidden-blocker",
+    "unbounded-card-content",
+    "installer-path-escape",
+    "destructive-repair",
+    "destructive-uninstall",
+    "repository-state-reset",
+    "manual-json-required",
+    "project-specific-cli-required",
+    "missing-fallback-renderer"
   ],
   "budgets": {
     "maxFixCycles": 2,
@@ -179,27 +192,8 @@
   "adapters": {
     "generic": { "command": null, "artifactPaths": [] },
     "codex": { "command": null, "artifactPaths": [] },
-    "gajae": {
-      "command": null,
-      "artifactPaths": [
-        ".gjc/goals.json",
-        ".gjc/ledger.jsonl",
-        ".omc/ultragoal/goals.json",
-        ".omc/ultragoal/ledger.jsonl"
-      ]
-    },
-    "ouroboros": {
-      "command": null,
-      "artifactPaths": [
-        ".ouroboros/seed.json",
-        ".ouroboros/ledger.jsonl",
-        ".ouro/seed.json",
-        ".ouro/ledger.jsonl"
-      ]
-    },
-    "omo": {
-      "command": null,
-      "artifactPaths": [".omo/omo.jsonc", ".omo/omo.json"]
-    }
+    "gajae": { "command": null, "artifactPaths": [] },
+    "ouroboros": { "command": null, "artifactPaths": [] },
+    "omo": { "command": null, "artifactPaths": [] }
   }
 }

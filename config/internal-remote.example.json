@@ -1,0 +1,42 @@
+{
+  "schema": "shipping-remote/config-v1",
+  "allowedRoots": [
+    "/srv/shipping/projects",
+    "/srv/shipping/runtime-evidence"
+  ],
+  "serverCredentialEnv": "SHIPPING_REMOTE_SERVER_CREDENTIAL",
+  "actors": [
+    {
+      "id": "owner",
+      "credentialEnv": "SHIPPING_REMOTE_OWNER_CREDENTIAL",
+      "permissions": [
+        "read",
+        "write",
+        "approve",
+        "control",
+        "close",
+        "admin"
+      ],
+      "projects": [
+        "project-a"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "project-a",
+      "root": "/srv/shipping/projects/project-a",
+      "omoRuntimeManifest": "/srv/shipping/runtime-evidence/omo/runtime-manifest.json",
+      "runtimePinFiles": [
+        "/srv/shipping/runtime-evidence/omo/runtime-pin.json"
+      ]
+    }
+  ],
+  "maxClockSkewMs": 120000,
+  "maxBodyBytes": 32768,
+  "maxConcurrent": 4,
+  "ratePerMinute": 30,
+  "replayTtlMs": 600000,
+  "approvalTtlMs": 180000,
+  "notificationLimit": 1000
+}

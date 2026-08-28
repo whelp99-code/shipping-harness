@@ -158,3 +158,11 @@ codex mcp list
 ```
 
 When a tool reports `ERR_ADAPTER_COMMAND_REQUIRED`, the contract has no approved external-agent command. This is not a request to supply a shell command through MCP. Let the connected host agent edit the code directly, or configure the adapter command in the contract before it is approved and locked.
+## v0.9 internal remote gateway
+
+The remote gateway is not a public MCP endpoint. It is a separate TLS-only internal JSON control surface that maps authenticated requests back to the same fixed `callShippingTool` functions used by the local MCP server. No remote request accepts a raw shell command or replaces the MCP server.
+
+Local MCP and CLI remain the recovery and higher-authority control paths. In particular, a local human stop prevents remote execution or resume. The gateway exposes only fixed project, status, proposal, approval, control, verification, close, notification, backup, restore, and health operations.
+
+See `docs/internal-remote/README.md` for request signing, one-time approval receipts, private-listener restrictions, and backup rules.
+

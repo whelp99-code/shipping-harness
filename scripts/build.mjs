@@ -8,7 +8,7 @@ const destination = path.join(root, 'dist');
 await rm(destination, { recursive: true, force: true });
 await mkdir(destination, { recursive: true });
 
-for (const entry of ['src', 'bin', 'docs', 'README.md', 'LICENSE', 'THIRD_PARTY.md']) {
+for (const entry of ['src', 'packages', 'bin', 'config', 'docs', 'README.md', 'LICENSE', 'THIRD_PARTY.md']) {
   await cp(path.join(root, entry), path.join(destination, entry), { recursive: true });
 }
 
@@ -22,6 +22,8 @@ const distributionPackage = {
 await writeFile(path.join(destination, 'package.json'), `${JSON.stringify(distributionPackage, null, 2)}\n`, 'utf8');
 await chmod(path.join(destination, 'bin', 'shipping-harness.mjs'), 0o755);
 await chmod(path.join(destination, 'bin', 'shipping-harness-mcp.mjs'), 0o755);
+await chmod(path.join(destination, 'bin', 'shipping-harness-plugin.mjs'), 0o755);
+await chmod(path.join(destination, 'bin', 'shipping-harness-remote.mjs'), 0o755);
 
 const files = await walkFiles(destination);
 const manifest = [];

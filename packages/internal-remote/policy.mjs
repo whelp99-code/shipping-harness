@@ -1,9 +1,125 @@
 import net from 'node:net';
-export function invariant(condition,code,message,details){if(!condition){const e=new Error(message);e.code=code;e.details=details;throw e;}}
-export const ACTION_PERMISSION=Object.freeze({'shipping/status':'read','shipping/start':'write','shipping/approve':'approve','shipping/pause':'control','shipping/resume':'control','shipping/abort':'control','shipping/verify':'write','shipping/close':'close','evidence/summary':'read','approval/issue':'approve','notifications/list':'read','backup/create':'admin','backup/restore':'admin','health/read':'read'});
-export const ALLOWED_ACTIONS=Object.freeze(Object.keys(ACTION_PERMISSION));
-const FORBIDDEN_KEYS=new Set(['command','shell','argv','args','env','environment','cwd','executable','script','rawCommand']);
-export function rejectArbitraryExecution(value,depth=0){invariant(depth<=16,'ERR_REMOTE_DEPTH','Remote input nesting is too deep');if(Array.isArray(value)){invariant(value.length<=256,'ERR_REMOTE_SIZE','Remote array is too large');for(const item of value)rejectArbitraryExecution(item,depth+1);return;}if(value&&typeof value==='object'){invariant(Object.keys(value).length<=128,'ERR_REMOTE_SIZE','Remote object is too large');for(const [key,nested] of Object.entries(value)){invariant(!FORBIDDEN_KEYS.has(key),'ERR_REMOTE_ARBITRARY',`Remote execution field is forbidden: ${key}`);rejectArbitraryExecution(nested,depth+1);}}}
-export function privateListenHost(host){if(host==='localhost'||host==='::1')return true;if(net.isIP(host)!==4)return false;const p=host.split('.').map(Number);return p[0]===127||p[0]===10||(p[0]===172&&p[1]>=16&&p[1]<=31)||(p[0]===192&&p[1]===168);}
-export function validateListen(host){invariant(privateListenHost(host),'ERR_REMOTE_LISTEN','Gateway listen host must be loopback or private IPv4; public/unspecified listeners are forbidden');return host;}
-export function boundedString(value,label,max=4096){invariant(typeof value==='string'&&value.length>0&&Buffer.byteLength(value,'utf8')<=max,'ERR_REMOTE_ARGUMENT',`${label} is required and bounded`);return value;}
+import path from 'node:path';
+
+export function invariant(condition, code, message, details) {
+  if (condition) return;
+  const error = new Error(message);
+  error.code = code;
+  error.details = details;
+  throw error;
+}
+
+export const ACTION_PERMISSION = Object.freeze({
+  'projects/list': 'read',
+  'shipping/status': 'read',
+  'shipping/start': 'write',
+  'shipping/approve': 'approve',
+  'shipping/execute': 'write',
+  'shipping/pause': 'control',
+  'shipping/resume': 'control',
+  'shipping/abort': 'control',
+  'shipping/fix-blockers': 'write',
+  'shipping/verify': 'write',
+  'shipping/close': 'close',
+  'evidence/summary': 'read',
+  'approval/issue': 'approve',
+  'notifications/list': 'read',
+  'backup/create': 'admin',
+  'backup/restore': 'admin',
+  'health/read': 'read',
+});
+
+export const ALLOWED_ACTIONS = Object.freeze(Object.keys(ACTION_PERMISSION));
+
+export const MUTATING_ACTIONS = Object.freeze(new Set([
+  'shipping/start',
+  'shipping/approve',
+  'shipping/execute',
+  'shipping/pause',
+  'shipping/resume',
+  'shipping/abort',
+  'shipping/fix-blockers',
+  'shipping/verify',
+  'shipping/close',
+  'approval/issue',
+  'backup/create',
+  'backup/restore',
+]));
+
+const FORBIDDEN_KEYS = new Set([
+  'command',
+  'rawcommand',
+  'shell',
+  'argv',
+  'args',
+  'env',
+  'environment',
+  'cwd',
+  'executable',
+  'binary',
+  'program',
+  'script',
+  'providerkey',
+  'apikey',
+  'accesstoken',
+  'refreshtoken',
+  'authorization',
+  'credential',
+  'credentials',
+]);
+
+function normalizedKey(key) {
+  return String(key).replace(/[-_\s]/gu, '').toLowerCase();
+}
+
+export function rejectArbitraryExecution(value, depth = 0) {
+  invariant(depth <= 16, 'ERR_REMOTE_DEPTH', 'Remote input nesting is too deep');
+  if (Array.isArray(value)) {
+    invariant(value.length <= 256, 'ERR_REMOTE_SIZE', 'Remote array is too large');
+    for (const item of value) rejectArbitraryExecution(item, depth + 1);
+    return;
+  }
+  if (!value || typeof value !== 'object') return;
+  const entries = Object.entries(value);
+  invariant(entries.length <= 128, 'ERR_REMOTE_SIZE', 'Remote object is too large');
+  for (const [key, nested] of entries) {
+    invariant(!FORBIDDEN_KEYS.has(normalizedKey(key)), 'ERR_REMOTE_ARBITRARY', `Remote execution or credential field is forbidden: ${key}`);
+    rejectArbitraryExecution(nested, depth + 1);
+  }
+}
+
+export function privateListenHost(host) {
+  if (host === 'localhost' || host === '::1') return true;
+  if (net.isIP(host) !== 4) return false;
+  const parts = host.split('.').map(Number);
+  return parts[0] === 127
+    || parts[0] === 10
+    || (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31)
+    || (parts[0] === 192 && parts[1] === 168);
+}
+
+export function validateListen(host) {
+  invariant(privateListenHost(host), 'ERR_REMOTE_LISTEN', 'Gateway listen host must be loopback or private IPv4; public and unspecified listeners are forbidden');
+  return host;
+}
+
+export function boundedString(value, label, max = 4096) {
+  invariant(typeof value === 'string' && value.length > 0 && Buffer.byteLength(value, 'utf8') <= max, 'ERR_REMOTE_ARGUMENT', `${label} is required and bounded`);
+  return value;
+}
+
+export function boundedInteger(value, label, { min = 1, max = Number.MAX_SAFE_INTEGER, fallback } = {}) {
+  const candidate = value ?? fallback;
+  invariant(Number.isInteger(candidate) && candidate >= min && candidate <= max, 'ERR_REMOTE_CONFIG', `${label} must be an integer between ${min} and ${max}`);
+  return candidate;
+}
+
+export function pathWithin(parent, target) {
+  const relative = path.relative(path.resolve(parent), path.resolve(target));
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+}
+
+export function assertPathWithin(parent, target, code = 'ERR_REMOTE_PATH') {
+  invariant(pathWithin(parent, target), code, 'Path is outside the configured internal root', { parent: path.resolve(parent), target: path.resolve(target) });
+  return path.resolve(target);
+}

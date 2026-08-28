@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current stable:** `v0.7.0 — Private OMO Runtime Bridge` (`CLOSED`)
-**Current development:** `v0.8.0 — Team/DAG Entry Gate` (`DISABLED by v0.7 pilot evidence`)
+**Current stable:** `v0.8.0 — Team/DAG Entry Gate Decision` (`CLOSED`, Team/DAG disabled)
+**Current development:** `v0.9.0 — Authenticated Internal Remote Control` (`LOCKED`)
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -86,6 +86,21 @@ The local MCP server validates the explicit confirmation field and proposal hash
 No MCP tool accepts a raw shell command. When no approved adapter command exists, `shipping_execute` returns a work order to the connected host agent instead of inventing CLI flags.
 
 See [`docs/MCP.md`](docs/MCP.md) for installation, tool behavior, compatibility, and limitations.
+
+## Internal remote control (v0.9)
+
+The v0.9 development release adds a TLS-only owner/company-internal gateway for explicitly allowlisted repositories. It accepts signed, short-lived high-level Shipping requests only; there is no raw shell, command, argv, environment, deployment, push, public tenant, or customer surface.
+
+Start the `shipping-harness-remote` binary with a private configuration file, TLS certificate, TLS key, a loopback or private listen address, and the environment-variable names documented in the example configuration. Secret values never belong in Git.
+
+See [`docs/internal-remote/README.md`](docs/internal-remote/README.md) and [`config/internal-remote.example.json`](config/internal-remote.example.json).
+
+Verification:
+
+```bash
+npm run test:remote
+npm run smoke:remote
+```
 
 ## Adapter control plane
 

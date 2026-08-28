@@ -30,7 +30,7 @@
     "test:adapter": "node scripts/run-tests.mjs adapter",
     "test:mcp": "node scripts/run-tests.mjs mcp",
     "test:decision": "node --test --test-reporter=spec test/unit/decision-evidence.test.mjs test/unit/decision-package.test.mjs test/unit/decision-policy.test.mjs test/adversarial/decision-attacks.test.mjs",
-    "test:goals": "node --test --test-reporter=spec test/unit/goals-compiler.test.mjs",
+    "test:goals": "node --test --test-reporter=spec test/unit/goals-compiler.test.mjs test/integration/goals-recovery.test.mjs",
     "test:adversarial": "node scripts/run-tests.mjs adversarial",
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",

@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 10,
+    "requiredFailed": 0,
+    "total": 10
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "3a696672666946afbd98208fc92e8ff523a0b857",
+  "closedAt": "2026-08-28T05:33:23.458Z",
+  "closedGitSha": "79b2ab46b5f623076d2b2f8afe2e3a24ee18359d",
+  "contractHash": "af478cbb3ac88fdac6c7157b39393aa9c13b08b21e3e044cf69c1eaee42c49e2",
+  "evidenceRunId": "run-2026-08-28T05-33-02-931Z-7ad5ec8b",
+  "fixCycles": 0,
+  "goal": "Compile the locked release into durable Goal and Task state with append-only evidence, restart recovery, current-SHA completion proof, and bounded failure termination.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "0.5.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

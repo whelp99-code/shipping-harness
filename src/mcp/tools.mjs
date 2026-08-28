@@ -23,6 +23,8 @@ export const SHIPPING_TOOLS = Object.freeze([
         goal: { type: 'string', minLength: 5, maxLength: 4000, description: 'The user-visible outcome this release must deliver.' },
         release: { type: 'string', pattern: '^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$', description: 'Optional semantic version. Defaults to 0.1.0 or the next minor release.' },
         projectName: { type: 'string', minLength: 1, maxLength: 120, description: 'Optional project display name.' },
+        mode: { type: 'string', enum: ['AUTO', 'SAFE', 'INTERVIEW'], default: 'AUTO', description: 'AUTO decides ordinary reversible choices; SAFE escalates medium-risk changes; INTERVIEW groups bounded questions.' },
+        proposerId: { type: 'string', minLength: 1, maxLength: 160, description: 'Optional stable identity of the host agent proposing the decision. It cannot approve the same proposal.' },
       },
       required: ['goal'],
       additionalProperties: false,
@@ -189,21 +191,30 @@ async function statusOrUninitialized(root) {
 export async function callShippingTool(root, name, rawArguments) {
   const args = objectArguments(rawArguments);
   if (name === 'shipping_start') {
-    rejectUnknownKeys(args, ['goal', 'release', 'projectName']);
+    rejectUnknownKeys(args, ['goal', 'release', 'projectName', 'mode', 'proposerId']);
     const goal = requiredString(args.goal, 'goal', 5, 4000);
     if (args.release !== undefined) requiredString(args.release, 'release', 5, 80);
     if (args.projectName !== undefined) requiredString(args.projectName, 'projectName', 1, 120);
+    if (args.mode !== undefined) invariant(['AUTO', 'SAFE', 'INTERVIEW'].includes(args.mode), 'ERR_MCP_ARGUMENTS', `Unsupported decision mode: ${String(args.mode)}`);
+    if (args.proposerId !== undefined) requiredString(args.proposerId, 'proposerId', 1, 160);
     const { proposal, proposalPath } = await createScopeProposal(root, {
       goal,
       release: args.release,
       projectName: args.projectName,
+      mode: args.mode,
+      proposerId: args.proposerId ?? 'mcp-host-agent',
     });
     const data = {
       proposalId: proposal.id,
       proposalHash: proposal.hash,
       release: proposal.release,
       goal: proposal.goal,
+      mode: proposal.mode,
       readyForApproval: proposal.readyForApproval,
+      approvalStatus: proposal.decision.approvalStatus,
+      approvalBrief: proposal.approvalBrief,
+      questions: proposal.decision.questions,
+      proposer: proposal.decision.proposer,
       scope: proposal.contract.scope,
       acceptance: proposal.contract.acceptance,
       plan: proposal.plan,
@@ -212,7 +223,10 @@ export async function callShippingTool(root, name, rawArguments) {
       proposalPath,
       approvalRequired: true,
     };
-    return complete(data, `Proposed ${proposal.release} with ${proposal.contract.acceptance.length} required checks. Review the scope, then call shipping_approve_scope with the exact proposal ID and hash.`);
+    const next = proposal.readyForApproval
+      ? 'Review the one-screen approval brief, then call shipping_approve_scope with the exact proposal ID and hash.'
+      : 'Resolve the grouped exception questions, then create a new proposal before approval.';
+    return complete(data, `Proposed ${proposal.release} in ${proposal.mode} mode with ${proposal.contract.acceptance.length} required checks. ${next}`);
   }
 
   if (name === 'shipping_approve_scope') {
@@ -221,6 +235,8 @@ export async function callShippingTool(root, name, rawArguments) {
       proposalId: requiredString(args.proposalId, 'proposalId', 1, 160),
       proposalHash: requiredString(args.proposalHash, 'proposalHash', 64, 64),
       confirm: args.confirm === true,
+      approverType: 'human',
+      approverId: 'mcp-confirmed-user',
     });
     const data = {
       project: result.contract.project,

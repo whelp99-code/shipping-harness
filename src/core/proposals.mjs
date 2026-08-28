@@ -9,6 +9,7 @@ import { runtimePaths } from './paths.mjs';
 import { buildShortPlan } from './project-analysis.mjs';
 import { buildDecisionEvidence } from './decision-evidence.mjs';
 import { compileDecisionContract, composeDefaultDecision } from './decision-package.mjs';
+import { applyDecisionPolicy, buildApprovalBrief } from './decision-policy.mjs';
 import { prepareNextRelease } from './release-transition.mjs';
 import { initializeState, readState, recordLedger, transitionState } from './state.mjs';
 
@@ -78,11 +79,13 @@ export async function createScopeProposal(root, input) {
   const inheritedCommands = Object.entries(base.adapters ?? {})
     .filter(([, config]) => typeof config?.command === 'string' && config.command.trim())
     .map(([name]) => name);
-  const decision = composeDefaultDecision(evidence, {
+  let decision = composeDefaultDecision(evidence, {
     release,
     projectName,
     proposerId: typeof input.proposerId === 'string' && input.proposerId.trim() ? input.proposerId.trim().slice(0, 160) : undefined,
   });
+  decision = applyDecisionPolicy(evidence, decision, { budgets: base.budgets });
+  const approvalBrief = buildApprovalBrief(decision);
   const contract = compileDecisionContract(base, decision);
   const acceptance = contract.acceptance;
   const now = new Date();
@@ -98,16 +101,18 @@ export async function createScopeProposal(root, input) {
     createdAt: now.toISOString(),
     expiresAt: new Date(now.getTime() + PROPOSAL_TTL_MS).toISOString(),
     mode: decision.mode,
-    readyForApproval: sourceChanges.length === 0 && decision.questions.length === 0,
+    readyForApproval: sourceChanges.length === 0 && decision.approvalStatus === 'APPROVABLE' && decision.questions.length === 0,
     sourceChanges,
     analysis,
     evidence,
     decision,
+    approvalBrief,
     contract,
     plan: buildShortPlan(analysis, acceptance),
     diagnostics: [
       ...analysis.diagnostics,
       ...(sourceChanges.length > 0 ? ['Commit or discard non-.shipping changes before approval.'] : []),
+      ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
       ...(inheritedCommands.length > 0 ? [`Existing adapter commands were removed from the generated proposal: ${inheritedCommands.join(', ')}.`] : []),
     ],
   };
@@ -133,12 +138,17 @@ export async function loadScopeProposal(root, proposalId) {
 /**
  * Approve a proposal and atomically move the release into LOCKED state.
  * @param {string} root
- * @param {{proposalId: string, proposalHash: string, confirm: boolean}} input
+ * @param {{proposalId: string, proposalHash: string, confirm: boolean, approverType?: string, approverId?: string}} input
  */
 export async function approveScopeProposal(root, input) {
   invariant(input.confirm === true, 'ERR_APPROVAL_REQUIRED', 'Explicit confirm=true is required to approve scope');
+  const approverType = input.approverType ?? 'human';
+  const approverId = typeof input.approverId === 'string' && input.approverId.trim() ? input.approverId.trim().slice(0, 160) : 'local-user';
+  invariant(approverType === 'human', 'ERR_MODEL_SELF_APPROVAL', 'Only a human approver may lock a decision proposal');
   const { proposal, proposalPath } = await loadScopeProposal(root, input.proposalId);
   invariant(input.proposalHash === proposal.hash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match');
+  invariant(proposal.readyForApproval === true && proposal.decision?.approvalStatus === 'APPROVABLE', 'ERR_DECISION_NEEDS_INPUT', 'Proposal still has unresolved mandatory risks or questions');
+  invariant(approverId !== proposal.decision?.proposer?.id, 'ERR_MODEL_SELF_APPROVAL', 'The proposer cannot approve its own decision package');
   invariant(Date.parse(proposal.expiresAt) > Date.now(), 'ERR_PROPOSAL_EXPIRED', 'Proposal has expired; create a new proposal');
   invariant(currentGitSha(root) === proposal.gitSha, 'ERR_PROPOSAL_STALE', 'Repository HEAD changed after proposal creation');
   const sourceChanges = nonRuntimeChanges(root);
@@ -172,6 +182,8 @@ export async function approveScopeProposal(root, input) {
     approval: {
       confirmed: true,
       approvedAt: new Date().toISOString(),
+      approverType,
+      approverId,
       contractHash: lock.contractHash,
       baselineSha: lock.baselineSha,
     },

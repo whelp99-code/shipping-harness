@@ -1,0 +1,305 @@
+{
+  "acceptance": [
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0701",
+      "cwd": ".",
+      "description": "The separate private runtime pin, internal patch commit, build digest, compatibility version, package and installation evidence validate.",
+      "id": "AC-0701",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0702",
+      "cwd": ".",
+      "description": "Upstream license, copyright notices, internal-use boundary, and modification inventory are present and valid.",
+      "id": "AC-0702",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0703",
+      "cwd": ".",
+      "description": "Work-order and receipt schemas bind all required Shipping authority fields and budgets.",
+      "id": "AC-0703",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0704",
+      "cwd": ".",
+      "description": "The runtime cannot approve or modify Shipping contracts, increase budgets, or transition SHIPPABLE/CLOSED.",
+      "id": "AC-0704",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0705",
+      "cwd": ".",
+      "description": "The promoted default profile enforces bounded workers/depth/continuations/fix cycles with Team/DAG and unlimited values disabled.",
+      "id": "AC-0705",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0706",
+      "cwd": ".",
+      "description": "Shipping pause, abort, close, and budget denial override continuation and late work.",
+      "id": "AC-0706",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0707",
+      "cwd": ".",
+      "description": "Foreign-session, stale-SHA, wrong-task, tampered, replayed, and out-of-scope receipts are rejected.",
+      "id": "AC-0707",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0708",
+      "cwd": ".",
+      "description": "An OMO completed receipt remains untrusted until current Shipping acceptance verification succeeds.",
+      "id": "AC-0708",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0709",
+      "cwd": ".",
+      "description": "Unavailable or incompatible OMO yields an approved fallback or durable BLOCKED, never fabricated success.",
+      "id": "AC-0709",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0710",
+      "cwd": ".",
+      "description": "Crash/restart and duplicate delivery do not replay terminal work or duplicate completion.",
+      "id": "AC-0710",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0711",
+      "cwd": ".",
+      "description": "Selected upstream tests, bridge tests, compatibility checks, canary and isolated install all pass before promotion.",
+      "id": "AC-0711",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0712",
+      "cwd": ".",
+      "description": "The previous disabled/fallback runtime artifact can be restored and v0.7 re-promoted without changing the active contract.",
+      "id": "AC-0712",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0713",
+      "cwd": ".",
+      "description": "No public/customer package, listener, endpoint, image, or publish configuration is produced.",
+      "id": "AC-0713",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/omo-v0.7-gate.mjs AC-0714",
+      "cwd": ".",
+      "description": "A real OMO-backed internal pilot reaches CLOSED only after Shipping verification and produces a v0.8 entry-gate report.",
+      "id": "AC-0714",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "npm test",
+      "cwd": ".",
+      "description": "All Shipping Core regressions pass.",
+      "id": "AC-0790",
+      "required": true,
+      "timeoutSeconds": 600,
+      "type": "command"
+    },
+    {
+      "command": "npm run test:omo-bridge",
+      "cwd": ".",
+      "description": "The dedicated Shipping/OMO bridge suite passes.",
+      "id": "AC-0791",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "npm run security",
+      "cwd": ".",
+      "description": "Security boundaries pass.",
+      "id": "AC-0792",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "npm run license:check",
+      "cwd": ".",
+      "description": "License and third-party inventories pass.",
+      "id": "AC-0793",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "npm run build",
+      "cwd": ".",
+      "description": "The Shipping package builds with the private bridge but without vendored OMO source.",
+      "id": "AC-0794",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    }
+  ],
+  "adapters": {
+    "codex": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "gajae": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "generic": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "omo": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "ouroboros": {
+      "artifactPaths": [],
+      "command": null
+    }
+  },
+  "blockerPolicy": [
+    "acceptance-failure",
+    "contract-tamper",
+    "stale-evidence",
+    "scope-drift",
+    "critical-security",
+    "human-stop-override",
+    "runtime-authority-escalation",
+    "runtime-unbounded-value",
+    "runtime-receipt-tamper",
+    "runtime-session-takeover",
+    "runtime-late-result",
+    "runtime-fabricated-success",
+    "runtime-public-publish",
+    "runtime-license-boundary",
+    "runtime-rollback-failure",
+    "missing-real-pilot"
+  ],
+  "budgets": {
+    "maxAgentRuns": 3,
+    "maxCommandSeconds": 900,
+    "maxFixCycles": 2,
+    "maxOutputBytes": 1048576
+  },
+  "goal": "Delegate bounded personal/company-internal execution to the verified private OMO runtime while Shipping retains exclusive authority over scope, approval, budgets, human stop, evidence, blockers, SHIPPABLE, and CLOSED.",
+  "internalRuntime": {
+    "configPath": "config/upstreams/omo-pin.json",
+    "dagMode": false,
+    "fallback": [
+      "codex",
+      "generic",
+      "blocked"
+    ],
+    "humanStopWins": true,
+    "maxAgentDepth": 1,
+    "maxContinuations": 3,
+    "maxFixCycles": 2,
+    "maxParallelWorkers": 2,
+    "profile": "private-omo-v0.7",
+    "publicPublish": false,
+    "receiptSchema": "shipping-omo-receipt/v1",
+    "schema": "shipping-harness/private-runtime-profile-v1",
+    "shippingFinisherOnly": true,
+    "teamMode": false,
+    "workOrderSchema": "shipping-omo/v1"
+  },
+  "project": "shipping-harness",
+  "release": "0.7.0",
+  "releasePolicy": {
+    "autoCommit": false,
+    "autoPush": false,
+    "autoTag": false,
+    "generateReport": true
+  },
+  "schema": "shipping-harness/v1",
+  "scope": {
+    "exclude": [
+      "OMO source copied into Shipping Core or distributed from the Shipping package.",
+      "Team Mode, DAG orchestration, more than two parallel workers, delegation depth above one, unlimited values, or evolutionary loops.",
+      "Customer installation, public npm/source/binary/image/container publication, public SaaS, public listeners, marketplace, or external tenant access.",
+      "Remote/mobile control, organization RBAC, backup service, v0.9 operations, or v1.0 schema freeze.",
+      "OMO memory, reflection, telemetry, self-update, branding changes, or model-provider credential migration.",
+      "Treating OMO task completion as release completion without current Shipping verification."
+    ],
+    "include": [
+      "A narrow Shipping Core bridge to the separately pinned shipping-harness-omo-runtime without importing the OMO monorepo into Shipping Core.",
+      "Signed shipping-omo/v1 work orders and shipping-omo-receipt/v1 receipts bound to release, contract hash, Git SHA, session, Goal/Task, scope, acceptance, and bounded budgets.",
+      "Truthful runtime health, compatibility, exact upstream/internal pins, build digest, notices, modification inventory, install evidence, canary evidence, promotion, and rollback evidence.",
+      "Shipping-owned pause, abort, budget, stale-SHA, foreign-session, forbidden-path, late-result, receipt-integrity, issue, verification, and Finisher decisions.",
+      "At most two workers, depth one, three continuations, two fix cycles, Team and DAG disabled, no unlimited values, no public publishing.",
+      "Contract-approved Codex/Generic fallback or durable BLOCKED when the private runtime is unavailable or incompatible.",
+      "One disposable but real Git project completed through an actual OMO-backed probe/work-order receipt followed by independent Shipping acceptance verification and CLOSED receipt.",
+      "A v0.7 pilot report containing completion, intervention, cost/usage, coordination, stop, false-done, and entry-gate evidence for v0.8."
+    ],
+    "paths": {
+      "exclude": [
+        ".shipping/contract.yaml",
+        ".shipping/contract.lock",
+        ".git/**",
+        "dist/**",
+        "coverage/**",
+        "node_modules/**"
+      ],
+      "include": [
+        "packages/internal-omo-bridge/**",
+        "config/upstreams/**",
+        "scripts/omo-*.mjs",
+        "test/omo/**",
+        "test/adversarial/**",
+        "docs/internal-runtime/**",
+        "docs/planning/**",
+        "docs/TRACEABILITY.md",
+        "README.md",
+        "BACKLOG.md",
+        "THIRD_PARTY.md",
+        "package.json",
+        "src/mcp/tools.mjs",
+        "src/mcp/resources.mjs",
+        "src/core/contract.mjs"
+      ]
+    }
+  },
+  "stopPolicy": {
+    "autoContinueAfterInterrupt": false,
+    "closeWhenRequiredGatesPass": true,
+    "humanInterruptWins": true
+  },
+  "worker": "shipping-harness"
+}

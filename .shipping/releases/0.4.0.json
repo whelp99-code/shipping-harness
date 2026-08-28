@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 9,
+    "requiredFailed": 0,
+    "total": 9
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "db2a9d72d388660099a7402ea0d768c7a55e4f8a",
+  "closedAt": "2026-08-28T04:59:02.420Z",
+  "closedGitSha": "020cd05a6b1b8f21fd4e08bc7f0ac263e860f06b",
+  "contractHash": "7009a9912820a8aeddfb71593b16d9b2104dc5b7dfdab8ff45d78ef7b95270f9",
+  "evidenceRunId": "run-2026-08-28T04-58-39-048Z-79ac875e",
+  "fixCycles": 0,
+  "goal": "Make AI decide the smallest operable release from repository evidence and user intent, ask only when a high-risk or irreversible decision cannot be safely inferred, present one approval brief, and preserve deterministic Shipping Harness governance.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "0.4.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

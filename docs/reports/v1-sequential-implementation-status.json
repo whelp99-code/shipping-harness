@@ -1,0 +1,145 @@
+{
+  "schema": "shipping-harness/sequential-status-v1",
+  "generatedAt": "2026-08-28T15:10:09.634Z",
+  "project": "shipping-harness",
+  "direction": "LOCKED",
+  "usage": "personal-and-company-internal-only",
+  "userRole": "approver",
+  "candidate": {
+    "release": "1.0.0",
+    "packageVersion": "1.0.0",
+    "state": "LOCKED",
+    "contractHash": "4ba1df073720f3de8e653ccad0864206b333e87d6ee74cc3d75e610fa4de180d",
+    "baselineSha": "4bb1bd3cc2c3f778b80d8f1cf65118d8bfa51ad0",
+    "commit": "0f507b305161c2cf6d19c834cda933792c5b7d6a",
+    "branch": "main",
+    "worktree": "CLEAN",
+    "finalAuthorityPending": true
+  },
+  "releases": {
+    "0.1.0": {
+      "state": "CLOSED",
+      "tag": "v0.1.0",
+      "commit": "5905408d0c7707045c287d2699f61e647c63d3e7",
+      "receipt": ".shipping/releases/0.1.0.json",
+      "contractHash": "5a4b20f5b96d04b07e6122126e3ef7ee6bb490a45a9b21ac5760f1ff89c987f8",
+      "evidenceSha": null
+    },
+    "0.2.0": {
+      "state": "CLOSED",
+      "tag": "v0.2.0",
+      "commit": "ad8ef985d09113f0c069ede6715534fab2b63694",
+      "receipt": ".shipping/releases/0.2.0.json",
+      "contractHash": "48841997ec5eb19f913ac3b7b6dd39af48a65f7e840cd77b41707d63fdafc373",
+      "evidenceSha": null
+    },
+    "0.3.0": {
+      "state": "CLOSED",
+      "tag": "v0.3.0",
+      "commit": "1fff502d0897e64859e7dc459c58a43fbc53022a",
+      "receipt": ".shipping/releases/0.3.0.json",
+      "contractHash": "bb988485838386f87590a0bfa3d78bc8358fc7e9371a5ed4d9903b9958636a0c",
+      "evidenceSha": null
+    },
+    "0.4.0": {
+      "state": "CLOSED",
+      "tag": "v0.4.0",
+      "commit": "179a1a16b2df0febf3c889d6c0b611bd8770207b",
+      "receipt": ".shipping/releases/0.4.0.json",
+      "contractHash": "7009a9912820a8aeddfb71593b16d9b2104dc5b7dfdab8ff45d78ef7b95270f9",
+      "evidenceSha": null
+    },
+    "0.5.0": {
+      "state": "CLOSED",
+      "tag": "v0.5.0",
+      "commit": "a61369e138dca6357351261ec3e99d92059bbdca",
+      "receipt": ".shipping/releases/0.5.0.json",
+      "contractHash": "af478cbb3ac88fdac6c7157b39393aa9c13b08b21e3e044cf69c1eaee42c49e2",
+      "evidenceSha": null
+    },
+    "0.6.0": {
+      "state": "CLOSED",
+      "tag": "v0.6.0",
+      "commit": "64802ce7b62861843e606bddc8b740b7bd93b704",
+      "receipt": ".shipping/releases/0.6.0.json",
+      "contractHash": "8859851816a53f10c6fd40d0037a3862392a30cd6fd384bdfe541edc8c394b83",
+      "evidenceSha": null
+    },
+    "0.7.0": {
+      "state": "CLOSED",
+      "tag": "v0.7.0",
+      "commit": "48a645b6254677ced4b006ba75c59431b0e7aeae",
+      "receipt": ".shipping/releases/0.7.0.json",
+      "contractHash": "dd08362081994ec564d5a4b6362de9a2fb5d1f5611351da52928546a74104598",
+      "evidenceSha": null
+    },
+    "0.8.0": {
+      "state": "CLOSED",
+      "tag": "v0.8.0",
+      "commit": "3676d3b8c32d9d7117d640e58b76594159fe7e78",
+      "receipt": ".shipping/releases/0.8.0.json",
+      "contractHash": "e36604c0c5e05304f7f2402b87a14ef14f58d353080af444302db826baacc6d3",
+      "evidenceSha": null
+    },
+    "0.9.0": {
+      "state": "CLOSED",
+      "tag": "v0.9.0",
+      "commit": "5b6279ad9728eb9966b3992563b9caa5d86316ac",
+      "receipt": ".shipping/releases/0.9.0.json",
+      "contractHash": "455059b1971936435c0ab8c8853ae7e6eb94662904fc53d4a277870f6df9be21",
+      "evidenceSha": null
+    }
+  },
+  "evidence": {
+    "schemas": {
+      "count": 21,
+      "examplesValidated": true
+    },
+    "benchmark": {
+      "method": "controlled-local-fixtures",
+      "liveModelBenchmark": false,
+      "shippingFalseDone": 0,
+      "shippingScopeDriftAccepted": 0,
+      "humanStopViolations": 0
+    },
+    "installation": {
+      "status": "PASS",
+      "packageSha256": "6fdb9205c04fbe295dede8f2f97ad2755a375ad05864a24cfbb20caebc20b2e6",
+      "cleanInstallVersion": "1.0.0",
+      "upgrade": "0.6.0 -> 1.0.0",
+      "pluginDoctorHealthy": true,
+      "beginnerFinalState": "CLOSED",
+      "rollbackProven": true
+    },
+    "privateOmo": {
+      "historicalPilot": true,
+      "historicalCompletionTrusted": false,
+      "currentPromotion": "PASS",
+      "releaseCommit": "ef82b4cda5d8688840780ca5a09bd0a5fa11d5bc",
+      "buildDigest": "sha256:c78bc68993cfaa121eac550ca6043cce2002ef63f9255a9f4b669f27ec7324b5",
+      "tag": "shipping-runtime-v0.7.0-r1",
+      "publicPublish": false
+    },
+    "teamDag": {
+      "decision": "DISABLED",
+      "enabled": false
+    },
+    "remote": {
+      "passed": true,
+      "finalState": "CLOSED",
+      "replayBlocked": true,
+      "publicListener": false
+    },
+    "security": {
+      "internalOnly": true,
+      "rawShellMcp": false,
+      "rawShellRemote": false,
+      "unlimitedValuesAllowed": false
+    }
+  },
+  "finalAuthority": {
+    "requiredReceipt": ".shipping/releases/1.0.0.json",
+    "requiredTag": "v1.0.0",
+    "requiredState": "CLOSED"
+  }
+}

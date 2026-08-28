@@ -1,0 +1,56 @@
+{
+  "schema": "shipping-harness/v0.9-remote-pilot-v1",
+  "generatedAt": "2026-08-28T13:31:43.390Z",
+  "passed": true,
+  "shippingHarness": {
+    "packageVersion": "0.9.0",
+    "implementationGitSha": "9932b197333bc77ec4225c1e6890f30f61e45d9c",
+    "contractHash": "455059b1971936435c0ab8c8853ae7e6eb94662904fc53d4a277870f6df9be21"
+  },
+  "transport": {
+    "protocol": "HTTPS JSON",
+    "tls": true,
+    "listenHost": "127.0.0.1",
+    "publicListener": false,
+    "maxBodyBytes": 32768,
+    "maxConcurrent": 2
+  },
+  "authorization": {
+    "actor": "owner",
+    "projectAllowlist": [
+      "pilot"
+    ],
+    "signedRequests": true,
+    "replayRejectedAfterRestart": true,
+    "oneTimeApproval": true,
+    "approvalBoundToGitSha": true,
+    "remoteResumeOverHumanStopDenied": true
+  },
+  "workflow": {
+    "proposedRelease": "0.1.0",
+    "approvalState": "LOCKED",
+    "pauseObserved": true,
+    "verificationDecision": "SHIPPABLE",
+    "blockers": 0,
+    "finalState": "CLOSED",
+    "closedNotification": true
+  },
+  "backupRestore": {
+    "signed": true,
+    "restored": true,
+    "restoredState": "CLOSED",
+    "omoManifestEvidenceOnly": true
+  },
+  "recovery": {
+    "gatewayRestarted": true,
+    "replayStoreDurable": true,
+    "stateRecovered": true
+  },
+  "metrics": {
+    "durationMs": 409,
+    "humanInterventions": 2,
+    "falseDoneCount": 0,
+    "publicRequests": 0,
+    "rawShellFields": 0
+  }
+}

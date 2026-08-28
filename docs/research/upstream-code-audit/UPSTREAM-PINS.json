@@ -1,0 +1,52 @@
+{
+  "schema": "shipping-harness/upstream-audit-pins-v1",
+  "capturedAt": "2026-08-28",
+  "auditScope": "Shipping-relevant control paths",
+  "repositories": [
+    {
+      "name": "Gajae Code",
+      "slug": "gajae-code",
+      "origin": "https://github.com/Yeachan-Heo/gajae-code.git",
+      "requestedBranch": "main",
+      "checkout": "detached",
+      "commit": "103659a2ebf6e698140c021981d47508389a2897",
+      "shortCommit": "103659a2ebf6",
+      "commitDate": "2026-08-27T09:03:19+09:00",
+      "commitSubject": "chore: bump version to 0.15.3",
+      "declaredOrReleaseVersion": "0.15.3",
+      "licenseBoundary": "MIT",
+      "localAuditPath": ".chatgpt2codex/upstreams/gajae-code",
+      "vendoredIntoShippingHarness": false
+    },
+    {
+      "name": "Q00 Ouroboros",
+      "slug": "ouroboros",
+      "origin": "https://github.com/Q00/ouroboros.git",
+      "requestedBranch": "main",
+      "checkout": "detached",
+      "commit": "6db4d70cca2d8065fcd6dda765cf85e0d950b133",
+      "shortCommit": "6db4d70cca2d",
+      "commitDate": "2026-08-27T22:53:15+09:00",
+      "commitSubject": "chore(release): v0.51.16 (#2287)",
+      "declaredOrReleaseVersion": "0.51.16",
+      "licenseBoundary": "MIT",
+      "localAuditPath": ".chatgpt2codex/upstreams/ouroboros",
+      "vendoredIntoShippingHarness": false
+    },
+    {
+      "name": "Oh My OpenAgent / OMO Native",
+      "slug": "oh-my-openagent",
+      "origin": "https://github.com/code-yeongyu/oh-my-openagent.git",
+      "requestedBranch": "dev",
+      "checkout": "detached",
+      "commit": "43d9c058e08b00a3629319df82e6a647de2b8490",
+      "shortCommit": "43d9c058e08b",
+      "commitDate": "2026-08-28T03:07:24+09:00",
+      "commitSubject": "Merge pull request #7448 from code-yeongyu/fix/release-arm64-musl-smoke",
+      "declaredOrReleaseVersion": "5.0.0-beta.23",
+      "licenseBoundary": "Sustainable Use License 1.0; narrower licenses apply to selected portions",
+      "localAuditPath": ".chatgpt2codex/upstreams/oh-my-openagent",
+      "vendoredIntoShippingHarness": false
+    }
+  ]
+}

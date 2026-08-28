@@ -11,6 +11,12 @@ DRAFT → scope approved → LOCKED → BUILD → VERIFY → blocker-only FIX
 
 New ideas never enter an active release unless they repair an accepted requirement. They move to the next-version backlog.
 
+## Upstream code-audit note
+
+The official Gajae Code, Q00 Ouroboros, and OMO repositories were downloaded at exact pinned revisions and audited at the function/control-path level before v0.4 implementation. The audit leaves the active v0.4 contract unchanged, but recommends splitting durable Goal/Evidence work from the much larger OMO-style orchestration runtime. See [`../research/upstream-code-audit/README.md`](../research/upstream-code-audit/README.md) and [`../research/upstream-code-audit/05-PROPOSED-PLAN-CORRECTIONS.md`](../research/upstream-code-audit/05-PROPOSED-PLAN-CORRECTIONS.md).
+
+The product sequence below remains the previously approved plan until that correction proposal is explicitly adopted. No later-version scope is silently changed by the research audit.
+
 ## Product sequence
 
 | Version | Outcome | User-visible change |

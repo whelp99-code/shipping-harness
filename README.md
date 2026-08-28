@@ -168,6 +168,7 @@ Bounded goal/role orchestration, plugin and approval UX, authenticated remote co
 - [`docs/planning/06-ADAPTER-INTEGRATION.md`](docs/planning/06-ADAPTER-INTEGRATION.md)
 - [`docs/TRACEABILITY.md`](docs/TRACEABILITY.md)
 - [`docs/MCP.md`](docs/MCP.md)
+- [`docs/research/upstream-code-audit/README.md`](docs/research/upstream-code-audit/README.md)
 - [`docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md`](docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md)
 - [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md)
 

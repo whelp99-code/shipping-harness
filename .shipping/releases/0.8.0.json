@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 17,
+    "requiredFailed": 0,
+    "total": 17
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "3a196a56ef8c5259ea3237f600657910292e4b28",
+  "closedAt": "2026-08-28T12:38:53.340Z",
+  "closedGitSha": "837302fb3ba94718d8735c8ff6834cabca1abe86",
+  "contractHash": "e36604c0c5e05304f7f2402b87a14ef14f58d353080af444302db826baacc6d3",
+  "evidenceRunId": "run-2026-08-28T12-38-32-872Z-b7870530",
+  "fixCycles": 1,
+  "goal": "Close v0.8.0 by recording and enforcing the evidence-based decision that Team and DAG orchestration remain disabled because the v0.7 real pilot did not prove a coordination bottleneck or completion benefit.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "0.8.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current stable:** `v0.3.0`
-**Next planned:** `v0.4.0 — AI Decides, Human Approves` (`DRAFT`)
+**Current stable:** `v0.4.0 — AI Decides, Human Approves` (`CLOSED`)
+**Current development:** `v0.5.0 — Durable Goal and Evidence Runtime` (`DRAFT`)
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.

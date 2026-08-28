@@ -1,188 +1,31 @@
 {
-  "acceptance": [
-    {
-      "command": "npm run lint",
-      "cwd": ".",
-      "description": "All source, decision, MCP, and test files pass repository lint checks.",
-      "id": "AC-001",
-      "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
-    },
-    {
-      "command": "npm run typecheck",
-      "cwd": ".",
-      "description": "The module graph and package entrypoints resolve.",
-      "id": "AC-002",
-      "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
-    },
-    {
-      "command": "npm run build",
-      "cwd": ".",
-      "description": "A distributable v0.4.0 tree with CLI and MCP binaries is produced.",
-      "id": "AC-003",
-      "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
-    },
-    {
-      "command": "npm test",
-      "cwd": ".",
-      "description": "All unit, integration, adapter, MCP, decision, and adversarial tests pass.",
-      "id": "AC-004",
-      "required": true,
-      "timeoutSeconds": 480,
-      "type": "command"
-    },
-    {
-      "command": "npm run test:mcp",
-      "cwd": ".",
-      "description": "MCP protocol, tool, proposal, approval, and STDIO transport tests pass independently.",
-      "id": "AC-005",
-      "required": true,
-      "timeoutSeconds": 240,
-      "type": "command"
-    },
-    {
-      "command": "npm run test:decision",
-      "cwd": ".",
-      "description": "Auto-decision modes, evidence, assumptions, risk escalation, approval brief, and policy tests pass independently.",
-      "id": "AC-006",
-      "required": true,
-      "timeoutSeconds": 240,
-      "type": "command"
-    },
-    {
-      "command": "node scripts/mcp-smoke.mjs",
-      "cwd": ".",
-      "description": "A live local STDIO smoke client completes discovery, decision workflow entry, tool listing, and read-only status invocation.",
-      "id": "AC-007",
-      "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
-    },
-    {
-      "command": "npm run security",
-      "cwd": ".",
-      "description": "Security checks reject command exposure, self-approval, policy bypass, stale decisions, prompt injection, path escape, oversized messages, and secret leakage.",
-      "id": "AC-008",
-      "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
-    },
-    {
-      "command": "npm run license:check",
-      "cwd": ".",
-      "description": "License and third-party interoperability boundaries remain valid.",
-      "id": "AC-009",
-      "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
-    }
-  ],
-  "adapters": {
-    "codex": {
-      "artifactPaths": [],
-      "command": null
-    },
-    "gajae": {
-      "artifactPaths": [
-        ".gjc/goals.json",
-        ".gjc/ledger.jsonl",
-        ".omc/ultragoal/goals.json",
-        ".omc/ultragoal/ledger.jsonl"
-      ],
-      "command": null
-    },
-    "generic": {
-      "artifactPaths": [],
-      "command": null
-    },
-    "omo": {
-      "artifactPaths": [
-        ".omo/omo.jsonc",
-        ".omo/omo.json"
-      ],
-      "command": null
-    },
-    "ouroboros": {
-      "artifactPaths": [
-        ".ouroboros/seed.json",
-        ".ouroboros/ledger.jsonl",
-        ".ouro/seed.json",
-        ".ouro/ledger.jsonl"
-      ],
-      "command": null
-    }
-  },
-  "blockerPolicy": [
-    "acceptance-failure",
-    "contract-tamper",
-    "stale-evidence",
-    "scope-drift",
-    "data-loss",
-    "critical-security",
-    "capability-overclaim",
-    "human-stop-override",
-    "unbounded-continuation",
-    "mcp-protocol-violation",
-    "arbitrary-command-exposure",
-    "stale-proposal",
-    "approval-bypass",
-    "decision-policy-bypass",
-    "unapproved-mandatory-risk",
-    "model-self-approval",
-    "repository-instruction-injection",
-    "question-budget-exceeded"
-  ],
-  "budgets": {
-    "maxAgentRuns": 3,
-    "maxCommandSeconds": 900,
-    "maxFixCycles": 2,
-    "maxOutputBytes": 1048576
-  },
-  "goal": "Make AI decide the smallest operable release from repository evidence and user intent, ask only when a high-risk or irreversible decision cannot be safely inferred, present one approval brief, and preserve deterministic Shipping Harness governance.",
-  "project": "shipping-harness",
-  "release": "0.4.0",
-  "releasePolicy": {
-    "autoCommit": false,
-    "autoPush": false,
-    "autoTag": false,
-    "generateReport": true
-  },
   "schema": "shipping-harness/v1",
+  "project": "shipping-harness",
+  "worker": "shipping-harness",
+  "release": "0.5.0",
+  "goal": "Compile the locked release into durable Goal and Task state with append-only evidence, restart recovery, current-SHA completion proof, and bounded failure termination.",
   "scope": {
-    "exclude": [
-      "Full Gajae deep interview, ralplan, ultragoal, tmux worker orchestration, or copied Gajae source.",
-      "OMO multi-agent teams, autonomous model routing, parallel specialist execution, or native plugin emulation.",
-      "Ouroboros evolutionary generations, ontology convergence, unbounded evaluate/evolve loops, or copied Ouroboros source.",
-      "Embedded model-provider APIs, a proprietary reasoning model, or mandatory network model calls in the Shipping Harness core.",
-      "Remote HTTP MCP, OAuth, plugin approval cards, mobile UI, cloud control plane, multi-user/RBAC, automatic Git push, and deployment.",
-      "Model-generated arbitrary shell execution, model self-approval, automatic contract approval, or bypassing human pause/abort.",
-      "Implementation of v0.5.0 or later roadmap items."
-    ],
     "include": [
-      "AUTO as the default decision mode, with explicit SAFE and INTERVIEW alternatives.",
-      "A bounded repository decision evidence pack built without executing project code and with repository text treated as untrusted data.",
-      "A model-agnostic structured decision protocol for a connected host agent to submit goals, scope, exclusions, acceptance, decisions, assumptions, evidence, confidence, reversibility, risks, and exception questions.",
-      "Deterministic validation that rejects unrelated features, fabricated capabilities, unsupported commands, stale evidence, hidden scope growth, silent mode changes, and weakened Shipping Harness policy.",
-      "Mandatory-risk escalation for destructive data, paid services, external impact, credentials/permissions, privacy/legal/compliance/critical-security, mutually exclusive core outcomes, and removal of critical compatibility promises.",
-      "Safe documented assumptions for reversible low-risk uncertainty and a hard limit of three exception questions returned in one batch with recommended choices.",
-      "A concise one-screen approval brief plus a separately inspectable detailed decision package.",
-      "Proposal hashing that covers mode, decisions, assumptions, risks, questions, evidence, Git SHA, and expiry while preserving explicit user approval and proposer/approver separation.",
-      "MCP, security, adversarial, regression, installation, and beginner-workflow documentation for the v0.4.0 decision flow."
+      "Deterministic compilation of the locked Shipping contract into stable Goal and Task records.",
+      "Requirement and acceptance-consumer links for every Task, with orphan, duplicate, invalid dependency, and cycle rejection.",
+      "Explicit bounded Goal and Task state machines, including DONE, BLOCKED, and PLANNING_STUCK terminal outcomes.",
+      "Append-only execution ledger plus atomic Goal, Task, attempt, checkpoint, blocker, and evidence snapshots.",
+      "Restart recovery that rebuilds state without replaying completed work or mutable commands.",
+      "Current contract-hash and Git-SHA evidence freshness checks before any Goal or Task becomes DONE.",
+      "Repeated-failure fingerprints, retry budgets, unchanged-state no-progress suppression, and changed-source bounded retry reset.",
+      "Human pause and abort propagation above task recovery and continuation.",
+      "Concise Goal and Task status integrated into CLI and MCP status while Shipping Finisher remains the only release closure authority.",
+      "Offline unit, integration, adversarial, package-install, and real disposable-repository smoke validation for v0.5.0."
+    ],
+    "exclude": [
+      "Multi-agent teams, model routing, background RPC child processes, OMO runtime integration, Team Mode, or DAG execution.",
+      "Plugin installation UX, approval cards, mobile UI, remote HTTP MCP, OAuth, cloud services, or multi-user/RBAC.",
+      "A general-purpose workflow engine, dynamic top-level graph expansion, or current-release evolution.",
+      "Unlimited attempts, retries, depth, continuation, time, output, or cost.",
+      "Goal or Task state overriding the locked Shipping contract, human pause/abort, blocker policy, Finisher, SHIPPABLE, or CLOSED.",
+      "Implementation of v0.6.0 or later roadmap items."
     ],
     "paths": {
-      "exclude": [
-        ".shipping/contract.yaml",
-        ".shipping/contract.lock",
-        ".git/**",
-        "dist/**",
-        "coverage/**",
-        "node_modules/**"
-      ],
       "include": [
         "src/**",
         "bin/**",
@@ -194,13 +37,169 @@
         "THIRD_PARTY.md",
         "LICENSE",
         "package.json"
+      ],
+      "exclude": [
+        ".shipping/contract.yaml",
+        ".shipping/contract.lock",
+        ".git/**",
+        "dist/**",
+        "coverage/**",
+        "node_modules/**"
       ]
     }
   },
-  "stopPolicy": {
-    "autoContinueAfterInterrupt": false,
-    "closeWhenRequiredGatesPass": true,
-    "humanInterruptWins": true
+  "acceptance": [
+    {
+      "id": "AC-001",
+      "description": "All source, Goal runtime, MCP, and test files pass repository lint checks.",
+      "type": "command",
+      "command": "npm run lint",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-002",
+      "description": "The complete v0.5.0 module graph and package entrypoints resolve.",
+      "type": "command",
+      "command": "npm run typecheck",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-003",
+      "description": "A distributable v0.5.0 tree with CLI and MCP binaries is produced.",
+      "type": "command",
+      "command": "npm run build",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-004",
+      "description": "All unit, integration, adapter, MCP, decision, Goal runtime, and adversarial tests pass.",
+      "type": "command",
+      "command": "npm test",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 480
+    },
+    {
+      "id": "AC-005",
+      "description": "Goal/Task compilation, ledger, recovery, freshness, and failure-guard tests pass independently.",
+      "type": "command",
+      "command": "npm run test:goals",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 240
+    },
+    {
+      "id": "AC-006",
+      "description": "MCP protocol and Goal/Task status integration tests pass independently.",
+      "type": "command",
+      "command": "npm run test:mcp",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 240
+    },
+    {
+      "id": "AC-007",
+      "description": "Adversarial stale-proof, cycle, replay, retry, scope-reopen, pause, and ledger-corruption tests pass.",
+      "type": "command",
+      "command": "npm run test:adversarial",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 240
+    },
+    {
+      "id": "AC-008",
+      "description": "A disposable repository completes compile, checkpoint, interruption, restart recovery, fresh evidence, and DONE flow.",
+      "type": "command",
+      "command": "node scripts/goal-runtime-smoke.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "AC-009",
+      "description": "Security checks preserve contract, path, command, secret, human-stop, and Finisher boundaries.",
+      "type": "command",
+      "command": "npm run security",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-010",
+      "description": "License and third-party interoperability boundaries remain valid.",
+      "type": "command",
+      "command": "npm run license:check",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    }
+  ],
+  "blockerPolicy": [
+    "acceptance-failure",
+    "contract-tamper",
+    "stale-evidence",
+    "scope-drift",
+    "data-loss",
+    "critical-security",
+    "human-stop-override",
+    "unbounded-continuation",
+    "goal-task-orphan",
+    "goal-task-cycle",
+    "invalid-goal-task-transition",
+    "completed-work-replay",
+    "stale-task-evidence",
+    "unbounded-task-retry",
+    "no-progress-retry",
+    "goal-overrides-finisher",
+    "ledger-corruption-without-diagnostic"
+  ],
+  "budgets": {
+    "maxFixCycles": 2,
+    "maxAgentRuns": 3,
+    "maxCommandSeconds": 900,
+    "maxOutputBytes": 1048576
   },
-  "worker": "shipping-harness"
+  "stopPolicy": {
+    "humanInterruptWins": true,
+    "autoContinueAfterInterrupt": false,
+    "closeWhenRequiredGatesPass": true
+  },
+  "releasePolicy": {
+    "autoCommit": false,
+    "autoTag": false,
+    "autoPush": false,
+    "generateReport": true
+  },
+  "adapters": {
+    "generic": { "command": null, "artifactPaths": [] },
+    "codex": { "command": null, "artifactPaths": [] },
+    "gajae": {
+      "command": null,
+      "artifactPaths": [
+        ".gjc/goals.json",
+        ".gjc/ledger.jsonl",
+        ".omc/ultragoal/goals.json",
+        ".omc/ultragoal/ledger.jsonl"
+      ]
+    },
+    "ouroboros": {
+      "command": null,
+      "artifactPaths": [
+        ".ouroboros/seed.json",
+        ".ouroboros/ledger.jsonl",
+        ".ouro/seed.json",
+        ".ouro/ledger.jsonl"
+      ]
+    },
+    "omo": {
+      "command": null,
+      "artifactPaths": [".omo/omo.jsonc", ".omo/omo.json"]
+    }
+  }
 }

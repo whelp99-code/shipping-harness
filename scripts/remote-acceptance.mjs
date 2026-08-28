@@ -32,8 +32,8 @@ function assertAncestor(commit) {
 }
 
 function requestKeySection(source) {
-  const start = source.indexOf('const REQUEST_KEYS');
-  const end = source.indexOf('const FORBIDDEN_KEYS');
+  const start = source.indexOf('const REQUEST_FIELDS');
+  const end = source.indexOf('export function signRemoteRequest');
   assert.ok(start >= 0 && end > start, 'Remote request key policy is missing');
   return source.slice(start, end);
 }
@@ -118,7 +118,7 @@ const checks = {
     assert.equal(pilot.transport.publicListener, false);
     assert.equal(pilot.authorization.signedRequests, true);
     assert.deepEqual(pilot.authorization.projectAllowlist, ['pilot']);
-    assert.match(policySource, /Public listeners are forbidden/u);
+    assert.match(policySource, /public.*listeners are forbidden/iu);
     assert.match(identitySource, /allowedRoots/u);
   },
   'AC-0902': () => {
@@ -134,7 +134,8 @@ const checks = {
       assert.equal(requestKeys.includes(`'${forbidden}'`), false, `Request schema exposes ${forbidden}`);
       assert.equal(actionParams.includes(`'${forbidden}'`), false, `Action params expose ${forbidden}`);
     }
-    assert.match(requestSource, /forbidden remote field/iu);
+    assert.match(requestSource, /rejectArbitraryExecution\(request\.params/iu);
+    assert.match(policySource, /Remote execution or credential field is forbidden/iu);
     assert.equal(pilot.metrics.rawShellFields, 0);
   },
   'AC-0904': () => {

@@ -168,7 +168,7 @@ async function runPilot() {
       config,
       replayStore: new ReplayStore(replayPath, { ttlMs: config.replayTtlMs }),
       adapter,
-      notifications: new NotificationStore(notificationPath),
+      notifications: new NotificationStore(notificationPath, { maxEntries: config.notificationLimit }),
       backupRoot: path.join(stateRoot, 'backups'),
     });
 

@@ -1,0 +1,30 @@
+{
+  "actor": "human-approved-sequential-build",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": "scripts/build.mjs"
+    },
+    {
+      "field": "scope.paths.include",
+      "value": "scripts/amend-v09-packaging-scope.mjs"
+    }
+  ],
+  "correctedContractHash": "455059b1971936435c0ab8c8853ae7e6eb94662904fc53d4a277870f6df9be21",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-0.9.0-001",
+  "kind": "required-distribution-path-correction",
+  "previousContractHash": "d848ff6f5a90a968f1cdf10eff0c5792db5ea78445b73ff1f8ed9a4afae78695",
+  "previousScopeRevision": 1,
+  "previousState": "LOCKED",
+  "project": "shipping-harness",
+  "publicBoundaryChanged": false,
+  "reason": "The locked v0.9 build acceptance requires a runnable remote binary, but scripts/build.mjs was omitted from the approved path list and the current distributor did not copy packages/ or config/. The amendment permits only that packaging correction.",
+  "recordedAt": "2026-08-28T13:13:00.555Z",
+  "release": "0.9.0",
+  "remoteActionSurfaceChanged": false,
+  "removed": [],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticScopeExpansion": false,
+  "sourceGitSha": "9f9483b77e5927ccdf89af568286c2c148695a92"
+}

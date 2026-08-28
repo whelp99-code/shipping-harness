@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current stable:** `v0.4.0 — AI Decides, Human Approves` (`CLOSED`)
-**Current development:** `v0.5.0 — Durable Goal and Evidence Runtime` (`DRAFT`)
+**Current stable:** `v0.5.0 — Durable Goal and Evidence Runtime` (`CLOSED`)
+**Next planned:** `v0.6.0 — Beginner Plugin and Local Agent Experience`
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -149,11 +149,15 @@ Capability-negotiated adapters for Generic shell execution, Codex CLI, Gajae Cod
 
 A local STDIO MCP server, natural-language goal intake, repository analysis, minimal scope and acceptance proposal, explicit Git-bound approval, safe host-agent work orders, configured-adapter execution without raw command inputs, and deterministic verification/closure tools.
 
-### v0.4.0 — AI Decides, Human Approves (planned)
+### v0.4.0 — AI Decides, Human Approves
 
-Model-agnostic automatic decision mode, bounded repository evidence, assumptions/confidence/reversibility, risk-based exception questions, one-screen approval brief, and deterministic decision-policy validation. The v0.4.0 contract is intentionally left `DRAFT` until implementation is explicitly started.
+Model-agnostic automatic decision mode, bounded repository evidence, assumptions/confidence/reversibility, risk-based exception questions, one-screen approval brief, and deterministic decision-policy validation. Released and closed as `v0.4.0`.
 
-### v0.5.0 onward
+### v0.5.0 — Durable Goal and Evidence Runtime
+
+Locked contracts compile into stable Goal and Task records with append-only execution evidence, restart recovery, current-SHA completion proof, bounded retries, planning-stuck termination, human pause/abort propagation, and concise MCP status. Released and closed as `v0.5.0`.
+
+### v0.6.0 onward
 
 The accepted internal-only sequence is: durable Goal/Evidence runtime, beginner plugin/local MCP, a separately pinned private OMO execution runtime, bounded Team/DAG only after pilot proof, authenticated internal remote/mobile control, and a stable v1.0 control plane. See [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md).
 

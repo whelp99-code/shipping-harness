@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -11,7 +11,8 @@
     "shipping-harness": "./bin/shipping-harness.mjs",
     "shiph": "./bin/shipping-harness.mjs",
     "shipping-harness-mcp": "./bin/shipping-harness-mcp.mjs",
-    "shipping-harness-plugin": "./bin/shipping-harness-plugin.mjs"
+    "shipping-harness-plugin": "./bin/shipping-harness-plugin.mjs",
+    "shipping-harness-remote": "./bin/shipping-harness-remote.mjs"
   },
   "files": [
     "bin/",
@@ -19,10 +20,17 @@
     "packages/",
     "scripts/goal-runtime-smoke.mjs",
     "scripts/plugin-smoke.mjs",
-    "docs/",
     "LICENSE",
     "README.md",
-    "THIRD_PARTY.md"
+    "THIRD_PARTY.md",
+    "schemas/",
+    "config/",
+    "docs/*.md",
+    "docs/operations/",
+    "docs/internal-runtime/",
+    "docs/internal-remote/",
+    "docs/planning/",
+    "docs/research/"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -42,7 +50,15 @@
     "security": "node scripts/security-check.mjs",
     "license:check": "node scripts/license-check.mjs",
     "release:verify": "npm run check && npm run security && npm run license:check",
-    "test:omo-bridge": "node --test --test-reporter=spec test/omo/*.test.mjs"
+    "test:omo-bridge": "node --test --test-reporter=spec test/omo/*.test.mjs",
+    "test:omo": "node --test --test-reporter=spec test/omo/*.test.mjs test/adversarial/omo-bridge-attacks.test.mjs",
+    "smoke:omo": "node scripts/omo-bridge-smoke.mjs",
+    "test:remote": "node --test --test-reporter=spec test/remote/*.test.mjs test/adversarial/remote-attacks.test.mjs",
+    "smoke:remote": "node scripts/remote-gateway-smoke.mjs",
+    "test:stable": "node --test --test-reporter=spec test/stable/*.test.mjs test/adversarial/stable-control-attacks.test.mjs",
+    "benchmark:completion": "node scripts/v1-completion-benchmark.mjs --check",
+    "verify:docs": "node scripts/v1-doc-audit.mjs",
+    "security:inventory": "node scripts/v1-security-inventory.mjs --check"
   },
   "license": "MIT"
 }

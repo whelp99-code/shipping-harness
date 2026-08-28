@@ -202,3 +202,11 @@ Shipping Harness is planned for the owner's personal use and future private use 
 See [`docs/ADAPTERS.md`](docs/ADAPTERS.md) for the capability, artifact, and lifecycle protocols.
 
 Shipping Harness runs only commands explicitly stored in a repository-owned contract or supplied by the operator. Artifact collection accepts only validated repository-relative paths, stores metadata and hashes rather than raw third-party content, and rejects home directories, credential-like files, protected runtime paths, and symlink escapes. It does not auto-push, auto-deploy, mutate provider credentials, install external harnesses, or bypass a human stop. The planned private OMO runtime remains subordinate to the same policy and is not a public/customer distribution target.
+
+## Private OMO runtime (v0.7)
+
+A separately pinned internal OMO runtime can execute bounded signed work orders. Shipping retains final authority and independently verifies every result. See `docs/internal-runtime/OMO-RUNTIME.md`.
+
+## v1.0 stable internal control plane
+
+v1.0 freezes the supported schemas, migration range, private OMO boundary, internal TLS remote protocol, backup/restore process and operator runbooks. It is a personal/company-internal release. Team/DAG remains disabled. The supported beginner entry point remains the Shipping Harness plugin/MCP and one explicit scope approval.

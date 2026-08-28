@@ -1,95 +1,22 @@
-import { spawnSync } from 'node:child_process';
-import path from 'node:path';
-import { runtimePaths } from '../../src/core/paths.mjs';
-import { ensureDir, readJson, writeJsonAtomic } from '../../src/core/fs.mjs';
-import { invariant, ShippingError } from '../../src/core/errors.mjs';
-import { loadPrivateOmoConfig, verifyPrivateOmoPromotion } from './config.mjs';
-import { loadOrCreateBridgeKey } from './key.mjs';
-import { createPrivateOmoWorkOrder } from './work-order.mjs';
-import { validatePrivateOmoReceipt } from './receipt.mjs';
-
-function runJson(config, argv, { key, timeoutMs = 120_000 } = {}) {
-  const result = spawnSync(config.nodePath, [config.cliPath, ...argv, '--json'], {
-    encoding: 'utf8',
-    timeout: timeoutMs,
-    maxBuffer: 16 * 1024 * 1024,
-    windowsHide: true,
-    env: {
-      ...process.env,
-      SHIPPING_OMO_NODE: config.nodePath,
-      ...(key ? { SHIPPING_OMO_HMAC_KEY: key } : {}),
-    },
-  });
-  if (result.error) throw new ShippingError('ERR_OMO_RUNTIME_EXEC', 'Unable to execute the private OMO runtime', { cause: result.error.message });
-  let parsed;
-  try { parsed = JSON.parse(String(result.stdout || '').trim()); }
-  catch {
-    throw new ShippingError('ERR_OMO_RUNTIME_OUTPUT', 'Private OMO runtime did not return bounded JSON', {
-      exitCode: result.status ?? 1,
-      stderr: String(result.stderr || '').trim().slice(0, 4000),
+import { spawn } from 'node:child_process';
+import readline from 'node:readline';
+import { invariant } from './policy.mjs';
+export class PrivateOmoClient {
+  constructor({ nodeExecutable, runtimeCli, secret, allowedRoots, stateRoot, omoExecutable, timeoutMs=30_000 }) { this.nodeExecutable=nodeExecutable; this.runtimeCli=runtimeCli; this.secret=secret; this.allowedRoots=allowedRoots; this.stateRoot=stateRoot; this.omoExecutable=omoExecutable; this.timeoutMs=timeoutMs; }
+  async call(request) {
+    invariant(typeof this.nodeExecutable==='string'&&typeof this.runtimeCli==='string','ERR_OMO_RUNTIME','Runtime executable and CLI are required');
+    return await new Promise((resolve,reject)=>{
+      const child=spawn(this.nodeExecutable,[this.runtimeCli],{stdio:['pipe','pipe','pipe'],windowsHide:true,env:{...process.env,SHIPPING_OMO_SHARED_SECRET:this.secret,SHIPPING_OMO_ALLOWED_ROOTS:this.allowedRoots.join(process.platform==='win32'?';':':'),SHIPPING_OMO_STATE_ROOT:this.stateRoot,SHIPPING_OMO_EXECUTABLE:this.omoExecutable,OMO_DISABLE_POSTHOG:'true'}});
+      let stderr=''; const timer=setTimeout(()=>{ child.kill('SIGTERM'); reject(Object.assign(new Error('Private OMO RPC timed out'),{code:'ERR_OMO_TIMEOUT'})); },this.timeoutMs);
+      child.stderr.on('data',(chunk)=>{ stderr+=String(chunk); if(stderr.length>64*1024) stderr=stderr.slice(-64*1024); });
+      const lines=readline.createInterface({input:child.stdout,crlfDelay:Infinity}); let settled=false;
+      lines.on('line',(line)=>{ if(settled||!line.trim()) return; try{ const response=JSON.parse(line); settled=true; clearTimeout(timer); child.stdin.end(); child.kill('SIGTERM'); if(!response.ok){ const error=Object.assign(new Error(response.error?.message??'Private OMO RPC failed'),{code:response.error?.code??'ERR_OMO_RPC'}); reject(error); } else resolve(response.result); } catch(error){ settled=true; clearTimeout(timer); reject(Object.assign(new Error(`Invalid private OMO RPC response: ${error.message}`),{code:'ERR_OMO_PROTOCOL'})); }});
+      child.on('error',(error)=>{ if(!settled){settled=true;clearTimeout(timer);reject(Object.assign(error,{code:'ERR_OMO_UNAVAILABLE'}));} });
+      child.on('exit',(code)=>{ if(!settled){settled=true;clearTimeout(timer);reject(Object.assign(new Error(`Private OMO RPC exited ${code}: ${stderr.trim()}`),{code:'ERR_OMO_UNAVAILABLE'}));} });
+      child.stdin.end(`${JSON.stringify(request)}\n`);
     });
   }
-  return { exitCode: result.status ?? 1, stderr: String(result.stderr || '').trim(), data: parsed };
-}
-
-/** @param {string} root */
-export async function privateOmoDoctor(root) {
-  const config = await loadPrivateOmoConfig(root);
-  const promotion = await verifyPrivateOmoPromotion(root, config);
-  const result = runJson(config, ['doctor']);
-  invariant(result.exitCode === 0 && result.data.healthy === true, 'ERR_OMO_RUNTIME_UNAVAILABLE', 'Private OMO runtime doctor failed', { doctor: result.data, stderr: result.stderr });
-  invariant(result.data.internalOnly === true && result.data.publicPublish === false, 'ERR_OMO_BRIDGE_BOUNDARY', 'Private OMO doctor violates the internal-use boundary');
-  invariant(result.data.teamMode === false && result.data.dagMode === false, 'ERR_OMO_BRIDGE_BUDGET', 'Private OMO doctor enabled v0.8 features');
-  return Object.freeze({ config, promotion, doctor: result.data });
-}
-
-/**
- * @param {string} root
- * @param {Parameters<typeof createPrivateOmoWorkOrder>[1] & {timeoutMs?: number}} options
- */
-export async function executePrivateOmoRuntime(root, options = {}) {
-  const health = await privateOmoDoctor(root);
-  const keyRecord = await loadOrCreateBridgeKey(root, health.config);
-  const order = await createPrivateOmoWorkOrder(root, { ...options, hmacKey: keyRecord.key });
-  const directory = path.join(runtimePaths(root).tmp, 'private-omo', order.shipping_session_id);
-  await ensureDir(directory);
-  const orderPath = path.join(directory, 'work-order.json');
-  const receiptPath = path.join(directory, 'receipt.json');
-  await writeJsonAtomic(orderPath, order);
-  const argv = [
-    'execute', '--order', orderPath,
-    '--state-root', health.config.stateRoot,
-    '--receipt-out', receiptPath,
-  ];
-  for (const allowedRoot of health.config.allowedRoots) argv.push('--allowed-root', allowedRoot);
-  const result = runJson(health.config, argv, { key: keyRecord.key, timeoutMs: options.timeoutMs ?? (order.budgets.wall_clock_seconds + 30) * 1000 });
-  const receipt = result.data.receipt ?? await readJson(receiptPath);
-  const validated = validatePrivateOmoReceipt(root, receipt, { order, hmacKey: keyRecord.key });
-  return Object.freeze({
-    schema: 'shipping-harness/private-omo-execution-v1',
-    health: { runtimeVersion: health.promotion.runtimeVersion, buildDigest: health.promotion.buildDigest },
-    keyCreated: keyRecord.created,
-    order,
-    receipt: validated,
-    runtimeExitCode: result.exitCode,
-    runtimeStderr: result.stderr,
-    orderPath,
-    receiptPath,
-  });
-}
-
-/** @param {string} root @param {string} sessionId */
-export async function privateOmoStatus(root, sessionId) {
-  const config = await loadPrivateOmoConfig(root);
-  const result = runJson(config, ['status', '--state-root', config.stateRoot, '--session', sessionId]);
-  invariant(result.exitCode === 0, 'ERR_OMO_RUNTIME_STATUS', 'Private OMO runtime status failed', { stderr: result.stderr });
-  return result.data;
-}
-
-/** @param {string} root @param {string} sessionId @param {string} reason */
-export async function cancelPrivateOmo(root, sessionId, reason = 'human stop') {
-  const config = await loadPrivateOmoConfig(root);
-  const result = runJson(config, ['cancel', '--state-root', config.stateRoot, '--session', sessionId, '--reason', reason]);
-  invariant(result.exitCode === 0, 'ERR_OMO_RUNTIME_CANCEL', 'Private OMO runtime cancellation failed', { stderr: result.stderr });
-  return result.data;
+  probe(id='probe'){ return this.call({rpc:'shipping-omo/rpc-v1',id,action:'probe'}); }
+  execute(envelope,id='execute'){ return this.call({rpc:'shipping-omo/rpc-v1',id,action:'execute',...envelope}); }
+  cancel(envelope,id='cancel'){ return this.call({rpc:'shipping-omo/rpc-v1',id,action:'cancel',...envelope}); }
 }

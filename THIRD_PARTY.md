@@ -22,3 +22,7 @@ Shipping Harness v0.7 has no runtime package dependencies and vendors no third-p
 - any external-distribution requirement triggers a new direction and license review before work continues.
 
 Names, protocol specifications, and documented interoperability concepts remain property of their respective projects. Integration does not imply endorsement, authentication, successful provider access, or full compatibility. See `docs/planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md` for the accepted product boundary.
+
+## Private internal OMO runtime boundary (v1.0)
+
+Shipping Harness interoperates with a separately stored private OMO runtime pinned by `config/upstreams/omo-pin.json`. That runtime retains the upstream Sustainable Use License 1.0, notices and modification record. It is used only personally or inside the user's company and is not included in the public/portable Shipping Core package. Shipping Core communicates through a signed local JSON-STDIO protocol and never treats an OMO task receipt as release authority.

@@ -1,0 +1,9 @@
+{
+  "amendmentId": "AMEND-0.7.0-001",
+  "baselineSha": "d6997b1db7c683e06551459416d88a5b20e95271",
+  "contractHash": "dd08362081994ec564d5a4b6362de9a2fb5d1f5611351da52928546a74104598",
+  "lockedAt": "2026-08-28T08:43:12.425Z",
+  "release": "0.7.0",
+  "schema": "shipping-harness/lock-v1",
+  "scopeRevision": 2
+}

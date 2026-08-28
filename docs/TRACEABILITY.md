@@ -17,7 +17,7 @@
 | GOAL-013 governed internal runtime reuse | REQ-UPSTREAM-001..002, REQ-OMO-001..009, NFR-RUNTIME-001..002 | AC-0701..0714 | internal OMO bridge, private pinned runtime, Shipping verification | planned bridge/runtime/adversarial/canary/rollback suites |
 | GOAL-014 internal-only product boundary | REQ-INTERNAL-001, REQ-OMO-009, NFR-LICENSE-001 | AC-0713, AC-1010..1012 | third-party policy, runtime promotion, release operations | planned policy/packaging/release tests |
 | GOAL-015 safe internal remote control | REQ-REMOTE-001..005 | AC-0901..0912 | internal gateway, signed approval, backup/restore | planned remote/security/operations suites |
-| GOAL-016 stable internal product | REQ-STABLE-001..003, REQ-OPS-001..002, REQ-BENCH-001..002, REQ-SECURITY-001, REQ-HANDOVER-001, REQ-RELEASE-001 | AC-1001..1014 | schema registry, migrations, operations, benchmark, handover | planned v1.0 full release gate |
+| GOAL-016 stable internal product | REQ-STABLE-001..003, REQ-OPS-001..002, REQ-BENCH-001..002, REQ-SECURITY-001, REQ-HANDOVER-001, REQ-RELEASE-001 | AC-1001..1014 | stable schemas, migrations, operations, benchmark, security inventory, handover | implemented v1.0 gates |
 
 ## Source layout mapping
 
@@ -40,17 +40,17 @@ src/core/proposals.mjs      REQ-PROPOSAL-*
 src/mcp/tools.mjs           REQ-MCP-003, REQ-MCP-006..008
 src/mcp/protocol.mjs        REQ-MCP-002..005
 src/mcp/stdio.mjs           REQ-MCP-001, REQ-MCP-005
-src/core/decision-*.mjs     REQ-DECISION-*, REQ-ESCALATE-*, REQ-POLICY-* (planned v0.4)
-src/mcp/tools.mjs           REQ-MODE-*, REQ-APPROVAL-* (planned extension v0.4)
-src/core/goals/*.mjs        REQ-GOAL-* (planned v0.5)
-plugin/* / skill/*          REQ-PLUGIN-* (planned v0.6)
-packages/internal-omo-bridge/* REQ-OMO-* (planned v0.7)
-private shipping-harness-omo-runtime REQ-UPSTREAM-*, REQ-OMO-* (separate internal runtime, planned v0.7)
-src/core/team-policy/*.mjs  REQ-TEAM-* (planned v0.8)
-src/remote/*                REQ-REMOTE-* (planned v0.9)
-src/core/schema-registry/*  REQ-STABLE-* (planned v1.0)
-docs/operations/*           REQ-OPS-*, REQ-HANDOVER-* (planned v1.0)
-benchmarks/*                REQ-BENCH-* (planned v1.0)
+src/core/decision-*.mjs     REQ-DECISION-*, REQ-ESCALATE-*, REQ-POLICY-* (implemented v0.4)
+src/mcp/tools.mjs           REQ-MODE-*, REQ-APPROVAL-* (implemented v0.4)
+src/core/goals/*.mjs        REQ-GOAL-* (implemented v0.5)
+packages/shipping-plugin/*  REQ-PLUGIN-* (implemented v0.6)
+packages/internal-omo-bridge/* REQ-OMO-* (implemented v0.7)
+private shipping-harness-omo-runtime REQ-UPSTREAM-*, REQ-OMO-* (separate internal runtime, implemented v0.7)
+scripts/team-dag-entry-gate.mjs REQ-TEAM-* (entry gate implemented v0.8; Team/DAG disabled)
+packages/internal-remote/*  REQ-REMOTE-* (implemented v0.9)
+packages/stable-control/* and schemas/v1/* REQ-STABLE-* (implemented v1.0)
+docs/operations/* and docs/HANDOVER.md REQ-OPS-*, REQ-HANDOVER-* (implemented v1.0)
+scripts/v1-completion-benchmark.mjs REQ-BENCH-* (implemented v1.0)
 src/cli.mjs                 user flows and orchestration
 ```
 
@@ -80,7 +80,7 @@ src/cli.mjs                 user flows and orchestration
 | AC-0311 | `npm test`; v0.1 and v0.2 regression suites plus MCP suite |
 | AC-0312 | `.shipping/releases/0.3.0.json`; own release contract closure |
 
-## v0.4 planned verification mapping
+## v0.4 verification mapping
 
 | Acceptance | Planned proof |
 |---|---|
@@ -114,3 +114,17 @@ Any implementation that cannot map to a requirement is out of scope or must amen
 | Shipping-only Finisher and current evidence | `bridge.mjs`, `receipt.mjs`, core release gate | AC-0708, AC-0714 |
 | Real installation and operations | sibling runtime verification evidence, `scripts/omo-pilot.mjs` | AC-0711, AC-0714 |
 | Conditional Team/DAG entry gate | `docs/internal-runtime/v0.7-pilot.json` | v0.8 decision = DISABLED |
+
+## v1.0 verification mapping
+
+| Acceptance | Proof |
+|---|---|
+| AC-1001 | `schemas/v1/**`, stable schema registry, and schema/example tests |
+| AC-1002 | Stable migration module, migration guide, and migration/adversarial tests |
+| AC-1003 | Compatibility module and compatibility guide |
+| AC-1004..1005 | Final smoke: clean install, v0.6 upgrade, plugin rollback, and installed MCP user flow |
+| AC-1006..1007 | Completion benchmark and current Git/contract-bound evidence |
+| AC-1008 | Current private OMO promotion plus v0.8 disabled decision evidence |
+| AC-1009 | v0.9 internal TLS, replay, backup, and restore pilot |
+| AC-1010..1012 | v1 security inventory, third-party inventory, handover, retention, and security documents |
+| AC-1013..1014 | v1 acceptance script, Shipping verify/close receipt, and clean annotated tag |

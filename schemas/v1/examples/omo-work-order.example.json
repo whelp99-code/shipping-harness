@@ -1,0 +1,51 @@
+{
+  "schema": "shipping-omo/v1",
+  "work_order_id": "WO-example",
+  "release_id": "example-project@1.0.0",
+  "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "git_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "shipping_session_id": "SESSION-example",
+  "project_root": "/internal/example-project",
+  "shipping_state": "LOCKED",
+  "goal_ids": [
+    "GOAL-001"
+  ],
+  "task_ids": [
+    "TASK-001"
+  ],
+  "requirement_ids": [
+    "REQ-001"
+  ],
+  "acceptance_ids": [
+    "AC-001"
+  ],
+  "allowed_paths": [
+    "src/**",
+    "test/**"
+  ],
+  "forbidden_paths": [
+    ".git/**",
+    ".shipping/**"
+  ],
+  "budgets": {
+    "parallel_workers": 2,
+    "agent_depth": 1,
+    "continuations": 3,
+    "fix_cycles": 2,
+    "wall_clock_seconds": 900,
+    "tool_calls": 200,
+    "turns": 50
+  },
+  "execution": {
+    "mode": "probe",
+    "prompt": "Execute only locked tasks.",
+    "requested_agent": "builder",
+    "requested_model": null,
+    "credential_mode": "isolated"
+  },
+  "issued_at": "2026-08-28T00:00:00.000Z",
+  "expires_at": "2026-08-28T00:15:00.000Z",
+  "nonce": "NONCE-example",
+  "key_id": "shipping-local-v1",
+  "signature": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+}

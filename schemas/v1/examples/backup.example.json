@@ -1,0 +1,17 @@
+{
+  "schema": "shipping-harness/backup-v1",
+  "backupId": "BACKUP-example",
+  "projectId": "example-project",
+  "createdAt": "2026-08-28T00:00:00.000Z",
+  "files": [
+    {
+      "path": "shipping/state.json",
+      "bytes": "e30=",
+      "size": 2,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "restore": true
+    }
+  ],
+  "totalBytes": 2,
+  "signature": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+}

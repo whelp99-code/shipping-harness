@@ -1,0 +1,12 @@
+{
+  "schema": "shipping-harness/event-v1",
+  "id": "EV-example",
+  "time": "2026-08-28T00:00:00.000Z",
+  "type": "release.closed",
+  "project": "example-project",
+  "release": "1.0.0",
+  "severity": "info",
+  "data": {
+    "state": "CLOSED"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/migration-v1",
+  "title": "Shipping Harness stable migrationReceipt schema",
+  "description": "Internal stable v1 schema for migrationReceipt. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "migrationId",
+    "fromRelease",
+    "toRelease",
+    "sourceState",
+    "targetState",
+    "changed",
+    "artifacts",
+    "createdAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/migration-v1",
+      "type": "string"
+    },
+    "migrationId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "fromRelease": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "toRelease": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "sourceState": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "targetState": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "changed": {
+      "type": "boolean"
+    },
+    "artifacts": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "fromSchema",
+          "toSchema",
+          "changed"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "fromSchema": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "toSchema": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 128
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

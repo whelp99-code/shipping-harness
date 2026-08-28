@@ -1,0 +1,64 @@
+{
+  "schema": "shipping-harness/final-smoke-v1",
+  "status": "PASS",
+  "package": {
+    "file": "shipping-harness-1.0.0.tgz",
+    "sha256": "6fdb9205c04fbe295dede8f2f97ad2755a375ad05864a24cfbb20caebc20b2e6",
+    "cleanInstallVersion": "1.0.0",
+    "upgradeFrom": "0.6.0",
+    "upgradeTo": "1.0.0",
+    "reportsExcluded": true,
+    "publicPublish": false
+  },
+  "plugin": {
+    "upgradeChanged": true,
+    "rollbackChanged": true,
+    "reupgradeChanged": true,
+    "rollbackProven": true,
+    "doctorHealthy": true,
+    "statePreserved": true,
+    "projectSpecificCliRequired": false,
+    "beginnerFinalState": "CLOSED",
+    "mcp": {
+      "discovered": true,
+      "proposalQuestions": 0,
+      "approvalState": "LOCKED",
+      "humanPauseObserved": true,
+      "verificationDecision": "SHIPPABLE",
+      "finalState": "CLOSED"
+    }
+  },
+  "privateOmo": {
+    "status": "PASS",
+    "runtimeVersion": "0.7.0",
+    "releaseCommit": "ef82b4cda5d8688840780ca5a09bd0a5fa11d5bc",
+    "buildDigest": "sha256:c78bc68993cfaa121eac550ca6043cce2002ef63f9255a9f4b669f27ec7324b5",
+    "requiresShippingVerification": true,
+    "publicPublish": false
+  },
+  "remote": {
+    "status": "PASS",
+    "transport": "HTTPS JSON",
+    "finalState": "CLOSED",
+    "replayBlocked": true,
+    "publicListener": false
+  },
+  "backupRestore": {
+    "signed": true,
+    "restored": true,
+    "restoredState": "CLOSED"
+  },
+  "benchmark": {
+    "method": "controlled-local-fixtures",
+    "shippingFalseDone": 0,
+    "shippingScopeDriftAccepted": 0,
+    "humanStopViolations": 0,
+    "liveModelBenchmark": false
+  },
+  "teamDag": {
+    "decision": "DISABLED",
+    "enabled": false
+  },
+  "networkUsed": false,
+  "representativeEnvironment": "isolated temporary directories"
+}

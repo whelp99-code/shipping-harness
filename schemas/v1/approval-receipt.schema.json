@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-remote-approval/v1",
+  "title": "Shipping Harness stable approvalReceipt schema",
+  "description": "Internal stable v1 schema for approvalReceipt. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "receiptId",
+    "requestId",
+    "actorId",
+    "projectId",
+    "release",
+    "proposalId",
+    "proposalHash",
+    "gitSha",
+    "nonce",
+    "issuedAt",
+    "expiresAt",
+    "oneTime",
+    "signature"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-remote-approval/v1",
+      "type": "string"
+    },
+    "receiptId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "requestId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "actorId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "projectId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "release": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "proposalId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "proposalHash": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "gitSha": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "nonce": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "issuedAt": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    },
+    "oneTime": {
+      "type": "boolean"
+    },
+    "signature": {
+      "type": "string",
+      "maxLength": 256
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

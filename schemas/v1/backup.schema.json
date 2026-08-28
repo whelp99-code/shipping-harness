@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/backup-v1",
+  "title": "Shipping Harness stable backup schema",
+  "description": "Internal stable v1 schema for backup. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "backupId",
+    "projectId",
+    "createdAt",
+    "files",
+    "totalBytes",
+    "signature"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/backup-v1",
+      "type": "string"
+    },
+    "backupId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "projectId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "createdAt": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    },
+    "files": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "bytes",
+          "size",
+          "sha256",
+          "restore"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "bytes": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sha256": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "restore": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 128
+      }
+    },
+    "totalBytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "signature": {
+      "type": "string",
+      "maxLength": 256
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

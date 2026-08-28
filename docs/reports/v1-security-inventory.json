@@ -1,0 +1,77 @@
+{
+  "schema": "shipping-harness/security-inventory-v1",
+  "release": "1.0.0",
+  "boundaries": {
+    "internalOnly": true,
+    "publicSaas": false,
+    "customerDistribution": false,
+    "publicOmoBundle": false,
+    "rawShellMcp": false,
+    "rawShellRemote": false,
+    "remoteTlsRequired": true,
+    "remotePublicListener": false,
+    "credentialBackup": false
+  },
+  "authority": {
+    "humanStopFirst": true,
+    "shippingFinisherOnly": true,
+    "omoReceiptsRequireShippingVerification": true,
+    "scopeApprovalHumanOnly": true,
+    "closedVersionsNeverReopen": true
+  },
+  "limits": {
+    "unlimitedValuesAllowed": false,
+    "omoWorkers": 2,
+    "omoDepth": 1,
+    "omoContinuations": 3,
+    "fixCycles": 2,
+    "remoteBodyBytes": 65536,
+    "remoteConcurrency": 8
+  },
+  "thirdParty": {
+    "omo": {
+      "license": "Sustainable Use License 1.0",
+      "use": "personal/company-internal only",
+      "upstreamCommit": "43d9c058e08b00a3629319df82e6a647de2b8490",
+      "internalPatchCommit": "2aac9960d037bd8817911622ee6526648be88fb0",
+      "releaseCommit": "ef82b4cda5d8688840780ca5a09bd0a5fa11d5bc",
+      "tag": "shipping-runtime-v0.7.0-r1",
+      "buildDigest": "sha256:c78bc68993cfaa121eac550ca6043cce2002ef63f9255a9f4b669f27ec7324b5",
+      "publicPublish": false
+    },
+    "shippingCore": {
+      "license": "MIT"
+    }
+  },
+  "optionalModes": {
+    "team": "DISABLED",
+    "dag": "DISABLED",
+    "entryGateDecision": "DISABLED"
+  },
+  "criticalFiles": {
+    "remotePolicy": "9bdb4a423452a53e66d85876171186355c8d298df9c2a3f383686e4447feb4c8",
+    "remoteRequest": "55660d2ae0f55d8982f32909c6260b483a983ed1605d6dc94cf95b039e2c0bfe",
+    "omoReceiptValidator": "451f90c754fb3afd4ed3ea5330336248d9c546e15dc04bc4408b85ca1a7a4132",
+    "stableRegistry": "acb1a3784ff530ab1bf3dd4e24415105dc9666f62b0a33ddf88b2b3ca7c71306",
+    "migration": "2047305a7527eda6fc9d9735ad3640b0be050ed88d4264f31519ce4840662826"
+  },
+  "requiredRecords": [
+    "THIRD_PARTY.md",
+    "docs/SECURITY-INVENTORY.md",
+    "docs/HANDOVER.md",
+    "docs/operations/INTERNAL-REMOTE-INCIDENT.md",
+    "docs/operations/RETENTION-SUPPORT.md",
+    "docs/internal-runtime/OMO-RUNTIME.md",
+    "/home/jm/orca/projects/shipping-harness-omo-runtime/shipping-internal/LICENSE.md",
+    "/home/jm/orca/projects/shipping-harness-omo-runtime/shipping-internal/MODIFICATIONS.md",
+    "/home/jm/orca/projects/shipping-harness-omo-runtime/shipping-internal/NOTICE/shipping-harness.md"
+  ],
+  "tests": [
+    "npm run security",
+    "npm run license:check",
+    "npm run test:adversarial",
+    "npm run test:omo-bridge",
+    "npm run test:remote",
+    "npm run test:stable"
+  ]
+}

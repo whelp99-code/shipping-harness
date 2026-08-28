@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/state-v1",
+  "title": "Shipping Harness stable state schema",
+  "description": "Internal stable v1 schema for state. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "state",
+    "release",
+    "contractHash",
+    "baselineSha",
+    "currentEvidenceSha",
+    "lastRunId",
+    "agentRuns",
+    "fixCycles",
+    "blockerCount",
+    "nextCount",
+    "ignoreCount",
+    "resumeState",
+    "humanStop",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/state-v1",
+      "type": "string"
+    },
+    "state": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "release": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "contractHash": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "baselineSha": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "currentEvidenceSha": {
+      "type": "null"
+    },
+    "lastRunId": {
+      "type": "null"
+    },
+    "agentRuns": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "fixCycles": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "blockerCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "nextCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "ignoreCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "resumeState": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "humanStop": {
+      "type": "boolean"
+    },
+    "createdAt": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

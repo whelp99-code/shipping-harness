@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/decision-v1",
+  "title": "Shipping Harness stable decision schema",
+  "description": "Internal stable v1 schema for decision. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "proposer",
+    "mode",
+    "evidenceHash",
+    "gitSha",
+    "release",
+    "projectName",
+    "outcome",
+    "scope",
+    "acceptance",
+    "decisions",
+    "assumptions",
+    "risks",
+    "questions",
+    "hash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/decision-v1",
+      "type": "string"
+    },
+    "proposer": {
+      "type": "object",
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "maxLength": 8192
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 8192
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "mode": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "evidenceHash": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "gitSha": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "release": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "projectName": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "outcome": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "include",
+        "exclude",
+        "paths"
+      ],
+      "properties": {
+        "include": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "exclude": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "paths": {
+          "type": "object",
+          "required": [
+            "include",
+            "exclude"
+          ],
+          "properties": {
+            "include": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {
+                "type": "string",
+                "maxLength": 8192
+              }
+            },
+            "exclude": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {
+                "type": "string",
+                "maxLength": 8192
+              }
+            }
+          },
+          "additionalProperties": false,
+          "maxProperties": 128
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "acceptance": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "type",
+          "command",
+          "cwd",
+          "required",
+          "timeoutSeconds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "type": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "command": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "cwd": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "timeoutSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 128
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "choice",
+          "rationale",
+          "basis",
+          "evidenceRefs",
+          "confidence",
+          "reversibility"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "choice": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "basis": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "evidenceRefs": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "type": "string",
+              "maxLength": 8192
+            }
+          },
+          "confidence": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "reversibility": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 128
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "statement",
+          "evidenceRefs",
+          "confidence",
+          "reversibility"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "statement": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "evidenceRefs": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "type": "string",
+              "maxLength": 8192
+            }
+          },
+          "confidence": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "reversibility": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 128
+      }
+    },
+    "risks": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {}
+    },
+    "questions": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {}
+    },
+    "hash": {
+      "type": "string",
+      "maxLength": 256
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

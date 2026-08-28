@@ -1,0 +1,18 @@
+{
+  "schema": "shipping-harness/state-v1",
+  "state": "PAUSED",
+  "release": "1.0.0",
+  "contractHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baselineSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "currentEvidenceSha": null,
+  "lastRunId": null,
+  "agentRuns": 1,
+  "fixCycles": 0,
+  "blockerCount": 0,
+  "nextCount": 0,
+  "ignoreCount": 0,
+  "resumeState": "LOCKED",
+  "humanStop": true,
+  "createdAt": "2026-08-28T00:00:00.000Z",
+  "updatedAt": "2026-08-28T00:05:00.000Z"
+}

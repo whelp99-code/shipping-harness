@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-remote/notification-v1",
+  "title": "Shipping Harness stable notification schema",
+  "description": "Internal stable v1 schema for notification. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "createdAt",
+    "projectId",
+    "release",
+    "type",
+    "dedupeKey",
+    "payload"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-remote/notification-v1",
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "createdAt": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    },
+    "projectId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "release": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "type": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "dedupeKey": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "state"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "maxLength": 8192
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

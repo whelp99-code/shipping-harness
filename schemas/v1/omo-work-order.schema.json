@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-omo/v1",
+  "title": "Shipping Harness stable omoWorkOrder schema",
+  "description": "Internal stable v1 schema for omoWorkOrder. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "work_order_id",
+    "release_id",
+    "contract_hash",
+    "git_sha",
+    "shipping_session_id",
+    "project_root",
+    "shipping_state",
+    "goal_ids",
+    "task_ids",
+    "requirement_ids",
+    "acceptance_ids",
+    "allowed_paths",
+    "forbidden_paths",
+    "budgets",
+    "execution",
+    "issued_at",
+    "expires_at",
+    "nonce",
+    "key_id",
+    "signature"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-omo/v1",
+      "type": "string"
+    },
+    "work_order_id": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "release_id": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "contract_hash": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "git_sha": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "shipping_session_id": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "project_root": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "shipping_state": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "goal_ids": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "task_ids": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "requirement_ids": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "acceptance_ids": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "allowed_paths": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "forbidden_paths": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "required": [
+        "parallel_workers",
+        "agent_depth",
+        "continuations",
+        "fix_cycles",
+        "wall_clock_seconds",
+        "tool_calls",
+        "turns"
+      ],
+      "properties": {
+        "parallel_workers": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "agent_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "continuations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "fix_cycles": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "wall_clock_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "tool_calls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "turns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "execution": {
+      "type": "object",
+      "required": [
+        "mode",
+        "prompt",
+        "requested_agent",
+        "requested_model",
+        "credential_mode"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "maxLength": 8192
+        },
+        "prompt": {
+          "type": "string",
+          "maxLength": 8192
+        },
+        "requested_agent": {
+          "type": "string",
+          "maxLength": 8192
+        },
+        "requested_model": {
+          "type": "null"
+        },
+        "credential_mode": {
+          "type": "string",
+          "maxLength": 8192
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "issued_at": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    },
+    "nonce": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "key_id": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "signature": {
+      "type": "string",
+      "maxLength": 256
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

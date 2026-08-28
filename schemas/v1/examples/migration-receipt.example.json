@@ -1,0 +1,18 @@
+{
+  "schema": "shipping-harness/migration-v1",
+  "migrationId": "MIGRATION-example",
+  "fromRelease": "0.9.0",
+  "toRelease": "1.0.0",
+  "sourceState": "PAUSED",
+  "targetState": "PAUSED",
+  "changed": true,
+  "artifacts": [
+    {
+      "kind": "state",
+      "fromSchema": "shipping-harness/state-v1",
+      "toSchema": "shipping-harness/state-v1",
+      "changed": false
+    }
+  ],
+  "createdAt": "2026-08-28T00:00:00.000Z"
+}

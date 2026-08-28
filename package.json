@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -18,14 +18,16 @@
     "bin/",
     "src/",
     "packages/",
+    "schemas/",
+    "config/",
+    "docs/",
+    "!docs/reports/**",
     "scripts/goal-runtime-smoke.mjs",
     "scripts/plugin-smoke.mjs",
-    "docs/",
-    "LICENSE",
+    "scripts/remote-gateway-smoke.mjs",
     "README.md",
-    "THIRD_PARTY.md",
-    "config/",
-    "scripts/remote-gateway-smoke.mjs"
+    "LICENSE",
+    "THIRD_PARTY.md"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -44,10 +46,17 @@
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",
     "license:check": "node scripts/license-check.mjs",
-    "release:verify": "npm run check && npm run security && npm run license:check",
+    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs",
     "test:omo-bridge": "node --test --test-reporter=spec test/omo/*.test.mjs",
     "test:remote": "node --test --test-reporter=spec test/remote/*.test.mjs test/adversarial/remote-attacks.test.mjs",
-    "smoke:remote": "node scripts/remote-gateway-smoke.mjs --check"
+    "smoke:remote": "node scripts/remote-gateway-smoke.mjs --check",
+    "test:stable": "node --test --test-reporter=spec test/stable/*.test.mjs test/adversarial/stable-control-attacks.test.mjs",
+    "benchmark:completion": "node scripts/v1-completion-benchmark.mjs --check",
+    "smoke:stable": "node scripts/v1-final-smoke.mjs --check",
+    "security:inventory": "node scripts/v1-security-inventory.mjs --check",
+    "verify:docs": "node scripts/v1-doc-audit.mjs",
+    "acceptance:v1": "node scripts/v1-acceptance.mjs --all",
+    "status:v1": "node scripts/v1-status-report.mjs"
   },
   "license": "MIT"
 }

@@ -1,0 +1,37 @@
+{
+  "schema": "shipping-harness/evidence-v1",
+  "runId": "run-2026-example",
+  "release": "1.0.0",
+  "contractHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "gitSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "baselineSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "startedAt": "2026-08-28T00:00:00.000Z",
+  "finishedAt": "2026-08-28T00:00:01.000Z",
+  "results": [
+    {
+      "criterionId": "AC-001",
+      "description": "Tests pass.",
+      "required": true,
+      "status": "PASS",
+      "command": "npm test",
+      "cwd": ".",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "outputLimitExceeded": false,
+      "capturedBytes": 120,
+      "startedAt": "2026-08-28T00:00:00.000Z",
+      "finishedAt": "2026-08-28T00:00:01.000Z",
+      "durationMs": 1000,
+      "stdoutDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "stderrDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "logPath": ".shipping/evidence/run-2026-example/AC-001.log"
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "requiredFailed": 0
+  }
+}

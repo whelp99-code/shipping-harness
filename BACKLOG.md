@@ -1,32 +1,35 @@
-# Backlog
+# Post-v1 Backlog
 
-Items below remain outside the active v0.4.0 DRAFT unless explicitly promoted by the accepted sequential roadmap.
+Shipping Harness v1 deliberately closes with a small internal product surface. Items below are not release blockers and cannot enter a closed version without a new approved contract.
 
-- [ ] BACKLOG-001: Optional full YAML parser dependency/profile.
-- [ ] BACKLOG-002: GitHub Checks and protected-branch integration.
-- [ ] BACKLOG-003: Signed release receipts and provenance attestations.
-- [ ] BACKLOG-004: Multi-repository release coordination.
-- [ ] BACKLOG-005: Company RBAC and approval workflows.
-- [ ] BACKLOG-006: Web dashboard and long-term metrics store.
-- [ ] BACKLOG-007: Native upstream plugins contributed separately after interface stabilization.
-- [ ] BACKLOG-008: LLM-assisted issue triage under deterministic policy constraints.
-- [ ] BACKLOG-009: Optional Gajae-style bounded interview and plan critic.
-- [ ] BACKLOG-010: Selected OMO Team/DAG role assignment and parallel execution.
-- [ ] BACKLOG-011: Ouroboros-style bounded evaluation and next-version evolution proposal.
-- [ ] BACKLOG-012: Internal Streamable HTTP MCP with authentication and project allowlists.
-- [ ] BACKLOG-013: ChatGPT/Codex plugin packaging, approval cards, and beginner status surfaces.
-- [ ] BACKLOG-014: Internal dashboard, RBAC, notifications, and completion analytics.
-- [ ] BACKLOG-015: Private pinned OMO runtime foundation with task, routing, continuation, recovery, and rollback.
-- [ ] BACKLOG-016: Internal-use distribution guard, upstream notice inventory, modification log, and pin promotion policy.
-- [ ] BACKLOG-017: OMO memory/reflection subsystem evaluation after v1.0, only if an internal need is proven.
+## Deferred product work
 
-## Roadmap promotion
+- [ ] BACKLOG-001: Optional full YAML parser profile for repositories that require non-JSON YAML syntax.
+- [ ] BACKLOG-002: GitHub Checks, protected-branch policy, and explicit push/tag approval integration.
+- [ ] BACKLOG-003: Multi-repository release coordination under a separate bounded contract.
+- [ ] BACKLOG-004: Internal dashboard and long-term completion metrics store.
+- [ ] BACKLOG-005: Extended company RBAC beyond the current internal remote actor/project/action allowlists.
+- [ ] BACKLOG-006: Optional LLM-assisted issue triage subordinate to deterministic blocker policy.
+- [ ] BACKLOG-007: Optional Gajae-style bounded interview/plan critic for users who explicitly choose interview mode.
+- [ ] BACKLOG-008: Ouroboros-style next-version evolution proposals; never automatic reopening of a closed release.
+- [ ] BACKLOG-009: OMO memory/reflection evaluation only after a measured internal need and separate license/security review.
+- [ ] BACKLOG-010: Team/DAG reconsideration only after a real coordination bottleneck and measurable completion benefit are proven.
+- [ ] BACKLOG-011: Additional agent-host profiles and native integrations after the stable MCP interface proves insufficient.
+- [ ] BACKLOG-012: Optional internal UI for approval, progress, blockers, completion, backup, and incident status.
 
-- v0.4.0 introduces Auto-Decision, risk escalation, and one-brief approval; it does **not** implement the full deep-interview backlog item.
-- v0.5.0 implements durable Goal/Task/Evidence mechanisms and bounded evaluation, but no OMO runtime or team.
-- v0.6.0 targets BACKLOG-013 as the local beginner plugin and approval UX.
-- v0.7.0 targets BACKLOG-015 and BACKLOG-016 using a separate private internal OMO runtime.
-- v0.8.0 may promote bounded portions of BACKLOG-010 only after v0.7 pilot evidence proves a need.
-- v0.9.0 targets BACKLOG-012 and the operational subset of BACKLOG-014.
-- BACKLOG-017 remains post-v1.0 and cannot enter merely because the upstream feature exists.
-- Items not explicitly mapped above remain deferred and cannot enter an active release without a new contract.
+## Completed roadmap items
+
+- Auto decision, conservative defaults, risk escalation, and one-brief approval: completed in v0.4.0.
+- Durable Goal/Task/Ledger and evidence freshness: completed in v0.5.0.
+- Beginner plugin, local MCP, doctor, repair, upgrade, and rollback: completed in v0.6.0.
+- Separate private OMO runtime, signed bridge, bounded execution, canary, and rollback: completed in v0.7.0.
+- Team/DAG evidence gate: completed in v0.8.0 with the feature deliberately disabled.
+- Authenticated internal TLS remote control and signed backup/restore: completed in v0.9.0.
+- Stable schemas, migrations, compatibility, operations, benchmark, security inventory, and handover: v1.0.0 release scope.
+
+## Permanent exclusions under the locked direction
+
+- Public SaaS, customer installation, resale, or public integrated OMO distribution.
+- Unlimited autonomy, workers, retries, continuations, time, tool calls, or graph size.
+- Automatic purchase, production deployment, customer communication, push, or merge without explicit authority.
+- Model self-approval or runtime claims that bypass independent Shipping verification.

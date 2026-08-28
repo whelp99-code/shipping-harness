@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current stable:** `v0.8.0 — Team/DAG Entry Gate Decision` (`CLOSED`, Team/DAG disabled)
-**Current development:** `v0.9.0 — Authenticated Internal Remote Control` (`LOCKED`)
+**Current release train:** `v1.0.0 — Stable Internal Shipping Control Plane`
+**Authority:** the release is complete only when `.shipping/releases/1.0.0.json` is `CLOSED` and annotated tag `v1.0.0` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -45,25 +45,27 @@ User outcome → AI decision → one approval → bounded execution → verified
 ## Quick start
 
 ```bash
-node ./bin/shipping-harness.mjs init
+shipping-harness init
 # Edit .shipping/contract.yaml, commit the baseline, then:
-node ./bin/shipping-harness.mjs contract check
-node ./bin/shipping-harness.mjs lock
-node ./bin/shipping-harness.mjs verify
-node ./bin/shipping-harness.mjs status
-node ./bin/shipping-harness.mjs close
+shipping-harness contract check
+shipping-harness lock
+shipping-harness verify
+shipping-harness status
+shipping-harness close
 ```
 
 The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency-free and deterministic parser.
 
 ## Beginner use: connect it as an MCP server
 
-Install the local package once:
+Install the locally verified tagged package once:
 
 ```bash
-cd /path/to/shipping-harness
-npm link
+npm install --prefix "$HOME/.local" /absolute/path/shipping-harness-1.0.0.tgz \
+  --ignore-scripts --no-audit --no-fund
 ```
+
+Use `npm link` only for development checkouts.
 
 Connect one target repository to Codex:
 
@@ -180,9 +182,17 @@ Local plugin installer, concise approval/progress/blocker/completion views, MCP 
 
 A separately pinned private OMO runtime, signed work orders and receipts, bounded execution, session ownership, human-stop precedence, package/install/canary/rollback proof, approved fallback or durable BLOCKED, and mandatory Shipping re-verification. OMO source is not bundled into Shipping Core. See [`docs/internal-runtime/README.md`](docs/internal-runtime/README.md).
 
-### v0.8.0 onward
+### v0.8.0 — Evidence-Gated Team/DAG Decision
 
-The v0.7 real pilot found no coordination bottleneck or parallel critical work, so Team/DAG remains disabled. The accepted sequence continues with authenticated internal remote/mobile control and a stable v1.0 control plane. See [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md).
+The v0.7 real pilot found no coordination bottleneck or parallel critical work, so Team/DAG was deliberately closed as disabled rather than implemented speculatively.
+
+### v0.9.0 — Authenticated Internal Remote Control
+
+TLS-only private access, signed and replay-protected requests, project/action allowlists, one-time proposal approval, bounded notifications, and signed backup/restore were implemented and closed.
+
+### v1.0.0 — Stable Internal Shipping Control Plane
+
+Stable schemas and examples, authority-preserving migration, compatibility diagnostics, internal operations, completion benchmark, security inventory, clean install, v0.6-to-v1 upgrade, plugin rollback, installed MCP beginner flow, private OMO promotion verification, and internal remote recovery are the v1 release gates. See [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md).
 
 Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
 
@@ -216,4 +226,4 @@ Shipping Harness is planned for the owner's personal use and future private use 
 
 See [`docs/ADAPTERS.md`](docs/ADAPTERS.md) for the capability, artifact, and lifecycle protocols.
 
-Shipping Harness runs only commands explicitly stored in a repository-owned contract or supplied by the operator. Artifact collection accepts only validated repository-relative paths, stores metadata and hashes rather than raw third-party content, and rejects home directories, credential-like files, protected runtime paths, and symlink escapes. It does not auto-push, auto-deploy, mutate provider credentials, install external harnesses, or bypass a human stop. The planned private OMO runtime remains subordinate to the same policy and is not a public/customer distribution target.
+Shipping Harness runs only commands explicitly stored in a repository-owned contract or supplied by the operator. Artifact collection accepts only validated repository-relative paths, stores metadata and hashes rather than raw third-party content, and rejects home directories, credential-like files, protected runtime paths, and symlink escapes. It does not auto-push, auto-deploy, mutate provider credentials, install external harnesses, or bypass a human stop. The private OMO runtime remains subordinate to the same policy and is not a public/customer distribution target.

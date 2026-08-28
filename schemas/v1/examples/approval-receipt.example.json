@@ -1,0 +1,16 @@
+{
+  "schema": "shipping-remote-approval/v1",
+  "receiptId": "APPROVAL-example",
+  "requestId": "REQ-example",
+  "actorId": "owner",
+  "projectId": "example-project",
+  "release": "1.0.0",
+  "proposalId": "PROPOSAL-example",
+  "proposalHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "gitSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "nonce": "NONCE-example",
+  "issuedAt": "2026-08-28T00:00:00.000Z",
+  "expiresAt": "2026-08-28T00:03:00.000Z",
+  "oneTime": true,
+  "signature": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+}

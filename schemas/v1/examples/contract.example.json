@@ -1,0 +1,65 @@
+{
+  "schema": "shipping-harness/v1",
+  "project": "example-project",
+  "worker": "shipping-harness",
+  "release": "1.0.0",
+  "goal": "Ship one bounded useful outcome.",
+  "scope": {
+    "include": [
+      "Core outcome"
+    ],
+    "exclude": [
+      "Optional expansion"
+    ],
+    "paths": {
+      "include": [
+        "src/**",
+        "test/**",
+        "README.md"
+      ],
+      "exclude": [
+        ".shipping/**",
+        ".git/**"
+      ]
+    }
+  },
+  "acceptance": [
+    {
+      "id": "AC-001",
+      "description": "Tests pass.",
+      "type": "command",
+      "command": "npm test",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    }
+  ],
+  "blockerPolicy": [
+    "acceptance-failure",
+    "scope-drift",
+    "stale-evidence"
+  ],
+  "budgets": {
+    "maxFixCycles": 2,
+    "maxAgentRuns": 3,
+    "maxCommandSeconds": 900,
+    "maxOutputBytes": 1048576
+  },
+  "stopPolicy": {
+    "humanInterruptWins": true,
+    "autoContinueAfterInterrupt": false,
+    "closeWhenRequiredGatesPass": true
+  },
+  "releasePolicy": {
+    "autoCommit": false,
+    "autoPush": false,
+    "autoTag": false,
+    "generateReport": true
+  },
+  "adapters": {
+    "generic": {
+      "command": null,
+      "artifactPaths": []
+    }
+  }
+}

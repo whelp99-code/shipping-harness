@@ -1,0 +1,38 @@
+{
+  "schema": "shipping-omo-receipt/v1",
+  "work_order_id": "WO-example",
+  "shipping_session_id": "SESSION-example",
+  "release_id": "example-project@1.0.0",
+  "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_git_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "result_git_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "goal_ids": [
+    "GOAL-001"
+  ],
+  "shipping_task_ids": [
+    "TASK-001"
+  ],
+  "requirement_ids": [
+    "REQ-001"
+  ],
+  "acceptance_ids": [
+    "AC-001"
+  ],
+  "status": "completed",
+  "requires_shipping_verification": true,
+  "shipping_finisher_authority": true,
+  "terminal_replay_allowed": false,
+  "usage": {
+    "turns": 2,
+    "tool_calls": 4,
+    "continuations": 0
+  },
+  "path_analysis": {
+    "changed": [
+      "src/index.mjs"
+    ],
+    "violations": []
+  },
+  "receipt_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "signature": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+}

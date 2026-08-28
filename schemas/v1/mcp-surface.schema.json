@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/mcp-surface-v1",
+  "title": "Shipping Harness stable mcpSurface schema",
+  "description": "Internal stable v1 schema for mcpSurface. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "protocolVersions",
+    "tools",
+    "resources",
+    "rootFixedAtStart",
+    "arbitraryCommandInput",
+    "publicListener"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/mcp-surface-v1",
+      "type": "string"
+    },
+    "protocolVersions": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "tools": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "resources": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "rootFixedAtStart": {
+      "type": "boolean"
+    },
+    "arbitraryCommandInput": {
+      "type": "boolean"
+    },
+    "publicListener": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

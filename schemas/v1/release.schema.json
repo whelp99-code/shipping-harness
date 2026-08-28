@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/release-v1",
+  "title": "Shipping Harness stable release schema",
+  "description": "Internal stable v1 schema for release. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "project",
+    "release",
+    "state",
+    "contractHash",
+    "gitSha",
+    "evidenceSha",
+    "closedGitSha",
+    "closedAt",
+    "blockers",
+    "backlogItems"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/release-v1",
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "release": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "state": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "contractHash": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "gitSha": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "evidenceSha": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "closedGitSha": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "closedAt": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    },
+    "blockers": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "backlogItems": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

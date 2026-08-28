@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/goals-v1",
+  "title": "Shipping Harness stable goalGraph schema",
+  "description": "Internal stable v1 schema for goalGraph. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "project",
+    "release",
+    "contractHash",
+    "graphHash",
+    "goals",
+    "tasks"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/goals-v1",
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "release": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "contractHash": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "graphHash": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "goals": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "state",
+          "taskIds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "state": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "taskIds": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "type": "string",
+              "maxLength": 8192
+            }
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 128
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "goalId",
+          "title",
+          "state",
+          "dependsOn",
+          "acceptanceIds",
+          "requirementIds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "goalId": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "state": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "dependsOn": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {}
+          },
+          "acceptanceIds": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "type": "string",
+              "maxLength": 8192
+            }
+          },
+          "requirementIds": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "type": "string",
+              "maxLength": 8192
+            }
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 128
+      }
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

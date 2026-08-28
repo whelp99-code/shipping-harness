@@ -1,0 +1,11 @@
+{
+  "schema": "shipping-harness/health-v1",
+  "status": "HEALTHY",
+  "checks": {
+    "shipping": "CLOSED",
+    "plugin": "HEALTHY",
+    "omo": "live",
+    "remote": "healthy"
+  },
+  "internalOnly": true
+}

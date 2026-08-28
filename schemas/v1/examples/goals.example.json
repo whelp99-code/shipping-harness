@@ -1,0 +1,32 @@
+{
+  "schema": "shipping-harness/goals-v1",
+  "project": "example-project",
+  "release": "1.0.0",
+  "contractHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "graphHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "goals": [
+    {
+      "id": "GOAL-001",
+      "title": "Ship bounded outcome",
+      "state": "TODO",
+      "taskIds": [
+        "TASK-001"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "TASK-001",
+      "goalId": "GOAL-001",
+      "title": "Pass required tests",
+      "state": "TODO",
+      "dependsOn": [],
+      "acceptanceIds": [
+        "AC-001"
+      ],
+      "requirementIds": [
+        "REQ-001"
+      ]
+    }
+  ]
+}

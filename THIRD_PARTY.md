@@ -1,6 +1,6 @@
 # Third-Party Integration Inventory
 
-Shipping Harness v0.9 has no runtime package dependencies and vendors no third-party source. The separately pinned private OMO runtime is installed and verified outside Shipping Core under an internal-only license boundary; Shipping stores only interoperability code, exact pins, digests, notices, and evidence references.
+Shipping Harness v1.0.0 has no required third-party runtime package dependencies and vendors no third-party source. The separately pinned private OMO runtime is installed and verified outside Shipping Core under an internal-only license boundary; Shipping stores only interoperability code, exact pins, digests, notices, and evidence references.
 
 | Project | Current use | Accepted future use | License and boundary |
 |---|---|---|---|
@@ -23,7 +23,7 @@ Shipping Harness v0.9 has no runtime package dependencies and vendors no third-p
 - OMO cannot mutate Shipping contracts, budgets, blocker policy, human stop, or release closure;
 - any external-distribution requirement triggers a new direction and license review before work continues.
 
-## v0.9 internal remote conditions
+## v1 internal remote conditions
 
 - loopback or private-network TLS listener only;
 - standard-library HTTPS and cryptography only;
@@ -33,3 +33,12 @@ Shipping Harness v0.9 has no runtime package dependencies and vendors no third-p
 - disposable OpenSSL usage is limited to local verification and creates no production dependency.
 
 Names, protocol specifications, and documented interoperability concepts remain property of their respective projects. Integration does not imply endorsement, authentication, successful provider access, or full compatibility. See the project planning documents for the accepted product boundary.
+
+## v1 stable-control conditions
+
+- Stable schema documents and examples are original Shipping Harness artifacts.
+- Package reports and operational evidence are excluded from the installable tarball.
+- Compatibility reporting distinguishes discovery from proven operational health.
+- Migrations preserve CLOSED, human-stop, contract, Git, and runtime-verification authority.
+- Benchmark results cover governance correctness only and make no model-quality or cost-superiority claim.
+- The project remains private and internal and is never published automatically.

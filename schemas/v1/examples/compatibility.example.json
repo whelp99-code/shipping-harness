@@ -1,0 +1,44 @@
+{
+  "schema": "shipping-harness/compatibility-v1",
+  "shippingVersion": "1.0.0",
+  "supportedReleases": [
+    "0.6.0",
+    "0.7.0",
+    "0.8.0",
+    "0.9.0",
+    "1.0.0"
+  ],
+  "node": {
+    "minimum": 22,
+    "recommended": 24
+  },
+  "git": {
+    "minimum": "2.30"
+  },
+  "plugin": {
+    "upgradeFrom": [
+      "0.6.0",
+      "0.7.0",
+      "0.8.0",
+      "0.9.0"
+    ]
+  },
+  "omoRuntime": {
+    "shippingBridge": "0.7.0",
+    "upstreamVersion": "5.0.0-beta.23",
+    "internalOnly": true
+  },
+  "mcp": {
+    "current": "2026-07-28",
+    "legacy": "2025-11-25"
+  },
+  "remote": {
+    "schema": "shipping-remote/request-v1",
+    "tlsMinimum": "1.2",
+    "publicListener": false
+  },
+  "teamDag": {
+    "default": "DISABLED",
+    "entryGate": "docs/reports/v0.8-entry-gate.json"
+  }
+}

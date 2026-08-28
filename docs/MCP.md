@@ -19,12 +19,14 @@ Requirements:
 - Git repository with at least one commit
 - An MCP client that can start a local STDIO server
 
-Link the package once:
+Install the locally verified package once:
 
 ```bash
-cd /path/to/shipping-harness
-npm link
+npm install --prefix "$HOME/.local" /absolute/path/shipping-harness-1.0.0.tgz \
+  --ignore-scripts --no-audit --no-fund
 ```
+
+Use `npm link` only for development checkouts.
 
 The MCP client launches this command:
 
@@ -126,9 +128,9 @@ notifications/cancelled
 
 Every protocol message occupies one stdout line. Logs and startup errors use stderr only.
 
-## v0.3.0 limitations
+## Stable local MCP boundaries
 
-- Local STDIO only; no remote HTTP endpoint or OAuth.
+- Local agent integration uses project-root-fixed STDIO. The separate optional internal gateway does not change the local MCP root.
 - One fixed Git repository per MCP server process.
 - No web or mobile dashboard.
 - No full Gajae deep interview.
@@ -136,7 +138,7 @@ Every protocol message occupies one stdout line. Logs and startup errors use std
 - No Ouroboros evolutionary generation loop.
 - No automatic Git push or deployment.
 
-Those capabilities require separate version contracts and remain in `BACKLOG.md`.
+Public or customer surfaces, automatic deployment, and speculative Team/DAG remain outside v1 and require a new version contract.
 
 ## Planned internal runtime path
 
@@ -158,6 +160,12 @@ codex mcp list
 ```
 
 When a tool reports `ERR_ADAPTER_COMMAND_REQUIRED`, the contract has no approved external-agent command. This is not a request to supply a shell command through MCP. Let the connected host agent edit the code directly, or configure the adapter command in the contract before it is approved and locked.
+
+## v1 verification
+
+The v1 release drill installs the packed artifact into an isolated prefix and drives the installed MCP through discovery, natural-language scope proposal, exact approval, host-agent work order, human pause and resume, deterministic verification, and `CLOSED`. The same drill proves v0.6-to-v1 package upgrade, plugin rollback and re-upgrade, state preservation, current private OMO promotion, and internal remote recovery.
+
+The MCP root is fixed at process start. Use one MCP process per repository, or configure the host to start the same binary from the active Git project without exposing a root-switching tool argument.
 ## v0.9 internal remote gateway
 
 The remote gateway is not a public MCP endpoint. It is a separate TLS-only internal JSON control surface that maps authenticated requests back to the same fixed `callShippingTool` functions used by the local MCP server. No remote request accepts a raw shell command or replaces the MCP server.

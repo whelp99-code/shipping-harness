@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/plugin-v1",
+  "title": "Shipping Harness stable pluginManifest schema",
+  "description": "Internal stable v1 schema for pluginManifest. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "name",
+    "displayName",
+    "version",
+    "localOnly",
+    "mcp",
+    "userFlow",
+    "approval",
+    "surfaces"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/plugin-v1",
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "displayName": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "version": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "localOnly": {
+      "type": "boolean"
+    },
+    "mcp": {
+      "type": "object",
+      "required": [
+        "transport",
+        "binary",
+        "arbitraryCommandInput",
+        "publicListener"
+      ],
+      "properties": {
+        "transport": {
+          "type": "string",
+          "maxLength": 8192
+        },
+        "binary": {
+          "type": "string",
+          "maxLength": 8192
+        },
+        "arbitraryCommandInput": {
+          "type": "boolean"
+        },
+        "publicListener": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "userFlow": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "approval": {
+      "type": "object",
+      "required": [
+        "humanConfirmationRequired",
+        "modelSelfApprovalForbidden"
+      ],
+      "properties": {
+        "humanConfirmationRequired": {
+          "type": "boolean"
+        },
+        "modelSelfApprovalForbidden": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "surfaces": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

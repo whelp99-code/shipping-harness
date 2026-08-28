@@ -54,15 +54,16 @@ test('upgrade creates rollback metadata and rollback restores the previous plugi
     await rm(oldPackage, { recursive: true, force: true });
   });
   const stateHashBefore = await hashFile(fixture.paths.state);
+  const currentPackageVersion = JSON.parse(await readFile(path.join(packageRoot, 'package.json'), 'utf8')).version;
   await installShippingPlugin({ packageRoot: oldPackage, installRoot, host: 'generic', projectRoot: fixture.root, dryRun: false, now: '2026-08-28T01:00:00.000Z' });
   const preview = await upgradeShippingPlugin({ packageRoot, installRoot, host: 'generic', projectRoot: fixture.root });
   assert.equal(preview.needed, true);
   assert.equal(preview.from, '0.5.0');
-  assert.equal(preview.to, '0.6.0');
+  assert.equal(preview.to, currentPackageVersion);
 
   const upgraded = await upgradeShippingPlugin({ packageRoot, installRoot, host: 'generic', projectRoot: fixture.root, dryRun: false, now: '2026-08-28T02:00:00.000Z' });
   assert.equal(upgraded.backup.packageVersion, '0.5.0');
-  assert.equal(upgraded.install.receipt.packageVersion, '0.6.0');
+  assert.equal(upgraded.install.receipt.packageVersion, currentPackageVersion);
   const rolled = await rollbackShippingPlugin({ installRoot, dryRun: false });
   assert.equal(rolled.receipt.packageVersion, '0.5.0');
   assert.equal(rolled.after.healthy, true);

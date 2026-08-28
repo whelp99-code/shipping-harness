@@ -1,0 +1,69 @@
+{
+  "schema": "shipping-harness/decision-v1",
+  "proposer": {
+    "type": "system",
+    "id": "shipping-default-composer"
+  },
+  "mode": "AUTO",
+  "evidenceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "gitSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "release": "1.0.0",
+  "projectName": "example-project",
+  "outcome": "Ship one bounded useful outcome.",
+  "scope": {
+    "include": [
+      "Core outcome"
+    ],
+    "exclude": [
+      "Optional expansion"
+    ],
+    "paths": {
+      "include": [
+        "src/**"
+      ],
+      "exclude": [
+        ".shipping/**",
+        ".git/**"
+      ]
+    }
+  },
+  "acceptance": [
+    {
+      "id": "AC-001",
+      "description": "Tests pass.",
+      "type": "command",
+      "command": "npm test",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "title": "Preserve stack",
+      "choice": "Use existing stack.",
+      "rationale": "Reduces completion risk.",
+      "basis": "evidence",
+      "evidenceRefs": [
+        "EVID-001"
+      ],
+      "confidence": "high",
+      "reversibility": "reversible"
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "ASM-001",
+      "statement": "No paid service is required.",
+      "evidenceRefs": [
+        "EVID-001"
+      ],
+      "confidence": "medium",
+      "reversibility": "reversible"
+    }
+  ],
+  "risks": [],
+  "questions": [],
+  "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

@@ -1,0 +1,13 @@
+{
+  "schema": "shipping-harness/release-v1",
+  "project": "example-project",
+  "release": "1.0.0",
+  "state": "CLOSED",
+  "contractHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "gitSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "evidenceSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "closedGitSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "closedAt": "2026-08-28T00:10:00.000Z",
+  "blockers": 0,
+  "backlogItems": 0
+}

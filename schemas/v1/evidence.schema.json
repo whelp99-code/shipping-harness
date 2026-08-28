@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/evidence-v1",
+  "title": "Shipping Harness stable evidence schema",
+  "description": "Internal stable v1 schema for evidence. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "runId",
+    "release",
+    "contractHash",
+    "gitSha",
+    "baselineSha",
+    "startedAt",
+    "finishedAt",
+    "results",
+    "summary"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/evidence-v1",
+      "type": "string"
+    },
+    "runId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "release": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "contractHash": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "gitSha": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "baselineSha": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "startedAt": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    },
+    "finishedAt": {
+      "type": "string",
+      "maxLength": 8192,
+      "format": "date-time"
+    },
+    "results": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": [
+          "criterionId",
+          "description",
+          "required",
+          "status",
+          "command",
+          "cwd",
+          "exitCode",
+          "signal",
+          "timedOut",
+          "outputLimitExceeded",
+          "capturedBytes",
+          "startedAt",
+          "finishedAt",
+          "durationMs",
+          "stdoutDigest",
+          "stderrDigest",
+          "logPath"
+        ],
+        "properties": {
+          "criterionId": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "command": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "cwd": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "exitCode": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "signal": {
+            "type": "null"
+          },
+          "timedOut": {
+            "type": "boolean"
+          },
+          "outputLimitExceeded": {
+            "type": "boolean"
+          },
+          "capturedBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "startedAt": {
+            "type": "string",
+            "maxLength": 8192,
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "maxLength": 8192,
+            "format": "date-time"
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "stdoutDigest": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "stderrDigest": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "logPath": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 128
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "total",
+        "passed",
+        "failed",
+        "requiredFailed"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "passed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "requiredFailed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

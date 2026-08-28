@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-remote/request-v1",
+  "title": "Shipping Harness stable remoteRequest schema",
+  "description": "Internal stable v1 schema for remoteRequest. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "requestId",
+    "actorId",
+    "projectId",
+    "action",
+    "params",
+    "timestamp",
+    "nonce",
+    "signature"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-remote/request-v1",
+      "type": "string"
+    },
+    "requestId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "actorId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "projectId": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "action": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "params": {
+      "type": "object",
+      "required": [],
+      "properties": {},
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "timestamp": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "nonce": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "signature": {
+      "type": "string",
+      "maxLength": 256
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

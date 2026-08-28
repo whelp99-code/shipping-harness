@@ -1,0 +1,11 @@
+{
+  "schema": "shipping-remote/request-v1",
+  "requestId": "REQ-example",
+  "actorId": "owner",
+  "projectId": "example-project",
+  "action": "shipping/status",
+  "params": {},
+  "timestamp": "2026-08-28T00:00:00.000Z",
+  "nonce": "nonce-example",
+  "signature": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+}

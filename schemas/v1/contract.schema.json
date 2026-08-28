@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/v1",
+  "title": "Shipping Harness stable contract schema",
+  "description": "Internal stable v1 schema for contract. Unknown top-level fields fail closed.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "project",
+    "worker",
+    "release",
+    "goal",
+    "scope",
+    "acceptance",
+    "blockerPolicy",
+    "budgets",
+    "stopPolicy",
+    "releasePolicy",
+    "adapters"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/v1",
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "worker": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "release": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "goal": {
+      "type": "string",
+      "maxLength": 8192
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "include",
+        "exclude",
+        "paths"
+      ],
+      "properties": {
+        "include": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "exclude": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "paths": {
+          "type": "object",
+          "required": [
+            "include",
+            "exclude"
+          ],
+          "properties": {
+            "include": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {
+                "type": "string",
+                "maxLength": 8192
+              }
+            },
+            "exclude": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {
+                "type": "string",
+                "maxLength": 8192
+              }
+            }
+          },
+          "additionalProperties": false,
+          "maxProperties": 128
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "acceptance": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "type",
+          "command",
+          "cwd",
+          "required",
+          "timeoutSeconds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "type": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "command": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "cwd": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "timeoutSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 128
+      }
+    },
+    "blockerPolicy": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "string",
+        "maxLength": 8192
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "required": [
+        "maxFixCycles",
+        "maxAgentRuns",
+        "maxCommandSeconds",
+        "maxOutputBytes"
+      ],
+      "properties": {
+        "maxFixCycles": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxAgentRuns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxCommandSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maxOutputBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "stopPolicy": {
+      "type": "object",
+      "required": [
+        "humanInterruptWins",
+        "autoContinueAfterInterrupt",
+        "closeWhenRequiredGatesPass"
+      ],
+      "properties": {
+        "humanInterruptWins": {
+          "type": "boolean"
+        },
+        "autoContinueAfterInterrupt": {
+          "type": "boolean"
+        },
+        "closeWhenRequiredGatesPass": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "releasePolicy": {
+      "type": "object",
+      "required": [
+        "autoCommit",
+        "autoPush",
+        "autoTag",
+        "generateReport"
+      ],
+      "properties": {
+        "autoCommit": {
+          "type": "boolean"
+        },
+        "autoPush": {
+          "type": "boolean"
+        },
+        "autoTag": {
+          "type": "boolean"
+        },
+        "generateReport": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    },
+    "adapters": {
+      "type": "object",
+      "required": [
+        "generic"
+      ],
+      "properties": {
+        "generic": {
+          "type": "object",
+          "required": [
+            "command",
+            "artifactPaths"
+          ],
+          "properties": {
+            "command": {
+              "type": "null"
+            },
+            "artifactPaths": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {}
+            }
+          },
+          "additionalProperties": false,
+          "maxProperties": 128
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 128
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 128
+}

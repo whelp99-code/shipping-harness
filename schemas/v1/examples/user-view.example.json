@@ -1,0 +1,22 @@
+{
+  "schema": "shipping-harness/user-view-v1",
+  "initialized": true,
+  "project": "example-project",
+  "release": "1.0.0",
+  "coreState": "CLOSED",
+  "userState": "CLOSED",
+  "summary": "이 버전은 완료되어 다시 열리지 않습니다.",
+  "blockerCount": 0,
+  "goals": {
+    "totalTasks": 1,
+    "doneTasks": 1,
+    "blockedTasks": 0
+  },
+  "nextAction": "완료 보고서를 확인하고 다음 버전을 별도로 검토하세요.",
+  "canPause": false,
+  "canResume": false,
+  "canClose": false,
+  "evidenceFresh": true,
+  "fixCycles": 0,
+  "agentRuns": 1
+}

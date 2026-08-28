@@ -1,0 +1,12 @@
+{
+  "schema": "shipping-remote/notification-v1",
+  "id": "NOTICE-example",
+  "createdAt": "2026-08-28T00:00:00.000Z",
+  "projectId": "example-project",
+  "release": "1.0.0",
+  "type": "CLOSED",
+  "dedupeKey": "example-project:1.0.0:CLOSED",
+  "payload": {
+    "state": "CLOSED"
+  }
+}

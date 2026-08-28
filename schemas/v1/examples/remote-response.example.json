@@ -1,0 +1,8 @@
+{
+  "schema": "shipping-remote/response-v1",
+  "requestId": "REQ-example",
+  "ok": true,
+  "result": {
+    "state": "CLOSED"
+  }
+}

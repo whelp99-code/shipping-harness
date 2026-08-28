@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { currentDecision, evaluateEntryGate } from '../../scripts/v0.8-entry-gate.mjs';
+test('actual v0.7 pilot keeps Team and DAG disabled',()=>{const d=currentDecision();assert.equal(d.decision,'DISABLED');assert.equal(d.teamMode,false);assert.equal(d.dagMode,false);assert.equal(d.criteria.realModelExecution,false);assert.equal(d.limits.unlimitedValuesAllowed,false);});
+test('one missing criterion keeps the gate disabled',()=>{const pilot={metrics:{independentParallelTasks:2,coordinationBlockers:1,completionGainPercent:20,falseDoneDelta:0},modelTask:{status:'unavailable'},privateRuntime:{teamMode:false,dagMode:false}};const d=evaluateEntryGate({pilot,pin:{tag:'t',commit:'c'}});assert.equal(d.decision,'DISABLED');});
+test('only complete measured evidence can enable a future bounded experiment',()=>{const pilot={metrics:{independentParallelTasks:2,coordinationBlockers:1,completionGainPercent:20,falseDoneDelta:0},modelTask:{status:'completed'},privateRuntime:{teamMode:false,dagMode:false}};const d=evaluateEntryGate({pilot,pin:{tag:'t',commit:'c'}});assert.equal(d.decision,'ENABLED');assert.equal(d.limits.maxParallelMembers,2);assert.equal(d.limits.maxDepth,1);});

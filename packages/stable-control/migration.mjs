@@ -1,0 +1,7 @@
+import { invariant } from './errors.mjs';
+import { STABLE_SCHEMAS, validateStableArtifact } from './schema-registry.mjs';
+export const SUPPORTED_RELEASES=Object.freeze(['0.6.0','0.7.0','0.8.0','0.9.0','1.0.0']);
+const LEGACY_SCHEMA_MAP=Object.freeze({'shipping-harness/v1':STABLE_SCHEMAS.contract,'shipping-harness/decision-package-v1':STABLE_SCHEMAS.decision,'shipping-harness/goal-snapshot-v1':STABLE_SCHEMAS.goalTask,'shipping-harness/release-receipt-v1':STABLE_SCHEMAS.release});
+export function assertSupportedUpgrade(from,to='1.0.0'){invariant(SUPPORTED_RELEASES.includes(from),'ERR_MIGRATION_VERSION',`Unsupported source release: ${from}`);invariant(to==='1.0.0','ERR_MIGRATION_VERSION',`Unsupported target release: ${to}`);return{from,to,supported:true};}
+export function migrateArtifact(value,{kind}={}){invariant(value&&typeof value==='object'&&!Array.isArray(value),'ERR_MIGRATION_ARTIFACT','Migration input must be an object');const original=value.schema??value.rpc;const target=LEGACY_SCHEMA_MAP[original]??original;const migrated=structuredClone(value);if(original!==target)migrated.schema=target;if(kind==='release'&&migrated.state===undefined)migrated.state='CLOSED';validateStableArtifact(target,migrated);return{artifact:migrated,fromSchema:original,toSchema:target,changed:original!==target};}
+export function deprecationNotice(schema){if(LEGACY_SCHEMA_MAP[schema])return{deprecated:true,replacement:LEGACY_SCHEMA_MAP[schema],removal:'2.0.0'};return{deprecated:false,replacement:null,removal:null};}

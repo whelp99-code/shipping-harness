@@ -1,0 +1,3 @@
+import { SUPPORTED_RELEASES } from './migration.mjs';
+export const COMPATIBILITY=Object.freeze({node:{minimum:22,recommended:24},git:{minimum:'2.30'},shippingReleases:SUPPORTED_RELEASES,pluginUpgradeFrom:['0.6.0','0.7.0','0.8.0','0.9.0'],omoRuntime:{shippingBridge:'0.7.0',upstreamVersion:'5.0.0-beta.23',nativePackage:'5.0.0-0.beta.23',senpi:'2026.8.27',internalOnly:true},mcp:{current:'2026-07-28',legacy:'2025-11-25'},remote:{schema:'shipping-harness/remote-request-v1',tlsMinimum:'1.2',publicListener:false},teamDag:{default:'DISABLED',entryGate:'docs/reports/v0.8-entry-gate.json'}});
+export function compatibilityReport(){return structuredClone(COMPATIBILITY);}

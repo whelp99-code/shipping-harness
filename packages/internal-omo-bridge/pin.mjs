@@ -1,0 +1,5 @@
+import { readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { invariant } from './policy.mjs';
+function git(root,args){ const result=spawnSync('git',['-C',root,...args],{encoding:'utf8',windowsHide:true}); invariant(result.status===0,'ERR_OMO_PIN',String(result.stderr||'git pin check failed').trim()); return String(result.stdout).trim(); }
+export async function verifyRuntimePin(pinPath){ const pin=JSON.parse(await readFile(pinPath,'utf8')); const head=git(pin.runtimeRoot,['rev-parse','HEAD']); const tagCommit=git(pin.runtimeRoot,['rev-list','-n','1',pin.tag]); invariant(head===pin.commit,'ERR_OMO_PIN','Private runtime HEAD does not match the approved pin',{head,expected:pin.commit}); invariant(tagCommit===pin.commit,'ERR_OMO_PIN','Private runtime tag does not match the approved pin'); const status=git(pin.runtimeRoot,['status','--porcelain']); invariant(status==='','ERR_OMO_PIN','Private runtime worktree is dirty'); return {status:'live',...pin,head}; }

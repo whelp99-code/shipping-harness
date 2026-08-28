@@ -1,0 +1,89 @@
+{
+  "schema": "shipping-harness/completion-benchmark-v1",
+  "method": "controlled-local-fixtures",
+  "liveModelBenchmark": false,
+  "scenarios": [
+    {
+      "name": "passing",
+      "agentSaysDone": true,
+      "direct": {
+        "shipped": true
+      },
+      "shipping": {
+        "state": "SHIPPABLE",
+        "shipped": true,
+        "blockers": 0,
+        "evidenceSha": "5fcdfd18e2bfeaf1723404ba64696ed495e3e1c3"
+      },
+      "expected": "SHIP"
+    },
+    {
+      "name": "false-done",
+      "agentSaysDone": true,
+      "direct": {
+        "shipped": true
+      },
+      "shipping": {
+        "state": "TRIAGE",
+        "shipped": false,
+        "blockers": 1,
+        "evidenceSha": "4093099591e8258cf89f7a7e67269483bcccb92e"
+      },
+      "expected": "BLOCK"
+    },
+    {
+      "name": "scope-drift",
+      "agentSaysDone": true,
+      "direct": {
+        "shipped": true
+      },
+      "shipping": {
+        "state": "TRIAGE",
+        "shipped": false,
+        "blockers": 1,
+        "evidenceSha": "1cef9e21bd9ac5b544a4879e162ce2ad1da19ee8"
+      },
+      "expected": "BLOCK"
+    }
+  ],
+  "modes": {
+    "directAgent": {
+      "status": "RUN",
+      "description": "Naive comparator accepts the agent DONE claim."
+    },
+    "shippingOnly": {
+      "status": "RUN",
+      "description": "Actual Shipping CLI lock and verify executed."
+    },
+    "privateOmoRuntime": {
+      "status": "BOUNDARY_CANARY_ONLY",
+      "description": "v0.7 verified the real runtime boundary but model coding is disabled; no completion-performance claim."
+    },
+    "boundedTeamDag": {
+      "status": "DISABLED",
+      "description": "v0.8 evidence gate did not justify Team/DAG."
+    }
+  },
+  "summary": {
+    "scenarioCount": 3,
+    "direct": {
+      "shipped": 3,
+      "falseDone": 2,
+      "scopeDriftAccepted": 1
+    },
+    "shipping": {
+      "shipped": 1,
+      "falseDone": 0,
+      "scopeDriftAccepted": 0,
+      "blockedExpected": 2,
+      "evidenceLinked": 3
+    },
+    "runawayExecutions": 0,
+    "humanStopViolations": 0
+  },
+  "limitations": [
+    "This benchmark measures completion-gate correctness, not model coding quality, token cost or wall-clock productivity.",
+    "Private OMO model execution was disabled and is not reported as a completion benchmark.",
+    "Team/DAG remained disabled by the v0.8 evidence gate."
+  ]
+}

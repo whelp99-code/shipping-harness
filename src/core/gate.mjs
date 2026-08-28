@@ -15,6 +15,7 @@ import { exists, readJson, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { runtimePaths } from './paths.mjs';
 import { invariant, ShippingError } from './errors.mjs';
 import { patchState, readState, recordLedger, transitionState } from './state.mjs';
+import { goalStatusView } from './goals/status-view.mjs';
 
 /** @param {string} root */
 export async function verifyRelease(root) {
@@ -210,6 +211,7 @@ export async function releaseStatus(root) {
       requiresNewContract: analyzed.violations.length + analyzed.allowed.length > 0,
     };
   }
+  const goals = await goalStatusView(root);
   return {
     state,
     git,
@@ -219,6 +221,7 @@ export async function releaseStatus(root) {
     issues: { counts: countIssues(issues.issues), items: issues.issues },
     evidenceFresh: Boolean(state.currentEvidenceSha && state.currentEvidenceSha === git.sha && contractValid),
     closedDrift,
+    goals,
     paths,
   };
 }

@@ -1,5 +1,43 @@
 import { invariant } from '../errors.mjs';
+import { hashObject } from '../crypto.mjs';
 import { validateGoalRecord, validateTaskRecord } from './schema.mjs';
+
+/** @param {Record<string, any>} graph */
+export function goalGraphIdentity(graph) {
+  return {
+    schema: graph.schema,
+    project: graph.project,
+    release: graph.release,
+    contractHash: graph.contractHash,
+    goals: [...graph.goals].map((goal) => ({
+      id: goal.id,
+      title: goal.title,
+      state: 'PENDING',
+      taskIds: [...goal.taskIds],
+      acceptanceIds: [...goal.acceptanceIds],
+      evidenceRefs: [],
+      blockerRefs: [],
+    })).sort((left, right) => left.id.localeCompare(right.id)),
+    tasks: [...graph.tasks].map((task) => ({
+      id: task.id,
+      goalId: task.goalId,
+      title: task.title,
+      state: 'PENDING',
+      consumer: { ...task.consumer },
+      dependsOn: [...task.dependsOn].sort(),
+      maxAttempts: task.maxAttempts,
+      attempts: 0,
+      currentAttemptId: null,
+      evidenceRefs: [],
+      blockerRefs: [],
+    })).sort((left, right) => left.id.localeCompare(right.id)),
+  };
+}
+
+/** @param {Record<string, any>} graph */
+export function computeGoalGraphHash(graph) {
+  return hashObject(goalGraphIdentity(graph));
+}
 
 /** @param {Record<string, any>[]} tasks */
 function assertAcyclic(tasks) {
@@ -75,6 +113,9 @@ export function validateGoalGraph(graph, allowed = {}) {
   }
 
   assertAcyclic(graph.tasks);
+  if (graph.graphHash !== undefined) {
+    invariant(graph.graphHash === computeGoalGraphHash(graph), 'ERR_GOAL_GRAPH_TAMPERED', 'Goal graph immutable structure hash does not match');
+  }
   return graph;
 }
 

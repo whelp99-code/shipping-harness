@@ -6,6 +6,52 @@ import { writeGoalSnapshots } from './store.mjs';
 
 /** @param {Record<string, any>} graph @param {Record<string, any>} event */
 function applyEvent(graph, event) {
+  if (event.type === 'PLANNING_CYCLE_RECORDED' && event.payload?.stateTransition) {
+    const transition = event.payload.stateTransition;
+    const index = graph.tasks.findIndex((task) => task.id === transition.taskId);
+    invariant(index >= 0, 'ERR_GOAL_RECOVERY', `Planning event references missing Task ${transition.taskId}`);
+    invariant(graph.tasks[index].state === transition.from, 'ERR_GOAL_RECOVERY', `Task ${transition.taskId} planning source state mismatch`);
+    graph.tasks[index] = transitionTaskRecord(graph.tasks[index], transition.to);
+    return;
+  }
+  if (event.type === 'RUNTIME_PAUSED') {
+    for (const transition of event.payload.transitions ?? []) {
+      const index = graph.tasks.findIndex((task) => task.id === transition.taskId);
+      invariant(index >= 0, 'ERR_GOAL_RECOVERY', `Pause event references missing Task ${transition.taskId}`);
+      invariant(graph.tasks[index].state === transition.from, 'ERR_GOAL_RECOVERY', `Task ${transition.taskId} pause source state mismatch`);
+      const next = transitionTaskRecord(graph.tasks[index], 'PAUSED');
+      graph.tasks[index] = { ...next, resumeState: transition.resumeState };
+    }
+    return;
+  }
+  if (event.type === 'RUNTIME_RESUMED') {
+    for (const transition of event.payload.transitions ?? []) {
+      const index = graph.tasks.findIndex((task) => task.id === transition.taskId);
+      invariant(index >= 0, 'ERR_GOAL_RECOVERY', `Resume event references missing Task ${transition.taskId}`);
+      invariant(graph.tasks[index].state === 'PAUSED', 'ERR_GOAL_RECOVERY', `Task ${transition.taskId} is not paused during recovery`);
+      const next = transitionTaskRecord(graph.tasks[index], transition.to);
+      const { resumeState: _removed, ...withoutResume } = next;
+      graph.tasks[index] = withoutResume;
+    }
+    return;
+  }
+  if (event.type === 'RUNTIME_ABORTED') {
+    for (const transition of event.payload.taskTransitions ?? []) {
+      const index = graph.tasks.findIndex((task) => task.id === transition.taskId);
+      invariant(index >= 0, 'ERR_GOAL_RECOVERY', `Abort event references missing Task ${transition.taskId}`);
+      invariant(graph.tasks[index].state === transition.from, 'ERR_GOAL_RECOVERY', `Task ${transition.taskId} abort source state mismatch`);
+      const next = transitionTaskRecord(graph.tasks[index], 'BLOCKED');
+      const { resumeState: _removed, ...withoutResume } = next;
+      graph.tasks[index] = withoutResume;
+    }
+    for (const transition of event.payload.goalTransitions ?? []) {
+      const index = graph.goals.findIndex((goal) => goal.id === transition.goalId);
+      invariant(index >= 0, 'ERR_GOAL_RECOVERY', `Abort event references missing Goal ${transition.goalId}`);
+      invariant(graph.goals[index].state === transition.from, 'ERR_GOAL_RECOVERY', `Goal ${transition.goalId} abort source state mismatch`);
+      graph.goals[index] = transitionGoalRecord(graph.goals[index], 'BLOCKED');
+    }
+    return;
+  }
   if (event.type === 'GOAL_TRANSITION') {
     const index = graph.goals.findIndex((goal) => goal.id === event.entityId);
     invariant(index >= 0, 'ERR_GOAL_RECOVERY', `Recovery event references missing Goal ${event.entityId}`);

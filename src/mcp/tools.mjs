@@ -7,6 +7,7 @@ import { beginFixCycle, closeRelease, releaseStatus, verifyRelease } from '../co
 import { runtimePaths } from '../core/paths.mjs';
 import { approveScopeProposal, createScopeProposal } from '../core/proposals.mjs';
 import { abort, pause, readState, resume } from '../core/state.mjs';
+import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from '../core/goals/authority.mjs';
 
 const ADAPTERS = ['generic', 'codex', 'gajae', 'ouroboros', 'omo'];
 
@@ -299,7 +300,12 @@ export async function callShippingTool(root, name, rawArguments) {
     invariant(['pause', 'resume', 'abort'].includes(action), 'ERR_MCP_ARGUMENTS', `Unsupported control action: ${String(action)}`);
     const reason = typeof args.reason === 'string' && args.reason.trim() ? args.reason.trim().slice(0, 500) : `MCP ${action}`;
     const state = action === 'pause' ? await pause(root, reason) : action === 'resume' ? await resume(root, reason) : await abort(root, reason);
-    return complete({ action, state }, `Release ${action} completed. Current state: ${state.state}.`);
+    const goalRuntime = action === 'pause'
+      ? await pauseGoalRuntime(root, reason)
+      : action === 'resume'
+        ? await resumeGoalRuntime(root, reason)
+        : await abortGoalRuntime(root, reason);
+    return complete({ action, state, goalRuntime: goalRuntime ? { transitions: goalRuntime.transitions ?? goalRuntime.taskTransitions ?? [] } : null }, `Release ${action} completed. Current state: ${state.state}.`);
   }
 
   if (name === 'shipping_close') {

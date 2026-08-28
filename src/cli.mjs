@@ -16,6 +16,7 @@ import { executeAdapter } from './adapters/runner.mjs';
 import { decideStop, ingestLifecycleEvent } from './core/hooks.mjs';
 import { prepareNextRelease } from './core/release-transition.mjs';
 import { VERSION } from './version.mjs';
+import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from './core/goals/authority.mjs';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {
@@ -214,21 +215,27 @@ export async function main(argv = process.argv.slice(2)) {
   }
 
   if (command === 'pause') {
-    const result = await pause(root, stringOption(options, 'reason', 'operator pause'));
+    const reason = stringOption(options, 'reason', 'operator pause');
+    const result = await pause(root, reason);
+    await pauseGoalRuntime(root, reason);
     if (json) printJson(result);
     else process.stdout.write(`Paused from ${result.resumeState}.\n`);
     return 0;
   }
 
   if (command === 'resume') {
-    const result = await resume(root, stringOption(options, 'reason', 'operator resume'));
+    const reason = stringOption(options, 'reason', 'operator resume');
+    const result = await resume(root, reason);
+    await resumeGoalRuntime(root, reason);
     if (json) printJson(result);
     else process.stdout.write(`Resumed to ${result.state}.\n`);
     return 0;
   }
 
   if (command === 'abort') {
-    const result = await abort(root, stringOption(options, 'reason', 'operator abort'));
+    const reason = stringOption(options, 'reason', 'operator abort');
+    const result = await abort(root, reason);
+    await abortGoalRuntime(root, reason);
     if (json) printJson(result);
     else process.stdout.write(`Release aborted: ${result.abortReason}\n`);
     return 0;

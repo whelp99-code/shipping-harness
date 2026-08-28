@@ -1,6 +1,6 @@
 import { hashObject } from '../crypto.mjs';
 import { invariant } from '../errors.mjs';
-import { validateGoalGraph } from './graph.mjs';
+import { computeGoalGraphHash, validateGoalGraph } from './graph.mjs';
 
 /** @param {string} value */
 function idSegment(value) {
@@ -68,6 +68,7 @@ export function compileGoalGraph(contract, options = {}) {
     }],
     tasks,
   };
-  validateGoalGraph(graph, { acceptanceIds, requirementIds });
-  return { ...graph, graphHash: hashObject(graph) };
+  const compiled = { ...graph, graphHash: computeGoalGraphHash(graph) };
+  validateGoalGraph(compiled, { acceptanceIds, requirementIds });
+  return compiled;
 }

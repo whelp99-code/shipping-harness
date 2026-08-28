@@ -19,6 +19,7 @@ export function goalRuntimePaths(root) {
     checkpoints: path.join(shipping.directory, 'checkpoints'),
     attempts: path.join(shipping.directory, 'attempts'),
     failureFingerprints: path.join(shipping.directory, 'failure-fingerprints.json'),
+    planningCounters: path.join(shipping.directory, 'planning-counters.json'),
   };
 }
 

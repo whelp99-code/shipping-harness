@@ -11,13 +11,13 @@ const GOAL_TRANSITIONS = Object.freeze({
 });
 
 const TASK_TRANSITIONS = Object.freeze({
-  PENDING: Object.freeze(['READY', 'BLOCKED', 'PAUSED']),
-  READY: Object.freeze(['RUNNING', 'BLOCKED', 'PAUSED']),
-  RUNNING: Object.freeze(['VERIFYING', 'FAILED', 'BLOCKED', 'PAUSED']),
-  VERIFYING: Object.freeze(['DONE', 'FAILED', 'BLOCKED', 'PAUSED']),
-  FAILED: Object.freeze(['RETRY_READY', 'BLOCKED', 'PLANNING_STUCK']),
-  RETRY_READY: Object.freeze(['RUNNING', 'BLOCKED', 'PAUSED']),
-  PAUSED: Object.freeze(['PENDING', 'READY', 'RUNNING', 'VERIFYING', 'RETRY_READY', 'BLOCKED']),
+  PENDING: Object.freeze(['READY', 'BLOCKED', 'PAUSED', 'PLANNING_STUCK']),
+  READY: Object.freeze(['RUNNING', 'BLOCKED', 'PAUSED', 'PLANNING_STUCK']),
+  RUNNING: Object.freeze(['VERIFYING', 'FAILED', 'BLOCKED', 'PAUSED', 'PLANNING_STUCK']),
+  VERIFYING: Object.freeze(['DONE', 'FAILED', 'BLOCKED', 'PAUSED', 'PLANNING_STUCK']),
+  FAILED: Object.freeze(['RETRY_READY', 'BLOCKED', 'PAUSED', 'PLANNING_STUCK']),
+  RETRY_READY: Object.freeze(['RUNNING', 'BLOCKED', 'PAUSED', 'PLANNING_STUCK']),
+  PAUSED: Object.freeze(['PENDING', 'READY', 'RUNNING', 'VERIFYING', 'FAILED', 'RETRY_READY', 'BLOCKED']),
   DONE: Object.freeze([]),
   BLOCKED: Object.freeze([]),
   PLANNING_STUCK: Object.freeze([]),

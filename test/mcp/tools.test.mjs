@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import { createFixtureRepo } from '../helpers/repo.mjs';
 import { createMcpProtocol, MCP_PROTOCOL_VERSION } from '../../src/mcp/protocol.mjs';
 import { approveScopeProposal, createScopeProposal } from '../../src/core/proposals.mjs';
+import { assertLockedContract } from '../../src/core/contract.mjs';
+import { compileGoalGraph } from '../../src/core/goals/compiler.mjs';
+import { initializeGoalRuntime, readGoalRuntime } from '../../src/core/goals/store.mjs';
 
 const meta = {
   'io.modelcontextprotocol/protocolVersion': MCP_PROTOCOL_VERSION,
@@ -44,6 +47,36 @@ test('unknown tools are protocol errors while operational failures are visible t
     const verify = await protocol.handle(call(2, 'shipping_verify', {}));
     assert.equal(verify.result.isError, true);
     assert.equal(verify.result.structuredContent.error.code, 'ERR_FILE_MISSING');
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('MCP status exposes bounded Goal state and pause/resume propagates human authority', async () => {
+  const fixture = await createFixtureRepo();
+  try {
+    const { proposal } = await createScopeProposal(fixture.root, { goal: 'Complete one governed Goal runtime flow' });
+    await approveScopeProposal(fixture.root, { proposalId: proposal.id, proposalHash: proposal.hash, confirm: true });
+    const { contract, lock } = await assertLockedContract(fixture.root);
+    const graph = compileGoalGraph(contract, { contractHash: lock.contractHash });
+    await initializeGoalRuntime(fixture.root, graph);
+    const protocol = createMcpProtocol(fixture.root);
+
+    const status = await protocol.handle(call(10, 'shipping_status', {}));
+    assert.equal(status.result.isError, false);
+    assert.equal(status.result.structuredContent.goals.taskCounts.PENDING, graph.tasks.length);
+    assert.equal(status.result.structuredContent.goals.tasks.length, graph.tasks.length);
+
+    const paused = await protocol.handle(call(11, 'shipping_pause', { action: 'pause', reason: 'human review' }));
+    assert.equal(paused.result.isError, false);
+    assert.equal(paused.result.structuredContent.state.state, 'PAUSED');
+    assert.equal(paused.result.structuredContent.goalRuntime.transitions.length, graph.tasks.length);
+    assert.equal((await readGoalRuntime(fixture.root)).tasks.every((task) => task.state === 'PAUSED'), true);
+
+    const resumed = await protocol.handle(call(12, 'shipping_pause', { action: 'resume', reason: 'human review complete' }));
+    assert.equal(resumed.result.isError, false);
+    assert.equal(resumed.result.structuredContent.state.state, 'LOCKED');
+    assert.equal((await readGoalRuntime(fixture.root)).tasks.every((task) => task.state === 'PENDING'), true);
   } finally {
     await fixture.cleanup();
   }

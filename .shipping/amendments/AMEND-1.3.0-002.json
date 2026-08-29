@@ -1,0 +1,29 @@
+{
+  "actor": "human-approved-sequential-build",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": "src/core/contract.mjs"
+    },
+    {
+      "field": "scope.paths.include",
+      "value": "src/core/decision-package.mjs"
+    }
+  ],
+  "correctedContractHash": "fbf4d7c958939324b67abfb2915fe0614e5584d43459fed8013c20051bd6ee72",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-1.3.0-002",
+  "kind": "required-isolation-validation-layers",
+  "previousContractHash": "a2e6bd3034271e36b972faeff7438ff813d3214ad22c972292342cfeeaf3e7a8",
+  "previousScopeRevision": 1,
+  "previousState": "LOCKED",
+  "productionBehaviorScopeChanged": false,
+  "project": "shipping-harness",
+  "reason": "Isolation metadata must be validated at both decision-package and locked-contract boundaries so a model or edited proposal cannot downgrade a side-effecting check to direct execution. These existing validation files were omitted from the initial allowlist.",
+  "recordedAt": "2026-08-29T11:21:38.347Z",
+  "release": "1.3.0",
+  "removed": [],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticProductScopeExpansion": false,
+  "sourceGitSha": "3342df7357355dc1dad514a773acea325fa7a758"
+}

@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 5,
+    "requiredFailed": 0,
+    "total": 5
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "33a0039ecc997b2467953dfe87783f8f19c2c993",
+  "closedAt": "2026-08-29T11:45:54.982Z",
+  "closedGitSha": "dc5138e49e5dddc7cda0376b11965b443a718a1b",
+  "contractHash": "e7ec2804e24a500a4c5d7cc24a2bd9933773723b961f43617ba09d277acd13f1",
+  "evidenceRunId": "run-2026-08-29T11-45-31-750Z-53fb05d0",
+  "fixCycles": 0,
+  "goal": "Explain mixed-stack projects and current work concretely, require acceptance coverage for every product change, and isolate side-effecting package verification from the source worktree.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.3.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

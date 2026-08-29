@@ -99,9 +99,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Package and deploy the nine-tool Shipping Harness as OMP's main internal development harness, prove upgrade and rollback, and complete a non-destructive nested-project field pilot.",
+  "goal": "Detect the real nested product workspace, derive cwd-bound acceptance and version evidence, and refine one canonical proposal through a bounded ninth MCP tool.",
   "project": "shipping-harness",
-  "release": "1.1.1",
+  "release": "1.1.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 5,
+    "requiredFailed": 0,
+    "total": 5
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "9f32428c0d562da0adea4e6ee0acbf23d246ec12",
+  "closedAt": "2026-08-29T15:52:10.466Z",
+  "closedGitSha": "e98fa0e28c28408c482f5c1f974d77405221b68b",
+  "contractHash": "334ceb9c9b6c559f530bb1d1a47ad134f237ee4cd448d84a5371eb1e1a19b12d",
+  "evidenceRunId": "run-2026-08-29T15-51-30-605Z-4bf16c05",
+  "fixCycles": 0,
+  "goal": "Compile deterministic evidence-first Korean beginner briefs and one safe next action from Shipping authority data, reduce host-model dependence without weakening performance or release authority, and deploy the verified tagged release to OMP 18 without mutating OMP or target projects.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.4.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

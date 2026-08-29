@@ -81,9 +81,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Prevent duplicate, mode-switched, dirty, unresolved, or weakly verified proposals from being presented or approved as ready.",
+  "goal": "Restore OMP MCP compatibility by supporting the protocol version OMP 15.10.12 actually negotiates, with no change to Shipping authority or tool behavior.",
   "project": "shipping-harness",
-  "release": "1.0.2",
+  "release": "1.0.1",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

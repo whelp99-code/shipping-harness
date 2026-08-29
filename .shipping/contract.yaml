@@ -1,10 +1,10 @@
 {
   "acceptance": [
     {
-      "command": "node --test --test-reporter=spec test/mcp/canonical-proposal-state.test.mjs test/mcp/proposal-lifecycle.test.mjs test/mcp/nested-workspace-refine.test.mjs",
+      "command": "node --test --test-reporter=spec test/mcp/baseline-steward.test.mjs test/mcp/proposal-lifecycle.test.mjs test/mcp/nested-workspace-refine.test.mjs",
       "cwd": ".",
-      "description": "Canonical state, legacy projection, cwd-bound brief, and no-op refine tests pass.",
-      "id": "AC-11201",
+      "description": "Dirty classification, baseline plan, file-set handshake, and next-action tests pass.",
+      "id": "AC-12001",
       "required": true,
       "timeoutSeconds": 300,
       "type": "command"
@@ -12,8 +12,8 @@
     {
       "command": "npm run test:mcp",
       "cwd": ".",
-      "description": "All MCP proposal and OMP compatibility tests pass.",
-      "id": "AC-11202",
+      "description": "All MCP and OMP compatibility tests pass with nine tools.",
+      "id": "AC-12002",
       "required": true,
       "timeoutSeconds": 360,
       "type": "command"
@@ -22,7 +22,7 @@
       "command": "npm run release:verify",
       "cwd": ".",
       "description": "Full regression, security, license, and documentation verification passes.",
-      "id": "AC-11203",
+      "id": "AC-12003",
       "required": true,
       "timeoutSeconds": 900,
       "type": "command"
@@ -31,7 +31,7 @@
       "command": "git diff --check",
       "cwd": ".",
       "description": "No whitespace or conflict-marker errors remain.",
-      "id": "AC-11204",
+      "id": "AC-12004",
       "required": true,
       "timeoutSeconds": 60,
       "type": "command"
@@ -100,28 +100,29 @@
     "generateReport": true
   },
   "requirements": [
-    "REQ-CANON-001",
-    "REQ-CANON-002",
-    "REQ-CANON-003",
-    "REQ-CANON-004",
-    "REQ-CANON-005",
-    "REQ-CANON-006"
+    "REQ-BASE-001",
+    "REQ-BASE-002",
+    "REQ-BASE-003",
+    "REQ-BASE-004",
+    "REQ-BASE-005",
+    "REQ-BASE-006"
   ],
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Baseline commit, stash, reset, discard, or other Git mutation automation.",
-      "Dirty-path classification, component graphs, work themes, and acceptance coverage implementation reserved for later releases.",
-      "New MCP tools, OMP core/model-router changes, Team/DAG, push, deploy, publication, or public listeners.",
-      "Rewriting historical proposal files merely to normalize their projection."
+      "Shipping-executed commit, stash, reset, clean, checkout, delete, discard, push, merge, or deploy.",
+      "Automatic trust of tracked .omo, .senpi, .serena, generated, or ambiguous files.",
+      "Component graphs, work themes, acceptance coverage, and isolated package execution reserved for v1.3.0.",
+      "A tenth MCP tool, OMP core/model-router changes, Team/DAG, public publication, or public listeners."
     ],
     "include": [
-      "Make one canonical proposal state authoritative for every approval projection and gate.",
-      "Safely project legacy contradictory proposal files without rewriting or hash damage.",
-      "Include exact cwd in approval-brief acceptance rows.",
-      "Prevent no-op refinement revisions while preserving meaningful immutable revision chains.",
-      "Write the sequential v1.1.2, v1.2.0, and v1.3.0 plans; implement only v1.1.2 in this release.",
-      "Preserve OMP 18.0.10 and 15.10.12 compatibility and the nine-tool MCP surface."
+      "Classify dirty entries as PRODUCT, RELEASE_EVIDENCE, AGENT_RUNTIME, SHIPPING_RUNTIME, GENERATED, or UNKNOWN using status and tracking evidence.",
+      "Treat untracked agent/runtime and generated artifacts as visible non-blocking entries while tracked or unknown runtime entries remain blocking.",
+      "Return a bounded baseline plan with exact included and excluded paths, rationale, suggested commit message, and a file-set hash.",
+      "Return one canonical next action for each proposal state and remove destructive discard from beginner guidance.",
+      "Require an explicit user-authorized baseline preservation handshake before accepting a post-commit rescan of a dirty proposal.",
+      "Verify the reviewed file set equals the committed file set, keep the same proposal identity, and reject drift.",
+      "Preserve the nine-tool MCP surface, OMP 18.0.10 compatibility, and all v1.1.2 canonical-state guarantees."
     ],
     "paths": {
       "exclude": [
@@ -138,26 +139,22 @@
         "docs/COMPATIBILITY.md",
         "docs/TRACEABILITY.md",
         "docs/planning/02-REQUIREMENTS.md",
-        "docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md",
-        "docs/planning/21-V1.1.2-CANONICAL-PROPOSAL-STATE-DEVELOPMENT-PLAN.md",
         "docs/planning/22-V1.2.0-SAFE-BASELINE-STEWARD-DEVELOPMENT-PLAN.md",
-        "docs/planning/23-V1.3.0-PROJECT-INTELLIGENCE-AND-ACCEPTANCE-COVERAGE-DEVELOPMENT-PLAN.md",
         "package.json",
+        "src/core/baseline.mjs",
+        "src/core/decision-evidence.mjs",
         "src/core/proposal-state.mjs",
         "src/core/proposals.mjs",
-        "src/core/decision-policy.mjs",
-        "src/core/decision-package.mjs",
         "src/mcp/tools.mjs",
+        "src/mcp/user-view.mjs",
         "packages/shipping-plugin/manifest/plugin.json",
         "packages/shipping-plugin/skill/SKILL.md",
         "packages/stable-control/compatibility.mjs",
-        "schemas/v1/examples/mcp-surface.example.json",
         "schemas/v1/examples/plugin.example.json",
-        "test/mcp/canonical-proposal-state.test.mjs",
+        "test/mcp/baseline-steward.test.mjs",
         "test/mcp/proposal-lifecycle.test.mjs",
         "test/mcp/nested-workspace-refine.test.mjs",
-        "test/mcp/omp-compatibility.test.mjs",
-        "test/plugin/renderers.test.mjs"
+        "test/mcp/omp-compatibility.test.mjs"
       ]
     }
   },

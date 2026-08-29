@@ -34,8 +34,8 @@ For OMP, use the release-owned transactional bootstrap instead of manually editi
 
 ```bash
 cd /home/jm/orca/projects/shipping-harness
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.2
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.2 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.2.0
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.2.0 --apply
 shipping-harness-omp doctor
 ```
 
@@ -120,6 +120,12 @@ NEEDS_INPUT | DIRTY_BASELINE | NEEDS_ACCEPTANCE | READY_FOR_APPROVAL
 Only `READY_FOR_APPROVAL` may be passed to `shipping_approve_scope`. Repeating the same AUTO request reuses the active proposal instead of creating duplicates. MCP `shipping_start` is AUTO-only; a host agent cannot silently switch to SAFE or INTERVIEW. A fallback-only `git diff --check` is supplemental evidence and is not sufficient for a software release.
 
 From v1.1.2, legacy `decision.approvalStatus` and `approvalBrief.status` values are non-authoritative compatibility projections derived from the canonical proposal state. Dirty, unresolved, weak, expired, or superseded proposals never project approval readiness. Each approval check includes its exact `cwd`; a rescan with no authority-bearing change returns `changed: false` and does not create a revision archive.
+
+### Dirty baseline preservation
+
+From v1.2.0, `DIRTY_BASELINE` returns a bounded `baseline` object with categorized entries, exact blocking/non-blocking paths, a suggested host commit message, a file-set hash, and one next action: `REVIEW_BASELINE`. Untracked agent/runtime and generated output remain visible but do not block; tracked or unknown entries fail closed.
+
+Shipping does not stage, commit, stash, reset, or delete files. After the user separately approves the displayed baseline plan, the host agent may commit exactly the included paths. It then calls `shipping_refine` with `rescan: true`, the exact `baselinePlanHash`, current full `baselineCommit`, and `baselineAuthorizedByUser: true`. The commit must directly follow the reviewed Git HEAD and contain exactly the reviewed paths or refinement fails with baseline drift. Baseline preservation approval is not release-scope approval.
 
 For repositories containing one real product below a wrapper root, Shipping scans only bounded Git-tracked manifest paths, selects the strongest runnable workspace, and binds every proposed command to its exact workspace-relative `cwd`. If candidates remain materially tied, `shipping_refine` may select one existing candidate without accepting a free-form path or command.
 

@@ -6,6 +6,7 @@ import { createDefaultContract, loadContract, lockContract, validateContract } f
 import { hashObject, stableStringify } from './crypto.mjs';
 import { assertContainedPath, ensureDir, exists, readJson, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { currentGitSha, gitStatus } from './git.mjs';
+import { analyzeBaseline, verifyBaselinePreservation } from './baseline.mjs';
 import { invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
 import { buildShortPlan } from './project-analysis.mjs';
@@ -17,6 +18,7 @@ import {
   deriveProposalState,
   isTerminalProposalState,
   proposalAuthorityStatus,
+  proposalNextAction,
   proposalFingerprint,
   proposalSummary,
 } from './proposal-state.mjs';
@@ -72,12 +74,9 @@ function nextMinor(version) {
 }
 
 /** @param {string} root */
-function nonRuntimeChanges(root) {
-  return gitStatus(root).porcelain.filter((line) => {
-    const raw = line.slice(3).trim();
-    const paths = raw.split(' -> ').map((entry) => entry.replace(/^"|"$/gu, ''));
-    return paths.some((entry) => entry !== '.shipping' && !entry.startsWith('.shipping/'));
-  });
+function currentBaseline(root) {
+  const status = gitStatus(root);
+  return analyzeBaseline(root, status.porcelain, { gitSha: status.sha });
 }
 
 /** @param {Record<string, any>} proposal */
@@ -135,6 +134,8 @@ function authorityFingerprint(input) {
     mode: proposal.mode,
     modeAuthorization: proposal.modeAuthorization ?? null,
     sourceChanges: proposal.sourceChanges ?? [],
+    baseline: proposal.baseline ?? null,
+    baselinePreservation: proposal.baselinePreservation ?? null,
     acceptanceStrength: proposal.acceptanceStrength,
     workspace: proposal.workspace,
     workspaceCandidates: proposal.workspaceCandidates,
@@ -280,7 +281,8 @@ export async function createScopeProposal(root, input) {
     const contract = compileDecisionContract(base, decision);
     const acceptance = contract.acceptance;
     const now = new Date();
-    const sourceChanges = nonRuntimeChanges(root);
+    const baseline = evidence.baseline;
+    const sourceChanges = baseline.blockingPaths;
     const acceptanceStrength = classifyAcceptanceStrength(analysis);
     const id = `proposal-${now.toISOString().replace(/[:.]/gu, '-')}-${randomUUID().slice(0, 8)}`;
     const proposal = {
@@ -302,6 +304,7 @@ export async function createScopeProposal(root, input) {
       mode: decision.mode,
       lifecycle: { state: 'PLANNING', supersedes: active?.proposal?.id ?? null },
       sourceChanges,
+      baseline,
       acceptanceStrength,
       workspace: analysis.workspace,
       workspaceCandidates: analysis.workspaceCandidates,
@@ -314,7 +317,7 @@ export async function createScopeProposal(root, input) {
       plan: buildShortPlan(analysis, acceptance),
       diagnostics: [
         ...analysis.diagnostics,
-        ...(sourceChanges.length > 0 ? ['Commit or discard non-.shipping changes before approval.'] : []),
+        ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
         ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
         ...(acceptanceStrength.sufficient ? [] : ['A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
         ...(inheritedCommands.length > 0 ? [`Existing adapter commands were removed from the generated proposal: ${inheritedCommands.join(', ')}.`] : []),
@@ -387,7 +390,7 @@ function resolveDecisionQuestions(questions, answers) {
 /**
  * Refine one active proposal identity using bounded structured user decisions.
  * @param {string} root
- * @param {{proposalId:string, proposalHash:string, answers?:Array<{questionId:string,choice:string}>, workspaceCandidateId?:string|null, mode?:string|null, modeAuthorizedByUser?:boolean, rescan?:boolean}} input
+ * @param {{proposalId:string, proposalHash:string, answers?:Array<{questionId:string,choice:string}>, workspaceCandidateId?:string|null, mode?:string|null, modeAuthorizedByUser?:boolean, rescan?:boolean, baselinePlanHash?:string, baselineCommit?:string, baselineAuthorizedByUser?:boolean}} input
  */
 export async function refineScopeProposal(root, input) {
   return withProposalLock(root, async () => {
@@ -414,6 +417,9 @@ export async function refineScopeProposal(root, input) {
     const answers = input.answers ?? [];
     invariant(Array.isArray(answers) && answers.length <= 3, 'ERR_PROPOSAL_REFINE', 'Refinement accepts at most three grouped answers');
     invariant(answers.length > 0 || input.workspaceCandidateId || requestedMode !== proposal.mode || input.rescan === true, 'ERR_PROPOSAL_REFINE', 'Refinement must include an answer, workspace selection, authorized mode change, or rescan');
+    if (input.baselinePlanHash !== undefined) invariant(/^[a-f0-9]{64}$/u.test(input.baselinePlanHash), 'ERR_BASELINE_PLAN', 'baselinePlanHash must be a SHA-256 hex digest');
+    if (input.baselineCommit !== undefined) invariant(/^[a-f0-9]{40}$/u.test(input.baselineCommit), 'ERR_BASELINE_COMMIT', 'baselineCommit must be a full Git SHA');
+    invariant(input.baselineAuthorizedByUser !== true || (input.baselinePlanHash && input.baselineCommit), 'ERR_BASELINE_APPROVAL', 'Baseline authorization requires the reviewed plan hash and commit SHA');
 
     const evidence = await buildDecisionEvidence(root, {
       goal: proposal.goal,
@@ -421,6 +427,13 @@ export async function refineScopeProposal(root, input) {
       workspaceCandidateId,
     });
     const analysis = evidence.analysis;
+    let baselinePreservation = proposal.baselinePreservation ?? null;
+    const baselineChanged = proposal.baseline?.plan?.fileSetHash !== evidence.baseline?.plan?.fileSetHash
+      || proposal.gitSha !== evidence.gitSha;
+    if (summary.state === 'DIRTY_BASELINE' && baselineChanged) {
+      invariant(proposal.gitSha !== evidence.gitSha, 'ERR_BASELINE_UNAUTHORIZED', 'Dirty baseline changed without a reviewed preservation commit');
+      baselinePreservation = verifyBaselinePreservation(root, proposal.baseline, input);
+    }
     const release = proposal.releaseSelection?.explicit
       ? proposal.release
       : (analysis.versionEvidence?.recommendedVersion ?? proposal.release);
@@ -452,7 +465,8 @@ export async function refineScopeProposal(root, input) {
     decision = validateDecisionPackage(evidence, decision);
     const approvalBrief = buildApprovalBrief(decision);
     const contract = compileDecisionContract(base, decision);
-    const sourceChanges = nonRuntimeChanges(root);
+    const baseline = evidence.baseline;
+    const sourceChanges = baseline.blockingPaths;
     const acceptanceStrength = classifyAcceptanceStrength(analysis);
     const now = new Date();
     const candidate = {
@@ -482,6 +496,8 @@ export async function refineScopeProposal(root, input) {
       expiresAt: new Date(now.getTime() + PROPOSAL_TTL_MS).toISOString(),
       lifecycle: { state: 'PLANNING', supersedes: proposal.lifecycle?.supersedes ?? null },
       sourceChanges,
+      baseline,
+      baselinePreservation,
       acceptanceStrength,
       workspace: analysis.workspace,
       workspaceCandidates: analysis.workspaceCandidates,
@@ -494,7 +510,7 @@ export async function refineScopeProposal(root, input) {
       plan: buildShortPlan(analysis, contract.acceptance),
       diagnostics: [
         ...analysis.diagnostics,
-        ...(sourceChanges.length > 0 ? ['Commit or discard non-.shipping changes before approval.'] : []),
+        ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
         ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
         ...(acceptanceStrength.sufficient ? [] : ['A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
       ],
@@ -564,8 +580,9 @@ export async function approveScopeProposal(root, input) {
   invariant(approverId !== proposal.decision?.proposer?.id, 'ERR_MODEL_SELF_APPROVAL', 'The proposer cannot approve its own decision package');
   invariant(Date.parse(proposal.expiresAt) > Date.now(), 'ERR_PROPOSAL_EXPIRED', 'Proposal has expired; create a new proposal');
   invariant(currentGitSha(root) === proposal.gitSha, 'ERR_PROPOSAL_STALE', 'Repository HEAD changed after proposal creation');
-  const sourceChanges = nonRuntimeChanges(root);
-  invariant(sourceChanges.length === 0, 'ERR_PROPOSAL_DIRTY', 'Commit or discard non-.shipping changes before approval', { sourceChanges });
+  const baseline = currentBaseline(root);
+  const sourceChanges = baseline.blockingPaths;
+  invariant(sourceChanges.length === 0, 'ERR_PROPOSAL_DIRTY', 'Review and preserve blocking baseline changes before approval', { sourceChanges, baseline });
 
   const paths = runtimePaths(root);
   await assertContainedPath(root, paths.directory);
@@ -580,7 +597,7 @@ export async function approveScopeProposal(root, input) {
   }
   invariant(state.state === 'DRAFT', 'ERR_APPROVAL_STATE', `Scope can be approved only from DRAFT, current state is ${state.state}`);
   await writeAtomic(paths.contract, stableStringify(validateContract(proposal.contract)));
-  invariant(currentGitSha(root) === proposal.gitSha && nonRuntimeChanges(root).length === 0, 'ERR_PROPOSAL_STALE', 'Repository changed during proposal approval');
+  invariant(currentGitSha(root) === proposal.gitSha && currentBaseline(root).blockingPaths.length === 0, 'ERR_PROPOSAL_STALE', 'Repository changed during proposal approval');
   const sha = currentGitSha(root);
   const { contract, lock } = await lockContract(root, sha);
   const locked = await transitionState(root, 'LOCKED', {

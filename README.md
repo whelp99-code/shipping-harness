@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.1.2 — Canonical Proposal State`
-**Authority:** the release is complete only when `.shipping/releases/1.1.2.json` is `CLOSED` and annotated tag `v1.1.2` points to the closure commit
+**Current release train:** `v1.2.0 — Safe Baseline Steward`
+**Authority:** the release is complete only when `.shipping/releases/1.2.0.json` is `CLOSED` and annotated tag `v1.2.0` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -62,10 +62,10 @@ After `v1.1.1` is tagged, run from the clean Shipping Harness checkout:
 
 ```bash
 # Read-only preview
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.2
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.2.0
 
 # Back up, install locally, merge OMP settings, and verify
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.2 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.2.0 --apply
 
 # Thereafter the installed command is available
 shipping-harness-omp doctor

@@ -6,6 +6,7 @@ import { invariant } from '../core/errors.mjs';
 import { exists } from '../core/fs.mjs';
 import { beginFixCycle, closeRelease, releaseStatus, verifyRelease } from '../core/gate.mjs';
 import { runtimePaths } from '../core/paths.mjs';
+import { proposalNextAction } from '../core/proposal-state.mjs';
 import { approveScopeProposal, createScopeProposal, findActiveScopeProposal, refineScopeProposal } from '../core/proposals.mjs';
 import { abort, pause, readState, resume } from '../core/state.mjs';
 import { buildBlockerView, buildUserStatusView } from './user-view.mjs';
@@ -37,7 +38,7 @@ export const SHIPPING_TOOLS = Object.freeze([
   {
     name: 'shipping_refine',
     title: 'Refine the active release proposal',
-    description: 'Revise one active proposal identity using bounded structured user answers, an existing workspace candidate, a rescan, or an explicitly user-authorized mode change. It never accepts commands, paths, environment maps, credentials, push, or deploy fields.',
+    description: 'Revise one active proposal identity using bounded structured user answers, an existing workspace candidate, a rescan, an explicitly user-authorized mode change, or a reviewed external baseline-commit receipt. It never executes Git mutation or accepts commands, free-form paths, credentials, push, or deploy fields.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -60,6 +61,9 @@ export const SHIPPING_TOOLS = Object.freeze([
         mode: { type: 'string', enum: ['AUTO', 'SAFE', 'INTERVIEW'] },
         modeAuthorizedByUser: { type: 'boolean', default: false },
         rescan: { type: 'boolean', default: false },
+        baselinePlanHash: { type: 'string', pattern: '^[a-f0-9]{64}$', description: 'Exact reviewed baseline plan hash.' },
+        baselineCommit: { type: 'string', pattern: '^[a-f0-9]{40}$', description: 'Current host-created Git commit that preserves exactly the reviewed paths.' },
+        baselineAuthorizedByUser: { type: 'boolean', default: false, description: 'True only after the user separately approved the host-side baseline commit.' },
       },
       required: ['proposalId', 'proposalHash'],
       additionalProperties: false,
@@ -264,6 +268,8 @@ export async function callShippingTool(root, name, rawArguments) {
       workspace: proposal.workspace,
       workspaceCandidates: proposal.workspaceCandidates,
       versionEvidence: proposal.versionEvidence,
+      baseline: proposal.baseline,
+      nextAction: proposalNextAction(proposal.canonicalState),
       acceptanceStrength: proposal.acceptanceStrength,
       scope: proposal.contract.scope,
       acceptance: proposal.contract.acceptance,
@@ -295,7 +301,7 @@ export async function callShippingTool(root, name, rawArguments) {
     const next = proposal.readyForApproval
       ? 'Review the one-screen approval brief, then call shipping_approve_scope with the exact proposal ID and hash.'
       : proposal.canonicalState === 'DIRTY_BASELINE'
-        ? 'Preserve or explicitly discard the existing source changes before approval.'
+        ? 'Review the exact baseline preservation plan before approval.'
         : proposal.canonicalState === 'NEEDS_ACCEPTANCE'
           ? 'A repository-owned build, test, verify, check, package, or equivalent acceptance command must be detected before approval.'
           : 'Resolve the grouped exception questions before approval.';
@@ -303,7 +309,7 @@ export async function callShippingTool(root, name, rawArguments) {
   }
 
   if (name === 'shipping_refine') {
-    rejectUnknownKeys(args, ['proposalId', 'proposalHash', 'answers', 'workspaceCandidateId', 'mode', 'modeAuthorizedByUser', 'rescan']);
+    rejectUnknownKeys(args, ['proposalId', 'proposalHash', 'answers', 'workspaceCandidateId', 'mode', 'modeAuthorizedByUser', 'rescan', 'baselinePlanHash', 'baselineCommit', 'baselineAuthorizedByUser']);
     const proposalId = requiredString(args.proposalId, 'proposalId', 1, 160);
     const proposalHash = requiredString(args.proposalHash, 'proposalHash', 64, 64);
     invariant(/^[a-f0-9]{64}$/u.test(proposalHash), 'ERR_MCP_ARGUMENTS', 'proposalHash must be a lowercase SHA-256 value');
@@ -314,6 +320,9 @@ export async function callShippingTool(root, name, rawArguments) {
     if (args.mode !== undefined) invariant(['AUTO', 'SAFE', 'INTERVIEW'].includes(args.mode), 'ERR_MCP_ARGUMENTS', `Unsupported decision mode: ${String(args.mode)}`);
     invariant(args.modeAuthorizedByUser === undefined || typeof args.modeAuthorizedByUser === 'boolean', 'ERR_MCP_ARGUMENTS', 'modeAuthorizedByUser must be boolean');
     invariant(args.rescan === undefined || typeof args.rescan === 'boolean', 'ERR_MCP_ARGUMENTS', 'rescan must be boolean');
+    if (args.baselinePlanHash !== undefined) invariant(/^[a-f0-9]{64}$/u.test(args.baselinePlanHash), 'ERR_MCP_ARGUMENTS', 'baselinePlanHash must be a lowercase SHA-256 value');
+    if (args.baselineCommit !== undefined) invariant(/^[a-f0-9]{40}$/u.test(args.baselineCommit), 'ERR_MCP_ARGUMENTS', 'baselineCommit must be a full lowercase Git SHA');
+    invariant(args.baselineAuthorizedByUser === undefined || typeof args.baselineAuthorizedByUser === 'boolean', 'ERR_MCP_ARGUMENTS', 'baselineAuthorizedByUser must be boolean');
     if (args.answers !== undefined) {
       invariant(Array.isArray(args.answers) && args.answers.length <= 3, 'ERR_MCP_ARGUMENTS', 'answers must contain at most three entries');
       for (const answer of args.answers) {
@@ -331,6 +340,9 @@ export async function callShippingTool(root, name, rawArguments) {
       mode: args.mode,
       modeAuthorizedByUser: args.modeAuthorizedByUser === true,
       rescan: args.rescan === true,
+      baselinePlanHash: args.baselinePlanHash,
+      baselineCommit: args.baselineCommit,
+      baselineAuthorizedByUser: args.baselineAuthorizedByUser === true,
     });
     const proposal = result.proposal;
     const data = {
@@ -347,6 +359,9 @@ export async function callShippingTool(root, name, rawArguments) {
       workspace: proposal.workspace,
       workspaceCandidates: proposal.workspaceCandidates,
       versionEvidence: proposal.versionEvidence,
+      baseline: proposal.baseline,
+      baselinePreservation: proposal.baselinePreservation ?? null,
+      nextAction: proposalNextAction(proposal.canonicalState),
       acceptanceStrength: proposal.acceptanceStrength,
       acceptance: proposal.contract.acceptance,
       questions: proposal.decision.questions,
@@ -360,6 +375,8 @@ export async function callShippingTool(root, name, rawArguments) {
         outcome: proposal.approvalBrief.outcome,
         workspace: proposal.workspace,
         versionEvidence: proposal.versionEvidence,
+        baseline: proposal.baseline,
+        nextAction: proposalNextAction(proposal.canonicalState),
         included: proposal.approvalBrief.included,
         deferred: proposal.approvalBrief.deferred,
         acceptance: proposal.contract.acceptance,

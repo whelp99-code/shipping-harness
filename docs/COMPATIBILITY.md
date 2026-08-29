@@ -1,6 +1,6 @@
 # Shipping Harness v1 Compatibility
 
-Shipping Harness v1.1.2 is an internal-only control plane. A component is supported only after its exact combination passes local compatibility checks; discovery of a binary alone is not readiness proof.
+Shipping Harness v1.2.0 is an internal-only control plane. A component is supported only after its exact combination passes local compatibility checks; discovery of a binary alone is not readiness proof.
 
 The v1.0.2 proposal surface exposes one canonical state. `NEEDS_INPUT`, `DIRTY_BASELINE`, and `NEEDS_ACCEPTANCE` are fail-closed states and can never be interpreted as approval readiness by a host agent.
 
@@ -9,6 +9,8 @@ The v1.1.0 surface adds bounded Git-tracked nested-workspace selection, command-
 The v1.1.1 deployment surface adds local package backup, atomic OMP configuration merge, actual-host smoke testing, exact nine-tool protocol verification, install receipts, doctor, and digest-checked rollback. It does not modify OMP itself.
 
 The v1.1.2 proposal surface projects one canonical state into every compatibility field, retains old proposal bytes and hashes on read, includes exact command working directories in approval briefs, and makes evidence-identical refinement idempotent.
+
+The v1.2.0 baseline surface classifies dirty paths with tracked-state evidence, excludes only proven non-product runtime/generated entries from approval blocking, and verifies a separately user-approved direct baseline commit against an exact plan hash and path set. Shipping itself exposes no Git mutation.
 
 ## Supported core environment
 

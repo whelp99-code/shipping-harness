@@ -1,6 +1,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { hashObject, sha256, stableStringify } from './crypto.mjs';
+import { analyzeBaseline } from './baseline.mjs';
 import { invariant } from './errors.mjs';
 import { assertContainedPath, exists } from './fs.mjs';
 import { currentGitSha, gitStatus } from './git.mjs';
@@ -82,12 +83,6 @@ function operationalSurface(analysis) {
   };
 }
 
-/** @param {string} line */
-function statusPath(line) {
-  const value = line.slice(3).trim();
-  return value.split(' -> ').at(-1)?.replace(/^"|"$/gu, '') ?? value;
-}
-
 /**
  * Build a bounded fact pack without executing repository code or trusting repository prose as policy.
  * @param {string} root
@@ -104,10 +99,8 @@ export async function buildDecisionEvidence(root, input) {
   const gitSha = currentGitSha(root);
   const manifests = await manifestReceipts(root, analysis.manifests);
   const history = await releaseHistory(root);
-  const sourceChanges = git.porcelain
-    .map(statusPath)
-    .filter((entry) => entry !== '.shipping' && !entry.startsWith('.shipping/'))
-    .slice(0, 200);
+  const baseline = analyzeBaseline(root, git.porcelain, { gitSha });
+  const sourceChanges = baseline.blockingPaths.slice(0, 200);
   const createdAt = (input.now ?? new Date()).toISOString();
   const facts = [
     { id: 'EVID-001', kind: 'user-intent', source: 'user', claim: input.goal.trim(), trust: 'trusted-user-intent' },
@@ -118,6 +111,7 @@ export async function buildDecisionEvidence(root, input) {
     { id: 'EVID-006', kind: 'operational-surface', source: 'repository-metadata', claim: operationalSurface(analysis), trust: 'untrusted-repository-data' },
     { id: 'EVID-007', kind: 'workspace-selection', source: 'repository-metadata', claim: { selected: analysis.workspace, candidates: analysis.workspaceCandidates }, trust: 'untrusted-repository-data' },
     { id: 'EVID-008', kind: 'version-evidence', source: 'repository-metadata', claim: analysis.versionEvidence, trust: 'untrusted-repository-data' },
+    { id: 'EVID-009', kind: 'baseline-classification', source: 'git-status', claim: baseline, trust: 'trusted-mechanical' },
   ];
   const pack = {
     schema: 'shipping-harness/decision-evidence-v1',
@@ -133,6 +127,7 @@ export async function buildDecisionEvidence(root, input) {
     releaseHistory: history,
     operationalSurface: operationalSurface(analysis),
     sourceChanges,
+    baseline,
     facts,
   };
   pack.hash = hashObject(pack);

@@ -17,6 +17,7 @@
 | GOAL-013 governed internal runtime reuse | REQ-UPSTREAM-001..002, REQ-OMO-001..009, NFR-RUNTIME-001..002 | AC-0701..0714 | internal OMO bridge, private pinned runtime, Shipping verification | planned bridge/runtime/adversarial/canary/rollback suites |
 | GOAL-014 internal-only product boundary | REQ-INTERNAL-001, REQ-OMO-009, NFR-LICENSE-001 | AC-0713, AC-1010..1012 | third-party policy, runtime promotion, release operations | planned policy/packaging/release tests |
 | GOAL-015 safe internal remote control | REQ-REMOTE-001..005 | AC-0901..0912 | internal gateway, signed approval, backup/restore | planned remote/security/operations suites |
+| GOAL-018 safe dirty-baseline stewardship | REQ-BASE-001..006 | AC-120-001..009 | baseline classifier, proposal preservation handshake, MCP next action | baseline steward, proposal lifecycle, OMP compatibility tests |
 | GOAL-017 canonical proposal authority | REQ-CANON-001..006 | AC-112-001..008 | proposal state projection, proposal storage/refinement, MCP output | canonical proposal, lifecycle, nested refine, OMP compatibility tests |
 | GOAL-016 stable internal product | REQ-STABLE-001..003, REQ-OPS-001..002, REQ-BENCH-001..002, REQ-SECURITY-001, REQ-HANDOVER-001, REQ-RELEASE-001 | AC-1001..1014 | stable schemas, migrations, operations, benchmark, security inventory, handover | implemented v1.0 gates |
 
@@ -38,6 +39,7 @@ src/adapters/artifacts.mjs  REQ-ADAPTER-003..006, REQ-SEC-001..003
 src/adapters/registry.mjs   REQ-ADAPTER-001..006
 src/core/project-analysis.mjs REQ-ANALYZE-*
 src/core/proposal-state.mjs and src/core/proposals.mjs REQ-CANON-* (implemented v1.1.2)
+src/core/baseline.mjs and proposal refinement REQ-BASE-* (implemented v1.2.0)
 src/core/proposals.mjs      REQ-PROPOSAL-*
 src/mcp/tools.mjs           REQ-MCP-003, REQ-MCP-006..008
 src/mcp/protocol.mjs        REQ-MCP-002..005
@@ -140,3 +142,14 @@ Any implementation that cannot map to a requirement is out of scope or must amen
 | AC-112-005 | cwd-bound approval-brief assertions |
 | AC-112-006..007 | no-op and meaningful refinement revision-chain tests |
 | AC-112-008 | `npm run test:mcp`, `npm run release:verify`, OMP compatibility and release receipt |
+
+## v1.2.0 verification mapping
+
+| Acceptance | Proof |
+|---|---|
+| AC-120-001..003 | classifier category and tracked/untracked tests in `test/mcp/baseline-steward.test.mjs` |
+| AC-120-004 | exact baseline plan/hash/status projection test |
+| AC-120-005..006 | no-Git-mutation tool schema and commit path/history drift tests |
+| AC-120-007 | explicit host commit plus same-proposal rescan test |
+| AC-120-008 | beginner text/action assertions |
+| AC-120-009 | MCP/OMP/full release verification and release receipt |

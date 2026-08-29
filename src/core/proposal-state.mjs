@@ -28,6 +28,21 @@ export function proposalAuthorityStatus(state) {
   return 'NOT_READY';
 }
 
+/** @param {string} state */
+export function proposalNextAction(state) {
+  const actions = {
+    PLANNING: 'WAIT_FOR_ANALYSIS',
+    NEEDS_INPUT: 'ANSWER_EXCEPTION',
+    DIRTY_BASELINE: 'REVIEW_BASELINE',
+    NEEDS_ACCEPTANCE: 'STRENGTHEN_ACCEPTANCE',
+    READY_FOR_APPROVAL: 'REVIEW_SCOPE',
+    APPROVED: 'EXECUTE_LOCKED_SCOPE',
+    SUPERSEDED: 'USE_ACTIVE_PROPOSAL',
+    EXPIRED: 'CREATE_NEW_PROPOSAL',
+  };
+  return actions[state] ?? 'CHECK_STATUS';
+}
+
 /** @param {unknown} value */
 function normalizedText(value) {
   return typeof value === 'string'
@@ -117,9 +132,11 @@ export function proposalSummary(proposal) {
     mode: proposal.mode,
     state,
     readyForApproval: state === 'READY_FOR_APPROVAL',
+    nextAction: proposalNextAction(state),
     questionCount: proposal.decision?.questions?.length ?? 0,
     dirtyPathCount: proposal.sourceChanges?.length ?? 0,
     acceptanceStrength: proposal.acceptanceStrength ?? classifyAcceptanceStrength(proposal.analysis),
+    baseline: proposal.baseline ?? proposal.evidence?.baseline ?? null,
     workspace: proposal.workspace ?? proposal.analysis?.workspace ?? null,
     workspaceCandidates: proposal.workspaceCandidates ?? proposal.analysis?.workspaceCandidates ?? [],
     versionEvidence: proposal.versionEvidence ?? proposal.analysis?.versionEvidence ?? null,

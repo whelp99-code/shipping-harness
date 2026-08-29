@@ -384,6 +384,20 @@
 | AC-112-007 | Meaningful refinement preserves the immutable revision and previous-hash chain. |
 | AC-112-008 | OMP 18.0.10/15.10.12 compatibility, security, license, docs, and all regressions pass. |
 
+### v1.2.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-120-001 | Shipping runtime is not counted as product dirty state. |
+| AC-120-002 | Untracked agent runtime is separately visible and non-blocking. |
+| AC-120-003 | Tracked or ambiguous runtime and UNKNOWN remain blocking. |
+| AC-120-004 | The baseline plan shows exact included/excluded paths, rationale, message, and file-set hash. |
+| AC-120-005 | Shipping exposes no automatic commit, stash, reset, or discard operation. |
+| AC-120-006 | File-set or history drift invalidates the preservation handshake. |
+| AC-120-007 | A user-approved host commit rescans under the same proposal ID. |
+| AC-120-008 | Normal beginner guidance never presents destructive discard. |
+| AC-120-009 | OMP 18 nine-tool compatibility, security, license, docs, and full regression pass. |
+
 ## Definition of Done
 
 A release is done when its acceptance criteria pass, required checks succeed, release blockers are zero, non-blockers are moved to backlog, release documentation exists, and Git has a clean committed tag. A missing remote is documented and does not justify fabricating a push.

@@ -15,7 +15,7 @@ const USER_STATE_MAP = Object.freeze({
 function nextAction(state, blockers) {
   if (state === 'PLANNING') return '원하는 결과를 한 문장으로 말하세요.';
   if (state === 'NEEDS_INPUT') return '남은 핵심 질문에 답하거나 권장 안전안을 승인하세요.';
-  if (state === 'DIRTY_BASELINE') return '기존 변경사항을 검토하고 기준선으로 보존하거나 명시적으로 폐기하세요.';
+  if (state === 'DIRTY_BASELINE') return '기존 변경사항의 기준선 보존 계획을 검토하세요.';
   if (state === 'NEEDS_ACCEPTANCE') return '실제 빌드·테스트·검증 명령을 확인해 완료조건에 반영하세요.';
   if (state === 'AWAITING_APPROVAL') return '제안된 범위를 검토하고 승인하거나 수정하세요.';
   if (state === 'RUNNING') return blockers > 0 ? '출시 차단 문제만 수정하세요.' : '개발과 검증을 계속하세요.';
@@ -59,6 +59,8 @@ export function buildUserStatusView(status) {
       questionCount: proposal.questionCount,
       dirtyPathCount: proposal.dirtyPathCount,
       acceptanceStrength: proposal.acceptanceStrength,
+      baseline: proposal.baseline ?? null,
+      nextActionCode: proposal.nextAction ?? null,
     };
   }
   if (!status?.initialized && !status?.state?.state) {

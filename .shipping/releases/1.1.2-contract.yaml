@@ -90,9 +90,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Classify dirty work safely, present a bounded baseline preservation plan, and rescan the same proposal only after an explicitly approved host-side commit without exposing Git mutation through MCP.",
+  "goal": "Eliminate contradictory proposal approval states, preserve backward-compatible proposal reads, bind approval checks to canonical state, and prevent no-op refinement revisions.",
   "project": "shipping-harness",
-  "release": "1.2.0",
+  "release": "1.1.2",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

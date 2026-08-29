@@ -1,4 +1,4 @@
-# Sequential Roadmap and Development Plan — v0.4.0 to v1.0.0
+# Sequential Roadmap and Development Plan — v0.4.0 to v1.1.1
 
 **Status:** ROADMAP LOCKED
 **Canonical direction:** [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md)
@@ -27,6 +27,9 @@ The roadmap below defines sequence and dependency. Implementation must use the c
 | v0.8.0 | [`15-V0.8.0-BOUNDED-TEAM-DAG-DEVELOPMENT-PLAN.md`](15-V0.8.0-BOUNDED-TEAM-DAG-DEVELOPMENT-PLAN.md) |
 | v0.9.0 | [`16-V0.9.0-INTERNAL-REMOTE-OPERATIONS-DEVELOPMENT-PLAN.md`](16-V0.9.0-INTERNAL-REMOTE-OPERATIONS-DEVELOPMENT-PLAN.md) |
 | v1.0.0 | [`17-V1.0.0-STABLE-INTERNAL-CONTROL-PLANE-DEVELOPMENT-PLAN.md`](17-V1.0.0-STABLE-INTERNAL-CONTROL-PLANE-DEVELOPMENT-PLAN.md) |
+| v1.0.2 | [`18-V1.0.2-PROPOSAL-SAFETY-HARDENING-DEVELOPMENT-PLAN.md`](18-V1.0.2-PROPOSAL-SAFETY-HARDENING-DEVELOPMENT-PLAN.md) |
+| v1.1.0 | [`19-V1.1.0-NESTED-WORKSPACE-AND-REFINEMENT-DEVELOPMENT-PLAN.md`](19-V1.1.0-NESTED-WORKSPACE-AND-REFINEMENT-DEVELOPMENT-PLAN.md) |
+| v1.1.1 | [`20-V1.1.1-OMP-FIELD-DEPLOYMENT-AND-PILOT-DEVELOPMENT-PLAN.md`](20-V1.1.1-OMP-FIELD-DEPLOYMENT-AND-PILOT-DEVELOPMENT-PLAN.md) |
 
 If this summary conflicts with a version-specific plan, the direction document wins first, then the version-specific plan, then this summary.
 
@@ -55,6 +58,9 @@ Canonical decision: [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERN
 | v0.8.0 | Bounded Team and DAG Orchestration | Selected OMO team/DAG capabilities handle larger work without unbounded autonomy. |
 | v0.9.0 | Internal Remote Control and Operations | Authenticated mobile/web control, allowlists, backup, monitoring, and upgrade rollback. |
 | v1.0.0 | Stable Internal Shipping Control Plane | Stable schemas, supported internal runtimes, benchmarks, and operational handover. |
+| v1.0.2 | Proposal Safety Hardening | One truthful proposal state; duplicate, dirty, mode-switched, weak-gate approval is impossible. |
+| v1.1.0 | Nested Workspace Intelligence | The actual runnable workspace, version, commands, and cwd are detected and one proposal is refined. |
+| v1.1.1 | OMP Field Deployment | The nine-tool main harness is installed and proven against a nested-project pilot. |
 
 ---
 

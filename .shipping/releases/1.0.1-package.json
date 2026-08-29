@@ -1,0 +1,19 @@
+{
+  "schema": "shipping-harness/release-package-v1",
+  "release": "1.0.1",
+  "state": "VERIFIED",
+  "package": "shipping-harness-1.0.1.tgz",
+  "packageSha256": "f1321c55c8161d710187d5ef43374e94da193a5eac89b57656070a87f6709c6c",
+  "sourceCommit": "9ec7303fcc7b7c1bfe27a5cc0548f34662e01409",
+  "closedReceipt": ".shipping/releases/1.0.1.json",
+  "omp": {
+    "client": "OMP 15.10.12",
+    "protocol": "2025-03-26",
+    "connected": true,
+    "tools": 8,
+    "status": "UNINITIALIZED"
+  },
+  "networkUsed": false,
+  "publicPublish": false,
+  "verifiedAt": "2026-08-29T03:44:04.451Z"
+}

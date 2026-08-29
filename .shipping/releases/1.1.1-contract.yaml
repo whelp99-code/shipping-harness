@@ -1,40 +1,40 @@
 {
   "acceptance": [
     {
+      "id": "AC-11101",
+      "description": "OMP main-harness install, doctor, backup, and rollback tests pass.",
+      "type": "command",
       "command": "node --test --test-reporter=spec test/omp-main-harness/*.test.mjs",
       "cwd": ".",
-      "description": "OMP main-harness install, doctor, backup, and rollback tests pass.",
-      "id": "AC-11101",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-11102",
+      "description": "Current OMP host version/smoke and isolated nine-tool configuration field smoke passes.",
+      "type": "command",
       "command": "node packages/omp-main-harness/field-smoke.mjs --check",
       "cwd": ".",
-      "description": "Current OMP host version/smoke and isolated nine-tool configuration field smoke passes.",
-      "id": "AC-11102",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-11103",
+      "description": "All MCP and OMP compatibility tests pass.",
+      "type": "command",
       "command": "npm run test:mcp",
       "cwd": ".",
-      "description": "All MCP and OMP compatibility tests pass.",
-      "id": "AC-11103",
       "required": true,
-      "timeoutSeconds": 360,
-      "type": "command"
+      "timeoutSeconds": 360
     },
     {
+      "id": "AC-11104",
+      "description": "Full release, security, license, stable-control, and documentation verification passes.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full release, security, license, stable-control, and documentation verification passes.",
-      "id": "AC-11104",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     }
   ],
   "adapters": {
@@ -90,9 +90,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Eliminate contradictory proposal approval states, preserve backward-compatible proposal reads, bind approval checks to canonical state, and prevent no-op refinement revisions.",
+  "goal": "Package and deploy the nine-tool Shipping Harness as OMP's main internal development harness, prove upgrade and rollback, and complete a non-destructive nested-project field pilot.",
   "project": "shipping-harness",
-  "release": "1.1.2",
+  "release": "1.1.1",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

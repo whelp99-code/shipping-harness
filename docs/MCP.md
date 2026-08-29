@@ -19,10 +19,10 @@ Requirements:
 - Git repository with at least one commit
 - An MCP client that can start a local STDIO server
 
-Install the locally verified package once:
+Install the locally verified package once. Use a user-global prefix so the executable links and package land in the same `~/.local` tree:
 
 ```bash
-npm install --prefix "$HOME/.local" /absolute/path/shipping-harness-1.0.0.tgz \
+npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.0.1.tgz \
   --ignore-scripts --no-audit --no-fund
 ```
 
@@ -112,7 +112,7 @@ The MCP tool schema never exposes `command`, `shell`, `args`, `argv`, or environ
 
 ## Protocol compatibility
 
-The server implements newline-delimited JSON-RPC 2.0 over STDIO. It supports stateless discovery and tool requests for MCP `2026-07-28`, while retaining the `initialize` and `notifications/initialized` flow for clients using MCP `2025-11-25`.
+The server implements newline-delimited JSON-RPC 2.0 over STDIO. It supports stateless discovery and tool requests for MCP `2026-07-28`, while retaining the `initialize` and `notifications/initialized` flow for clients using MCP `2025-11-25` and `2025-03-26`. OMP `15.10.12` uses `2025-03-26`; Shipping returns the negotiated version and accepts subsequent standard requests without proprietary metadata.
 
 Supported RPC methods:
 

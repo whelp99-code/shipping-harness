@@ -5,7 +5,8 @@ import { listShippingResources, readShippingResource } from './resources.mjs';
 
 export const MCP_PROTOCOL_VERSION = '2026-07-28';
 export const MCP_LEGACY_VERSION = '2025-11-25';
-export const MCP_SUPPORTED_VERSIONS = Object.freeze([MCP_PROTOCOL_VERSION, MCP_LEGACY_VERSION]);
+export const MCP_OMP_VERSION = '2025-03-26';
+export const MCP_SUPPORTED_VERSIONS = Object.freeze([MCP_PROTOCOL_VERSION, MCP_LEGACY_VERSION, MCP_OMP_VERSION]);
 export const MCP_SERVER_INFO = Object.freeze({ name: 'shipping-harness', version: VERSION });
 export const MCP_MAX_MESSAGE_BYTES = 1024 * 1024;
 export const MCP_MAX_TOOL_ARGUMENT_BYTES = 64 * 1024;
@@ -85,6 +86,7 @@ function requestProtocol(params, state, method) {
     }
     return requested;
   }
+  if (state.negotiatedVersion) return state.negotiatedVersion;
   if (state.legacyInitialized) return MCP_LEGACY_VERSION;
   throw new McpProtocolError(-32022, 'Unsupported protocol version', { supported: MCP_SUPPORTED_VERSIONS, requested: 'missing' });
 }
@@ -117,6 +119,7 @@ function toolErrorResult(error, protocolVersion) {
 export function createMcpProtocol(root) {
   const state = {
     legacyInitialized: false,
+    negotiatedVersion: null,
     cancelled: new Set(),
     toolChain: Promise.resolve(),
   };
@@ -155,12 +158,14 @@ export function createMcpProtocol(root) {
       try {
         if (request.method === 'initialize') {
           const requested = request.params?.protocolVersion;
-          if (requested !== MCP_LEGACY_VERSION) {
-            throw new McpProtocolError(-32022, 'Unsupported protocol version', { supported: [MCP_LEGACY_VERSION], requested: requested ?? 'missing' });
+          const supportedInitializeVersions = [MCP_LEGACY_VERSION, MCP_OMP_VERSION];
+          if (!supportedInitializeVersions.includes(requested)) {
+            throw new McpProtocolError(-32022, 'Unsupported protocol version', { supported: supportedInitializeVersions, requested: requested ?? 'missing' });
           }
           state.legacyInitialized = true;
+          state.negotiatedVersion = requested;
           return success(request.id, {
-            protocolVersion: MCP_LEGACY_VERSION,
+            protocolVersion: requested,
             capabilities: { tools: { listChanged: false }, resources: { listChanged: false } },
             serverInfo: MCP_SERVER_INFO,
             instructions: 'Use shipping_start to propose a small release. Never approve scope without explicit user review and confirmation.',

@@ -59,7 +59,9 @@ for (const file of markdown) {
 }
 
 const packageJson = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
-if (packageJson.version !== '1.0.0') failures.push(`package version is ${packageJson.version}, expected 1.0.0`);
+const activeContract = JSON.parse(readFileSync(path.join(root, '.shipping', 'contract.yaml'), 'utf8'));
+if (packageJson.version !== activeContract.release) failures.push(`package version is ${packageJson.version}, active release is ${activeContract.release}`);
+if (!/^1\.0\.\d+$/u.test(packageJson.version)) failures.push(`package version ${packageJson.version} is outside the stable v1.0 patch line`);
 for (const key of ['test:stable', 'benchmark:completion', 'smoke:stable', 'security:inventory', 'verify:docs', 'acceptance:v1']) {
   if (typeof packageJson.scripts?.[key] !== 'string') failures.push(`missing package script: ${key}`);
 }

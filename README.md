@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.0.0 — Stable Internal Shipping Control Plane`
-**Authority:** the release is complete only when `.shipping/releases/1.0.0.json` is `CLOSED` and annotated tag `v1.0.0` points to the closure commit
+**Current release train:** `v1.0.1 — OMP MCP Compatibility Patch`
+**Authority:** the release is complete only when `.shipping/releases/1.0.1.json` is `CLOSED` and annotated tag `v1.0.1` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -61,7 +61,7 @@ The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency
 Install the locally verified tagged package once:
 
 ```bash
-npm install --prefix "$HOME/.local" /absolute/path/shipping-harness-1.0.0.tgz \
+npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.0.1.tgz \
   --ignore-scripts --no-audit --no-fund
 ```
 
@@ -193,6 +193,10 @@ TLS-only private access, signed and replay-protected requests, project/action al
 ### v1.0.0 — Stable Internal Shipping Control Plane
 
 Stable schemas and examples, authority-preserving migration, compatibility diagnostics, internal operations, completion benchmark, security inventory, clean install, v0.6-to-v1 upgrade, plugin rollback, installed MCP beginner flow, private OMO promotion verification, and internal remote recovery are the v1 release gates. See [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md).
+
+### v1.0.1 — OMP MCP Compatibility Patch
+
+Adds explicit MCP `2025-03-26` initialization compatibility for OMP `15.10.12`, preserves the negotiated protocol version for later requests, fixes the user-global npm installation form, and leaves Shipping authority and tool semantics unchanged.
 
 Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
 

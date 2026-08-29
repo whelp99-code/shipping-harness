@@ -1,6 +1,8 @@
 # Shipping Harness v1 Compatibility
 
-Shipping Harness v1.0.1 is an internal-only control plane. A component is reported as supported only after its exact combination passes the local compatibility checks; discovery of a binary alone is not proof of readiness.
+Shipping Harness v1.0.2 is an internal-only control plane. A component is reported as supported only after its exact combination passes the local compatibility checks; discovery of a binary alone is not proof of readiness.
+
+The v1.0.2 proposal surface exposes one canonical state. `NEEDS_INPUT`, `DIRTY_BASELINE`, and `NEEDS_ACCEPTANCE` are fail-closed states and can never be interpreted as approval readiness by a host agent.
 
 ## Supported core environment
 

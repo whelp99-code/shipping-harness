@@ -6,7 +6,7 @@ import { invariant } from '../core/errors.mjs';
 import { exists } from '../core/fs.mjs';
 import { beginFixCycle, closeRelease, releaseStatus, verifyRelease } from '../core/gate.mjs';
 import { runtimePaths } from '../core/paths.mjs';
-import { approveScopeProposal, createScopeProposal } from '../core/proposals.mjs';
+import { approveScopeProposal, createScopeProposal, findActiveScopeProposal } from '../core/proposals.mjs';
 import { abort, pause, readState, resume } from '../core/state.mjs';
 import { buildBlockerView, buildUserStatusView } from './user-view.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from '../core/goals/authority.mjs';
@@ -26,7 +26,7 @@ export const SHIPPING_TOOLS = Object.freeze([
         goal: { type: 'string', minLength: 5, maxLength: 4000, description: 'The user-visible outcome this release must deliver.' },
         release: { type: 'string', pattern: '^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$', description: 'Optional semantic version. Defaults to 0.1.0 or the next minor release.' },
         projectName: { type: 'string', minLength: 1, maxLength: 120, description: 'Optional project display name.' },
-        mode: { type: 'string', enum: ['AUTO', 'SAFE', 'INTERVIEW'], default: 'AUTO', description: 'AUTO decides ordinary reversible choices; SAFE escalates medium-risk changes; INTERVIEW groups bounded questions.' },
+        mode: { type: 'string', enum: ['AUTO'], default: 'AUTO', description: 'MCP start is AUTO-only. A later explicitly confirmed refinement may authorize another mode.' },
         proposerId: { type: 'string', minLength: 1, maxLength: 160, description: 'Optional stable identity of the host agent proposing the decision. It cannot approve the same proposal.' },
       },
       required: ['goal'],
@@ -174,15 +174,22 @@ function chooseConfiguredAdapter(contract, requested) {
 
 /** @param {string} root */
 async function statusOrUninitialized(root) {
+  const active = await findActiveScopeProposal(root);
+  const pendingProposal = active && !['APPROVED', 'SUPERSEDED', 'EXPIRED'].includes(active.summary.state)
+    ? active.summary
+    : null;
   if (!(await exists(runtimePaths(root).state))) {
     return {
       initialized: false,
-      state: 'UNINITIALIZED',
-      nextAction: 'Call shipping_start with the desired release outcome.',
+      state: pendingProposal ? 'PROPOSAL' : 'UNINITIALIZED',
+      pendingProposal,
+      nextAction: pendingProposal
+        ? 'Resolve the active proposal state before approval.'
+        : 'Call shipping_start with the desired release outcome.',
     };
   }
   const status = await releaseStatus(root);
-  return { initialized: true, ...status };
+  return { initialized: true, ...status, pendingProposal };
 }
 
 /**
@@ -198,9 +205,9 @@ export async function callShippingTool(root, name, rawArguments) {
     const goal = requiredString(args.goal, 'goal', 5, 4000);
     if (args.release !== undefined) requiredString(args.release, 'release', 5, 80);
     if (args.projectName !== undefined) requiredString(args.projectName, 'projectName', 1, 120);
-    if (args.mode !== undefined) invariant(['AUTO', 'SAFE', 'INTERVIEW'].includes(args.mode), 'ERR_MCP_ARGUMENTS', `Unsupported decision mode: ${String(args.mode)}`);
+    if (args.mode !== undefined) invariant(args.mode === 'AUTO', 'ERR_PROPOSAL_MODE_AUTHORIZATION', 'Unsupported decision mode for shipping_start: only AUTO is allowed; a host agent cannot silently switch decision mode');
     if (args.proposerId !== undefined) requiredString(args.proposerId, 'proposerId', 1, 160);
-    const { proposal, proposalPath } = await createScopeProposal(root, {
+    const { proposal, proposalPath, reused, supersededProposalId } = await createScopeProposal(root, {
       goal,
       release: args.release,
       projectName: args.projectName,
@@ -213,8 +220,12 @@ export async function callShippingTool(root, name, rawArguments) {
       release: proposal.release,
       goal: proposal.goal,
       mode: proposal.mode,
+      proposalState: proposal.canonicalState,
       readyForApproval: proposal.readyForApproval,
-      approvalStatus: proposal.decision.approvalStatus,
+      approvalStatus: proposal.canonicalState,
+      decisionStatus: proposal.decision.approvalStatus,
+      reused,
+      supersededProposalId,
       approvalBrief: proposal.approvalBrief,
       questions: proposal.decision.questions,
       proposer: proposal.decision.proposer,
@@ -227,7 +238,7 @@ export async function callShippingTool(root, name, rawArguments) {
       approvalRequired: true,
       userView: {
         schema: 'shipping-harness/approval-user-view-v1',
-        userState: proposal.readyForApproval ? 'AWAITING_APPROVAL' : 'PLANNING',
+        userState: proposal.readyForApproval ? 'AWAITING_APPROVAL' : proposal.canonicalState,
         outcome: proposal.approvalBrief.outcome,
         included: proposal.approvalBrief.included,
         deferred: proposal.approvalBrief.deferred,
@@ -236,13 +247,23 @@ export async function callShippingTool(root, name, rawArguments) {
         risks: proposal.approvalBrief.risks,
         questions: proposal.approvalBrief.questions,
         limits: proposal.approvalBrief.limits,
-        actions: proposal.readyForApproval ? ['approve', 'edit-scope', 'stop'] : ['answer-questions', 'stop'],
+        actions: proposal.readyForApproval
+          ? ['approve', 'edit-scope', 'stop']
+          : proposal.canonicalState === 'DIRTY_BASELINE'
+            ? ['preserve-baseline', 'inspect-changes', 'stop']
+            : proposal.canonicalState === 'NEEDS_ACCEPTANCE'
+              ? ['inspect-acceptance', 'stop']
+              : ['answer-questions', 'stop'],
       },
     };
     const next = proposal.readyForApproval
       ? 'Review the one-screen approval brief, then call shipping_approve_scope with the exact proposal ID and hash.'
-      : 'Resolve the grouped exception questions, then create a new proposal before approval.';
-    return complete(data, `Proposed ${proposal.release} in ${proposal.mode} mode with ${proposal.contract.acceptance.length} required checks. ${next}`);
+      : proposal.canonicalState === 'DIRTY_BASELINE'
+        ? 'Preserve or explicitly discard the existing source changes before approval.'
+        : proposal.canonicalState === 'NEEDS_ACCEPTANCE'
+          ? 'A repository-owned build, test, verify, check, package, or equivalent acceptance command must be detected before approval.'
+          : 'Resolve the grouped exception questions before approval.';
+    return complete(data, `${reused ? 'Reused' : 'Proposed'} ${proposal.release} in ${proposal.mode} mode. State: ${proposal.canonicalState}. ${next}`);
   }
 
   if (name === 'shipping_approve_scope') {

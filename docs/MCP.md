@@ -97,7 +97,15 @@ The exact outer configuration key is client-specific. The command and arguments 
 - four short execution steps
 - proposal ID and SHA-256 hash
 
-The proposal is not a release contract yet. The user or trusted client must call `shipping_approve_scope` with the exact ID, hash, and `confirm: true`. Approval fails when source files are dirty, Git HEAD changed, the proposal expired, the proposal was edited, or another release is active.
+It also returns one canonical proposal state:
+
+```text
+NEEDS_INPUT | DIRTY_BASELINE | NEEDS_ACCEPTANCE | READY_FOR_APPROVAL
+```
+
+Only `READY_FOR_APPROVAL` may be passed to `shipping_approve_scope`. Repeating the same AUTO request reuses the active proposal instead of creating duplicates. MCP `shipping_start` is AUTO-only; a host agent cannot silently switch to SAFE or INTERVIEW. A fallback-only `git diff --check` is supplemental evidence and is not sufficient for a software release.
+
+The proposal is not a release contract yet. The user or trusted client must call `shipping_approve_scope` with the exact ID, hash, and `confirm: true`. Approval fails when the canonical state is not `READY_FOR_APPROVAL`, source files are dirty, Git HEAD changed, the proposal expired, the proposal was edited, or another release is active. `shipping_status` reports an active pending proposal even before a release state exists.
 
 `confirm: true` proves that the caller submitted an explicit approval operation; a raw MCP server cannot cryptographically distinguish a human click from a model-generated call. Configure the MCP client to require user confirmation for `shipping_approve_scope`, `shipping_execute`, `shipping_fix_blockers`, `shipping_pause`, and `shipping_close`. The tool annotations mark these operations as mutating or destructive hints, but client-side approval policy remains the enforcement point until a dedicated plugin UI is delivered.
 

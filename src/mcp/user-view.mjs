@@ -14,6 +14,9 @@ const USER_STATE_MAP = Object.freeze({
 
 function nextAction(state, blockers) {
   if (state === 'PLANNING') return '원하는 결과를 한 문장으로 말하세요.';
+  if (state === 'NEEDS_INPUT') return '남은 핵심 질문에 답하거나 권장 안전안을 승인하세요.';
+  if (state === 'DIRTY_BASELINE') return '기존 변경사항을 검토하고 기준선으로 보존하거나 명시적으로 폐기하세요.';
+  if (state === 'NEEDS_ACCEPTANCE') return '실제 빌드·테스트·검증 명령을 확인해 완료조건에 반영하세요.';
   if (state === 'AWAITING_APPROVAL') return '제안된 범위를 검토하고 승인하거나 수정하세요.';
   if (state === 'RUNNING') return blockers > 0 ? '출시 차단 문제만 수정하세요.' : '개발과 검증을 계속하세요.';
   if (state === 'PAUSED') return '준비되면 다시 시작하거나 취소하세요.';
@@ -26,6 +29,38 @@ function nextAction(state, blockers) {
 
 /** @param {Record<string, any>} status */
 export function buildUserStatusView(status) {
+  if (status?.pendingProposal) {
+    const proposal = status.pendingProposal;
+    const userState = proposal.state === 'READY_FOR_APPROVAL' ? 'AWAITING_APPROVAL' : proposal.state;
+    const summaries = {
+      PLANNING: '이번 버전의 목표와 범위를 정하는 중입니다.',
+      NEEDS_INPUT: '승인 전에 사용자의 핵심 결정이 필요합니다.',
+      DIRTY_BASELINE: '기존 변경사항이 있어 아직 범위를 잠글 수 없습니다.',
+      NEEDS_ACCEPTANCE: '완료를 증명할 강한 빌드·테스트·검증 기준이 부족합니다.',
+      AWAITING_APPROVAL: '검토 가능한 한 개의 범위 제안이 준비되었습니다.',
+    };
+    return {
+      schema: 'shipping-harness/user-view-v1',
+      initialized: status.initialized === true,
+      project: status.contract?.project ?? null,
+      release: proposal.release,
+      proposalId: proposal.proposalId,
+      proposalRevision: proposal.revision,
+      coreState: proposal.state,
+      userState,
+      summary: summaries[userState] ?? '활성 제안의 상태를 확인하고 있습니다.',
+      blockerCount: 0,
+      goals: null,
+      nextAction: nextAction(userState, 0),
+      canPause: false,
+      canResume: false,
+      canClose: false,
+      readyForApproval: proposal.readyForApproval,
+      questionCount: proposal.questionCount,
+      dirtyPathCount: proposal.dirtyPathCount,
+      acceptanceStrength: proposal.acceptanceStrength,
+    };
+  }
   if (!status?.initialized && !status?.state?.state) {
     return {
       schema: 'shipping-harness/user-view-v1',

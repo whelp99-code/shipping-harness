@@ -2,7 +2,7 @@
   "schema": "shipping-harness/plugin-v1",
   "name": "shipping-harness",
   "displayName": "Shipping Harness",
-  "version": "0.6.0",
+  "version": "1.0.2",
   "localOnly": true,
   "mcp": {
     "transport": "stdio",
@@ -24,5 +24,11 @@
     "humanConfirmationRequired": true,
     "modelSelfApprovalForbidden": true
   },
-  "surfaces": ["approval", "progress", "blocker", "completion", "evidence-detail"]
+  "surfaces": [
+    "approval",
+    "progress",
+    "blocker",
+    "completion",
+    "evidence-detail"
+  ]
 }

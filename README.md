@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.0.1 — OMP MCP Compatibility Patch`
-**Authority:** the release is complete only when `.shipping/releases/1.0.1.json` is `CLOSED` and annotated tag `v1.0.1` points to the closure commit
+**Current release train:** `v1.0.2 — Proposal Safety Hardening`
+**Authority:** the release is complete only when `.shipping/releases/1.0.2.json` is `CLOSED` and annotated tag `v1.0.2` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -197,6 +197,10 @@ Stable schemas and examples, authority-preserving migration, compatibility diagn
 ### v1.0.1 — OMP MCP Compatibility Patch
 
 Adds explicit MCP `2025-03-26` initialization compatibility for OMP `15.10.12`, preserves the negotiated protocol version for later requests, fixes the user-global npm installation form, and leaves Shipping authority and tool semantics unchanged.
+
+### v1.0.2 — Proposal Safety Hardening
+
+Adds one canonical proposal state, an active-proposal index, idempotent starts, audited supersession, AUTO-only MCP start, weak-acceptance rejection, and truthful pending-proposal status. Dirty, unresolved, or fallback-only proposals cannot be approved.
 
 Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
 

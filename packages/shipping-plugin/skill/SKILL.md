@@ -11,14 +11,15 @@ Use the Shipping Harness MCP tools instead of asking a non-developer to edit `.s
 
 ## Normal flow
 
-1. Call `shipping_start` from the user's outcome. Keep `AUTO` mode unless the user explicitly chooses another mode.
-2. Show the returned approval brief without hiding assumptions, risks, deferred work, or execution limits.
-3. Never call `shipping_approve_scope` as if the model were the user. Require the host's explicit user-confirmation action.
-4. After approval, perform only locked work. Use `shipping_execute` or edit within the approved repository scope, then call `shipping_verify`.
-5. Call `shipping_status` for progress. Present only the next useful decision by default; keep evidence details available separately.
-6. Use `shipping_fix_blockers` only for release blockers and only within the remaining budget.
-7. A user pause or abort overrides every continuation request.
-8. Call `shipping_close` only when the core reports `SHIPPABLE`.
+1. Call `shipping_start` once from the user's outcome. MCP start is `AUTO` only; never switch modes or create replacement proposals to improve the answer.
+2. Use only the canonical proposal state returned by Shipping. Repeated identical starts must reuse the active proposal; do not reinterpret `NEEDS_INPUT`, `DIRTY_BASELINE`, or `NEEDS_ACCEPTANCE` as approvable.
+3. Show the returned approval brief without hiding assumptions, risks, deferred work, acceptance strength, dirty paths, or execution limits. Never invent acceptance commands in prose; authority belongs to the proposal contract.
+4. Never call `shipping_approve_scope` as if the model were the user. Require the host's explicit user-confirmation action and only when state is `READY_FOR_APPROVAL`.
+5. After approval, perform only locked work. Use `shipping_execute` or edit within the approved repository scope, then call `shipping_verify`.
+6. Call `shipping_status` for progress. Present only the next useful decision by default; keep evidence details available separately.
+7. Use `shipping_fix_blockers` only for release blockers and only within the remaining budget.
+8. A user pause or abort overrides every continuation request.
+9. Call `shipping_close` only when the core reports `SHIPPABLE`.
 
 ## User-facing language
 

@@ -1,4 +1,4 @@
-# Sequential Roadmap and Development Plan — v0.4.0 to v1.3.0
+# Sequential Roadmap and Development Plan — v0.4.0 to v1.3.1
 
 **Status:** ROADMAP LOCKED
 **Canonical direction:** [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md)

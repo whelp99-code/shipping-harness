@@ -22,7 +22,7 @@ Requirements:
 Install the locally verified package once. Use a user-global prefix so the executable links and package land in the same `~/.local` tree:
 
 ```bash
-npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.1.0.tgz \
+npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.3.1.tgz \
   --ignore-scripts --no-audit --no-fund
 ```
 
@@ -34,12 +34,14 @@ For OMP, use the release-owned transactional bootstrap instead of manually editi
 
 ```bash
 cd /home/jm/orca/projects/shipping-harness
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.0
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.0 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.1
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.1 --apply
 shipping-harness-omp doctor
 ```
 
 The first command is read-only. The applied command backs up the previous Shipping package and five managed OMP files, installs the local package offline under `~/.local`, preserves the OMP binary/router/model configuration and unrelated MCP servers, merges the nine-tool approval policy, runs protocol and doctor checks, and records an exact rollback command. Primary field validation uses the active OMP `18.0.10` `omo-balance`/`omp-core` installation. Source-linked OMP `15.10.12` remains a compatibility lane. See [`operations/OMP-MAIN-HARNESS.md`](operations/OMP-MAIN-HARNESS.md).
+
+From v1.3.1, bootstrap explicitly awaits installation, configuration, doctor, receipt, and backup completion before deleting the temporary package directory. The patch changes no MCP methods, schemas, approval semantics, or nine-tool inventory.
 
 The MCP client launches this command:
 

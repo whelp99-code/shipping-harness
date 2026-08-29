@@ -413,6 +413,20 @@
 | AC-130-009 | The real EvoHarvest pilot is read-only and proves mixed-stack, themes, coverage, and exact command policy. |
 | AC-130-010 | OMP 18 nine-tool compatibility, security, license, docs, full regression, and release closure pass. |
 
+### v1.3.1
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-131-001 | Full bootstrap apply succeeds in a disposable environment using real local npm packaging. |
+| AC-131-002 | Temporary cleanup begins only after install, configuration, doctor, receipt, and backup completion. |
+| AC-131-003 | The installed package reports v1.3.1 and OMP exposes exactly nine tools including `shipping_refine`. |
+| AC-131-004 | The backup contains the previous package and explicit rollback restores the prior version and managed files. |
+| AC-131-005 | Existing OMP install/rollback, field smoke, MCP, regression, security, license, and docs gates pass. |
+| AC-131-006 | Shipping verification reaches SHIPPABLE with zero blockers and unknowns using fresh evidence. |
+| AC-131-007 | The CLOSED receipt and annotated `v1.3.1` tag point to the closure commit with a clean worktree. |
+| AC-131-008 | Actual user installation reports v1.3.1 while OMP remains 18.0.10 and protected hashes are unchanged. |
+| AC-131-009 | Installed doctor, MCP tool inventory, receipt audit, and non-destructive EvoHarvest pilot pass. |
+
 ## Definition of Done
 
 A release is done when its acceptance criteria pass, required checks succeed, release blockers are zero, non-blockers are moved to backlog, release documentation exists, and Git has a clean committed tag. A missing remote is documented and does not justify fabricating a push.

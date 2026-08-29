@@ -1,6 +1,6 @@
 # OMP Main Harness — Install, Doctor, and Rollback
 
-**Release:** Shipping Harness v1.3.0
+**Release:** Shipping Harness v1.3.1
 **Boundary:** personal and company-internal use only
 **Primary tested host:** OMP 18.0.10 through the existing `omo-balance` launcher and standalone `omp-core`
 **Compatibility host:** source-linked OMP 15.10.12
@@ -26,10 +26,10 @@ Run as the ordinary Ubuntu user, not root:
 cd /home/jm/orca/projects/shipping-harness
 
 # Read-only preview
-shipping-harness-omp bootstrap --tag v1.3.0
+shipping-harness-omp bootstrap --tag v1.3.1
 
 # Back up, install, merge, and verify
-shipping-harness-omp bootstrap --tag v1.3.0 --apply
+shipping-harness-omp bootstrap --tag v1.3.1 --apply
 
 # Independent post-install check
 shipping-harness-omp doctor
@@ -40,6 +40,7 @@ The applied bootstrap requires:
 - a clean checkout;
 - an annotated tag matching `HEAD`;
 - a package version matching the tag;
+- temporary package cleanup only after install, configuration, doctor, receipt, and backup operations settle;
 - an OMP version in the tested matrix;
 - `omp --smoke-test` success;
 - MCP `2025-03-26` initialization;
@@ -52,7 +53,7 @@ It creates the package locally with npm, installs it with `--offline --global --
 
 ```text
 DONE
-Shipping Harness: 1.1.1
+Shipping Harness: 1.3.1
 OMP: omp/18.0.10
 MCP tools: 9 PASS
 Approval: always-ask
@@ -61,6 +62,12 @@ Receipt: /home/jm/.omp/agent/shipping-harness-install.json
 Backup: /home/jm/.omp/backups/shipping-harness-<timestamp>
 Rollback: /home/jm/.local/bin/shipping-harness-omp rollback --backup-id <id> --apply
 ```
+
+## v1.3.1 bootstrap ordering
+
+The bootstrap package lives in a private temporary directory only for the duration of the complete awaited install. Cleanup begins after package installation, OMP configuration merge, pre-receipt doctor, receipt creation, post-receipt doctor, and backup metadata completion.
+
+The end-to-end regression uses real local npm packaging, a disposable user prefix and OMP agent directory, a fake OMP 18.0.10 host, and explicit rollback. It verifies no new `shipping-omp-bootstrap-*` directory remains afterward.
 
 ## Approval policy
 

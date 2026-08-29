@@ -253,7 +253,9 @@ export async function bootstrapOmpMainHarness(input = {}) {
       npmCommand: resolved.npmCommand,
     });
     invariant(packed.version === source.version, 'ERR_OMP_PACKAGE_VERSION', 'Packed Shipping version differs from tagged source');
-    return installOmpMainHarness({
+    // Await inside the try block so finally cannot delete the package while
+    // install/backup/doctor/receipt operations still depend on it.
+    return await installOmpMainHarness({
       ...input,
       packagePath: packed.path,
       sourceTag: source.tag,

@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.3.0 — Project Intelligence and Acceptance Coverage`
-**Authority:** the release is complete only when `.shipping/releases/1.3.0.json` is `CLOSED` and annotated tag `v1.3.0` points to the closure commit
+**Current release train:** `v1.3.1 — OMP Bootstrap Temporary-Package Race Patch`
+**Authority:** the release is complete only when `.shipping/releases/1.3.1.json` is `CLOSED` and annotated tag `v1.3.1` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -58,14 +58,14 @@ The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency
 
 ## OMP main-harness installation
 
-After `v1.1.1` is tagged, run from the clean Shipping Harness checkout:
+After `v1.3.1` is closed and tagged, run from the clean Shipping Harness checkout:
 
 ```bash
 # Read-only preview
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.0
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.1
 
 # Back up, install locally, merge OMP settings, and verify
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.0 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.1 --apply
 
 # Thereafter the installed command is available
 shipping-harness-omp doctor
@@ -78,7 +78,7 @@ The bootstrap preserves the installed OMP binary, `omo-balance` router, model ro
 Install the locally verified tagged package once:
 
 ```bash
-npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.1.0.tgz \
+npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.3.1.tgz \
   --ignore-scripts --no-audit --no-fund
 ```
 
@@ -238,6 +238,10 @@ Classifies dirty product, release-evidence, agent-runtime, Shipping-runtime, gen
 ### v1.3.0 — Project Intelligence and Acceptance Coverage
 
 Builds a bounded mixed-stack component graph, groups current product work into at most three evidence-backed themes, keeps inferred goals recommendation-only, requires every changed product path to be covered by an acceptance command, and runs side-effecting package checks in disposable detached worktrees with deterministic-output and source-mutation checks.
+
+### v1.3.1 — OMP Bootstrap Temporary-Package Race Patch
+
+Awaits the complete transactional OMP installation before removing its temporary package, adds a real bootstrap-apply lifecycle regression, and proves doctor, receipt, backup, cleanup, and explicit rollback without changing OMP or MCP semantics.
 
 Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
 

@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 5,
+    "requiredFailed": 0,
+    "total": 5
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "9b3e3cd0e4197e107a18ee3344b40c2a212fb490",
+  "closedAt": "2026-08-29T05:18:29.355Z",
+  "closedGitSha": "5de78929418b5a02a433af62c1de9abdad604eae",
+  "contractHash": "9e3e743dda33d5d6d57320be53aa1866933dc951573c835192dd8b37eb57bcc1",
+  "evidenceRunId": "run-2026-08-29T05-15-09-776Z-f56e6f32",
+  "fixCycles": 0,
+  "goal": "Prevent duplicate, mode-switched, dirty, unresolved, or weakly verified proposals from being presented or approved as ready.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.0.2",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

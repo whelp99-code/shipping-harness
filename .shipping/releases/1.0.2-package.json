@@ -1,0 +1,19 @@
+{
+  "schema": "shipping-harness/v1.0.2-package-smoke",
+  "status": "PASS",
+  "package": "shipping-harness-1.0.2.tgz",
+  "sha256": "5f17d0d48f4562333be207bf9c6fcf9339e0c4608031a83bea66502601428e88",
+  "version": "1.0.2",
+  "sourceCommit": "5de78929418b5a02a433af62c1de9abdad604eae",
+  "omp": {
+    "client": "OMP 15.10.12",
+    "connected": true,
+    "tools": 8,
+    "proposalState": "READY_FOR_APPROVAL",
+    "reusedProposal": true,
+    "status": "AWAITING_APPROVAL"
+  },
+  "release": "1.0.2",
+  "state": "VERIFIED",
+  "recordedAt": "2026-08-29T05:18:29.412Z"
+}

@@ -1,0 +1,170 @@
+{
+  "acceptance": [
+    {
+      "command": "node --test --test-reporter=spec test/omp-main-harness/bootstrap-cleanup-race.test.mjs test/omp-main-harness/install-rollback.test.mjs",
+      "cwd": ".",
+      "description": "The real bootstrap apply lifecycle, doctor, receipt, and rollback regression pass.",
+      "id": "AC-13101",
+      "required": true,
+      "timeoutSeconds": 600,
+      "type": "command"
+    },
+    {
+      "command": "npm run test:omp-main && npm run smoke:omp-main",
+      "cwd": ".",
+      "description": "All OMP main-harness and current-host field smoke tests pass.",
+      "id": "AC-13102",
+      "required": true,
+      "timeoutSeconds": 900,
+      "type": "command"
+    },
+    {
+      "command": "npm run test:mcp && npm run release:verify",
+      "cwd": ".",
+      "description": "All MCP and full regression, security, license, and documentation gates pass.",
+      "id": "AC-13103",
+      "required": true,
+      "timeoutSeconds": 900,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/evoharvest-intelligence-pilot.mjs --check",
+      "cwd": ".",
+      "description": "The real EvoHarvest intelligence pilot remains non-destructive.",
+      "id": "AC-13104",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
+      "command": "git diff --check",
+      "cwd": ".",
+      "description": "No whitespace or conflict-marker errors remain.",
+      "id": "AC-13105",
+      "required": true,
+      "timeoutSeconds": 60,
+      "type": "command"
+    }
+  ],
+  "adapters": {
+    "codex": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "gajae": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "generic": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "omo": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "ouroboros": {
+      "artifactPaths": [],
+      "command": null
+    }
+  },
+  "blockerPolicy": [
+    "acceptance-failure",
+    "contract-tamper",
+    "stale-evidence",
+    "scope-drift",
+    "data-loss",
+    "critical-security",
+    "human-stop-override",
+    "automatic-approval",
+    "model-self-approval",
+    "raw-command-surface",
+    "public-listener",
+    "false-user-state",
+    "hidden-blocker",
+    "unbounded-card-content",
+    "installer-path-escape",
+    "destructive-migration",
+    "migration-without-rollback",
+    "unsupported-schema-accepted",
+    "compatibility-fabrication",
+    "terminal-state-replay",
+    "internal-boundary-violation",
+    "missing-handover",
+    "missing-fallback-renderer"
+  ],
+  "budgets": {
+    "maxAgentRuns": 3,
+    "maxCommandSeconds": 600,
+    "maxFixCycles": 2,
+    "maxOutputBytes": 1048576
+  },
+  "goal": "Fix the OMP bootstrap temporary-package cleanup race, prove real bootstrap apply and rollback, and deploy the closed patch to OMP 18 without changing product authority or MCP behavior.",
+  "project": "shipping-harness",
+  "release": "1.3.1",
+  "releasePolicy": {
+    "autoCommit": false,
+    "autoPush": false,
+    "autoTag": false,
+    "generateReport": true
+  },
+  "requirements": [
+    "REQ-BOOTSTRAP-001",
+    "REQ-BOOTSTRAP-002",
+    "REQ-BOOTSTRAP-003",
+    "REQ-BOOTSTRAP-004",
+    "REQ-BOOTSTRAP-005",
+    "REQ-BOOTSTRAP-006"
+  ],
+  "schema": "shipping-harness/v1",
+  "scope": {
+    "exclude": [
+      "Proposal, baseline, project-intelligence, acceptance-coverage, isolation-policy, or MCP semantic changes.",
+      "OMP core/router/provider/model-routing changes or OMP downgrade.",
+      "A tenth MCP tool, Team/DAG, push, deploy, publication, public listeners, or target-project mutation.",
+      "Reopening or modifying the closed v1.3.0 release."
+    ],
+    "include": [
+      "Await the complete OMP main-harness installation before deleting the temporary bootstrap package directory.",
+      "Add a real end-to-end bootstrap apply regression with disposable home/prefix, real local npm packaging, fake OMP 18 host, doctor, receipt, and explicit rollback.",
+      "Preserve automatic rollback behavior and verify the previous package and managed OMP files are recoverable.",
+      "Update v1.3.1 version, compatibility, planning, requirements, traceability, and operator documentation.",
+      "After source CLOSED/tag, deploy the tagged v1.3.1 package to the user environment while preserving actual OMP 18 launcher/core hashes.",
+      "Verify installed doctor, nine MCP tools, truthful receipt, and a non-destructive EvoHarvest pilot."
+    ],
+    "paths": {
+      "exclude": [
+        ".shipping/contract.yaml",
+        ".shipping/contract.lock",
+        ".git/**",
+        "dist/**",
+        "coverage/**",
+        "node_modules/**",
+        "docs/reports/**"
+      ],
+      "include": [
+        "README.md",
+        "docs/COMPATIBILITY.md",
+        "docs/MCP.md",
+        "docs/TRACEABILITY.md",
+        "docs/operations/OMP-MAIN-HARNESS.md",
+        "docs/planning/02-REQUIREMENTS.md",
+        "docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md",
+        "docs/planning/24-V1.3.1-OMP-BOOTSTRAP-TEMPORARY-PACKAGE-RACE-PATCH.md",
+        "package.json",
+        "packages/omp-main-harness/install.mjs",
+        "packages/shipping-plugin/manifest/plugin.json",
+        "packages/stable-control/compatibility.mjs",
+        "schemas/v1/examples/plugin.example.json",
+        "test/omp-main-harness/bootstrap-cleanup-race.test.mjs",
+        "test/omp-main-harness/install-rollback.test.mjs"
+      ]
+    }
+  },
+  "stopPolicy": {
+    "autoContinueAfterInterrupt": false,
+    "closeWhenRequiredGatesPass": true,
+    "humanInterruptWins": true
+  },
+  "worker": "shipping-harness"
+}

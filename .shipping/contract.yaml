@@ -1,49 +1,49 @@
 {
   "acceptance": [
     {
-      "command": "node --test --test-reporter=spec test/mcp/proposal-lifecycle.test.mjs",
+      "id": "AC-11001",
+      "description": "Nested workspace, cwd-bound command, version evidence, and proposal refinement tests pass.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/mcp/nested-workspace-refine.test.mjs",
       "cwd": ".",
-      "description": "Canonical proposal lifecycle, idempotency, mode authority, and weak-gate tests pass.",
-      "id": "AC-10201",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 240
     },
     {
+      "id": "AC-11002",
+      "description": "All MCP and OMP nine-tool compatibility tests pass.",
+      "type": "command",
       "command": "npm run test:mcp",
       "cwd": ".",
-      "description": "All MCP proposal and protocol regression tests pass.",
-      "id": "AC-10202",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 360
     },
     {
+      "id": "AC-11003",
+      "description": "Decision validation and adversarial authority tests pass.",
+      "type": "command",
       "command": "npm run test:decision",
       "cwd": ".",
-      "description": "Decision and beginner usability policy tests pass.",
-      "id": "AC-10203",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 360
     },
     {
+      "id": "AC-11004",
+      "description": "Beginner refinement and user-view flows pass.",
+      "type": "command",
       "command": "npm run test:usability",
       "cwd": ".",
-      "description": "Beginner user-view regression tests pass.",
-      "id": "AC-10204",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 360
     },
     {
+      "id": "AC-11005",
+      "description": "Full release, security, license, documentation, and stable-control verification passes.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full release, security, license, and documentation verification passes.",
-      "id": "AC-10205",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     }
   ],
   "adapters": {
@@ -109,27 +109,28 @@
     "generateReport": true
   },
   "requirements": [
-    "REQ-PROPOSAL-STATE-001",
-    "REQ-PROPOSAL-IDEMPOTENCY-001",
-    "REQ-MODE-AUTHORITY-001",
-    "REQ-ACCEPTANCE-FLOOR-001",
-    "REQ-PENDING-STATUS-001"
+    "REQ-WORKSPACE-001",
+    "REQ-WORKSPACE-002",
+    "REQ-ACCEPTANCE-CWD-001",
+    "REQ-VERSION-EVIDENCE-001",
+    "REQ-PROPOSAL-REFINE-001",
+    "REQ-REFINE-AUTHORITY-001"
   ],
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Nested workspace scanning or selection.",
-      "shipping_refine or any new user-facing MCP tool.",
-      "Executing target project code during planning.",
-      "Automatic commit, stash, reset, push, deploy, purchase, or publication.",
-      "Changes to OMP source, private OMO runtime, Team/DAG, or remote protocol."
+      "Executing discovered target-project commands during planning.",
+      "Free-form or model-authored shell, argv, environment, credential, push, deploy, or publication fields.",
+      "Automatic commit, stash, reset, merge, push, deploy, purchase, or target-project source changes.",
+      "Orchestrating multiple products or workspaces in one release.",
+      "OMP source modification, Team/DAG activation, public distribution, or remote protocol redesign."
     ],
     "include": [
-      "Derive one canonical proposal lifecycle state used by status and approval.",
-      "Return the existing active proposal for materially identical shipping_start calls and audit supersession for changed requests.",
-      "Keep AUTO mode unless an explicit user-authorized mode receipt permits a change.",
-      "Reject weak fallback-only acceptance and dirty or unresolved proposals before approval.",
-      "Expose pending proposal state and next action through shipping_status and the OMP skill."
+      "Bounded tracked-file discovery and deterministic selection of the real nested runnable workspace.",
+      "Manifest-derived verification and packaging commands with exact workspace-relative cwd and acceptance strength.",
+      "Evidence-backed patch, minor, or major version recommendation without overriding explicit user versions.",
+      "A ninth shipping_refine MCP tool that revises one canonical proposal identity using bounded structured answers and workspace selection.",
+      "Immutable archived proposal revisions, active-index updates, OMP skill guidance, and nine-tool compatibility validation."
     ],
     "paths": {
       "exclude": [
@@ -144,17 +145,21 @@
         "README.md",
         "docs/COMPATIBILITY.md",
         "docs/MCP.md",
-        "package-lock.json",
         "package.json",
         "packages/shipping-plugin/manifest/plugin.json",
         "packages/shipping-plugin/skill/SKILL.md",
+        "schemas/v1/**",
+        "src/core/decision-evidence.mjs",
         "src/core/decision-package.mjs",
+        "src/core/project-analysis.mjs",
         "src/core/proposal-state.mjs",
         "src/core/proposals.mjs",
+        "src/mcp/protocol.mjs",
         "src/mcp/tools.mjs",
         "src/mcp/user-view.mjs",
         "test/adversarial/**",
         "test/mcp/**",
+        "test/unit/**",
         "test/usability/**"
       ]
     }

@@ -1,0 +1,44 @@
+{
+  "schema": "shipping-harness/v1.1.1-package-omp-field-proof",
+  "status": "PASS",
+  "createdAt": "2026-08-29T07:04:46.213Z",
+  "release": "1.1.1",
+  "sourceCommit": "5621481c14624bfbc54ca7bfab42f167e14a7048",
+  "package": {
+    "filename": "shipping-harness-1.1.1.tgz",
+    "sha256": "0e3cf8540e429c298de3da5430a31f38c2a4f9098a243f1c7bad74a327a5ed09",
+    "version": "1.1.1",
+    "containsOmpCli": true,
+    "containsOmpRuntime": true,
+    "publicPublish": false
+  },
+  "isolatedInstall": {
+    "upgradeFrom": "1.0.1",
+    "upgradeTo": "1.1.1",
+    "doctor": "PASS",
+    "rollbackTo": "1.0.1",
+    "tamperedBackupRejected": true,
+    "source": "AC-11101"
+  },
+  "field": {
+    "status": "PASS",
+    "ompVersion": "18.0.10",
+    "protocol": "2025-03-26",
+    "tools": 9,
+    "refineTool": true,
+    "pilot": "PASS",
+    "proposalRevision": 2,
+    "userState": "AWAITING_APPROVAL",
+    "targetMutation": false,
+    "targetApproval": false,
+    "actualProjectUnchanged": true
+  },
+  "acceptance": {
+    "shippingState": "SHIPPABLE",
+    "passed": 4,
+    "total": 4,
+    "blockers": 0,
+    "unknown": 0,
+    "evidenceFresh": true
+  }
+}

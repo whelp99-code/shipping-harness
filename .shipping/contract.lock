@@ -1,0 +1,8 @@
+{
+  "baselineSha": "d8b3f0953ebc8715c1e50d70d4291543adfb3bd6",
+  "contractHash": "fd36bfe363ebdd56f427927ef9a931e73e34202efe74b240de290df53613a07c",
+  "lockedAt": "2026-08-29T03:39:36.790Z",
+  "release": "1.0.1",
+  "schema": "shipping-harness/lock-v1",
+  "scopeRevision": 1
+}

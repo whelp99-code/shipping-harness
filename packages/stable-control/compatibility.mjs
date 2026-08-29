@@ -10,7 +10,7 @@ function deepFreeze(value) {
 
 export const COMPATIBILITY = deepFreeze({
   schema: STABLE_SCHEMAS.compatibility,
-  shippingVersion: '1.3.1',
+  shippingVersion: '1.4.0',
   supportedReleases: [...SUPPORTED_RELEASES],
   platforms: ['linux', 'darwin'],
   architectures: ['x64', 'arm64'],
@@ -34,6 +34,7 @@ export const COMPATIBILITY = deepFreeze({
     },
     tools: 9,
     refinement: 'shipping_refine',
+    plainBrief: { schema: 'shipping-harness/plain-brief-v1', language: 'ko', deterministic: true, modelAuthority: false },
     nestedWorkspace: true,
     transport: 'stdio',
   },

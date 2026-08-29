@@ -1,0 +1,263 @@
+{
+  "schema": "shipping-harness/plain-brief-v1",
+  "language": "ko",
+  "state": "DIRTY_BASELINE",
+  "release": "1.1.1",
+  "headline": "아직 새 개발을 시작할 수 없습니다.",
+  "problems": [
+    {
+      "code": "BASELINE_NOT_PRESERVED",
+      "text": "이전에 작업한 제품 코드 7개와 검증·릴리스 기록 3개가 아직 안전한 기준점으로 저장되지 않았습니다.",
+      "evidenceRefs": [
+        "baseline.counts.PRODUCT",
+        "baseline.counts.RELEASE_EVIDENCE",
+        "baseline.plan.hash"
+      ]
+    }
+  ],
+  "improvements": [
+    {
+      "code": "PRESERVE_EXACT_BASELINE",
+      "text": "제품·릴리스 변경 10개만 검토한 기준선으로 보존합니다.",
+      "evidenceRefs": [
+        "baseline.plan.includePaths",
+        "baseline.plan.fileSetHash",
+        "baseline.plan.hash"
+      ]
+    },
+    {
+      "code": "SEPARATE_RUNTIME_STATE",
+      "text": "AI 작업 기록 1개와 Shipping 내부 기록 1개는 제품 기준선과 분리합니다.",
+      "evidenceRefs": [
+        "baseline.counts.AGENT_RUNTIME",
+        "baseline.counts.SHIPPING_RUNTIME",
+        "baseline.plan.excludePaths"
+      ]
+    },
+    {
+      "code": "NO_DESTRUCTIVE_BASELINE_ACTION",
+      "text": "파일을 삭제하거나 되돌리지 않고, 사용자가 승인한 경로만 호스트가 커밋합니다.",
+      "evidenceRefs": [
+        "baseline.plan.recommendation",
+        "baseline.plan.includePaths"
+      ]
+    }
+  ],
+  "nextPlan": [
+    {
+      "code": "PLAN_REVIEW_BASELINE",
+      "text": "기준선 보존 대상과 제외 대상을 확인합니다.",
+      "evidenceRefs": [
+        "baseline.plan.includePaths",
+        "baseline.plan.excludePaths"
+      ]
+    },
+    {
+      "code": "PLAN_HOST_COMMIT",
+      "text": "사용자가 승인하면 표시된 경로만 별도 기준선 커밋으로 보존합니다.",
+      "evidenceRefs": [
+        "baseline.plan.hash",
+        "baseline.plan.suggestedCommitMessage"
+      ]
+    },
+    {
+      "code": "PLAN_RESCAN_PROPOSAL",
+      "text": "같은 제안을 다시 검사해 기존 작업과 새 개발 범위를 분리합니다.",
+      "evidenceRefs": [
+        "proposalId",
+        "proposalRevision",
+        "baseline.plan.hash"
+      ]
+    },
+    {
+      "code": "PLAN_REVIEW_SCOPE_LATER",
+      "text": "승인 가능한 상태가 된 뒤 새 개발 범위를 별도로 검토합니다.",
+      "evidenceRefs": [
+        "canonicalState",
+        "readyForApproval"
+      ]
+    }
+  ],
+  "summary": {
+    "code": "SUMMARY_BASELINE_FIRST",
+    "text": "지금은 새 기능 개발이 아니라 기존 작업을 안전하게 보존하는 단계입니다.",
+    "evidenceRefs": [
+      "canonicalState",
+      "baseline.plan.hash"
+    ]
+  },
+  "userAction": {
+    "code": "REVIEW_BASELINE",
+    "label": "기준선 보존 계획 검토",
+    "exactPhrase": "이 기준선만 보존해.",
+    "requiresHumanApproval": true
+  },
+  "details": {
+    "available": true,
+    "evidenceRefs": [
+      "canonicalState",
+      "baseline",
+      "intelligence"
+    ],
+    "exactPathsInDefaultText": false
+  },
+  "actionEnvelope": {
+    "schema": "shipping-harness/action-envelope-v1",
+    "currentState": "DIRTY_BASELINE",
+    "allowedNow": [
+      "REVIEW_BASELINE",
+      "INSPECT_CHANGES",
+      "STOP"
+    ],
+    "forbiddenNow": [
+      "WAIT_FOR_ANALYSIS",
+      "ANSWER_EXCEPTION",
+      "STRENGTHEN_ACCEPTANCE",
+      "REVIEW_SCOPE",
+      "APPROVE_SCOPE",
+      "EDIT_SCOPE",
+      "INSPECT_ACCEPTANCE",
+      "CONTINUE_LOCKED_SCOPE",
+      "VERIFY",
+      "FIX_RELEASE_BLOCKER",
+      "PAUSE",
+      "RESUME",
+      "ABORT",
+      "CONFIRM_CLOSE",
+      "REVIEW_COMPLETION",
+      "CREATE_NEW_PROPOSAL",
+      "USE_ACTIVE_PROPOSAL"
+    ],
+    "requiresHumanApproval": true,
+    "nextAction": "REVIEW_BASELINE",
+    "userActionLabel": "기준선 보존 계획 검토",
+    "exactUserPhrase": "이 기준선만 보존해.",
+    "hash": "899dc3b86e6426931355dcacfc670cc7177cb700971a071a12e7be49731493dc"
+  },
+  "factGraph": {
+    "schema": "shipping-harness/brief-fact-graph-v1",
+    "state": "DIRTY_BASELINE",
+    "release": "1.1.1",
+    "facts": [
+      {
+        "code": "CANONICAL_STATE",
+        "authority": "mechanical",
+        "confidence": "exact",
+        "value": "DIRTY_BASELINE",
+        "evidenceRefs": [
+          "canonicalState"
+        ]
+      },
+      {
+        "code": "PRIMARY_NEXT_ACTION",
+        "authority": "mechanical",
+        "confidence": "exact",
+        "value": "REVIEW_BASELINE",
+        "evidenceRefs": [
+          "actionEnvelope.nextAction"
+        ]
+      },
+      {
+        "code": "APPROVAL_READINESS",
+        "authority": "mechanical",
+        "confidence": "exact",
+        "value": false,
+        "evidenceRefs": [
+          "canonicalState",
+          "readyForApproval"
+        ]
+      },
+      {
+        "code": "BLOCKER_COUNT",
+        "authority": "mechanical",
+        "confidence": "exact",
+        "value": 0,
+        "evidenceRefs": [
+          "issues.counts.BLOCKER",
+          "state.blockerCount"
+        ]
+      },
+      {
+        "code": "UNKNOWN_COUNT",
+        "authority": "mechanical",
+        "confidence": "exact",
+        "value": 0,
+        "evidenceRefs": [
+          "issues.counts.UNKNOWN",
+          "state.unknownCount",
+          "baseline.counts.UNKNOWN"
+        ]
+      },
+      {
+        "code": "BASELINE_COUNTS",
+        "authority": "mechanical",
+        "confidence": "exact",
+        "value": {
+          "product": 7,
+          "releaseEvidence": 3,
+          "agentRuntime": 1,
+          "shippingRuntime": 1,
+          "generated": 0,
+          "unknown": 0,
+          "blocking": 10
+        },
+        "evidenceRefs": [
+          "baseline.counts",
+          "baseline.blockingCount",
+          "baseline.plan.hash"
+        ]
+      },
+      {
+        "code": "ACCEPTANCE_COVERAGE",
+        "authority": "mechanical",
+        "confidence": "exact",
+        "value": {
+          "complete": true,
+          "coveredPaths": 10,
+          "totalPaths": 10,
+          "uncoveredPaths": 0
+        },
+        "evidenceRefs": [
+          "intelligence.acceptanceCoverage"
+        ]
+      },
+      {
+        "code": "REPORT_COMPILER",
+        "authority": "mechanical",
+        "confidence": "exact",
+        "value": "deterministic-no-model",
+        "evidenceRefs": [
+          "plainBrief.schema"
+        ]
+      }
+    ],
+    "hash": "1b122cec44e9aefb86e03dc0a89dfcba28a7b6967fe0da4b09b7ee7604fb7103"
+  },
+  "advisory": {
+    "authority": "recommendation-only",
+    "text": "Complete authentication verification and release packaging reproducibility.",
+    "explicitUserGoalWins": true
+  },
+  "modelAuthority": false,
+  "hash": "3e8075589bd0d547d9b6d1216fe1ef798d841a2cd146ac3cfc3a5a82cf8640f2",
+  "renderedText": "## 현재 상태\n\n**아직 새 개발을 시작할 수 없습니다.**\n\n## 문제점\n\n1. 이전에 작업한 제품 코드 7개와 검증·릴리스 기록 3개가 아직 안전한 기준점으로 저장되지 않았습니다.\n\n## 개선안\n\n1. 제품·릴리스 변경 10개만 검토한 기준선으로 보존합니다.\n2. AI 작업 기록 1개와 Shipping 내부 기록 1개는 제품 기준선과 분리합니다.\n3. 파일을 삭제하거나 되돌리지 않고, 사용자가 승인한 경로만 호스트가 커밋합니다.\n\n## 다음 진행 플랜\n\n1. 기준선 보존 대상과 제외 대상을 확인합니다.\n2. 사용자가 승인하면 표시된 경로만 별도 기준선 커밋으로 보존합니다.\n3. 같은 제안을 다시 검사해 기존 작업과 새 개발 범위를 분리합니다.\n4. 승인 가능한 상태가 된 뒤 새 개발 범위를 별도로 검토합니다.\n\n## 요약\n\n지금은 새 기능 개발이 아니라 기존 작업을 안전하게 보존하는 단계입니다.\n\n## 지금 할 일\n\n> **이 기준선만 보존해.**",
+  "textHash": "518862064bd9309037c76eff7420dbac0e0fa54f144ecf460563f44f6d0d0ad8",
+  "quality": {
+    "schema": "shipping-harness/plain-brief-quality-v1",
+    "healthy": true,
+    "checks": {
+      "requiredSections": true,
+      "oneNextAction": true,
+      "stateConsistent": true,
+      "evidenceBound": true,
+      "uniqueItems": true,
+      "mechanicalAuthority": true,
+      "boundedOutput": true,
+      "noDestructiveDefault": true,
+      "verificationIndependent": true
+    },
+    "renderedBytes": 1061,
+    "structuredBytes": 6121,
+    "maxBytes": 8192
+  }
+}

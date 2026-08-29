@@ -37,6 +37,10 @@ Before using a project:
 6. monitor `RUNNING`, `PAUSED`, `BLOCKED`, `SHIPPABLE`, or `CLOSED`;
 7. retain the release receipt, tag, and backlog.
 
+## v1.4.0 beginner-report authority
+
+Shipping Core compiles the default Korean report from canonical state, baseline, coverage, issues, and evidence. The report always includes problems, improvements, next plan, summary, and one next action. OMP must render it before optional model advice. Model advice is explicitly non-authoritative and cannot change approval readiness, acceptance, blockers, pause/abort, SHIPPABLE, or CLOSED. If rendering fails, operators use the raw Shipping fields; the failure never changes the core state.
+
 ## Support boundary
 
 Supported internal issues include installation, MCP registration, contract/proposal state, evidence freshness, plugin repair, private OMO pin/bridge, internal remote gateway, backup/restore, and rollback. Application-specific feature design remains the responsibility of the selected host agent under the approved Shipping contract.

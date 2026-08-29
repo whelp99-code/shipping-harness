@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shipping-harness.local/schemas/v1/plain-brief.schema.json",
+  "title": "Shipping Harness deterministic Korean plain brief",
+  "description": "A bounded user-facing projection compiled only from Shipping authority data. It never grants approval or closure authority.",
+  "type": "object",
+  "required": [
+    "schema",
+    "language",
+    "state",
+    "headline",
+    "problems",
+    "improvements",
+    "nextPlan",
+    "summary",
+    "userAction",
+    "details",
+    "actionEnvelope",
+    "factGraph",
+    "modelAuthority",
+    "hash",
+    "renderedText",
+    "textHash",
+    "quality"
+  ],
+  "properties": {
+    "schema": { "const": "shipping-harness/plain-brief-v1" },
+    "language": { "const": "ko" },
+    "state": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "release": { "type": ["string", "null"], "maxLength": 80 },
+    "headline": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "problems": { "$ref": "#/$defs/items" },
+    "improvements": { "$ref": "#/$defs/items" },
+    "nextPlan": { "$ref": "#/$defs/items" },
+    "summary": { "$ref": "#/$defs/item" },
+    "userAction": {
+      "type": "object",
+      "required": ["code", "label", "exactPhrase", "requiresHumanApproval"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "label": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "exactPhrase": { "type": ["string", "null"], "maxLength": 500 },
+        "requiresHumanApproval": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "details": {
+      "type": "object",
+      "required": ["available", "evidenceRefs", "exactPathsInDefaultText"],
+      "properties": {
+        "available": { "type": "boolean" },
+        "evidenceRefs": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+        },
+        "exactPathsInDefaultText": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "actionEnvelope": {
+      "type": "object",
+      "required": ["schema", "currentState", "allowedNow", "forbiddenNow", "requiresHumanApproval", "nextAction", "userActionLabel", "exactUserPhrase", "hash"],
+      "properties": {
+        "schema": { "const": "shipping-harness/action-envelope-v1" },
+        "currentState": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "allowedNow": { "$ref": "#/$defs/actions" },
+        "forbiddenNow": { "$ref": "#/$defs/actions" },
+        "requiresHumanApproval": { "type": "boolean" },
+        "nextAction": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "userActionLabel": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "exactUserPhrase": { "type": ["string", "null"], "maxLength": 500 },
+        "hash": { "$ref": "#/$defs/hash" }
+      },
+      "additionalProperties": false
+    },
+    "factGraph": {
+      "type": "object",
+      "required": ["schema", "state", "release", "facts", "hash"],
+      "properties": {
+        "schema": { "const": "shipping-harness/brief-fact-graph-v1" },
+        "state": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "release": { "type": ["string", "null"], "maxLength": 80 },
+        "facts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "required": ["code", "authority", "confidence", "value", "evidenceRefs"],
+            "properties": {
+              "code": { "type": "string", "minLength": 1, "maxLength": 100 },
+              "authority": { "enum": ["mechanical", "model-advisory"] },
+              "confidence": { "type": "string", "minLength": 1, "maxLength": 40 },
+              "value": {},
+              "evidenceRefs": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "hash": { "$ref": "#/$defs/hash" }
+      },
+      "additionalProperties": false
+    },
+    "advisory": { "type": ["object", "null"] },
+    "modelAuthority": { "const": false },
+    "hash": { "$ref": "#/$defs/hash" },
+    "renderedText": { "type": "string", "minLength": 1, "maxLength": 8192 },
+    "textHash": { "$ref": "#/$defs/hash" },
+    "quality": {
+      "type": "object",
+      "required": ["schema", "healthy", "checks", "renderedBytes", "structuredBytes", "maxBytes"],
+      "properties": {
+        "schema": { "const": "shipping-harness/plain-brief-quality-v1" },
+        "healthy": { "type": "boolean" },
+        "checks": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "boolean" } },
+        "renderedBytes": { "type": "integer", "minimum": 0, "maximum": 8192 },
+        "structuredBytes": { "type": "integer", "minimum": 0, "maximum": 8192 },
+        "maxBytes": { "const": 8192 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 80 }
+    },
+    "item": {
+      "type": "object",
+      "required": ["code", "text", "evidenceRefs"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[A-Z0-9_]+$", "maxLength": 100 },
+        "text": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "evidenceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/item" }
+    }
+  },
+  "additionalProperties": false
+}

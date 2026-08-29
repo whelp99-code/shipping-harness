@@ -1,6 +1,6 @@
 # OMP Main Harness — Install, Doctor, and Rollback
 
-**Release:** Shipping Harness v1.3.1
+**Release:** Shipping Harness v1.4.0
 **Boundary:** personal and company-internal use only
 **Primary tested host:** OMP 18.0.10 through the existing `omo-balance` launcher and standalone `omp-core`
 **Compatibility host:** source-linked OMP 15.10.12
@@ -26,10 +26,10 @@ Run as the ordinary Ubuntu user, not root:
 cd /home/jm/orca/projects/shipping-harness
 
 # Read-only preview
-shipping-harness-omp bootstrap --tag v1.3.1
+shipping-harness-omp bootstrap --tag v1.4.0
 
 # Back up, install, merge, and verify
-shipping-harness-omp bootstrap --tag v1.3.1 --apply
+shipping-harness-omp bootstrap --tag v1.4.0 --apply
 
 # Independent post-install check
 shipping-harness-omp doctor
@@ -53,7 +53,7 @@ It creates the package locally with npm, installs it with `--offline --global --
 
 ```text
 DONE
-Shipping Harness: 1.3.1
+Shipping Harness: 1.4.0
 OMP: omp/18.0.10
 MCP tools: 9 PASS
 Approval: always-ask
@@ -68,6 +68,10 @@ Rollback: /home/jm/.local/bin/shipping-harness-omp rollback --backup-id <id> --a
 The bootstrap package lives in a private temporary directory only for the duration of the complete awaited install. Cleanup begins after package installation, OMP configuration merge, pre-receipt doctor, receipt creation, post-receipt doctor, and backup metadata completion.
 
 The end-to-end regression uses real local npm packaging, a disposable user prefix and OMP agent directory, a fake OMP 18.0.10 host, and explicit rollback. It verifies no new `shipping-omp-bootstrap-*` directory remains afterward.
+
+## v1.4.0 beginner presentation
+
+The managed AGENTS block and installed Shipping Skill require OMP to show the Shipping-generated `plainBriefText` first and unchanged. The fixed order is `현재 상태`, `문제점`, `개선안`, `다음 진행 플랜`, `요약`, and `지금 할 일`. Optional model commentary must be placed under `AI 참고 의견` and has no authority over state, approval, acceptance, blockers, pause/abort, SHIPPABLE, or CLOSED. Doctor verifies the exact packaged Skill and managed block; it does not modify OMP binaries, router, providers, credentials, or model routing.
 
 ## Approval policy
 

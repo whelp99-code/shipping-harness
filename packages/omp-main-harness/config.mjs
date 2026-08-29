@@ -78,15 +78,26 @@ export function mergeMcpConfiguration(input, shippingMcp) {
   return config;
 }
 
+function managedAgentBlock() {
+  const presentation = [
+    '14. Shipping 결과에 `plainBrief`가 있으면 `현재 상태 → 문제점 → 개선안 → 다음 진행 플랜 → 요약 → 지금 할 일` 순서의 `plainBriefText`를 기본 보고서로 그대로 표시한다.',
+    '15. 모델은 Shipping이 만든 상태, 승인 가능 여부, 문제점, 다음 행동, 정확한 사용자 문장을 다시 해석하거나 바꾸지 않는다. 기술 근거는 기본 보고서 뒤의 상세 영역에 둔다.',
+    '16. 추가 의견이 꼭 필요하면 `AI 참고 의견`으로 분리하고 비권위 정보임을 명시한다. 이 의견은 계약, 승인, 완료조건, BLOCKER, SHIPPABLE, CLOSED를 바꿀 수 없다.',
+    '17. `plainBriefError`가 있으면 기존 raw Shipping 권위 필드를 보여주되 모델이 대체 상태나 완료 판정을 만들지 않는다.',
+  ].join('\n');
+  return OMP_AGENT_BLOCK.replace(`\n${OMP_AGENT_BLOCK_END}`, `\n${presentation}\n${OMP_AGENT_BLOCK_END}`);
+}
+
 /** @param {string} existing */
 export function mergeAgentRules(existing) {
+  const block = managedAgentBlock();
   const hasStart = existing.includes(OMP_AGENT_BLOCK_START);
   const hasEnd = existing.includes(OMP_AGENT_BLOCK_END);
   invariant(hasStart === hasEnd, 'ERR_OMP_AGENT_BLOCK', 'OMP AGENTS.md contains an incomplete Shipping managed block');
-  if (!hasStart) return `${existing.trimEnd()}${existing.trim() ? '\n\n' : ''}${OMP_AGENT_BLOCK}\n`;
+  if (!hasStart) return `${existing.trimEnd()}${existing.trim() ? '\n\n' : ''}${block}\n`;
   const before = existing.slice(0, existing.indexOf(OMP_AGENT_BLOCK_START)).trimEnd();
   const after = existing.slice(existing.indexOf(OMP_AGENT_BLOCK_END) + OMP_AGENT_BLOCK_END.length).trimStart();
-  return [before, OMP_AGENT_BLOCK, after].filter(Boolean).join('\n\n').trimEnd() + '\n';
+  return [before, block, after].filter(Boolean).join('\n\n').trimEnd() + '\n';
 }
 
 /** @param {Record<string, any>} paths @param {Record<string, any>} commands */
@@ -149,7 +160,9 @@ export async function inspectOmpConfiguration(paths, commands) {
       && Object.entries(OMP_TOOL_APPROVAL).every(([name, policy]) => approval[name] === policy),
     agents: agents.includes(OMP_AGENT_BLOCK_START)
       && agents.includes(OMP_AGENT_BLOCK_END)
-      && agents.split(OMP_AGENT_BLOCK_START).length === 2,
+      && agents.split(OMP_AGENT_BLOCK_START).length === 2
+      && agents.includes('plainBriefText')
+      && agents.includes('AI 참고 의견'),
     skill: sha256(skill.endsWith('\n') ? skill : `${skill}\n`) === sha256(sourceSkill.endsWith('\n') ? sourceSkill : `${sourceSkill}\n`),
   };
   return {

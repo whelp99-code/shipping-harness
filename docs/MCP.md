@@ -22,7 +22,7 @@ Requirements:
 Install the locally verified package once. Use a user-global prefix so the executable links and package land in the same `~/.local` tree:
 
 ```bash
-npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.3.1.tgz \
+npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.4.0.tgz \
   --ignore-scripts --no-audit --no-fund
 ```
 
@@ -34,14 +34,16 @@ For OMP, use the release-owned transactional bootstrap instead of manually editi
 
 ```bash
 cd /home/jm/orca/projects/shipping-harness
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.1
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.1 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.4.0
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.4.0 --apply
 shipping-harness-omp doctor
 ```
 
 The first command is read-only. The applied command backs up the previous Shipping package and five managed OMP files, installs the local package offline under `~/.local`, preserves the OMP binary/router/model configuration and unrelated MCP servers, merges the nine-tool approval policy, runs protocol and doctor checks, and records an exact rollback command. Primary field validation uses the active OMP `18.0.10` `omo-balance`/`omp-core` installation. Source-linked OMP `15.10.12` remains a compatibility lane. See [`operations/OMP-MAIN-HARNESS.md`](operations/OMP-MAIN-HARNESS.md).
 
 From v1.3.1, bootstrap explicitly awaits installation, configuration, doctor, receipt, and backup completion before deleting the temporary package directory. The patch changes no MCP methods, schemas, approval semantics, or nine-tool inventory.
+
+From v1.4.0, `shipping_start`, `shipping_refine`, and `shipping_status` expose `plainBrief`, `briefFactGraph`, and `actionEnvelope`. The default text is compiled locally from canonical Shipping data in the fixed order `현재 상태 → 문제점 → 개선안 → 다음 진행 플랜 → 요약 → 지금 할 일`. Exact paths, hashes, commands, and evidence remain in structured details. A host model may add a clearly labeled `AI 참고 의견`, but it cannot rewrite state, readiness, next action, acceptance, blockers, SHIPPABLE, or CLOSED. Brief compilation invokes no model, network, or extra Git process.
 
 The MCP client launches this command:
 
@@ -135,7 +137,7 @@ From v1.3.0, proposals include a bounded component graph, a primary stack plus s
 
 Every acceptance command carries a side-effect class. Package/release commands are mechanically marked `generated-artifacts`, require isolated execution, and require deterministic artifact output. Shipping runs them in disposable detached Git worktrees, repeats deterministic checks, compares artifact digests, fingerprints the source worktree before and after, and fails closed on nondeterminism or source mutation. External-state and data-state commands are not automatically runnable.
 
-The beginner projection is `oneScreenApproval`: release, canonical state, explicit goal, recommendation label, included/excluded scope, exact command/`cwd`, work themes, and coverage summary. Detailed evidence remains available separately and cannot be replaced by agent prose.
+The technical approval projection remains `oneScreenApproval`: release, canonical state, explicit goal, recommendation label, included/excluded scope, exact command/`cwd`, work themes, and coverage summary. The default beginner projection is `plainBrief`, which adds deterministic problems, improvements, next plan, summary, one action envelope, and one safe user phrase. Detailed evidence remains available separately and cannot be replaced by agent prose.
 
 For repositories containing one real product below a wrapper root, Shipping scans only bounded Git-tracked manifest paths, selects the strongest runnable workspace, and binds every proposed command to its exact workspace-relative `cwd`. If candidates remain materially tied, `shipping_refine` may select one existing candidate without accepting a free-form path or command.
 

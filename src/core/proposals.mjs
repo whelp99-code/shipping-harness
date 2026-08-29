@@ -8,6 +8,7 @@ import { assertContainedPath, ensureDir, exists, readJson, writeAtomic, writeJso
 import { currentGitSha, gitStatus } from './git.mjs';
 import { analyzeBaseline, verifyBaselinePreservation } from './baseline.mjs';
 import { buildOneScreenApproval } from './project-intelligence.mjs';
+import { compilePlainBriefSafe } from './plain-brief.mjs';
 import { invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
 import { buildShortPlan } from './project-analysis.mjs';
@@ -82,6 +83,21 @@ function currentBaseline(root) {
 
 /** @param {Record<string, any>} proposal */
 function proposalHash(proposal) {
+  const {
+    hash: _hash,
+    approval: _approval,
+    briefFactGraph: _briefFactGraph,
+    actionEnvelope: _actionEnvelope,
+    plainBrief: _plainBrief,
+    plainBriefText: _plainBriefText,
+    plainBriefError: _plainBriefError,
+    ...body
+  } = proposal;
+  return hashObject(body);
+}
+
+/** Legacy v1 proposals hashed every serialized projection except hash/approval. */
+function legacyProposalHash(proposal) {
   const { hash: _hash, approval: _approval, ...body } = proposal;
   return hashObject(body);
 }
@@ -109,6 +125,12 @@ export function projectProposalAuthority(input) {
     proposal.approvalBrief = buildApprovalBrief(proposal.decision);
   }
   proposal.oneScreenApproval = buildOneScreenApproval(proposal);
+  const compiled = compilePlainBriefSafe(proposal);
+  proposal.briefFactGraph = compiled.plainBrief?.factGraph ?? null;
+  proposal.actionEnvelope = compiled.plainBrief?.actionEnvelope ?? null;
+  proposal.plainBrief = compiled.plainBrief ?? null;
+  proposal.plainBriefText = compiled.plainBrief?.renderedText ?? null;
+  proposal.plainBriefError = compiled.error ?? null;
   return proposal;
 }
 
@@ -199,7 +221,8 @@ export async function findActiveScopeProposal(root) {
   if (!index) return null;
   const { proposal } = await loadScopeProposal(root, index.proposalId);
   invariant(proposal.fingerprint === index.fingerprint, 'ERR_PROPOSAL_INDEX', 'Active proposal fingerprint does not match the proposal');
-  return { proposal, projectedProposal: projectProposalAuthority(proposal), index, summary: proposalSummary(proposal) };
+  const projectedProposal = projectProposalAuthority(proposal);
+  return { proposal, projectedProposal, index, summary: proposalSummary(projectedProposal) };
 }
 
 /** @param {string} root @param {Record<string, any>} proposal @param {string} supersededBy */
@@ -352,8 +375,11 @@ export async function loadScopeProposal(root, proposalId) {
   invariant(proposal.schema === 'shipping-harness/proposal-v1', 'ERR_PROPOSAL_INVALID', 'Unsupported proposal schema');
   invariant(proposal.id === proposalId, 'ERR_PROPOSAL_ID', 'Proposal file identity does not match the requested proposal ID');
   invariant(proposal.projectRoot === path.resolve(root), 'ERR_PROPOSAL_ROOT', 'Proposal belongs to a different repository');
-  invariant(proposal.hash === proposalHash(proposal), 'ERR_PROPOSAL_TAMPERED', 'Proposal hash does not match its content');
-  return { proposal, projectedProposal: projectProposalAuthority(proposal), proposalPath, summary: proposalSummary(proposal) };
+  const currentHash = proposalHash(proposal);
+  const legacyHash = legacyProposalHash(proposal);
+  invariant(proposal.hash === currentHash || proposal.hash === legacyHash, 'ERR_PROPOSAL_TAMPERED', 'Proposal hash does not match its content');
+  const projectedProposal = projectProposalAuthority(proposal);
+  return { proposal, projectedProposal, proposalPath, summary: proposalSummary(projectedProposal) };
 }
 
 /** @param {unknown} value @param {number} max */

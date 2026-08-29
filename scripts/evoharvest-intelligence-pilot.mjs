@@ -4,6 +4,7 @@ import { stat } from 'node:fs/promises';
 import path from 'node:path';
 import { buildDecisionEvidence } from '../src/core/decision-evidence.mjs';
 import { hashObject } from '../src/core/crypto.mjs';
+import { compilePlainBrief } from '../src/core/plain-brief.mjs';
 import { runGit } from '../src/core/git.mjs';
 
 const target = path.resolve(process.env.EVOHARVEST_ROOT ?? '/home/jm/orca/projects/EvoHarvest');
@@ -46,6 +47,20 @@ const stacks = new Set([
 const themeText = intelligence.workThemes.map((entry) => entry.title).join(' ').toLowerCase();
 const verify = commands.find((entry) => entry.command === 'make verify');
 const pack = commands.find((entry) => entry.command === 'make package');
+const plainInput = {
+  canonicalState: 'DIRTY_BASELINE',
+  release: evidence.analysis.versionEvidence?.recommendedVersion ?? null,
+  goal,
+  readyForApproval: false,
+  proposalId: 'evoharvest-read-only-pilot',
+  proposalRevision: 1,
+  baseline: evidence.baseline,
+  workspace: evidence.analysis.workspace,
+  versionEvidence: evidence.analysis.versionEvidence,
+  intelligence,
+};
+const plainVariants = [null, 'weak', 'strong'].map((hostModel) => compilePlainBrief({ ...plainInput, hostModel }));
+const plainBrief = plainVariants[0];
 
 requireCondition(before === after, 'EvoHarvest Git/source fingerprint changed during the read-only pilot');
 requireCondition(evidence.analysis.workspace?.root === 'evoharvest-runtime-v1.1.0', `Unexpected workspace: ${evidence.analysis.workspace?.root}`);
@@ -62,6 +77,14 @@ requireCondition(verify?.cwd === 'evoharvest-runtime-v1.1.0', 'make verify cwd i
 requireCondition(pack?.cwd === 'evoharvest-runtime-v1.1.0', 'make package cwd is not bound to the runtime workspace');
 requireCondition(pack?.sideEffect === 'generated-artifacts' && pack?.isolationRequired === true && pack?.deterministicOutputRequired === true, 'make package isolation policy is incomplete');
 requireCondition(evidence.sourceChanges.every((entry) => !entry.startsWith('.shipping/')), 'Shipping runtime leaked into product dirty paths');
+requireCondition(plainBrief.quality?.healthy === true, 'EvoHarvest plain brief failed the deterministic quality gate');
+requireCondition(plainBrief.state === 'DIRTY_BASELINE', `Unexpected plain brief state: ${plainBrief.state}`);
+requireCondition(plainBrief.actionEnvelope?.nextAction === 'REVIEW_BASELINE', 'EvoHarvest plain brief has an unsafe next action');
+requireCondition(plainBrief.userAction?.exactPhrase === '이 기준선만 보존해.', 'EvoHarvest exact user phrase is missing');
+for (const heading of ['문제점', '개선안', '다음 진행 플랜', '요약']) requireCondition(plainBrief.renderedText.includes(`## ${heading}`), `EvoHarvest plain brief missing heading: ${heading}`);
+requireCondition(!plainBrief.renderedText.includes('evoharvest-runtime-v1.1.0/apps/web/playwright.config.ts'), 'Exact target paths leaked into the default beginner brief');
+requireCondition(new Set(plainVariants.map((entry) => entry.hash)).size === 1, 'Host model label changed the EvoHarvest plain brief hash');
+requireCondition(new Set(plainVariants.map((entry) => entry.textHash)).size === 1, 'Host model label changed the EvoHarvest plain text hash');
 
 const result = {
   schema: 'shipping-harness/evoharvest-intelligence-pilot-v1',
@@ -101,6 +124,24 @@ const result = {
     isolationRequired: entry.isolationRequired,
     deterministicOutputRequired: entry.deterministicOutputRequired,
   })),
+  plainBrief: {
+    schema: plainBrief.schema,
+    state: plainBrief.state,
+    headline: plainBrief.headline,
+    requiredSections: {
+      problems: plainBrief.problems.length,
+      improvements: plainBrief.improvements.length,
+      nextPlan: plainBrief.nextPlan.length,
+      summary: Boolean(plainBrief.summary?.text),
+    },
+    nextAction: plainBrief.actionEnvelope.nextAction,
+    exactUserPhrase: plainBrief.userAction.exactPhrase,
+    hash: plainBrief.hash,
+    textHash: plainBrief.textHash,
+    modelIndependent: new Set(plainVariants.map((entry) => entry.hash)).size === 1,
+    quality: plainBrief.quality,
+    renderedText: plainBrief.renderedText,
+  },
   publicPublish: false,
 };
 

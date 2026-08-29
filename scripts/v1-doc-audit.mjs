@@ -20,6 +20,10 @@ const required = [
   'docs/operations/INTERNAL-REMOTE-INCIDENT.md',
   'docs/operations/BACKUP-RESTORE.md',
   'schemas/v1/README.md',
+  'schemas/v1/plain-brief.schema.json',
+  'schemas/v1/examples/plain-brief.example.json',
+  'docs/planning/25-V1.4.0-EVIDENCE-FIRST-PLAIN-BRIEF-DEVELOPMENT-PLAN.md',
+  'docs/research/PAPERTHIN-APPLICATION-DECISION.md',
 ];
 
 function walk(directory, output = []) {
@@ -59,6 +63,16 @@ for (const file of markdown) {
 }
 
 const packageJson = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
+const dependencyNames = Object.keys({
+  ...(packageJson.dependencies ?? {}),
+  ...(packageJson.optionalDependencies ?? {}),
+  ...(packageJson.devDependencies ?? {}),
+});
+if (dependencyNames.some((name) => /paperthin/u.test(name))) failures.push('Paperthin must remain a conceptual reference, not a package dependency');
+const plainSchema = JSON.parse(readFileSync(path.join(root, 'schemas', 'v1', 'plain-brief.schema.json'), 'utf8'));
+const plainExample = JSON.parse(readFileSync(path.join(root, 'schemas', 'v1', 'examples', 'plain-brief.example.json'), 'utf8'));
+if (plainSchema.$id !== 'https://shipping-harness.local/schemas/v1/plain-brief.schema.json') failures.push('plain brief schema identifier mismatch');
+if (plainExample.schema !== 'shipping-harness/plain-brief-v1' || plainExample.quality?.healthy !== true) failures.push('plain brief example is not a healthy compiler output');
 const activeContract = JSON.parse(readFileSync(path.join(root, '.shipping', 'contract.yaml'), 'utf8'));
 if (packageJson.version !== activeContract.release) failures.push(`package version is ${packageJson.version}, active release is ${activeContract.release}`);
 if (!/^1\.\d+\.\d+$/u.test(packageJson.version)) failures.push(`package version ${packageJson.version} is outside the stable v1 release line`);

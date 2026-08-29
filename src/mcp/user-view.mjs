@@ -1,3 +1,5 @@
+import { compilePlainBriefSafe } from '../core/plain-brief.mjs';
+
 const USER_STATE_MAP = Object.freeze({
   DRAFT: 'PLANNING',
   LOCKED: 'RUNNING',
@@ -39,6 +41,13 @@ export function buildUserStatusView(status) {
       NEEDS_ACCEPTANCE: '완료를 증명할 강한 빌드·테스트·검증 기준이 부족합니다.',
       AWAITING_APPROVAL: '검토 가능한 한 개의 범위 제안이 준비되었습니다.',
     };
+    const compiled = proposal.plainBrief
+      ? { plainBrief: proposal.plainBrief, error: proposal.plainBriefError ?? null }
+      : compilePlainBriefSafe({
+          ...proposal,
+          canonicalState: proposal.state,
+          release: proposal.release,
+        });
     return {
       schema: 'shipping-harness/user-view-v1',
       initialized: status.initialized === true,
@@ -62,6 +71,11 @@ export function buildUserStatusView(status) {
       baseline: proposal.baseline ?? null,
       intelligence: proposal.intelligence ?? null,
       oneScreenApproval: proposal.oneScreenApproval ?? null,
+      briefFactGraph: compiled.plainBrief?.factGraph ?? proposal.briefFactGraph ?? null,
+      actionEnvelope: compiled.plainBrief?.actionEnvelope ?? proposal.actionEnvelope ?? null,
+      plainBrief: compiled.plainBrief ?? null,
+      plainBriefText: compiled.plainBrief?.renderedText ?? proposal.plainBriefText ?? null,
+      plainBriefError: compiled.error ?? proposal.plainBriefError ?? null,
       nextActionCode: proposal.nextAction ?? null,
     };
   }
@@ -88,6 +102,17 @@ export function buildUserStatusView(status) {
   } : null;
   const project = status.contract?.project ?? null;
   const release = status.contract?.release ?? status.state?.release ?? null;
+  const compiled = compilePlainBriefSafe({
+    state: status.state,
+    release,
+    contract: status.contractDetail ?? status.contract ?? null,
+    issues: status.issues ?? null,
+    evidenceFresh: status.evidenceFresh === true,
+    blockerCount,
+    unknownCount: status.issues?.counts?.UNKNOWN ?? status.state?.unknownCount ?? 0,
+    currentEvidenceSha: status.state?.currentEvidenceSha ?? null,
+    contractHash: status.state?.contractHash ?? status.contract?.hash ?? null,
+  });
   const summaryByState = {
     PLANNING: '이번 버전의 목표와 범위를 정하는 중입니다.',
     RUNNING: blockerCount > 0 ? '개발은 진행 중이지만 출시를 막는 문제가 있습니다.' : '잠긴 범위 안에서 개발과 검증을 진행 중입니다.',
@@ -114,6 +139,11 @@ export function buildUserStatusView(status) {
     evidenceFresh: status.evidenceFresh === true,
     fixCycles: status.state?.fixCycles ?? 0,
     agentRuns: status.state?.agentRuns ?? 0,
+    briefFactGraph: compiled.plainBrief?.factGraph ?? null,
+    actionEnvelope: compiled.plainBrief?.actionEnvelope ?? null,
+    plainBrief: compiled.plainBrief ?? null,
+    plainBriefText: compiled.plainBrief?.renderedText ?? null,
+    plainBriefError: compiled.error ?? null,
   };
 }
 

@@ -271,6 +271,11 @@ export async function callShippingTool(root, name, rawArguments) {
       baseline: proposal.baseline,
       intelligence: proposal.intelligence,
       oneScreenApproval: proposal.oneScreenApproval,
+      briefFactGraph: proposal.briefFactGraph,
+      actionEnvelope: proposal.actionEnvelope,
+      plainBrief: proposal.plainBrief,
+      plainBriefText: proposal.plainBriefText,
+      plainBriefError: proposal.plainBriefError,
       nextAction: proposalNextAction(proposal.canonicalState),
       acceptanceStrength: proposal.acceptanceStrength,
       scope: proposal.contract.scope,
@@ -307,7 +312,7 @@ export async function callShippingTool(root, name, rawArguments) {
         : proposal.canonicalState === 'NEEDS_ACCEPTANCE'
           ? 'A repository-owned build, test, verify, check, package, or equivalent acceptance command must be detected before approval.'
           : 'Resolve the grouped exception questions before approval.';
-    return complete(data, `${reused ? 'Reused' : 'Proposed'} ${proposal.release} in ${proposal.mode} mode. State: ${proposal.canonicalState}. ${next}`);
+    return complete(data, proposal.plainBriefText ?? `${reused ? 'Reused' : 'Proposed'} ${proposal.release} in ${proposal.mode} mode. State: ${proposal.canonicalState}. ${next}`);
   }
 
   if (name === 'shipping_refine') {
@@ -364,6 +369,11 @@ export async function callShippingTool(root, name, rawArguments) {
       baseline: proposal.baseline,
       intelligence: proposal.intelligence,
       oneScreenApproval: proposal.oneScreenApproval,
+      briefFactGraph: proposal.briefFactGraph,
+      actionEnvelope: proposal.actionEnvelope,
+      plainBrief: proposal.plainBrief,
+      plainBriefText: proposal.plainBriefText,
+      plainBriefError: proposal.plainBriefError,
       baselinePreservation: proposal.baselinePreservation ?? null,
       nextAction: proposalNextAction(proposal.canonicalState),
       acceptanceStrength: proposal.acceptanceStrength,
@@ -382,6 +392,11 @@ export async function callShippingTool(root, name, rawArguments) {
         baseline: proposal.baseline,
         intelligence: proposal.intelligence,
         oneScreenApproval: proposal.oneScreenApproval,
+        briefFactGraph: proposal.briefFactGraph,
+        actionEnvelope: proposal.actionEnvelope,
+        plainBrief: proposal.plainBrief,
+        plainBriefText: proposal.plainBriefText,
+        plainBriefError: proposal.plainBriefError,
         nextAction: proposalNextAction(proposal.canonicalState),
         included: proposal.approvalBrief.included,
         deferred: proposal.approvalBrief.deferred,
@@ -394,7 +409,7 @@ export async function callShippingTool(root, name, rawArguments) {
     const next = proposal.readyForApproval
       ? 'Review the revised one-screen brief, then explicitly approve the exact revision.'
       : `The revised proposal remains ${proposal.canonicalState}; resolve only that condition.`;
-    return complete(data, `${result.changed ? 'Refined' : 'Reused unchanged'} ${proposal.id} at revision ${proposal.revision}. State: ${proposal.canonicalState}. ${next}`);
+    return complete(data, proposal.plainBriefText ?? `${result.changed ? 'Refined' : 'Reused unchanged'} ${proposal.id} at revision ${proposal.revision}. State: ${proposal.canonicalState}. ${next}`);
   }
 
   if (name === 'shipping_approve_scope') {
@@ -422,7 +437,7 @@ export async function callShippingTool(root, name, rawArguments) {
     const status = await statusOrUninitialized(root);
     const userView = buildUserStatusView(status);
     const blockerView = status.initialized ? buildBlockerView(status) : { schema: 'shipping-harness/blocker-view-v1', blockers: [], remainingFixCycles: 0 };
-    return complete({ ...status, userView, blockerView }, userView.summary + ` Next: ${userView.nextAction}`);
+    return complete({ ...status, userView, blockerView }, userView.plainBriefText ?? (userView.summary + ` Next: ${userView.nextAction}`));
   }
 
   if (name === 'shipping_execute') {

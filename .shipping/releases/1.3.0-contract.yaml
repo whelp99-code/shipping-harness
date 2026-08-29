@@ -99,9 +99,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Fix the OMP bootstrap temporary-package cleanup race, prove real bootstrap apply and automatic rollback, and deploy the closed patch to OMP 18 without changing product authority or MCP behavior.",
+  "goal": "Explain mixed-stack projects and current work concretely, require acceptance coverage for every product change, and isolate side-effecting package verification from the source worktree.",
   "project": "shipping-harness",
-  "release": "1.3.1",
+  "release": "1.3.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

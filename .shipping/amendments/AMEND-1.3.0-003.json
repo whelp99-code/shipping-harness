@@ -1,0 +1,29 @@
+{
+  "actor": "human-approved-sequential-build",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": "packages/omp-main-harness/constants.mjs"
+    },
+    {
+      "field": "scope.paths.include",
+      "value": "docs/operations/OMP-MAIN-HARNESS.md"
+    }
+  ],
+  "correctedContractHash": "41541bd04e9dabd403846e2ac70b9307adce917ca7469325cde4827e7ec24855",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-1.3.0-003",
+  "kind": "required-omp-guidance-consistency",
+  "previousContractHash": "fbf4d7c958939324b67abfb2915fe0614e5584d43459fed8013c20051bd6ee72",
+  "previousScopeRevision": 1,
+  "previousState": "LOCKED",
+  "productionBehaviorScopeChanged": false,
+  "project": "shipping-harness",
+  "reason": "The final v1.3.0 OMP bootstrap rewrites the managed AGENTS block from packages/omp-main-harness/constants.mjs. That block and its operator documentation must describe the v1.2 baseline handshake and v1.3 coverage/isolation behavior or deployment would reinstall stale guidance.",
+  "recordedAt": "2026-08-29T11:37:18.777Z",
+  "release": "1.3.0",
+  "removed": [],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticProductScopeExpansion": false,
+  "sourceGitSha": "ce66485eae2b6add328bf0296e13f7d37aa205d8"
+}

@@ -14,6 +14,20 @@ export const PROPOSAL_STATES = Object.freeze([
 const TERMINAL = new Set(['APPROVED', 'SUPERSEDED', 'EXPIRED']);
 const FALLBACK_COMMANDS = new Set(['git diff --check']);
 
+/**
+ * Map the sole authority-bearing proposal state to a compatibility label.
+ * This label is a projection only; approval gates must use proposal state.
+ * @param {string} state
+ */
+export function proposalAuthorityStatus(state) {
+  if (state === 'READY_FOR_APPROVAL') return 'APPROVABLE';
+  if (state === 'NEEDS_INPUT') return 'NEEDS_INPUT';
+  if (state === 'APPROVED') return 'APPROVED';
+  if (state === 'SUPERSEDED') return 'SUPERSEDED';
+  if (state === 'EXPIRED') return 'EXPIRED';
+  return 'NOT_READY';
+}
+
 /** @param {unknown} value */
 function normalizedText(value) {
   return typeof value === 'string'

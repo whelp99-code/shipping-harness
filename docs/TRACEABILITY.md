@@ -17,6 +17,7 @@
 | GOAL-013 governed internal runtime reuse | REQ-UPSTREAM-001..002, REQ-OMO-001..009, NFR-RUNTIME-001..002 | AC-0701..0714 | internal OMO bridge, private pinned runtime, Shipping verification | planned bridge/runtime/adversarial/canary/rollback suites |
 | GOAL-014 internal-only product boundary | REQ-INTERNAL-001, REQ-OMO-009, NFR-LICENSE-001 | AC-0713, AC-1010..1012 | third-party policy, runtime promotion, release operations | planned policy/packaging/release tests |
 | GOAL-015 safe internal remote control | REQ-REMOTE-001..005 | AC-0901..0912 | internal gateway, signed approval, backup/restore | planned remote/security/operations suites |
+| GOAL-017 canonical proposal authority | REQ-CANON-001..006 | AC-112-001..008 | proposal state projection, proposal storage/refinement, MCP output | canonical proposal, lifecycle, nested refine, OMP compatibility tests |
 | GOAL-016 stable internal product | REQ-STABLE-001..003, REQ-OPS-001..002, REQ-BENCH-001..002, REQ-SECURITY-001, REQ-HANDOVER-001, REQ-RELEASE-001 | AC-1001..1014 | stable schemas, migrations, operations, benchmark, security inventory, handover | implemented v1.0 gates |
 
 ## Source layout mapping
@@ -36,6 +37,7 @@ src/adapters/sdk.mjs        REQ-ADAPTER-001..003
 src/adapters/artifacts.mjs  REQ-ADAPTER-003..006, REQ-SEC-001..003
 src/adapters/registry.mjs   REQ-ADAPTER-001..006
 src/core/project-analysis.mjs REQ-ANALYZE-*
+src/core/proposal-state.mjs and src/core/proposals.mjs REQ-CANON-* (implemented v1.1.2)
 src/core/proposals.mjs      REQ-PROPOSAL-*
 src/mcp/tools.mjs           REQ-MCP-003, REQ-MCP-006..008
 src/mcp/protocol.mjs        REQ-MCP-002..005
@@ -128,3 +130,13 @@ Any implementation that cannot map to a requirement is out of scope or must amen
 | AC-1009 | v0.9 internal TLS, replay, backup, and restore pilot |
 | AC-1010..1012 | v1 security inventory, third-party inventory, handover, retention, and security documents |
 | AC-1013..1014 | v1 acceptance script, Shipping verify/close receipt, and clean annotated tag |
+
+## v1.1.2 verification mapping
+
+| Acceptance | Proof |
+|---|---|
+| AC-112-001..003 | `test/mcp/canonical-proposal-state.test.mjs`, proposal lifecycle and approval-gate tests |
+| AC-112-004 | legacy contradictory proposal byte/hash preservation test |
+| AC-112-005 | cwd-bound approval-brief assertions |
+| AC-112-006..007 | no-op and meaningful refinement revision-chain tests |
+| AC-112-008 | `npm run test:mcp`, `npm run release:verify`, OMP compatibility and release receipt |

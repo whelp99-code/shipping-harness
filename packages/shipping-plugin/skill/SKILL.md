@@ -14,7 +14,7 @@ Use the Shipping Harness MCP tools instead of asking a non-developer to edit `.s
 1. Call `shipping_start` once from the user's outcome. MCP start is `AUTO` only; never switch modes or create replacement proposals to improve the answer.
 2. Use only the canonical proposal state returned by Shipping. Repeated identical starts must reuse the active proposal; do not reinterpret `NEEDS_INPUT`, `DIRTY_BASELINE`, or `NEEDS_ACCEPTANCE` as approvable.
 3. Treat the returned workspace, version evidence, acceptance commands, and each command's `cwd` as canonical. Never invent stronger acceptance in prose.
-4. When Shipping returns a bounded question or tied workspace, call `shipping_refine` only with the exact active proposal ID/hash and the user's structured choice. Refinement must keep the same proposal ID and increment its revision.
+4. When Shipping returns a bounded question or tied workspace, call `shipping_refine` only with the exact active proposal ID/hash and the user's structured choice. Meaningful refinement keeps the proposal ID and increments its revision; an evidence-identical rescan returns `changed: false` and must not be described as a new revision.
 5. Show the returned approval brief without hiding assumptions, risks, deferred work, acceptance strength, dirty paths, or execution limits.
 6. Never call `shipping_approve_scope` as if the model were the user. Require the host's explicit user-confirmation action and only when state is `READY_FOR_APPROVAL`.
 7. After approval, perform only locked work. Use `shipping_execute` or edit within the approved repository scope, then call `shipping_verify`.

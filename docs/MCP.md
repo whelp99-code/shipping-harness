@@ -34,8 +34,8 @@ For OMP, use the release-owned transactional bootstrap instead of manually editi
 
 ```bash
 cd /home/jm/orca/projects/shipping-harness
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.1
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.1 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.2
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.2 --apply
 shipping-harness-omp doctor
 ```
 
@@ -118,6 +118,8 @@ NEEDS_INPUT | DIRTY_BASELINE | NEEDS_ACCEPTANCE | READY_FOR_APPROVAL
 ```
 
 Only `READY_FOR_APPROVAL` may be passed to `shipping_approve_scope`. Repeating the same AUTO request reuses the active proposal instead of creating duplicates. MCP `shipping_start` is AUTO-only; a host agent cannot silently switch to SAFE or INTERVIEW. A fallback-only `git diff --check` is supplemental evidence and is not sufficient for a software release.
+
+From v1.1.2, legacy `decision.approvalStatus` and `approvalBrief.status` values are non-authoritative compatibility projections derived from the canonical proposal state. Dirty, unresolved, weak, expired, or superseded proposals never project approval readiness. Each approval check includes its exact `cwd`; a rescan with no authority-bearing change returns `changed: false` and does not create a revision archive.
 
 For repositories containing one real product below a wrapper root, Shipping scans only bounded Git-tracked manifest paths, selects the strongest runnable workspace, and binds every proposed command to its exact workspace-relative `cwd`. If candidates remain materially tied, `shipping_refine` may select one existing candidate without accepting a free-form path or command.
 

@@ -16,6 +16,7 @@ import {
   classifyAcceptanceStrength,
   deriveProposalState,
   isTerminalProposalState,
+  proposalAuthorityStatus,
   proposalFingerprint,
   proposalSummary,
 } from './proposal-state.mjs';
@@ -85,6 +86,69 @@ function proposalHash(proposal) {
   return hashObject(body);
 }
 
+/** @param {Record<string, any>} value */
+function decisionHash(value) {
+  const { hash: _hash, ...body } = value;
+  return hashObject(body);
+}
+
+/**
+ * Return a safe authority projection without changing the stored proposal hash.
+ * Historical proposal bytes remain untouched; all new proposals are projected
+ * before their top-level hash is calculated.
+ * @param {Record<string, any>} input
+ */
+export function projectProposalAuthority(input) {
+  const proposal = structuredClone(input);
+  const state = deriveProposalState(proposal);
+  proposal.canonicalState = state;
+  proposal.readyForApproval = state === 'READY_FOR_APPROVAL';
+  if (proposal.decision && typeof proposal.decision === 'object') {
+    proposal.decision.approvalStatus = proposalAuthorityStatus(state);
+    proposal.decision.hash = decisionHash(proposal.decision);
+    proposal.approvalBrief = buildApprovalBrief(proposal.decision);
+  }
+  return proposal;
+}
+
+/** @param {Record<string, any>} input */
+function authorityFingerprint(input) {
+  const proposal = projectProposalAuthority(input);
+  const evidence = structuredClone(proposal.evidence ?? null);
+  if (evidence && typeof evidence === 'object') {
+    delete evidence.createdAt;
+    delete evidence.hash;
+  }
+  const decision = structuredClone(proposal.decision ?? null);
+  if (decision && typeof decision === 'object') {
+    delete decision.hash;
+    delete decision.evidenceHash;
+    delete decision.gitSha;
+    decision.resolutions = decision.resolutions ?? [];
+    for (const resolution of decision.resolutions) delete resolution.resolvedAt;
+  }
+  return hashObject({
+    gitSha: proposal.gitSha,
+    release: proposal.release,
+    releaseSelection: proposal.releaseSelection,
+    goal: proposal.goal,
+    mode: proposal.mode,
+    modeAuthorization: proposal.modeAuthorization ?? null,
+    sourceChanges: proposal.sourceChanges ?? [],
+    acceptanceStrength: proposal.acceptanceStrength,
+    workspace: proposal.workspace,
+    workspaceCandidates: proposal.workspaceCandidates,
+    versionEvidence: proposal.versionEvidence,
+    analysis: proposal.analysis,
+    evidence,
+    decision,
+    contract: proposal.contract,
+    plan: proposal.plan,
+    diagnostics: proposal.diagnostics,
+    canonicalState: proposal.canonicalState,
+  });
+}
+
 /** @param {unknown} value @param {string} fallback */
 function safeProjectName(value, fallback) {
   const normalized = typeof value === 'string' ? value.replace(/[\u0000-\u001F\u007F]/gu, '').trim().slice(0, 120) : '';
@@ -131,7 +195,7 @@ export async function findActiveScopeProposal(root) {
   if (!index) return null;
   const { proposal } = await loadScopeProposal(root, index.proposalId);
   invariant(proposal.fingerprint === index.fingerprint, 'ERR_PROPOSAL_INDEX', 'Active proposal fingerprint does not match the proposal');
-  return { proposal, index, summary: proposalSummary(proposal) };
+  return { proposal, projectedProposal: projectProposalAuthority(proposal), index, summary: proposalSummary(proposal) };
 }
 
 /** @param {string} root @param {Record<string, any>} proposal @param {string} supersededBy */
@@ -146,12 +210,11 @@ async function supersedeProposal(root, proposal, supersededBy) {
       supersededBy,
     },
   };
-  updated.canonicalState = deriveProposalState(updated);
-  updated.readyForApproval = false;
-  updated.hash = proposalHash(updated);
-  const target = path.join(runtimePaths(root).proposals, `${updated.id}.json`);
-  await writeJsonAtomic(target, updated);
-  return updated;
+  const projected = projectProposalAuthority(updated);
+  projected.hash = proposalHash(projected);
+  const target = path.join(runtimePaths(root).proposals, `${projected.id}.json`);
+  await writeJsonAtomic(target, projected);
+  return projected;
 }
 
 /**
@@ -195,7 +258,7 @@ export async function createScopeProposal(root, input) {
       invariant(active.proposal.mode === evidence.mode, 'ERR_PROPOSAL_MODE_CHANGE', `Active proposal mode is ${active.proposal.mode}; create or refine it without silently switching mode`);
       if (active.proposal.fingerprint === fingerprint) {
         return {
-          proposal: active.proposal,
+          proposal: active.projectedProposal,
           proposalPath: path.join(runtimePaths(root).proposals, `${active.proposal.id}.json`),
           reused: true,
           supersededProposalId: null,
@@ -257,16 +320,15 @@ export async function createScopeProposal(root, input) {
         ...(inheritedCommands.length > 0 ? [`Existing adapter commands were removed from the generated proposal: ${inheritedCommands.join(', ')}.`] : []),
       ],
     };
-    proposal.canonicalState = deriveProposalState(proposal);
-    proposal.readyForApproval = proposal.canonicalState === 'READY_FOR_APPROVAL';
-    proposal.hash = proposalHash(proposal);
-    const proposalPath = path.join(runtimePaths(root).proposals, `${proposal.id}.json`);
+    const projectedProposal = projectProposalAuthority(proposal);
+    projectedProposal.hash = proposalHash(projectedProposal);
+    const proposalPath = path.join(runtimePaths(root).proposals, `${projectedProposal.id}.json`);
     await assertContainedPath(root, proposalPath);
     if (active && !isTerminalProposalState(active.summary.state)) await supersedeProposal(root, active.proposal, proposal.id);
-    await writeJsonAtomic(proposalPath, proposal);
-    await writeActiveProposalIndex(root, proposal);
+    await writeJsonAtomic(proposalPath, projectedProposal);
+    await writeActiveProposalIndex(root, projectedProposal);
     return {
-      proposal,
+      proposal: projectedProposal,
       proposalPath,
       reused: false,
       supersededProposalId: active && !isTerminalProposalState(active.summary.state) ? active.proposal.id : null,
@@ -284,7 +346,7 @@ export async function loadScopeProposal(root, proposalId) {
   invariant(proposal.id === proposalId, 'ERR_PROPOSAL_ID', 'Proposal file identity does not match the requested proposal ID');
   invariant(proposal.projectRoot === path.resolve(root), 'ERR_PROPOSAL_ROOT', 'Proposal belongs to a different repository');
   invariant(proposal.hash === proposalHash(proposal), 'ERR_PROPOSAL_TAMPERED', 'Proposal hash does not match its content');
-  return { proposal, proposalPath, summary: proposalSummary(proposal) };
+  return { proposal, projectedProposal: projectProposalAuthority(proposal), proposalPath, summary: proposalSummary(proposal) };
 }
 
 /** @param {unknown} value @param {number} max */
@@ -344,7 +406,7 @@ export async function refineScopeProposal(root, input) {
       invariant(input.modeAuthorizedByUser !== true || input.mode !== undefined, 'ERR_PROPOSAL_MODE_AUTHORIZATION', 'Mode authorization cannot be supplied without a requested mode');
     }
 
-    const workspaceCandidateId = input.workspaceCandidateId ?? proposal.workspace?.id ?? null;
+    const workspaceCandidateId = input.workspaceCandidateId ?? (proposal.workspace?.requested === true ? proposal.workspace.id : null);
     if (input.workspaceCandidateId !== undefined && input.workspaceCandidateId !== null) {
       boundedRefinementText(input.workspaceCandidateId, 100);
       invariant((proposal.workspaceCandidates ?? []).some((candidate) => candidate.id === input.workspaceCandidateId), 'ERR_WORKSPACE_CANDIDATE', `Unknown workspace candidate: ${input.workspaceCandidateId}`);
@@ -375,6 +437,9 @@ export async function refineScopeProposal(root, input) {
       ...(proposal.decision?.questions ?? []).map((question) => [question.id, question]),
       ...(decision.questions ?? []).map((question) => [question.id, question]),
     ]);
+    const priorResolutions = proposal.decision?.resolutions ?? [];
+    const previouslyResolvedIds = new Set(priorResolutions.map((entry) => entry.questionId));
+    decision.questions = decision.questions.filter((question) => !previouslyResolvedIds.has(question.id));
     const resolved = resolveDecisionQuestions([...availableQuestions.values()], answers);
     const answeredIds = new Set(resolved.resolutions.map((entry) => entry.questionId));
     decision.questions = decision.questions.filter((question) => !answeredIds.has(question.id));
@@ -390,20 +455,10 @@ export async function refineScopeProposal(root, input) {
     const sourceChanges = nonRuntimeChanges(root);
     const acceptanceStrength = classifyAcceptanceStrength(analysis);
     const now = new Date();
-    const revision = (proposal.revision ?? 1) + 1;
-    const archivePath = path.join(runtimePaths(root).proposals, `${proposal.id}.r${proposal.revision ?? 1}.json`);
-    await assertContainedPath(root, archivePath);
-    if (await exists(archivePath)) {
-      const archived = await readJson(archivePath);
-      invariant(archived.hash === proposal.hash, 'ERR_PROPOSAL_REVISION', 'Archived proposal revision does not match the active revision');
-    } else {
-      await writeJsonAtomic(archivePath, proposal);
-    }
-
-    const updated = {
+    const candidate = {
       ...proposal,
-      revision,
-      previousHash: proposal.hash,
+      revision: proposal.revision ?? 1,
+      previousHash: proposal.previousHash,
       gitSha: evidence.gitSha,
       release,
       releaseSelection: {
@@ -444,9 +499,34 @@ export async function refineScopeProposal(root, input) {
         ...(acceptanceStrength.sufficient ? [] : ['A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
       ],
     };
-    delete updated.approval;
-    updated.canonicalState = deriveProposalState(updated);
-    updated.readyForApproval = updated.canonicalState === 'READY_FOR_APPROVAL';
+    delete candidate.approval;
+    const projectedCandidate = projectProposalAuthority(candidate);
+    const projectedCurrent = projectProposalAuthority(proposal);
+    if (authorityFingerprint(projectedCandidate) === authorityFingerprint(projectedCurrent)) {
+      return {
+        proposal: projectedCurrent,
+        proposalPath,
+        archivedRevisionPath: null,
+        resolutions: [],
+        changed: false,
+      };
+    }
+
+    const revision = (proposal.revision ?? 1) + 1;
+    const archivePath = path.join(runtimePaths(root).proposals, `${proposal.id}.r${proposal.revision ?? 1}.json`);
+    await assertContainedPath(root, archivePath);
+    if (await exists(archivePath)) {
+      const archived = await readJson(archivePath);
+      invariant(archived.hash === proposal.hash, 'ERR_PROPOSAL_REVISION', 'Archived proposal revision does not match the active revision');
+    } else {
+      await writeJsonAtomic(archivePath, proposal);
+    }
+
+    const updated = projectProposalAuthority({
+      ...projectedCandidate,
+      revision,
+      previousHash: proposal.hash,
+    });
     updated.hash = proposalHash(updated);
     await writeJsonAtomic(proposalPath, updated);
     await writeActiveProposalIndex(root, updated);
@@ -455,6 +535,7 @@ export async function refineScopeProposal(root, input) {
       proposalPath,
       archivedRevisionPath: path.relative(root, archivePath).replaceAll('\\', '/'),
       resolutions: resolved.resolutions,
+      changed: true,
     };
   });
 }

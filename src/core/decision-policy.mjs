@@ -154,7 +154,7 @@ export function applyDecisionPolicy(evidence, input, options = {}) {
 
 /** @param {Record<string, any>} decision */
 export function buildApprovalBrief(decision) {
-  invariant(['APPROVABLE', 'NEEDS_INPUT', 'BLOCKED'].includes(decision.approvalStatus), 'ERR_DECISION_APPROVAL', 'Decision package has no valid approval status');
+  invariant(['APPROVABLE', 'NEEDS_INPUT', 'BLOCKED', 'NOT_READY', 'APPROVED', 'SUPERSEDED', 'EXPIRED'].includes(decision.approvalStatus), 'ERR_DECISION_APPROVAL', 'Decision package has no valid approval status');
   const brief = {
     schema: 'shipping-harness/approval-brief-v1',
     mode: decision.mode,
@@ -162,7 +162,7 @@ export function buildApprovalBrief(decision) {
     outcome: decision.outcome,
     included: decision.scope.include,
     deferred: decision.scope.exclude,
-    acceptance: decision.acceptance.map((entry) => ({ id: entry.id, description: entry.description, command: entry.command })),
+    acceptance: decision.acceptance.map((entry) => ({ id: entry.id, description: entry.description, command: entry.command, cwd: entry.cwd ?? '.' })),
     assumptions: decision.assumptions.map((entry) => ({ id: entry.id, statement: entry.statement })),
     risks: decision.risks.map((entry) => ({ id: entry.id, category: entry.category, severity: entry.severity, description: entry.description })),
     questions: decision.questions,
@@ -173,7 +173,7 @@ export function buildApprovalBrief(decision) {
     `Mode: ${brief.mode} | Status: ${brief.status}`,
     `Included: ${brief.included.join(' | ')}`,
     `Deferred: ${brief.deferred.join(' | ')}`,
-    `Acceptance: ${brief.acceptance.map((entry) => `${entry.id} ${entry.description}`).join(' | ')}`,
+    `Acceptance: ${brief.acceptance.map((entry) => `${entry.id} [cwd=${entry.cwd}] ${entry.description}`).join(' | ')}`,
     `Assumptions: ${brief.assumptions.map((entry) => `${entry.id} ${entry.statement}`).join(' | ') || 'None'}`,
     `Risks: ${brief.risks.map((entry) => `${entry.id} ${entry.severity} ${entry.category}`).join(' | ') || 'None'}`,
     `Questions: ${brief.questions.map((entry) => `${entry.id} ${entry.prompt}`).join(' | ') || 'None'}`,

@@ -337,6 +337,7 @@ export async function callShippingTool(root, name, rawArguments) {
       proposalId: proposal.id,
       proposalHash: proposal.hash,
       revision: proposal.revision,
+      changed: result.changed,
       previousHash: proposal.previousHash,
       release: proposal.release,
       mode: proposal.mode,
@@ -370,7 +371,7 @@ export async function callShippingTool(root, name, rawArguments) {
     const next = proposal.readyForApproval
       ? 'Review the revised one-screen brief, then explicitly approve the exact revision.'
       : `The revised proposal remains ${proposal.canonicalState}; resolve only that condition.`;
-    return complete(data, `Refined ${proposal.id} to revision ${proposal.revision}. State: ${proposal.canonicalState}. ${next}`);
+    return complete(data, `${result.changed ? 'Refined' : 'Reused unchanged'} ${proposal.id} at revision ${proposal.revision}. State: ${proposal.canonicalState}. ${next}`);
   }
 
   if (name === 'shipping_approve_scope') {

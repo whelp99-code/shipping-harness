@@ -371,6 +371,19 @@
 | AC-1013 | Optional findings are moved to NEXT and do not keep v1.0 open after all release blockers reach zero. |
 | AC-1014 | v1.0.0 closes with a clean committed release receipt, annotated tag, known limitations, operator handover, and zero blockers. |
 
+### v1.1.2
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-112-001 | DIRTY_BASELINE has no approval-ready nested projection. |
+| AC-112-002 | NEEDS_INPUT and NEEDS_ACCEPTANCE have no approval-ready nested projection. |
+| AC-112-003 | READY_FOR_APPROVAL is the only state accepted by the approval gate. |
+| AC-112-004 | Legacy contradictory proposal records project safely without rewriting or hash breakage. |
+| AC-112-005 | Approval-brief command rows include exact working directories. |
+| AC-112-006 | Evidence-identical refinement creates no revision archive and returns `changed: false`. |
+| AC-112-007 | Meaningful refinement preserves the immutable revision and previous-hash chain. |
+| AC-112-008 | OMP 18.0.10/15.10.12 compatibility, security, license, docs, and all regressions pass. |
+
 ## Definition of Done
 
 A release is done when its acceptance criteria pass, required checks succeed, release blockers are zero, non-blockers are moved to backlog, release documentation exists, and Git has a clean committed tag. A missing remote is documented and does not justify fabricating a push.

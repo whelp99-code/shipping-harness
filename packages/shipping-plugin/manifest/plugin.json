@@ -2,7 +2,7 @@
   "schema": "shipping-harness/plugin-v1",
   "name": "shipping-harness",
   "displayName": "Shipping Harness",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "localOnly": true,
   "mcp": {
     "transport": "stdio",

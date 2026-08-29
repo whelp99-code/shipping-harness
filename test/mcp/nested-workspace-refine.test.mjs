@@ -115,6 +115,7 @@ test('shipping_refine selects a tied workspace under one proposal identity and i
       workspaceCandidateId: beta.id,
     });
     const revision = refined.structuredContent;
+    assert.equal(revision.changed, true);
     assert.equal(revision.proposalId, initial.proposalId);
     assert.equal(revision.revision, 2);
     assert.equal(revision.previousHash, initial.proposalHash);

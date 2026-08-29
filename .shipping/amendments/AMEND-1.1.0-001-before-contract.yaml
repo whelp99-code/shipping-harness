@@ -1,49 +1,49 @@
 {
   "acceptance": [
     {
+      "id": "AC-11001",
+      "description": "Nested workspace, cwd-bound command, version evidence, and proposal refinement tests pass.",
+      "type": "command",
       "command": "node --test --test-reporter=spec test/mcp/nested-workspace-refine.test.mjs",
       "cwd": ".",
-      "description": "Nested workspace, cwd-bound command, version evidence, and proposal refinement tests pass.",
-      "id": "AC-11001",
       "required": true,
-      "timeoutSeconds": 240,
-      "type": "command"
+      "timeoutSeconds": 240
     },
     {
+      "id": "AC-11002",
+      "description": "All MCP and OMP nine-tool compatibility tests pass.",
+      "type": "command",
       "command": "npm run test:mcp",
       "cwd": ".",
-      "description": "All MCP and OMP nine-tool compatibility tests pass.",
-      "id": "AC-11002",
       "required": true,
-      "timeoutSeconds": 360,
-      "type": "command"
+      "timeoutSeconds": 360
     },
     {
+      "id": "AC-11003",
+      "description": "Decision validation and adversarial authority tests pass.",
+      "type": "command",
       "command": "npm run test:decision",
       "cwd": ".",
-      "description": "Decision validation and adversarial authority tests pass.",
-      "id": "AC-11003",
       "required": true,
-      "timeoutSeconds": 360,
-      "type": "command"
+      "timeoutSeconds": 360
     },
     {
+      "id": "AC-11004",
+      "description": "Beginner refinement and user-view flows pass.",
+      "type": "command",
       "command": "npm run test:usability",
       "cwd": ".",
-      "description": "Beginner refinement and user-view flows pass.",
-      "id": "AC-11004",
       "required": true,
-      "timeoutSeconds": 360,
-      "type": "command"
+      "timeoutSeconds": 360
     },
     {
+      "id": "AC-11005",
+      "description": "Full release, security, license, documentation, and stable-control verification passes.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full release, security, license, documentation, and stable-control verification passes.",
-      "id": "AC-11005",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     }
   ],
   "adapters": {
@@ -148,7 +148,6 @@
         "package.json",
         "packages/shipping-plugin/manifest/plugin.json",
         "packages/shipping-plugin/skill/SKILL.md",
-        "packages/stable-control/compatibility.mjs",
         "schemas/v1/**",
         "src/core/decision-evidence.mjs",
         "src/core/decision-package.mjs",

@@ -1,0 +1,22 @@
+{
+  "actor": "sequential-build",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": "packages/stable-control/compatibility.mjs"
+    }
+  ],
+  "correctedContractHash": "944bfd1234cdb047fcd88fc5f779bdf0ae0a692165b90c1be07cb49554902628",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-1.1.0-001",
+  "kind": "version-metadata-scope-correction",
+  "previousContractHash": "fd81dfe266e813a6aa05bac969e9004016c2bfed64f4b1ed325562f7fa188c98",
+  "project": "shipping-harness",
+  "reason": "Stable compatibility metadata must truthfully identify v1.1.0 and its nine-tool OMP surface.",
+  "recordedAt": "2026-08-29T05:42:04.823Z",
+  "release": "1.1.0",
+  "removed": [],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticProductScopeExpansion": false,
+  "sourceGitSha": "6eeb5ad9a7d675837a7cdebf342f03c2157575bf"
+}

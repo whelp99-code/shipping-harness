@@ -1,49 +1,40 @@
 {
   "acceptance": [
     {
-      "command": "node --test --test-reporter=spec test/mcp/nested-workspace-refine.test.mjs",
+      "id": "AC-11101",
+      "description": "OMP main-harness install, doctor, backup, and rollback tests pass.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/omp-main-harness/*.test.mjs",
       "cwd": ".",
-      "description": "Nested workspace, cwd-bound command, version evidence, and proposal refinement tests pass.",
-      "id": "AC-11001",
       "required": true,
-      "timeoutSeconds": 240,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-11102",
+      "description": "Current OMP host version/smoke and isolated nine-tool configuration field smoke passes.",
+      "type": "command",
+      "command": "node packages/omp-main-harness/field-smoke.mjs --check",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-11103",
+      "description": "All MCP and OMP compatibility tests pass.",
+      "type": "command",
       "command": "npm run test:mcp",
       "cwd": ".",
-      "description": "All MCP and OMP nine-tool compatibility tests pass.",
-      "id": "AC-11002",
       "required": true,
-      "timeoutSeconds": 360,
-      "type": "command"
+      "timeoutSeconds": 360
     },
     {
-      "command": "npm run test:decision",
-      "cwd": ".",
-      "description": "Decision validation and adversarial authority tests pass.",
-      "id": "AC-11003",
-      "required": true,
-      "timeoutSeconds": 360,
-      "type": "command"
-    },
-    {
-      "command": "npm run test:usability",
-      "cwd": ".",
-      "description": "Beginner refinement and user-view flows pass.",
-      "id": "AC-11004",
-      "required": true,
-      "timeoutSeconds": 360,
-      "type": "command"
-    },
-    {
+      "id": "AC-11104",
+      "description": "Full release, security, license, stable-control, and documentation verification passes.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full release, security, license, documentation, and stable-control verification passes.",
-      "id": "AC-11005",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     }
   ],
   "adapters": {
@@ -109,28 +100,31 @@
     "generateReport": true
   },
   "requirements": [
-    "REQ-WORKSPACE-001",
-    "REQ-WORKSPACE-002",
-    "REQ-ACCEPTANCE-CWD-001",
-    "REQ-VERSION-EVIDENCE-001",
-    "REQ-PROPOSAL-REFINE-001",
-    "REQ-REFINE-AUTHORITY-001"
+    "REQ-OMP-MANAGER-001",
+    "REQ-OMP-18-COMPAT-001",
+    "REQ-OMP-BACKUP-001",
+    "REQ-OMP-ROLLBACK-001",
+    "REQ-OMP-APPROVAL-001",
+    "REQ-OMP-DOCTOR-001",
+    "REQ-FIELD-PILOT-001",
+    "REQ-INSTALL-RECEIPT-001"
   ],
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Executing discovered target-project commands during planning.",
-      "Free-form or model-authored shell, argv, environment, credential, push, deploy, or publication fields.",
-      "Automatic commit, stash, reset, merge, push, deploy, purchase, or target-project source changes.",
-      "Orchestrating multiple products or workspaces in one release.",
-      "OMP source modification, Team/DAG activation, public distribution, or remote protocol redesign."
+      "Automatic target-project commit, stash, reset, merge, push, deployment, publication, purchase, or source modification.",
+      "Automatic approval of a target proposal or execution of discovered target-project commands during the planning pilot.",
+      "OMP core or omo-balance router source modification, OMP update, provider credential changes, or model routing changes.",
+      "Team/DAG activation, public package publication, customer distribution, or public network listeners.",
+      "Deleting previous OMP configuration, Shipping state, release receipts, or rollback packages."
     ],
     "include": [
-      "Bounded tracked-file discovery and deterministic selection of the real nested runnable workspace.",
-      "Manifest-derived verification and packaging commands with exact workspace-relative cwd and acceptance strength.",
-      "Evidence-backed patch, minor, or major version recommendation without overriding explicit user versions.",
-      "A ninth shipping_refine MCP tool that revises one canonical proposal identity using bounded structured answers and workspace selection.",
-      "Immutable archived proposal revisions, active-index updates, OMP skill guidance, and nine-tool compatibility validation."
+      "Ship a reusable shipping-harness-omp command for preview, install, doctor, and rollback of the OMP main-harness integration.",
+      "Detect and validate the current OMP 18.0.10 router/core environment while retaining tested MCP 2025-03-26 compatibility.",
+      "Back up and atomically merge OMP MCP, approval, AGENTS, Skill, and install receipt files without touching project release state.",
+      "Register all nine Shipping tools with always-ask authority and explicit prompt policy for refine, approval, execution, fixes, pause, and close.",
+      "Provide deterministic isolated install/rollback tests, an actual OMP version/smoke gate, and a non-destructive nested-project planning pilot receipt.",
+      "Package and document the v1.1.1 upgrade, fresh-shell doctor, rollback, and internal-only operating procedure."
     ],
     "paths": {
       "exclude": [
@@ -143,26 +137,20 @@
       ],
       "include": [
         "README.md",
+        "bin/shipping-harness-omp.mjs",
         "docs/COMPATIBILITY.md",
         "docs/MCP.md",
+        "docs/operations/OMP-MAIN-HARNESS.md",
+        "docs/planning/20-V1.1.1-OMP-FIELD-DEPLOYMENT-AND-PILOT-DEVELOPMENT-PLAN.md",
         "package.json",
+        "packages/omp-main-harness/**",
         "packages/shipping-plugin/manifest/plugin.json",
         "packages/shipping-plugin/skill/SKILL.md",
         "packages/stable-control/compatibility.mjs",
-        "schemas/v1/**",
-        "scripts/v1-doc-audit.mjs",
-        "src/core/decision-evidence.mjs",
-        "src/core/decision-package.mjs",
-        "src/core/project-analysis.mjs",
-        "src/core/proposal-state.mjs",
-        "src/core/proposals.mjs",
-        "src/mcp/protocol.mjs",
-        "src/mcp/tools.mjs",
-        "src/mcp/user-view.mjs",
-        "test/adversarial/**",
-        "test/mcp/**",
-        "test/unit/**",
-        "test/usability/**"
+        "schemas/v1/examples/mcp-surface.example.json",
+        "schemas/v1/examples/plugin.example.json",
+        "test/mcp/omp-compatibility.test.mjs",
+        "test/omp-main-harness/**"
       ]
     }
   },

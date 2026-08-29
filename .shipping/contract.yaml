@@ -1,37 +1,46 @@
 {
   "acceptance": [
     {
-      "command": "node --test --test-reporter=spec test/mcp/baseline-steward.test.mjs test/mcp/proposal-lifecycle.test.mjs test/mcp/nested-workspace-refine.test.mjs",
+      "command": "node --test --test-reporter=spec test/mcp/project-intelligence.test.mjs test/mcp/baseline-steward.test.mjs test/mcp/nested-workspace-refine.test.mjs",
       "cwd": ".",
-      "description": "Dirty classification, baseline plan, file-set handshake, and next-action tests pass.",
-      "id": "AC-12001",
-      "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
-    },
-    {
-      "command": "npm run test:mcp",
-      "cwd": ".",
-      "description": "All MCP and OMP compatibility tests pass with nine tools.",
-      "id": "AC-12002",
+      "description": "Mixed-stack graph, work themes, coverage matrix, and one-screen proposal tests pass.",
+      "id": "AC-13001",
       "required": true,
       "timeoutSeconds": 360,
       "type": "command"
     },
     {
-      "command": "npm run release:verify",
+      "command": "node --test --test-reporter=spec test/integration/isolated-acceptance.test.mjs",
       "cwd": ".",
-      "description": "Full regression, security, license, and documentation verification passes.",
-      "id": "AC-12003",
+      "description": "Side-effecting acceptance isolation and deterministic package tests pass.",
+      "id": "AC-13002",
+      "required": true,
+      "timeoutSeconds": 360,
+      "type": "command"
+    },
+    {
+      "command": "npm run test:mcp && npm run release:verify",
+      "cwd": ".",
+      "description": "All MCP, OMP, and full release regression, security, license, and docs gates pass.",
+      "id": "AC-13003",
       "required": true,
       "timeoutSeconds": 900,
+      "type": "command"
+    },
+    {
+      "command": "node scripts/evoharvest-intelligence-pilot.mjs --check",
+      "cwd": ".",
+      "description": "The real EvoHarvest planning pilot is non-destructive and records mixed-stack, theme, coverage, and baseline evidence.",
+      "id": "AC-13004",
+      "required": true,
+      "timeoutSeconds": 300,
       "type": "command"
     },
     {
       "command": "git diff --check",
       "cwd": ".",
       "description": "No whitespace or conflict-marker errors remain.",
-      "id": "AC-12004",
+      "id": "AC-13005",
       "required": true,
       "timeoutSeconds": 60,
       "type": "command"
@@ -100,29 +109,29 @@
     "generateReport": true
   },
   "requirements": [
-    "REQ-BASE-001",
-    "REQ-BASE-002",
-    "REQ-BASE-003",
-    "REQ-BASE-004",
-    "REQ-BASE-005",
-    "REQ-BASE-006"
+    "REQ-INTEL-001",
+    "REQ-INTEL-002",
+    "REQ-COVER-001",
+    "REQ-COVER-002",
+    "REQ-ISOLATE-001",
+    "REQ-ISOLATE-002"
   ],
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Shipping-executed commit, stash, reset, clean, checkout, delete, discard, push, merge, or deploy.",
-      "Automatic trust of tracked .omo, .senpi, .serena, generated, or ambiguous files.",
-      "Component graphs, work themes, acceptance coverage, and isolated package execution reserved for v1.3.0.",
+      "Executing product deployment, external services, paid actions, production migrations, or Git mutation in target projects.",
+      "Overriding the explicit user goal with an inferred work theme or auto-approving an inferred scope.",
+      "Unbounded semantic analysis or reading untracked secrets/content for theme inference.",
       "A tenth MCP tool, OMP core/model-router changes, Team/DAG, public publication, or public listeners."
     ],
     "include": [
-      "Classify dirty entries as PRODUCT, RELEASE_EVIDENCE, AGENT_RUNTIME, SHIPPING_RUNTIME, GENERATED, or UNKNOWN using status and tracking evidence.",
-      "Treat untracked agent/runtime and generated artifacts as visible non-blocking entries while tracked or unknown runtime entries remain blocking.",
-      "Return a bounded baseline plan with exact included and excluded paths, rationale, suggested commit message, and a file-set hash.",
-      "Return one canonical next action for each proposal state and remove destructive discard from beginner guidance.",
-      "Require an explicit user-authorized baseline preservation handshake before accepting a post-commit rescan of a dirty proposal.",
-      "Verify the reviewed file set equals the committed file set, keep the same proposal identity, and reject drift.",
-      "Preserve the nine-tool MCP surface, OMP 18.0.10 compatibility, and all v1.1.2 canonical-state guarantees."
+      "Build a bounded path-based component graph and identify primary/supporting stacks from tracked repository evidence.",
+      "Group changed product paths into one to three evidence-backed work themes and recommend a concrete release goal without overriding the explicit user goal.",
+      "Map every blocking product/release-evidence path to authority-bearing acceptance commands and exact cwd; uncovered paths force NEEDS_ACCEPTANCE.",
+      "Annotate acceptance commands with side-effect class, isolation requirement, and deterministic-output requirement where applicable.",
+      "Run side-effecting package/release acceptance in a temporary Git worktree or isolated copy and compare repeat output digests without mutating the source worktree.",
+      "Expose a bounded one-screen approval summary while preserving expandable detailed evidence.",
+      "Run a non-destructive real EvoHarvest planning pilot and preserve OMP 18.0.10, nine MCP tools, human approval, and all prior guarantees."
     ],
     "paths": {
       "exclude": [
@@ -131,7 +140,8 @@
         ".git/**",
         "dist/**",
         "coverage/**",
-        "node_modules/**"
+        "node_modules/**",
+        "docs/reports/**"
       ],
       "include": [
         "README.md",
@@ -139,8 +149,11 @@
         "docs/COMPATIBILITY.md",
         "docs/TRACEABILITY.md",
         "docs/planning/02-REQUIREMENTS.md",
-        "docs/planning/22-V1.2.0-SAFE-BASELINE-STEWARD-DEVELOPMENT-PLAN.md",
+        "docs/planning/23-V1.3.0-PROJECT-INTELLIGENCE-AND-ACCEPTANCE-COVERAGE-DEVELOPMENT-PLAN.md",
         "package.json",
+        "src/core/project-analysis.mjs",
+        "src/core/project-intelligence.mjs",
+        "src/core/isolated-verification.mjs",
         "src/core/baseline.mjs",
         "src/core/decision-evidence.mjs",
         "src/core/proposal-state.mjs",
@@ -151,10 +164,12 @@
         "packages/shipping-plugin/skill/SKILL.md",
         "packages/stable-control/compatibility.mjs",
         "schemas/v1/examples/plugin.example.json",
+        "scripts/evoharvest-intelligence-pilot.mjs",
+        "test/mcp/project-intelligence.test.mjs",
         "test/mcp/baseline-steward.test.mjs",
-        "test/mcp/proposal-lifecycle.test.mjs",
         "test/mcp/nested-workspace-refine.test.mjs",
-        "test/mcp/omp-compatibility.test.mjs"
+        "test/mcp/omp-compatibility.test.mjs",
+        "test/integration/isolated-acceptance.test.mjs"
       ]
     }
   },

@@ -1,4 +1,4 @@
-# Sequential Roadmap and Development Plan — v0.4.0 to v1.1.1
+# Sequential Roadmap and Development Plan — v0.4.0 to v1.3.0
 
 **Status:** ROADMAP LOCKED
 **Canonical direction:** [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md)
@@ -30,6 +30,9 @@ The roadmap below defines sequence and dependency. Implementation must use the c
 | v1.0.2 | [`18-V1.0.2-PROPOSAL-SAFETY-HARDENING-DEVELOPMENT-PLAN.md`](18-V1.0.2-PROPOSAL-SAFETY-HARDENING-DEVELOPMENT-PLAN.md) |
 | v1.1.0 | [`19-V1.1.0-NESTED-WORKSPACE-AND-REFINEMENT-DEVELOPMENT-PLAN.md`](19-V1.1.0-NESTED-WORKSPACE-AND-REFINEMENT-DEVELOPMENT-PLAN.md) |
 | v1.1.1 | [`20-V1.1.1-OMP-FIELD-DEPLOYMENT-AND-PILOT-DEVELOPMENT-PLAN.md`](20-V1.1.1-OMP-FIELD-DEPLOYMENT-AND-PILOT-DEVELOPMENT-PLAN.md) |
+| v1.1.2 | [`21-V1.1.2-CANONICAL-PROPOSAL-STATE-DEVELOPMENT-PLAN.md`](21-V1.1.2-CANONICAL-PROPOSAL-STATE-DEVELOPMENT-PLAN.md) |
+| v1.2.0 | [`22-V1.2.0-SAFE-BASELINE-STEWARD-DEVELOPMENT-PLAN.md`](22-V1.2.0-SAFE-BASELINE-STEWARD-DEVELOPMENT-PLAN.md) |
+| v1.3.0 | [`23-V1.3.0-PROJECT-INTELLIGENCE-AND-ACCEPTANCE-COVERAGE-DEVELOPMENT-PLAN.md`](23-V1.3.0-PROJECT-INTELLIGENCE-AND-ACCEPTANCE-COVERAGE-DEVELOPMENT-PLAN.md) |
 
 If this summary conflicts with a version-specific plan, the direction document wins first, then the version-specific plan, then this summary.
 
@@ -61,6 +64,9 @@ Canonical decision: [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERN
 | v1.0.2 | Proposal Safety Hardening | One truthful proposal state; duplicate, dirty, mode-switched, weak-gate approval is impossible. |
 | v1.1.0 | Nested Workspace Intelligence | The actual runnable workspace, version, commands, and cwd are detected and one proposal is refined. |
 | v1.1.1 | OMP Field Deployment | The nine-tool main harness is installed and proven against a nested-project pilot. |
+| v1.1.2 | Canonical Proposal State | One authority state controls every approval projection and no-op refine is idempotent. |
+| v1.2.0 | Safe Baseline Steward | Dirty work is classified and safely preserved through an explicit host-side handshake. |
+| v1.3.0 | Project Intelligence and Coverage | Mixed-stack work themes and acceptance coverage make the proposed release concrete and provable. |
 
 ---
 

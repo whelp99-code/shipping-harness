@@ -1,19 +1,10 @@
 {
   "acceptance": [
     {
-      "command": "node --test --test-reporter=spec test/omp-main-harness/*.test.mjs",
+      "command": "node --test --test-reporter=spec test/mcp/canonical-proposal-state.test.mjs test/mcp/proposal-lifecycle.test.mjs test/mcp/nested-workspace-refine.test.mjs",
       "cwd": ".",
-      "description": "OMP main-harness install, doctor, backup, and rollback tests pass.",
-      "id": "AC-11101",
-      "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
-    },
-    {
-      "command": "node packages/omp-main-harness/field-smoke.mjs --check",
-      "cwd": ".",
-      "description": "Current OMP host version/smoke and isolated nine-tool configuration field smoke passes.",
-      "id": "AC-11102",
+      "description": "Canonical state, legacy projection, cwd-bound brief, and no-op refine tests pass.",
+      "id": "AC-11201",
       "required": true,
       "timeoutSeconds": 300,
       "type": "command"
@@ -21,8 +12,8 @@
     {
       "command": "npm run test:mcp",
       "cwd": ".",
-      "description": "All MCP and OMP compatibility tests pass.",
-      "id": "AC-11103",
+      "description": "All MCP proposal and OMP compatibility tests pass.",
+      "id": "AC-11202",
       "required": true,
       "timeoutSeconds": 360,
       "type": "command"
@@ -30,10 +21,19 @@
     {
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full release, security, license, stable-control, and documentation verification passes.",
-      "id": "AC-11104",
+      "description": "Full regression, security, license, and documentation verification passes.",
+      "id": "AC-11203",
       "required": true,
       "timeoutSeconds": 900,
+      "type": "command"
+    },
+    {
+      "command": "git diff --check",
+      "cwd": ".",
+      "description": "No whitespace or conflict-marker errors remain.",
+      "id": "AC-11204",
+      "required": true,
+      "timeoutSeconds": 60,
       "type": "command"
     }
   ],
@@ -100,31 +100,28 @@
     "generateReport": true
   },
   "requirements": [
-    "REQ-OMP-MANAGER-001",
-    "REQ-OMP-18-COMPAT-001",
-    "REQ-OMP-BACKUP-001",
-    "REQ-OMP-ROLLBACK-001",
-    "REQ-OMP-APPROVAL-001",
-    "REQ-OMP-DOCTOR-001",
-    "REQ-FIELD-PILOT-001",
-    "REQ-INSTALL-RECEIPT-001"
+    "REQ-CANON-001",
+    "REQ-CANON-002",
+    "REQ-CANON-003",
+    "REQ-CANON-004",
+    "REQ-CANON-005",
+    "REQ-CANON-006"
   ],
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Automatic target-project commit, stash, reset, merge, push, deployment, publication, purchase, or source modification.",
-      "Automatic approval of a target proposal or execution of discovered target-project commands during the planning pilot.",
-      "OMP core or omo-balance router source modification, OMP update, provider credential changes, or model routing changes.",
-      "Team/DAG activation, public package publication, customer distribution, or public network listeners.",
-      "Deleting previous OMP configuration, Shipping state, release receipts, or rollback packages."
+      "Baseline commit, stash, reset, discard, or other Git mutation automation.",
+      "Dirty-path classification, component graphs, work themes, and acceptance coverage implementation reserved for later releases.",
+      "New MCP tools, OMP core/model-router changes, Team/DAG, push, deploy, publication, or public listeners.",
+      "Rewriting historical proposal files merely to normalize their projection."
     ],
     "include": [
-      "Ship a reusable shipping-harness-omp command for preview, install, doctor, and rollback of the OMP main-harness integration.",
-      "Detect and validate the current OMP 18.0.10 router/core environment while retaining tested MCP 2025-03-26 compatibility.",
-      "Back up and atomically merge OMP MCP, approval, AGENTS, Skill, and install receipt files without touching project release state.",
-      "Register all nine Shipping tools with always-ask authority and explicit prompt policy for refine, approval, execution, fixes, pause, and close.",
-      "Provide deterministic isolated install/rollback tests, an actual OMP version/smoke gate, and a non-destructive nested-project planning pilot receipt.",
-      "Package and document the v1.1.1 upgrade, fresh-shell doctor, rollback, and internal-only operating procedure."
+      "Make one canonical proposal state authoritative for every approval projection and gate.",
+      "Safely project legacy contradictory proposal files without rewriting or hash damage.",
+      "Include exact cwd in approval-brief acceptance rows.",
+      "Prevent no-op refinement revisions while preserving meaningful immutable revision chains.",
+      "Write the sequential v1.1.2, v1.2.0, and v1.3.0 plans; implement only v1.1.2 in this release.",
+      "Preserve OMP 18.0.10 and 15.10.12 compatibility and the nine-tool MCP surface."
     ],
     "paths": {
       "exclude": [
@@ -137,20 +134,30 @@
       ],
       "include": [
         "README.md",
-        "bin/shipping-harness-omp.mjs",
-        "docs/COMPATIBILITY.md",
         "docs/MCP.md",
-        "docs/operations/OMP-MAIN-HARNESS.md",
-        "docs/planning/20-V1.1.1-OMP-FIELD-DEPLOYMENT-AND-PILOT-DEVELOPMENT-PLAN.md",
+        "docs/COMPATIBILITY.md",
+        "docs/TRACEABILITY.md",
+        "docs/planning/02-REQUIREMENTS.md",
+        "docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md",
+        "docs/planning/21-V1.1.2-CANONICAL-PROPOSAL-STATE-DEVELOPMENT-PLAN.md",
+        "docs/planning/22-V1.2.0-SAFE-BASELINE-STEWARD-DEVELOPMENT-PLAN.md",
+        "docs/planning/23-V1.3.0-PROJECT-INTELLIGENCE-AND-ACCEPTANCE-COVERAGE-DEVELOPMENT-PLAN.md",
         "package.json",
-        "packages/omp-main-harness/**",
+        "src/core/proposal-state.mjs",
+        "src/core/proposals.mjs",
+        "src/core/decision-policy.mjs",
+        "src/core/decision-package.mjs",
+        "src/mcp/tools.mjs",
         "packages/shipping-plugin/manifest/plugin.json",
         "packages/shipping-plugin/skill/SKILL.md",
         "packages/stable-control/compatibility.mjs",
         "schemas/v1/examples/mcp-surface.example.json",
         "schemas/v1/examples/plugin.example.json",
+        "test/mcp/canonical-proposal-state.test.mjs",
+        "test/mcp/proposal-lifecycle.test.mjs",
+        "test/mcp/nested-workspace-refine.test.mjs",
         "test/mcp/omp-compatibility.test.mjs",
-        "test/omp-main-harness/**"
+        "test/plugin/renderers.test.mjs"
       ]
     }
   },

@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 4,
+    "requiredFailed": 0,
+    "total": 4
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "b6a5b49685007320f83a7c13e917ef1c4eeb06eb",
+  "closedAt": "2026-08-29T10:59:09.329Z",
+  "closedGitSha": "bf0d03d3021efbcc694b27376dcd40e0e69aea59",
+  "contractHash": "0475af0cb6bb1a9ded872ef38fa6fd2b34a30aa6163eaf2428a29423b02c5267",
+  "evidenceRunId": "run-2026-08-29T10-58-43-053Z-f03aef10",
+  "fixCycles": 0,
+  "goal": "Eliminate contradictory proposal approval states, preserve backward-compatible proposal reads, bind approval checks to canonical state, and prevent no-op refinement revisions.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.1.2",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

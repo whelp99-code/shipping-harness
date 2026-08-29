@@ -1,0 +1,39 @@
+{
+  "schema": "shipping-harness/v1.1.0-package-omp-smoke",
+  "release": "1.1.0",
+  "state": "VERIFIED",
+  "recordedAt": "2026-08-29T05:49:46.992Z",
+  "status": "PASS",
+  "package": "shipping-harness-1.1.0.tgz",
+  "packageVersion": "1.1.0",
+  "packageSha256": "b58c5274ed1ac4a99425e14c93b48eef3aae8c02d01538677c2a3ad81fb34957",
+  "sourceCommit": "92e430d23b8e6297fbb0787079eb99bf893eba1c",
+  "networkUsed": false,
+  "omp": {
+    "client": "OMP 15.10.12",
+    "protocol": "2025-03-26",
+    "connected": true,
+    "tools": 9,
+    "refineTool": true,
+    "proposalId": "proposal-2026-08-29T05-49-24-020Z-203ed795",
+    "revision": 2,
+    "workspace": "beta-runtime-v1.1.0",
+    "release": "1.1.1",
+    "state": "READY_FOR_APPROVAL",
+    "acceptance": [
+      [
+        "make verify",
+        "beta-runtime-v1.1.0"
+      ],
+      [
+        "make package",
+        "beta-runtime-v1.1.0"
+      ],
+      [
+        "git diff --check",
+        "."
+      ]
+    ],
+    "status": "AWAITING_APPROVAL"
+  }
+}

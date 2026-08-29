@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 5,
+    "requiredFailed": 0,
+    "total": 5
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "41b2259af410496e72d15df746e71a7ffa5a5351",
+  "closedAt": "2026-08-29T05:49:46.937Z",
+  "closedGitSha": "92e430d23b8e6297fbb0787079eb99bf893eba1c",
+  "contractHash": "9b06594ce856182b1918282ba0af822d3cd0b6e08fa34b041d0f69906b84bf18",
+  "evidenceRunId": "run-2026-08-29T05-48-24-933Z-7eff9818",
+  "fixCycles": 0,
+  "goal": "Detect the real nested product workspace, derive cwd-bound acceptance and version evidence, and refine one canonical proposal through a bounded ninth MCP tool.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.1.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

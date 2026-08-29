@@ -1,0 +1,24 @@
+{
+  "actor": "human-approved-compatibility-debug",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": "scripts/v1-doc-audit.mjs"
+    }
+  ],
+  "correctedContractHash": "fd36bfe363ebdd56f427927ef9a931e73e34202efe74b240de290df53613a07c",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-1.0.1-001",
+  "kind": "patch-release-verification-correction",
+  "previousContractHash": "df75284890940215222fbd0b80d2df1d56833dac34e251ec95a74963e0eff793",
+  "previousState": "LOCKED",
+  "productionCodeChanged": false,
+  "project": "shipping-harness",
+  "reason": "The v1 document audit hard-coded package 1.0.0 and must accept the active 1.0.1 patch release. This adds only that verification script to scope.",
+  "recordedAt": "2026-08-29T03:39:04.144Z",
+  "release": "1.0.1",
+  "removed": [],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticProductScopeExpansion": false,
+  "sourceGitSha": "bb8672db4578049a00821c99823dc25259d62d9f"
+}

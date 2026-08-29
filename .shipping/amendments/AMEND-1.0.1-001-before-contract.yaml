@@ -1,31 +1,31 @@
 {
   "acceptance": [
     {
+      "id": "AC-10101",
+      "description": "OMP 15.10.12 protocol 2025-03-26 initializes and retains that negotiated version.",
+      "type": "command",
       "command": "node --test --test-reporter=spec test/mcp/omp-compatibility.test.mjs",
       "cwd": ".",
-      "description": "OMP 15.10.12 protocol 2025-03-26 initializes and retains that negotiated version.",
-      "id": "AC-10101",
       "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
+      "timeoutSeconds": 120
     },
     {
+      "id": "AC-10102",
+      "description": "Existing MCP latest and legacy regression suite passes.",
+      "type": "command",
       "command": "npm run test:mcp",
       "cwd": ".",
-      "description": "Existing MCP latest and legacy regression suite passes.",
-      "id": "AC-10102",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-10103",
+      "description": "All release tests and security checks pass without authority regression.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "All release tests and security checks pass without authority regression.",
-      "id": "AC-10103",
       "required": true,
-      "timeoutSeconds": 600,
-      "type": "command"
+      "timeoutSeconds": 600
     }
   ],
   "adapters": {
@@ -76,9 +76,9 @@
     "missing-fallback-renderer"
   ],
   "budgets": {
+    "maxFixCycles": 2,
     "maxAgentRuns": 3,
     "maxCommandSeconds": 600,
-    "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
   "goal": "Restore OMP MCP compatibility by supporting the protocol version OMP 15.10.12 actually negotiates, with no change to Shipping authority or tool behavior.",
@@ -97,6 +97,12 @@
   ],
   "schema": "shipping-harness/v1",
   "scope": {
+    "include": [
+      "MCP initialization compatibility for OMP 15.10.12 protocol 2025-03-26",
+      "Regression tests for OMP-style initialize, tools/list, and shipping_status",
+      "Compatibility documentation and v1.0.1 package version",
+      "Corrected internal OMP bootstrap target and probes"
+    ],
     "exclude": [
       "New Shipping tools or changed authority semantics",
       "Changes to OMP source code",
@@ -104,13 +110,16 @@
       "Remote protocol changes",
       "Public distribution or deployment"
     ],
-    "include": [
-      "MCP initialization compatibility for OMP 15.10.12 protocol 2025-03-26",
-      "Regression tests for OMP-style initialize, tools/list, and shipping_status",
-      "Compatibility documentation and v1.0.1 package version",
-      "Corrected internal OMP bootstrap target and probes"
-    ],
     "paths": {
+      "include": [
+        "src/mcp/protocol.mjs",
+        "test/mcp/**",
+        "packages/stable-control/compatibility.mjs",
+        "docs/COMPATIBILITY.md",
+        "docs/MCP.md",
+        "README.md",
+        "package.json"
+      ],
       "exclude": [
         ".shipping/contract.yaml",
         ".shipping/contract.lock",
@@ -118,16 +127,6 @@
         "dist/**",
         "coverage/**",
         "node_modules/**"
-      ],
-      "include": [
-        "README.md",
-        "docs/COMPATIBILITY.md",
-        "docs/MCP.md",
-        "package.json",
-        "packages/stable-control/compatibility.mjs",
-        "scripts/v1-doc-audit.mjs",
-        "src/mcp/protocol.mjs",
-        "test/mcp/**"
       ]
     }
   },

@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.1.0 — Nested Workspace Intelligence and Proposal Refinement`
-**Authority:** the release is complete only when `.shipping/releases/1.1.0.json` is `CLOSED` and annotated tag `v1.1.0` points to the closure commit
+**Current release train:** `v1.1.1 — OMP Field Deployment and Rollback`
+**Authority:** the release is complete only when `.shipping/releases/1.1.1.json` is `CLOSED` and annotated tag `v1.1.1` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -55,6 +55,23 @@ shipping-harness close
 ```
 
 The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency-free and deterministic parser.
+
+## OMP main-harness installation
+
+After `v1.1.1` is tagged, run from the clean Shipping Harness checkout:
+
+```bash
+# Read-only preview
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.1
+
+# Back up, install locally, merge OMP settings, and verify
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.1 --apply
+
+# Thereafter the installed command is available
+shipping-harness-omp doctor
+```
+
+The bootstrap preserves the installed OMP binary, `omo-balance` router, model roles, credentials, other MCP servers, and target-project source. It installs Shipping under `~/.local`, exposes nine MCP tools including `shipping_refine`, records an exact rollback command, and never publishes a package. The primary field-tested host is OMP `18.0.10`; source-linked OMP `15.10.12` remains a compatibility lane. See [`docs/operations/OMP-MAIN-HARNESS.md`](docs/operations/OMP-MAIN-HARNESS.md).
 
 ## Beginner use: connect it as an MCP server
 
@@ -206,6 +223,10 @@ Adds one canonical proposal state, an active-proposal index, idempotent starts, 
 
 Selects the actual runnable workspace from bounded Git-tracked evidence, derives manifest-owned acceptance commands with exact working directories, recommends the next semantic version from mechanical evidence, and adds `shipping_refine` so one proposal identity can be revised without replacement proposals or raw command input.
 
+### v1.1.1 — OMP Field Deployment and Rollback
+
+Adds `shipping-harness-omp` preview/bootstrap/doctor/rollback, retains the active OMP `18.0.10` wrapper/core, backs up the previous Shipping package and managed OMP files, validates all nine MCP tools, and runs a planning-only nested-project field pilot without target mutation or approval.
+
 Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
 
 ## Documentation
@@ -220,6 +241,7 @@ Shipping Harness is planned for the owner's personal use and future private use 
 - [`docs/TRACEABILITY.md`](docs/TRACEABILITY.md)
 - [`docs/MCP.md`](docs/MCP.md)
 - [`docs/BEGINNER-QUICKSTART-KO.md`](docs/BEGINNER-QUICKSTART-KO.md)
+- [`docs/operations/OMP-MAIN-HARNESS.md`](docs/operations/OMP-MAIN-HARNESS.md)
 - [`docs/research/upstream-code-audit/README.md`](docs/research/upstream-code-audit/README.md)
 - [`docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md`](docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md)
 - [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md)

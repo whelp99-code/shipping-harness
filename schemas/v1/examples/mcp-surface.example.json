@@ -2,7 +2,8 @@
   "schema": "shipping-harness/mcp-surface-v1",
   "protocolVersions": [
     "2026-07-28",
-    "2025-11-25"
+    "2025-11-25",
+    "2025-03-26"
   ],
   "tools": [
     "shipping_start",

@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -12,7 +12,8 @@
     "shiph": "./bin/shipping-harness.mjs",
     "shipping-harness-mcp": "./bin/shipping-harness-mcp.mjs",
     "shipping-harness-plugin": "./bin/shipping-harness-plugin.mjs",
-    "shipping-harness-remote": "./bin/shipping-harness-remote.mjs"
+    "shipping-harness-remote": "./bin/shipping-harness-remote.mjs",
+    "shipping-harness-omp": "./bin/shipping-harness-omp.mjs"
   },
   "files": [
     "bin/",
@@ -43,6 +44,8 @@
     "test:plugin": "node --test --test-reporter=spec test/plugin/*.test.mjs",
     "test:usability": "node --test --test-reporter=spec test/usability/*.test.mjs",
     "test:adversarial": "node scripts/run-tests.mjs adversarial",
+    "test:omp-main": "node --test --test-reporter=spec test/omp-main-harness/*.test.mjs",
+    "smoke:omp-main": "node packages/omp-main-harness/field-smoke.mjs --check",
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",
     "license:check": "node scripts/license-check.mjs",

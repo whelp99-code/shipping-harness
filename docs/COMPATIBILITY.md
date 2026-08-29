@@ -1,10 +1,12 @@
 # Shipping Harness v1 Compatibility
 
-Shipping Harness v1.1.0 is an internal-only control plane. A component is reported as supported only after its exact combination passes the local compatibility checks; discovery of a binary alone is not proof of readiness.
+Shipping Harness v1.1.1 is an internal-only control plane. A component is supported only after its exact combination passes local compatibility checks; discovery of a binary alone is not readiness proof.
 
 The v1.0.2 proposal surface exposes one canonical state. `NEEDS_INPUT`, `DIRTY_BASELINE`, and `NEEDS_ACCEPTANCE` are fail-closed states and can never be interpreted as approval readiness by a host agent.
 
-The v1.1.0 surface adds bounded Git-tracked nested-workspace selection, command-and-`cwd` authority binding, mechanical version evidence, and the ninth tool `shipping_refine`. OMP `15.10.12` is supported only when it discovers all nine tools through MCP `2025-03-26`.
+The v1.1.0 surface adds bounded Git-tracked nested-workspace selection, command-and-`cwd` authority binding, mechanical version evidence, and the ninth tool `shipping_refine`.
+
+The v1.1.1 deployment surface adds local package backup, atomic OMP configuration merge, actual-host smoke testing, exact nine-tool protocol verification, install receipts, doctor, and digest-checked rollback. It does not modify OMP itself.
 
 ## Supported core environment
 
@@ -14,11 +16,25 @@ The v1.1.0 surface adds bounded Git-tracked nested-workspace selection, command-
 | CPU | x64 and arm64 | Other architectures report unsupported |
 | Node.js | 22 or newer; 22.23.2 tested on Ubuntu | Startup or compatibility gate fails |
 | Git | 2.30 or newer | Git-bound evidence and locking are unavailable |
-| Shipping upgrade source | v0.6.0, v0.7.0, v0.8.0, v0.9.0 | Earlier releases require manual export/reinitialization |
-| MCP | `2026-07-28`; compatible initialize clients `2025-11-25` and `2025-03-26` | Unsupported protocol versions fail clearly |
-| OMP | `15.10.12`, MCP `2025-03-26` | OMP-style initialize, tool discovery, and `shipping_status` are regression-tested |
+| Shipping package upgrade | v0.6.0 through v1.1.0 | Earlier releases require manual export/reinitialization |
+| MCP | current `2026-07-28`; compatible initialize clients `2025-11-25` and `2025-03-26` | Unsupported versions fail clearly |
+| OMP primary host | `18.0.10`, `omo-balance` wrapper + standalone `omp-core`, MCP `2025-03-26` | Version, worker smoke, nine-tool inventory, and status call must pass |
+| OMP compatibility host | source-linked `15.10.12`, MCP `2025-03-26` | Same protocol and nine-tool checks apply |
 | Local MCP transport | STDIO only | No local network listener is opened |
 | Internal remote transport | TLS 1.2+ on loopback/private addresses | Public or unspecified listeners are rejected |
+
+## OMP deployment boundary
+
+The supported OMP integration manages only the user-global Shipping package and five Shipping-owned OMP files or file sections. It preserves:
+
+- the installed OMP executable and router;
+- provider credentials and model routing;
+- unrelated MCP servers;
+- non-Shipping approval policies;
+- existing AGENTS content outside the managed block;
+- target-project source and `.shipping` state.
+
+A successful installation must report the same actual OMP version before and after deployment.
 
 ## Execution paths
 
@@ -26,16 +42,19 @@ The v1.1.0 surface adds bounded Git-tracked nested-workspace selection, command-
 |---|---|---|
 | Direct host-agent editing | Supported | Shipping verifies current Git evidence before closure |
 | Generic/Codex adapter | Supported when its configured command is present | Commands cannot be supplied through MCP or remote input |
-| Private OMO runtime | Optional, internal-only, separately pinned | OMO completion is a claim until Shipping verifies it |
+| OMP main harness | Supported on the exact hosts above | OMP implements; Shipping owns scope, pause, evidence, and close |
+| Private OMO runtime | Optional, internal-only, separately pinned | Runtime completion is a claim until Shipping verifies it |
 | Team/DAG | Disabled by the v0.8 evidence gate | Enabling it requires a new locked contract |
 
 ## Private OMO pin
 
 The compatible private runtime is recorded in `config/upstreams/omo-pin.json`. Shipping Core and the private runtime remain independently upgradeable and removable. A changed upstream commit, bridge schema, build digest, or internal patch requires canary and rollback proof before promotion.
 
-## Runtime check
+## Runtime checks
 
-`compatibilityReport()` in `packages/stable-control/compatibility.mjs` reports the observed Node, platform, architecture, and Git version together with stable supported ranges. An unsupported combination cannot be presented as live or healthy.
+`compatibilityReport()` in `packages/stable-control/compatibility.mjs` reports observed Node, platform, architecture, and Git together with stable ranges.
+
+`shipping-harness-omp doctor` additionally verifies the installed Shipping package, actual OMP version and smoke, MCP entry, approval policy, AGENTS block, Skill, exact nine-tool protocol surface, and install receipt.
 
 ## Internal-only boundary
 

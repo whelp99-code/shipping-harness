@@ -10,13 +10,13 @@ function deepFreeze(value) {
 
 export const COMPATIBILITY = deepFreeze({
   schema: STABLE_SCHEMAS.compatibility,
-  shippingVersion: '1.1.0',
+  shippingVersion: '1.1.1',
   supportedReleases: [...SUPPORTED_RELEASES],
   platforms: ['linux', 'darwin'],
   architectures: ['x64', 'arm64'],
   node: { minimum: 22, tested: ['22.23.2'] },
   git: { minimum: '2.30' },
-  plugin: { upgradeFrom: ['0.6.0', '0.7.0', '0.8.0', '0.9.0'], localOnly: true },
+  plugin: { upgradeFrom: ['0.6.0', '0.7.0', '0.8.0', '0.9.0', '1.0.0', '1.0.1', '1.0.2', '1.1.0'], localOnly: true },
   omoRuntime: {
     shippingBridge: '0.7.0',
     upstreamVersion: '5.0.0-beta.23',
@@ -28,7 +28,10 @@ export const COMPATIBILITY = deepFreeze({
   mcp: {
     current: '2026-07-28',
     compatible: ['2025-03-26', '2025-11-25'],
-    omp: { version: '15.10.12', protocol: '2025-03-26' },
+    omp: {
+      primary: { version: '18.0.10', protocol: '2025-03-26', surface: 'omo-balance router + standalone omp-core' },
+      compatibility: [{ version: '15.10.12', protocol: '2025-03-26', surface: 'source-linked compatibility lane' }],
+    },
     tools: 9,
     refinement: 'shipping_refine',
     nestedWorkspace: true,

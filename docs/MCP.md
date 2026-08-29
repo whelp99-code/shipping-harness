@@ -28,6 +28,19 @@ npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.1
 
 Use `npm link` only for development checkouts.
 
+### OMP main-harness bootstrap
+
+For OMP, use the release-owned transactional bootstrap instead of manually editing its files:
+
+```bash
+cd /home/jm/orca/projects/shipping-harness
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.1
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.1.1 --apply
+shipping-harness-omp doctor
+```
+
+The first command is read-only. The applied command backs up the previous Shipping package and five managed OMP files, installs the local package offline under `~/.local`, preserves the OMP binary/router/model configuration and unrelated MCP servers, merges the nine-tool approval policy, runs protocol and doctor checks, and records an exact rollback command. Primary field validation uses the active OMP `18.0.10` `omo-balance`/`omp-core` installation. Source-linked OMP `15.10.12` remains a compatibility lane. See [`operations/OMP-MAIN-HARNESS.md`](operations/OMP-MAIN-HARNESS.md).
+
 The MCP client launches this command:
 
 ```bash
@@ -110,7 +123,7 @@ For repositories containing one real product below a wrapper root, Shipping scan
 
 The proposal is not a release contract yet. The user or trusted client must call `shipping_approve_scope` with the exact ID, hash, and `confirm: true`. Approval fails when the canonical state is not `READY_FOR_APPROVAL`, source files are dirty, Git HEAD changed, the proposal expired, the proposal was edited, or another release is active. `shipping_status` reports an active pending proposal even before a release state exists.
 
-`confirm: true` proves that the caller submitted an explicit approval operation; a raw MCP server cannot cryptographically distinguish a human click from a model-generated call. Configure the MCP client to require user confirmation for `shipping_approve_scope`, `shipping_execute`, `shipping_fix_blockers`, `shipping_pause`, and `shipping_close`. The tool annotations mark these operations as mutating or destructive hints, but client-side approval policy remains the enforcement point until a dedicated plugin UI is delivered.
+`confirm: true` proves that the caller submitted an explicit approval operation; a raw MCP server cannot cryptographically distinguish a human click from a model-generated call. Configure the MCP client to require user confirmation for `shipping_refine`, `shipping_approve_scope`, `shipping_execute`, `shipping_fix_blockers`, `shipping_pause`, and `shipping_close`. The tool annotations mark these operations as mutating or destructive hints, but client-side approval policy remains the enforcement point until a dedicated plugin UI is delivered.
 
 ## How code is actually written
 
@@ -123,7 +136,7 @@ The MCP tool schema never exposes `command`, `shell`, `args`, `argv`, or environ
 
 ## Protocol compatibility
 
-The server implements newline-delimited JSON-RPC 2.0 over STDIO. It supports stateless discovery and tool requests for MCP `2026-07-28`, while retaining the `initialize` and `notifications/initialized` flow for clients using MCP `2025-11-25` and `2025-03-26`. OMP `15.10.12` uses `2025-03-26`; Shipping returns the negotiated version and accepts subsequent standard requests without proprietary metadata.
+The server implements newline-delimited JSON-RPC 2.0 over STDIO. It supports stateless discovery and tool requests for MCP `2026-07-28`, while retaining the `initialize` and `notifications/initialized` flow for clients using MCP `2025-11-25` and `2025-03-26`. OMP `18.0.10` and the source-linked `15.10.12` compatibility lane use `2025-03-26`; Shipping returns the negotiated version and accepts subsequent standard requests without proprietary metadata.
 
 Supported RPC methods:
 

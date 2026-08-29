@@ -1,0 +1,25 @@
+{
+  "actor": "human-approved-sequential-build",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": "test/omp-main-harness/install-rollback.test.mjs"
+    }
+  ],
+  "correctedContractHash": "e7ec2804e24a500a4c5d7cc24a2bd9933773723b961f43617ba09d277acd13f1",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-1.3.0-004",
+  "kind": "required-deployment-regression-update",
+  "previousContractHash": "41541bd04e9dabd403846e2ac70b9307adce917ca7469325cde4827e7ec24855",
+  "previousScopeRevision": 1,
+  "previousState": "LOCKED",
+  "productionBehaviorScopeChanged": false,
+  "project": "shipping-harness",
+  "reason": "The final OMP install/rollback suite has two historical assertions fixed to v1.1.1. The installer correctly reports the current package v1.3.0. This amendment permits only the test to derive the expected version from package.json so final deployment regression remains meaningful.",
+  "recordedAt": "2026-08-29T11:41:33.505Z",
+  "release": "1.3.0",
+  "removed": [],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticProductScopeExpansion": false,
+  "sourceGitSha": "e8cf612e157ad7e6b5a1d31b1b948b145769a8af"
+}

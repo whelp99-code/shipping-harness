@@ -174,8 +174,7 @@
         "test/mcp/baseline-steward.test.mjs",
         "test/mcp/nested-workspace-refine.test.mjs",
         "test/mcp/omp-compatibility.test.mjs",
-        "test/mcp/project-intelligence.test.mjs",
-        "test/omp-main-harness/install-rollback.test.mjs"
+        "test/mcp/project-intelligence.test.mjs"
       ]
     }
   },

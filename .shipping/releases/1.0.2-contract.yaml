@@ -1,49 +1,49 @@
 {
   "acceptance": [
     {
+      "id": "AC-10201",
+      "description": "Canonical proposal lifecycle, idempotency, mode authority, and weak-gate tests pass.",
+      "type": "command",
       "command": "node --test --test-reporter=spec test/mcp/proposal-lifecycle.test.mjs",
       "cwd": ".",
-      "description": "Canonical proposal lifecycle, idempotency, mode authority, and weak-gate tests pass.",
-      "id": "AC-10201",
       "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
+      "id": "AC-10202",
+      "description": "All MCP proposal and protocol regression tests pass.",
+      "type": "command",
       "command": "npm run test:mcp",
       "cwd": ".",
-      "description": "All MCP proposal and protocol regression tests pass.",
-      "id": "AC-10202",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-10203",
+      "description": "Decision and beginner usability policy tests pass.",
+      "type": "command",
       "command": "npm run test:decision",
       "cwd": ".",
-      "description": "Decision and beginner usability policy tests pass.",
-      "id": "AC-10203",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-10204",
+      "description": "Beginner user-view regression tests pass.",
+      "type": "command",
       "command": "npm run test:usability",
       "cwd": ".",
-      "description": "Beginner user-view regression tests pass.",
-      "id": "AC-10204",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-10205",
+      "description": "Full release, security, license, and documentation verification passes.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full release, security, license, and documentation verification passes.",
-      "id": "AC-10205",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     }
   ],
   "adapters": {
@@ -99,9 +99,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Detect the real nested product workspace, derive cwd-bound acceptance and version evidence, and refine one canonical proposal through a bounded ninth MCP tool.",
+  "goal": "Prevent duplicate, mode-switched, dirty, unresolved, or weakly verified proposals from being presented or approved as ready.",
   "project": "shipping-harness",
-  "release": "1.1.0",
+  "release": "1.0.2",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

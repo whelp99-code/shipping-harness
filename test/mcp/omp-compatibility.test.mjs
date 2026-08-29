@@ -30,7 +30,8 @@ test('OMP 15.10.12 negotiates MCP 2025-03-26 and can use Shipping tools without 
 
     const listed = await protocol.handle(request(2, 'tools/list'));
     assert.equal(listed.error, undefined);
-    assert.equal(listed.result.tools.length, 8);
+    assert.equal(listed.result.tools.length, 9);
+    assert.equal(listed.result.tools.some((tool) => tool.name === 'shipping_refine'), true);
     assert.equal(Object.hasOwn(listed.result, 'resultType'), false);
 
     const status = await protocol.handle(request(3, 'tools/call', {

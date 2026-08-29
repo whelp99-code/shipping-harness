@@ -6,6 +6,7 @@
   ],
   "tools": [
     "shipping_start",
+    "shipping_refine",
     "shipping_approve_scope",
     "shipping_execute",
     "shipping_status",

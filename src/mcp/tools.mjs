@@ -6,7 +6,7 @@ import { invariant } from '../core/errors.mjs';
 import { exists } from '../core/fs.mjs';
 import { beginFixCycle, closeRelease, releaseStatus, verifyRelease } from '../core/gate.mjs';
 import { runtimePaths } from '../core/paths.mjs';
-import { approveScopeProposal, createScopeProposal, findActiveScopeProposal } from '../core/proposals.mjs';
+import { approveScopeProposal, createScopeProposal, findActiveScopeProposal, refineScopeProposal } from '../core/proposals.mjs';
 import { abort, pause, readState, resume } from '../core/state.mjs';
 import { buildBlockerView, buildUserStatusView } from './user-view.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from '../core/goals/authority.mjs';
@@ -33,6 +33,38 @@ export const SHIPPING_TOOLS = Object.freeze([
       additionalProperties: false,
     },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+  {
+    name: 'shipping_refine',
+    title: 'Refine the active release proposal',
+    description: 'Revise one active proposal identity using bounded structured user answers, an existing workspace candidate, a rescan, or an explicitly user-authorized mode change. It never accepts commands, paths, environment maps, credentials, push, or deploy fields.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        proposalId: { type: 'string', minLength: 1, maxLength: 160 },
+        proposalHash: { type: 'string', pattern: '^[a-f0-9]{64}$' },
+        answers: {
+          type: 'array',
+          maxItems: 3,
+          items: {
+            type: 'object',
+            properties: {
+              questionId: { type: 'string', minLength: 1, maxLength: 80 },
+              choice: { type: 'string', minLength: 1, maxLength: 1000 },
+            },
+            required: ['questionId', 'choice'],
+            additionalProperties: false,
+          },
+        },
+        workspaceCandidateId: { type: 'string', pattern: '^WS-[a-f0-9]{12}$' },
+        mode: { type: 'string', enum: ['AUTO', 'SAFE', 'INTERVIEW'] },
+        modeAuthorizedByUser: { type: 'boolean', default: false },
+        rescan: { type: 'boolean', default: false },
+      },
+      required: ['proposalId', 'proposalHash'],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
   },
   {
     name: 'shipping_approve_scope',
@@ -229,6 +261,10 @@ export async function callShippingTool(root, name, rawArguments) {
       approvalBrief: proposal.approvalBrief,
       questions: proposal.decision.questions,
       proposer: proposal.decision.proposer,
+      workspace: proposal.workspace,
+      workspaceCandidates: proposal.workspaceCandidates,
+      versionEvidence: proposal.versionEvidence,
+      acceptanceStrength: proposal.acceptanceStrength,
       scope: proposal.contract.scope,
       acceptance: proposal.contract.acceptance,
       plan: proposal.plan,
@@ -264,6 +300,77 @@ export async function callShippingTool(root, name, rawArguments) {
           ? 'A repository-owned build, test, verify, check, package, or equivalent acceptance command must be detected before approval.'
           : 'Resolve the grouped exception questions before approval.';
     return complete(data, `${reused ? 'Reused' : 'Proposed'} ${proposal.release} in ${proposal.mode} mode. State: ${proposal.canonicalState}. ${next}`);
+  }
+
+  if (name === 'shipping_refine') {
+    rejectUnknownKeys(args, ['proposalId', 'proposalHash', 'answers', 'workspaceCandidateId', 'mode', 'modeAuthorizedByUser', 'rescan']);
+    const proposalId = requiredString(args.proposalId, 'proposalId', 1, 160);
+    const proposalHash = requiredString(args.proposalHash, 'proposalHash', 64, 64);
+    invariant(/^[a-f0-9]{64}$/u.test(proposalHash), 'ERR_MCP_ARGUMENTS', 'proposalHash must be a lowercase SHA-256 value');
+    if (args.workspaceCandidateId !== undefined) {
+      requiredString(args.workspaceCandidateId, 'workspaceCandidateId', 15, 15);
+      invariant(/^WS-[a-f0-9]{12}$/u.test(args.workspaceCandidateId), 'ERR_MCP_ARGUMENTS', 'workspaceCandidateId has an invalid format');
+    }
+    if (args.mode !== undefined) invariant(['AUTO', 'SAFE', 'INTERVIEW'].includes(args.mode), 'ERR_MCP_ARGUMENTS', `Unsupported decision mode: ${String(args.mode)}`);
+    invariant(args.modeAuthorizedByUser === undefined || typeof args.modeAuthorizedByUser === 'boolean', 'ERR_MCP_ARGUMENTS', 'modeAuthorizedByUser must be boolean');
+    invariant(args.rescan === undefined || typeof args.rescan === 'boolean', 'ERR_MCP_ARGUMENTS', 'rescan must be boolean');
+    if (args.answers !== undefined) {
+      invariant(Array.isArray(args.answers) && args.answers.length <= 3, 'ERR_MCP_ARGUMENTS', 'answers must contain at most three entries');
+      for (const answer of args.answers) {
+        invariant(answer && typeof answer === 'object' && !Array.isArray(answer), 'ERR_MCP_ARGUMENTS', 'Each answer must be an object');
+        rejectUnknownKeys(answer, ['questionId', 'choice']);
+        requiredString(answer.questionId, 'questionId', 1, 80);
+        requiredString(answer.choice, 'choice', 1, 1000);
+      }
+    }
+    const result = await refineScopeProposal(root, {
+      proposalId,
+      proposalHash,
+      answers: args.answers,
+      workspaceCandidateId: args.workspaceCandidateId,
+      mode: args.mode,
+      modeAuthorizedByUser: args.modeAuthorizedByUser === true,
+      rescan: args.rescan === true,
+    });
+    const proposal = result.proposal;
+    const data = {
+      proposalId: proposal.id,
+      proposalHash: proposal.hash,
+      revision: proposal.revision,
+      previousHash: proposal.previousHash,
+      release: proposal.release,
+      mode: proposal.mode,
+      proposalState: proposal.canonicalState,
+      readyForApproval: proposal.readyForApproval,
+      approvalStatus: proposal.canonicalState,
+      workspace: proposal.workspace,
+      workspaceCandidates: proposal.workspaceCandidates,
+      versionEvidence: proposal.versionEvidence,
+      acceptanceStrength: proposal.acceptanceStrength,
+      acceptance: proposal.contract.acceptance,
+      questions: proposal.decision.questions,
+      resolutions: result.resolutions,
+      approvalBrief: proposal.approvalBrief,
+      proposalPath: result.proposalPath,
+      archivedRevisionPath: result.archivedRevisionPath,
+      userView: {
+        schema: '[REDACTED]',
+        userState: proposal.readyForApproval ? 'AWAITING_APPROVAL' : proposal.canonicalState,
+        outcome: proposal.approvalBrief.outcome,
+        workspace: proposal.workspace,
+        versionEvidence: proposal.versionEvidence,
+        included: proposal.approvalBrief.included,
+        deferred: proposal.approvalBrief.deferred,
+        acceptance: proposal.contract.acceptance,
+        questions: proposal.decision.questions,
+        limits: proposal.approvalBrief.limits,
+        actions: proposal.readyForApproval ? ['approve', 'edit-scope', 'stop'] : ['refine', 'stop'],
+      },
+    };
+    const next = proposal.readyForApproval
+      ? 'Review the revised one-screen brief, then explicitly approve the exact revision.'
+      : `The revised proposal remains ${proposal.canonicalState}; resolve only that condition.`;
+    return complete(data, `Refined ${proposal.id} to revision ${proposal.revision}. State: ${proposal.canonicalState}. ${next}`);
   }
 
   if (name === 'shipping_approve_scope') {

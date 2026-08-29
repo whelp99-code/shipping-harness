@@ -2,7 +2,7 @@
   "schema": "shipping-harness/plugin-v1",
   "name": "shipping-harness",
   "displayName": "Shipping Harness",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "localOnly": true,
   "mcp": {
     "transport": "stdio",
@@ -12,6 +12,7 @@
   },
   "userFlow": [
     "shipping_start",
+    "shipping_refine",
     "shipping_approve_scope",
     "shipping_execute",
     "shipping_status",

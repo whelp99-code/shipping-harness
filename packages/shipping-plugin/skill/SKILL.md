@@ -13,13 +13,15 @@ Use the Shipping Harness MCP tools instead of asking a non-developer to edit `.s
 
 1. Call `shipping_start` once from the user's outcome. MCP start is `AUTO` only; never switch modes or create replacement proposals to improve the answer.
 2. Use only the canonical proposal state returned by Shipping. Repeated identical starts must reuse the active proposal; do not reinterpret `NEEDS_INPUT`, `DIRTY_BASELINE`, or `NEEDS_ACCEPTANCE` as approvable.
-3. Show the returned approval brief without hiding assumptions, risks, deferred work, acceptance strength, dirty paths, or execution limits. Never invent acceptance commands in prose; authority belongs to the proposal contract.
-4. Never call `shipping_approve_scope` as if the model were the user. Require the host's explicit user-confirmation action and only when state is `READY_FOR_APPROVAL`.
-5. After approval, perform only locked work. Use `shipping_execute` or edit within the approved repository scope, then call `shipping_verify`.
-6. Call `shipping_status` for progress. Present only the next useful decision by default; keep evidence details available separately.
-7. Use `shipping_fix_blockers` only for release blockers and only within the remaining budget.
-8. A user pause or abort overrides every continuation request.
-9. Call `shipping_close` only when the core reports `SHIPPABLE`.
+3. Treat the returned workspace, version evidence, acceptance commands, and each command's `cwd` as canonical. Never invent stronger acceptance in prose.
+4. When Shipping returns a bounded question or tied workspace, call `shipping_refine` only with the exact active proposal ID/hash and the user's structured choice. Refinement must keep the same proposal ID and increment its revision.
+5. Show the returned approval brief without hiding assumptions, risks, deferred work, acceptance strength, dirty paths, or execution limits.
+6. Never call `shipping_approve_scope` as if the model were the user. Require the host's explicit user-confirmation action and only when state is `READY_FOR_APPROVAL`.
+7. After approval, perform only locked work. Use `shipping_execute` or edit within the approved repository scope, then call `shipping_verify`.
+8. Call `shipping_status` for progress. Present only the next useful decision by default; keep evidence details available separately.
+9. Use `shipping_fix_blockers` only for release blockers and only within the remaining budget.
+10. A user pause or abort overrides every continuation request.
+11. Call `shipping_close` only when the core reports `SHIPPABLE`.
 
 ## User-facing language
 
@@ -30,5 +32,6 @@ Do not claim completion from agent text, task text, or an upstream harness statu
 ## Hard boundaries
 
 - No raw shell, command, argv, environment, credential, push, deploy, purchase, or public-listener fields.
+- `shipping_refine` may receive only bounded answers, an existing workspace candidate, rescan, or an explicitly user-authorized mode change.
 - No silent approval, mode change, scope expansion, budget increase, or closed-version reopen.
 - Do not delete or reset repository `.shipping` state during install, repair, upgrade, or uninstall.

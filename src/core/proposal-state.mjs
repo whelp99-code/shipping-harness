@@ -106,6 +106,9 @@ export function proposalSummary(proposal) {
     questionCount: proposal.decision?.questions?.length ?? 0,
     dirtyPathCount: proposal.sourceChanges?.length ?? 0,
     acceptanceStrength: proposal.acceptanceStrength ?? classifyAcceptanceStrength(proposal.analysis),
+    workspace: proposal.workspace ?? proposal.analysis?.workspace ?? null,
+    workspaceCandidates: proposal.workspaceCandidates ?? proposal.analysis?.workspaceCandidates ?? [],
+    versionEvidence: proposal.versionEvidence ?? proposal.analysis?.versionEvidence ?? null,
     createdAt: proposal.createdAt,
     expiresAt: proposal.expiresAt,
   };

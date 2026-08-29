@@ -91,12 +91,15 @@ function statusPath(line) {
 /**
  * Build a bounded fact pack without executing repository code or trusting repository prose as policy.
  * @param {string} root
- * @param {{goal: string, mode?: string, now?: Date}} input
+ * @param {{goal: string, mode?: string, workspaceCandidateId?: string | null, now?: Date}} input
  */
 export async function buildDecisionEvidence(root, input) {
   invariant(typeof input.goal === 'string' && input.goal.trim().length >= 5, 'ERR_DECISION_GOAL', 'A concrete goal is required');
   const policy = decisionModePolicy(input.mode);
-  const analysis = await analyzeRepository(root);
+  const analysis = await analyzeRepository(root, {
+    workspaceCandidateId: input.workspaceCandidateId ?? null,
+    goal: input.goal.trim(),
+  });
   const git = gitStatus(root);
   const gitSha = currentGitSha(root);
   const manifests = await manifestReceipts(root, analysis.manifests);
@@ -113,6 +116,8 @@ export async function buildDecisionEvidence(root, input) {
     { id: 'EVID-004', kind: 'verification-surface', source: 'repository-manifests', claim: analysis.candidateCommands, trust: 'untrusted-repository-data' },
     { id: 'EVID-005', kind: 'release-history', source: '.shipping/releases', claim: history, trust: 'trusted-shipping-receipts' },
     { id: 'EVID-006', kind: 'operational-surface', source: 'repository-metadata', claim: operationalSurface(analysis), trust: 'untrusted-repository-data' },
+    { id: 'EVID-007', kind: 'workspace-selection', source: 'repository-metadata', claim: { selected: analysis.workspace, candidates: analysis.workspaceCandidates }, trust: 'untrusted-repository-data' },
+    { id: 'EVID-008', kind: 'version-evidence', source: 'repository-metadata', claim: analysis.versionEvidence, trust: 'untrusted-repository-data' },
   ];
   const pack = {
     schema: 'shipping-harness/decision-evidence-v1',

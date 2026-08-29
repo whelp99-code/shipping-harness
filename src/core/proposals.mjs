@@ -10,7 +10,7 @@ import { invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
 import { buildShortPlan } from './project-analysis.mjs';
 import { buildDecisionEvidence } from './decision-evidence.mjs';
-import { compileDecisionContract, composeDefaultDecision } from './decision-package.mjs';
+import { compileDecisionContract, composeDefaultDecision, validateDecisionPackage } from './decision-package.mjs';
 import { applyDecisionPolicy, buildApprovalBrief } from './decision-policy.mjs';
 import {
   classifyAcceptanceStrength,
@@ -167,14 +167,18 @@ export async function createScopeProposal(root, input) {
     if (context.state) {
       invariant(['DRAFT', 'CLOSED'].includes(context.state.state), 'ERR_PROPOSAL_ACTIVE_RELEASE', `Cannot propose a new scope while release state is ${context.state.state}`);
     }
-    const evidence = await buildDecisionEvidence(root, { goal: input.goal.trim(), mode: input.mode ?? undefined });
+    const evidence = await buildDecisionEvidence(root, {
+      goal: input.goal.trim(),
+      mode: input.mode ?? undefined,
+      workspaceCandidateId: input.workspaceCandidateId ?? null,
+    });
     const analysis = evidence.analysis;
     const release = input.release?.trim()
       || (context.state?.state === 'DRAFT'
         ? (context.state.release || context.contract?.release || '0.1.0')
         : context.contract
           ? nextMinor(context.contract.release)
-          : '0.1.0');
+          : (analysis.versionEvidence?.recommendedVersion ?? '0.1.0'));
     invariant(SEMVER.test(release), 'ERR_RELEASE_VERSION', `Invalid semantic version: ${release}`);
     const goal = input.goal.trim();
     const projectName = safeProjectName(input.projectName, safeProjectName(analysis.projectName, path.basename(root)));
@@ -224,6 +228,11 @@ export async function createScopeProposal(root, input) {
       projectRoot: path.resolve(root),
       gitSha: evidence.gitSha,
       release,
+      releaseSelection: {
+        explicit: typeof input.release === 'string' && input.release.trim().length > 0,
+        recommended: analysis.versionEvidence?.recommendedVersion ?? null,
+        evidence: analysis.versionEvidence ?? null,
+      },
       goal,
       createdAt: now.toISOString(),
       expiresAt: new Date(now.getTime() + PROPOSAL_TTL_MS).toISOString(),
@@ -231,6 +240,9 @@ export async function createScopeProposal(root, input) {
       lifecycle: { state: 'PLANNING', supersedes: active?.proposal?.id ?? null },
       sourceChanges,
       acceptanceStrength,
+      workspace: analysis.workspace,
+      workspaceCandidates: analysis.workspaceCandidates,
+      versionEvidence: analysis.versionEvidence,
       analysis,
       evidence,
       decision,
@@ -269,9 +281,182 @@ export async function loadScopeProposal(root, proposalId) {
   await assertContainedPath(root, proposalPath);
   const proposal = await readJson(proposalPath);
   invariant(proposal.schema === 'shipping-harness/proposal-v1', 'ERR_PROPOSAL_INVALID', 'Unsupported proposal schema');
+  invariant(proposal.id === proposalId, 'ERR_PROPOSAL_ID', 'Proposal file identity does not match the requested proposal ID');
   invariant(proposal.projectRoot === path.resolve(root), 'ERR_PROPOSAL_ROOT', 'Proposal belongs to a different repository');
   invariant(proposal.hash === proposalHash(proposal), 'ERR_PROPOSAL_TAMPERED', 'Proposal hash does not match its content');
   return { proposal, proposalPath, summary: proposalSummary(proposal) };
+}
+
+/** @param {unknown} value @param {number} max */
+function boundedRefinementText(value, max = 1000) {
+  invariant(typeof value === 'string' && value.trim().length > 0 && value.length <= max, 'ERR_PROPOSAL_REFINE', `Refinement text must be between 1 and ${max} characters`);
+  return value.trim();
+}
+
+/** @param {Array<Record<string, any>>} questions @param {Array<Record<string, any>>} answers */
+function resolveDecisionQuestions(questions, answers) {
+  const available = new Map(questions.map((question) => [question.id, question]));
+  const seen = new Set();
+  const resolutions = [];
+  for (const answer of answers) {
+    invariant(answer && typeof answer === 'object' && !Array.isArray(answer), 'ERR_PROPOSAL_REFINE', 'Each refinement answer must be an object');
+    const questionId = boundedRefinementText(answer.questionId, 80);
+    invariant(!seen.has(questionId), 'ERR_PROPOSAL_REFINE', `Duplicate question answer: ${questionId}`);
+    seen.add(questionId);
+    const question = available.get(questionId);
+    invariant(question, 'ERR_PROPOSAL_REFINE', `Unknown proposal question: ${questionId}`);
+    const choice = boundedRefinementText(answer.choice, 1000);
+    resolutions.push({
+      questionId,
+      category: question.category,
+      choice: choice === 'recommended' ? question.recommendedChoice : choice,
+      recommendedChoice: question.recommendedChoice,
+      usedRecommendedChoice: choice === 'recommended' || choice === question.recommendedChoice,
+      resolvedAt: new Date().toISOString(),
+      authority: 'explicit-user-refinement',
+    });
+  }
+  return {
+    remaining: questions.filter((question) => !seen.has(question.id)),
+    resolutions,
+  };
+}
+
+/**
+ * Refine one active proposal identity using bounded structured user decisions.
+ * @param {string} root
+ * @param {{proposalId:string, proposalHash:string, answers?:Array<{questionId:string,choice:string}>, workspaceCandidateId?:string|null, mode?:string|null, modeAuthorizedByUser?:boolean, rescan?:boolean}} input
+ */
+export async function refineScopeProposal(root, input) {
+  return withProposalLock(root, async () => {
+    const index = await readActiveProposalIndex(root);
+    invariant(index, 'ERR_PROPOSAL_ACTIVE', 'No active proposal is available to refine');
+    invariant(input.proposalId === index.proposalId, 'ERR_PROPOSAL_ACTIVE', 'Only the active proposal may be refined');
+    const { proposal, proposalPath, summary } = await loadScopeProposal(root, input.proposalId);
+    invariant(input.proposalHash === proposal.hash && input.proposalHash === index.proposalHash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match the active revision');
+    invariant(!isTerminalProposalState(summary.state), 'ERR_PROPOSAL_REFINE_STATE', `Proposal cannot be refined from ${summary.state}`);
+
+    const requestedMode = input.mode ?? proposal.mode;
+    invariant(['AUTO', 'SAFE', 'INTERVIEW'].includes(requestedMode), 'ERR_DECISION_MODE', `Unsupported decision mode: ${String(requestedMode)}`);
+    if (requestedMode !== proposal.mode) {
+      invariant(input.modeAuthorizedByUser === true, 'ERR_PROPOSAL_MODE_AUTHORIZATION', 'Changing proposal mode requires explicit user authorization');
+    } else {
+      invariant(input.modeAuthorizedByUser !== true || input.mode !== undefined, 'ERR_PROPOSAL_MODE_AUTHORIZATION', 'Mode authorization cannot be supplied without a requested mode');
+    }
+
+    const workspaceCandidateId = input.workspaceCandidateId ?? proposal.workspace?.id ?? null;
+    if (input.workspaceCandidateId !== undefined && input.workspaceCandidateId !== null) {
+      boundedRefinementText(input.workspaceCandidateId, 100);
+      invariant((proposal.workspaceCandidates ?? []).some((candidate) => candidate.id === input.workspaceCandidateId), 'ERR_WORKSPACE_CANDIDATE', `Unknown workspace candidate: ${input.workspaceCandidateId}`);
+    }
+    const answers = input.answers ?? [];
+    invariant(Array.isArray(answers) && answers.length <= 3, 'ERR_PROPOSAL_REFINE', 'Refinement accepts at most three grouped answers');
+    invariant(answers.length > 0 || input.workspaceCandidateId || requestedMode !== proposal.mode || input.rescan === true, 'ERR_PROPOSAL_REFINE', 'Refinement must include an answer, workspace selection, authorized mode change, or rescan');
+
+    const evidence = await buildDecisionEvidence(root, {
+      goal: proposal.goal,
+      mode: requestedMode,
+      workspaceCandidateId,
+    });
+    const analysis = evidence.analysis;
+    const release = proposal.releaseSelection?.explicit
+      ? proposal.release
+      : (analysis.versionEvidence?.recommendedVersion ?? proposal.release);
+    const context = await currentReleaseContext(root);
+    const projectName = safeProjectName(analysis.projectName, proposal.decision?.projectName ?? path.basename(root));
+    const base = context.contract ? structuredClone(context.contract) : createDefaultContract(projectName);
+    let decision = composeDefaultDecision(evidence, {
+      release,
+      projectName,
+      proposerId: proposal.decision?.proposer?.id ?? 'mcp-host-agent',
+    });
+    decision = applyDecisionPolicy(evidence, decision, { budgets: base.budgets });
+    const availableQuestions = new Map([
+      ...(proposal.decision?.questions ?? []).map((question) => [question.id, question]),
+      ...(decision.questions ?? []).map((question) => [question.id, question]),
+    ]);
+    const resolved = resolveDecisionQuestions([...availableQuestions.values()], answers);
+    const answeredIds = new Set(resolved.resolutions.map((entry) => entry.questionId));
+    decision.questions = decision.questions.filter((question) => !answeredIds.has(question.id));
+    decision.resolutions = [
+      ...(proposal.decision?.resolutions ?? []),
+      ...resolved.resolutions,
+    ].slice(-20);
+    decision.approvalStatus = decision.questions.length > 0 ? 'NEEDS_INPUT' : 'APPROVABLE';
+    decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
+    decision = validateDecisionPackage(evidence, decision);
+    const approvalBrief = buildApprovalBrief(decision);
+    const contract = compileDecisionContract(base, decision);
+    const sourceChanges = nonRuntimeChanges(root);
+    const acceptanceStrength = classifyAcceptanceStrength(analysis);
+    const now = new Date();
+    const revision = (proposal.revision ?? 1) + 1;
+    const archivePath = path.join(runtimePaths(root).proposals, `${proposal.id}.r${proposal.revision ?? 1}.json`);
+    await assertContainedPath(root, archivePath);
+    if (await exists(archivePath)) {
+      const archived = await readJson(archivePath);
+      invariant(archived.hash === proposal.hash, 'ERR_PROPOSAL_REVISION', 'Archived proposal revision does not match the active revision');
+    } else {
+      await writeJsonAtomic(archivePath, proposal);
+    }
+
+    const updated = {
+      ...proposal,
+      revision,
+      previousHash: proposal.hash,
+      gitSha: evidence.gitSha,
+      release,
+      releaseSelection: {
+        explicit: proposal.releaseSelection?.explicit === true,
+        recommended: analysis.versionEvidence?.recommendedVersion ?? null,
+        evidence: analysis.versionEvidence ?? null,
+      },
+      mode: decision.mode,
+      modeAuthorization: requestedMode !== proposal.mode
+        ? { userConfirmed: true, from: proposal.mode, to: requestedMode, recordedAt: now.toISOString() }
+        : proposal.modeAuthorization ?? null,
+      fingerprint: proposalFingerprint({
+        projectRoot: path.resolve(root),
+        gitSha: evidence.gitSha,
+        goal: proposal.goal,
+        release,
+        mode: decision.mode,
+        projectName,
+      }),
+      refinedAt: now.toISOString(),
+      expiresAt: new Date(now.getTime() + PROPOSAL_TTL_MS).toISOString(),
+      lifecycle: { state: 'PLANNING', supersedes: proposal.lifecycle?.supersedes ?? null },
+      sourceChanges,
+      acceptanceStrength,
+      workspace: analysis.workspace,
+      workspaceCandidates: analysis.workspaceCandidates,
+      versionEvidence: analysis.versionEvidence,
+      analysis,
+      evidence,
+      decision,
+      approvalBrief,
+      contract,
+      plan: buildShortPlan(analysis, contract.acceptance),
+      diagnostics: [
+        ...analysis.diagnostics,
+        ...(sourceChanges.length > 0 ? ['Commit or discard non-.shipping changes before approval.'] : []),
+        ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
+        ...(acceptanceStrength.sufficient ? [] : ['A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
+      ],
+    };
+    delete updated.approval;
+    updated.canonicalState = deriveProposalState(updated);
+    updated.readyForApproval = updated.canonicalState === 'READY_FOR_APPROVAL';
+    updated.hash = proposalHash(updated);
+    await writeJsonAtomic(proposalPath, updated);
+    await writeActiveProposalIndex(root, updated);
+    return {
+      proposal: updated,
+      proposalPath,
+      archivedRevisionPath: path.relative(root, archivePath).replaceAll('\\', '/'),
+      resolutions: resolved.resolutions,
+    };
+  });
 }
 
 /**
@@ -289,6 +474,9 @@ export async function approveScopeProposal(root, input) {
     const existingState = await readState(root);
     invariant(['DRAFT', 'CLOSED'].includes(existingState.state), 'ERR_APPROVAL_STATE', `Scope can be approved only from DRAFT or CLOSED, current state is ${existingState.state}`);
   }
+  const activeIndex = await readActiveProposalIndex(root);
+  invariant(activeIndex?.proposalId === input.proposalId, 'ERR_PROPOSAL_ACTIVE', 'Only the active proposal may be approved');
+  invariant(activeIndex?.proposalHash === input.proposalHash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match the active revision');
   const { proposal, proposalPath, summary } = await loadScopeProposal(root, input.proposalId);
   invariant(input.proposalHash === proposal.hash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match');
   invariant(summary.state === 'READY_FOR_APPROVAL', 'ERR_DECISION_NEEDS_INPUT', `Proposal has unresolved mandatory risks or questions, a dirty baseline, weak acceptance, or another non-ready condition: ${summary.state}`);

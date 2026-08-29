@@ -22,10 +22,10 @@ test('latest MCP discovery and tool listing expose a bounded beginner surface', 
 
     const listed = await protocol.handle({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: { _meta: latestMeta() } });
     assert.equal(listed.result.resultType, 'complete');
-    assert.equal(listed.result.tools.length, 8);
+    assert.equal(listed.result.tools.length, 9);
     const names = listed.result.tools.map((tool) => tool.name);
     assert.deepEqual(names, [
-      'shipping_start', 'shipping_approve_scope', 'shipping_execute', 'shipping_status',
+      'shipping_start', 'shipping_refine', 'shipping_approve_scope', 'shipping_execute', 'shipping_status',
       'shipping_verify', 'shipping_fix_blockers', 'shipping_pause', 'shipping_close',
     ]);
     for (const tool of listed.result.tools) {

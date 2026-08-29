@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.0.2 — Proposal Safety Hardening`
-**Authority:** the release is complete only when `.shipping/releases/1.0.2.json` is `CLOSED` and annotated tag `v1.0.2` points to the closure commit
+**Current release train:** `v1.1.0 — Nested Workspace Intelligence and Proposal Refinement`
+**Authority:** the release is complete only when `.shipping/releases/1.1.0.json` is `CLOSED` and annotated tag `v1.1.0` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -61,7 +61,7 @@ The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency
 Install the locally verified tagged package once:
 
 ```bash
-npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.0.1.tgz \
+npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.1.0.tgz \
   --ignore-scripts --no-audit --no-fund
 ```
 
@@ -201,6 +201,10 @@ Adds explicit MCP `2025-03-26` initialization compatibility for OMP `15.10.12`, 
 ### v1.0.2 — Proposal Safety Hardening
 
 Adds one canonical proposal state, an active-proposal index, idempotent starts, audited supersession, AUTO-only MCP start, weak-acceptance rejection, and truthful pending-proposal status. Dirty, unresolved, or fallback-only proposals cannot be approved.
+
+### v1.1.0 — Nested Workspace Intelligence and Proposal Refinement
+
+Selects the actual runnable workspace from bounded Git-tracked evidence, derives manifest-owned acceptance commands with exact working directories, recommends the next semantic version from mechanical evidence, and adds `shipping_refine` so one proposal identity can be revised without replacement proposals or raw command input.
 
 Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
 

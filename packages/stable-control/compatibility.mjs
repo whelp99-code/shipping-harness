@@ -10,7 +10,7 @@ function deepFreeze(value) {
 
 export const COMPATIBILITY = deepFreeze({
   schema: STABLE_SCHEMAS.compatibility,
-  shippingVersion: '1.0.1',
+  shippingVersion: '1.1.0',
   supportedReleases: [...SUPPORTED_RELEASES],
   platforms: ['linux', 'darwin'],
   architectures: ['x64', 'arm64'],
@@ -29,6 +29,9 @@ export const COMPATIBILITY = deepFreeze({
     current: '2026-07-28',
     compatible: ['2025-03-26', '2025-11-25'],
     omp: { version: '15.10.12', protocol: '2025-03-26' },
+    tools: 9,
+    refinement: 'shipping_refine',
+    nestedWorkspace: true,
     transport: 'stdio',
   },
   remote: { schema: STABLE_SCHEMAS.remoteRequest, tlsMinimum: '1.2', publicListener: false, optional: true },

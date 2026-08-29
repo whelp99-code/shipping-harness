@@ -22,7 +22,7 @@ Requirements:
 Install the locally verified package once. Use a user-global prefix so the executable links and package land in the same `~/.local` tree:
 
 ```bash
-npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.0.1.tgz \
+npm install --global --prefix "$HOME/.local" /absolute/path/shipping-harness-1.1.0.tgz \
   --ignore-scripts --no-audit --no-fund
 ```
 
@@ -77,6 +77,7 @@ The exact outer configuration key is client-specific. The command and arguments 
 | Tool | User meaning | Important boundary |
 |---|---|---|
 | `shipping_start` | “Look at this repository and propose the smallest releasable version.” | Reads bounded metadata and writes only a proposal receipt. It does not run project code or approve scope. |
+| `shipping_refine` | “Apply my bounded decision to the same proposal.” | Keeps the proposal ID, increments its revision, archives the previous revision, and accepts only structured answers, an existing workspace candidate, rescan, or explicit mode authorization. |
 | `shipping_approve_scope` | “I reviewed this exact proposal. Lock it.” | Requires `confirm: true`, exact proposal ID/hash, unchanged Git SHA, and clean source. |
 | `shipping_execute` | “Start the approved work.” | Runs only a command already stored in the locked contract. Otherwise it returns a work order to the host agent. |
 | `shipping_status` | “Tell me whether this is running, blocked, shippable, or closed.” | Read-only. |
@@ -104,6 +105,8 @@ NEEDS_INPUT | DIRTY_BASELINE | NEEDS_ACCEPTANCE | READY_FOR_APPROVAL
 ```
 
 Only `READY_FOR_APPROVAL` may be passed to `shipping_approve_scope`. Repeating the same AUTO request reuses the active proposal instead of creating duplicates. MCP `shipping_start` is AUTO-only; a host agent cannot silently switch to SAFE or INTERVIEW. A fallback-only `git diff --check` is supplemental evidence and is not sufficient for a software release.
+
+For repositories containing one real product below a wrapper root, Shipping scans only bounded Git-tracked manifest paths, selects the strongest runnable workspace, and binds every proposed command to its exact workspace-relative `cwd`. If candidates remain materially tied, `shipping_refine` may select one existing candidate without accepting a free-form path or command.
 
 The proposal is not a release contract yet. The user or trusted client must call `shipping_approve_scope` with the exact ID, hash, and `confirm: true`. Approval fails when the canonical state is not `READY_FOR_APPROVAL`, source files are dirty, Git HEAD changed, the proposal expired, the proposal was edited, or another release is active. `shipping_status` reports an active pending proposal even before a release state exists.
 

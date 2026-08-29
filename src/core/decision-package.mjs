@@ -73,7 +73,7 @@ function validateScope(evidence, scope) {
 /** @param {Record<string, any>} evidence @param {Array<Record<string, any>>} acceptance */
 function validateAcceptance(evidence, acceptance) {
   invariant(acceptance.length > 0 && acceptance.length <= 12, 'ERR_DECISION_ACCEPTANCE', 'Acceptance must contain 1 to 12 criteria');
-  const allowedCommands = new Set(evidence.analysis.candidateCommands.map((entry) => entry.command));
+  const allowedCommands = new Set(evidence.analysis.candidateCommands.map((entry) => `${entry.cwd ?? '.'}\0${entry.command}`));
   const ids = new Set();
   for (const criterion of acceptance) {
     object(criterion, 'acceptance criterion');
@@ -82,7 +82,8 @@ function validateAcceptance(evidence, acceptance) {
     string(criterion.description, `${id}.description`, 1000);
     invariant(criterion.type === 'command', 'ERR_DECISION_ACCEPTANCE', `${id}.type must be command`);
     const command = string(criterion.command, `${id}.command`, 500);
-    invariant(allowedCommands.has(command), 'ERR_DECISION_COMMAND', `Acceptance command is not supported by repository evidence: ${command}`);
+    const cwd = string(criterion.cwd ?? '.', `${id}.cwd`, 300);
+    invariant(allowedCommands.has(`${cwd}\0${command}`), 'ERR_DECISION_COMMAND', `Acceptance command and cwd are not supported by repository evidence: ${cwd} :: ${command}`);
     invariant(criterion.required === true, 'ERR_DECISION_ACCEPTANCE', `${id} must be required in an automatically proposed release`);
   }
 }
@@ -203,6 +204,26 @@ export function composeDefaultDecision(evidence, input) {
         confidence: 'high',
         reversibility: 'reversible',
       },
+      {
+        id: 'DEC-004',
+        title: 'Select the runnable workspace',
+        choice: `Use ${evidence.analysis.workspace?.root ?? '.'} as the authority-bearing execution workspace.`,
+        rationale: 'The selected workspace has the strongest bounded combination of manifests, source, tests, release metadata, and verification targets.',
+        basis: 'evidence',
+        evidenceRefs: ['EVID-007'],
+        confidence: evidence.analysis.workspace?.confidence ?? 'low',
+        reversibility: 'reversible',
+      },
+      {
+        id: 'DEC-005',
+        title: 'Recommend the next semantic version',
+        choice: `Recommend ${input.release} from mechanical version evidence and the classified change kind.`,
+        rationale: 'An explicit user version remains authoritative; otherwise Shipping uses the highest-confidence manifest or tag evidence.',
+        basis: 'evidence',
+        evidenceRefs: ['EVID-008'],
+        confidence: evidence.analysis.versionEvidence?.confidence ?? 'low',
+        reversibility: 'reversible',
+      },
     ],
     assumptions: [
       {
@@ -213,14 +234,26 @@ export function composeDefaultDecision(evidence, input) {
         reversibility: 'reversible',
       },
     ],
-    risks: weakGate ? [{
-      id: 'RISK-001',
-      category: 'weak-verification',
-      severity: 'medium',
-      description: 'No strong repository build or test command was detected.',
-      mitigation: 'Require review of the fallback acceptance gate before approval.',
-      evidenceRefs: ['EVID-004'],
-    }] : [],
+    risks: [
+      ...(weakGate ? [{
+        id: 'RISK-001',
+        category: 'weak-verification',
+        severity: 'medium',
+        description: 'No strong repository build or test command was detected.',
+        mitigation: 'Require a repository-owned build, test, verify, check, package, or equivalent gate before approval.',
+        evidenceRefs: ['EVID-004'],
+      }] : []),
+      ...(evidence.analysis.workspace?.ambiguous ? [{
+        id: weakGate ? 'RISK-002' : 'RISK-001',
+        category: 'workspace-selection',
+        severity: 'high',
+        description: 'Multiple materially different runnable workspaces have equal mechanical scores.',
+        mitigation: `Use the recommended workspace ${evidence.analysis.workspace.root}, or explicitly select one candidate before approval.`,
+        recommendedChoice: `Use ${evidence.analysis.workspace.root}, the deterministic first-ranked candidate.`,
+        evidenceRefs: ['EVID-007'],
+        mandatory: true,
+      }] : []),
+    ],
     questions: [],
   };
   decision.hash = hashObject(decision);

@@ -398,6 +398,21 @@
 | AC-120-008 | Normal beginner guidance never presents destructive discard. |
 | AC-120-009 | OMP 18 nine-tool compatibility, security, license, docs, and full regression pass. |
 
+### v1.3.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-130-001 | Python, Node, Playwright, Shell, and Alembic mixed structure is represented with path-bound components. |
+| AC-130-002 | Dirty product work is grouped into no more than three evidence-backed themes. |
+| AC-130-003 | The explicit user goal remains authoritative and every inferred goal is labeled recommendation-only. |
+| AC-130-004 | Every blocking product/release-evidence path is covered or the proposal remains NEEDS_ACCEPTANCE. |
+| AC-130-005 | Every selected command records exact `cwd`, side-effect class, isolation, determinism, and automatic-run policy. |
+| AC-130-006 | Generated-artifact verification runs outside and leaves the source worktree unchanged. |
+| AC-130-007 | Repeated package artifact mismatch becomes a failed acceptance result. |
+| AC-130-008 | The bounded one-screen projection contains goal, recommendation label, scope, checks, themes, coverage, and state. |
+| AC-130-009 | The real EvoHarvest pilot is read-only and proves mixed-stack, themes, coverage, and exact command policy. |
+| AC-130-010 | OMP 18 nine-tool compatibility, security, license, docs, full regression, and release closure pass. |
+
 ## Definition of Done
 
 A release is done when its acceptance criteria pass, required checks succeed, release blockers are zero, non-blockers are moved to backlog, release documentation exists, and Git has a clean committed tag. A missing remote is documented and does not justify fabricating a push.

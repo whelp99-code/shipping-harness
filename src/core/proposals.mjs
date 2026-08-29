@@ -7,6 +7,7 @@ import { hashObject, stableStringify } from './crypto.mjs';
 import { assertContainedPath, ensureDir, exists, readJson, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { currentGitSha, gitStatus } from './git.mjs';
 import { analyzeBaseline, verifyBaselinePreservation } from './baseline.mjs';
+import { buildOneScreenApproval } from './project-intelligence.mjs';
 import { invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
 import { buildShortPlan } from './project-analysis.mjs';
@@ -107,6 +108,7 @@ export function projectProposalAuthority(input) {
     proposal.decision.hash = decisionHash(proposal.decision);
     proposal.approvalBrief = buildApprovalBrief(proposal.decision);
   }
+  proposal.oneScreenApproval = buildOneScreenApproval(proposal);
   return proposal;
 }
 
@@ -136,6 +138,7 @@ function authorityFingerprint(input) {
     sourceChanges: proposal.sourceChanges ?? [],
     baseline: proposal.baseline ?? null,
     baselinePreservation: proposal.baselinePreservation ?? null,
+    intelligence: proposal.intelligence ?? proposal.analysis?.intelligence ?? null,
     acceptanceStrength: proposal.acceptanceStrength,
     workspace: proposal.workspace,
     workspaceCandidates: proposal.workspaceCandidates,
@@ -305,6 +308,7 @@ export async function createScopeProposal(root, input) {
       lifecycle: { state: 'PLANNING', supersedes: active?.proposal?.id ?? null },
       sourceChanges,
       baseline,
+      intelligence: evidence.intelligence,
       acceptanceStrength,
       workspace: analysis.workspace,
       workspaceCandidates: analysis.workspaceCandidates,
@@ -319,7 +323,7 @@ export async function createScopeProposal(root, input) {
         ...analysis.diagnostics,
         ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
         ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
-        ...(acceptanceStrength.sufficient ? [] : ['A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
+        ...(acceptanceStrength.sufficient ? [] : [acceptanceStrength.level === 'UNCOVERED' ? `Acceptance does not cover: ${(acceptanceStrength.uncoveredPaths ?? []).join(', ')}` : 'A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
         ...(inheritedCommands.length > 0 ? [`Existing adapter commands were removed from the generated proposal: ${inheritedCommands.join(', ')}.`] : []),
       ],
     };
@@ -467,7 +471,22 @@ export async function refineScopeProposal(root, input) {
     const contract = compileDecisionContract(base, decision);
     const baseline = evidence.baseline;
     const sourceChanges = baseline.blockingPaths;
-    const acceptanceStrength = classifyAcceptanceStrength(analysis);
+    let intelligence = evidence.intelligence;
+    let proposalAnalysis = analysis;
+    if (baselinePreservation && proposal.intelligence) {
+      intelligence = {
+        ...intelligence,
+        workThemes: proposal.intelligence.workThemes,
+        goalRecommendation: proposal.intelligence.goalRecommendation,
+        acceptanceCoverage: proposal.intelligence.acceptanceCoverage,
+        preservedBaseline: {
+          planHash: proposal.baseline?.plan?.hash ?? null,
+          commit: baselinePreservation.commit,
+        },
+      };
+      proposalAnalysis = { ...analysis, intelligence };
+    }
+    const acceptanceStrength = classifyAcceptanceStrength(proposalAnalysis);
     const now = new Date();
     const candidate = {
       ...proposal,
@@ -498,21 +517,22 @@ export async function refineScopeProposal(root, input) {
       sourceChanges,
       baseline,
       baselinePreservation,
+      intelligence,
       acceptanceStrength,
-      workspace: analysis.workspace,
-      workspaceCandidates: analysis.workspaceCandidates,
-      versionEvidence: analysis.versionEvidence,
-      analysis,
+      workspace: proposalAnalysis.workspace,
+      workspaceCandidates: proposalAnalysis.workspaceCandidates,
+      versionEvidence: proposalAnalysis.versionEvidence,
+      analysis: proposalAnalysis,
       evidence,
       decision,
       approvalBrief,
       contract,
-      plan: buildShortPlan(analysis, contract.acceptance),
+      plan: buildShortPlan(proposalAnalysis, contract.acceptance),
       diagnostics: [
-        ...analysis.diagnostics,
+        ...proposalAnalysis.diagnostics,
         ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
         ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
-        ...(acceptanceStrength.sufficient ? [] : ['A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
+        ...(acceptanceStrength.sufficient ? [] : [acceptanceStrength.level === 'UNCOVERED' ? `Acceptance does not cover: ${(acceptanceStrength.uncoveredPaths ?? []).join(', ')}` : 'A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
       ],
     };
     delete candidate.approval;

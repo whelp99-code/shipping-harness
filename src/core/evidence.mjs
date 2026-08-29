@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { assertContainedPath, ensureDir, exists, readJson, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { runtimePaths } from './paths.mjs';
 import { runBoundedCommand } from './process.mjs';
+import { runIsolatedAcceptance } from './isolated-verification.mjs';
 import { invariant, ShippingError } from './errors.mjs';
 
 /** @param {string} value */
@@ -31,9 +32,7 @@ export async function runAcceptance(root, contract, lock, gitSha) {
       criterion.timeoutSeconds ?? contract.budgets.maxCommandSeconds,
       contract.budgets.maxCommandSeconds,
     );
-    const result = await runBoundedCommand({
-      command: criterion.command,
-      cwd: commandCwd,
+    const commandInput = {
       timeoutSeconds,
       maxOutputBytes: contract.budgets.maxOutputBytes,
       env: {
@@ -42,8 +41,12 @@ export async function runAcceptance(root, contract, lock, gitSha) {
         SHIPPING_HARNESS_CONTRACT_HASH: lock.contractHash,
         SHIPPING_HARNESS_GIT_SHA: gitSha,
       },
-    });
-    const passed = result.exitCode === 0 && !result.timedOut && !result.outputLimitExceeded;
+    };
+    const result = criterion.isolationRequired === true
+      ? await runIsolatedAcceptance(root, gitSha, criterion, commandInput)
+      : await runBoundedCommand({ command: criterion.command, cwd: commandCwd, ...commandInput });
+    const passed = result.exitCode === 0 && !result.timedOut && !result.outputLimitExceeded
+      && result.deterministicMismatch !== true && result.sourceMutationDetected !== true;
     const logName = `${safeName(criterion.id)}.log`;
     const logPath = path.join(runDirectory, logName);
     const log = [
@@ -55,6 +58,10 @@ export async function runAcceptance(root, contract, lock, gitSha) {
       `signal: ${String(result.signal)}`,
       `timedOut: ${String(result.timedOut)}`,
       `outputLimitExceeded: ${String(result.outputLimitExceeded)}`,
+      `sideEffect: ${criterion.sideEffect ?? 'none-or-test-output'}`,
+      `isolationRequired: ${String(criterion.isolationRequired === true)}`,
+      `deterministic: ${String(result.isolation?.deterministic ?? true)}`,
+      `sourceUnchanged: ${String(result.isolation?.sourceUnchanged ?? true)}`,
       `stdoutDigest: ${result.stdoutDigest}`,
       `stderrDigest: ${result.stderrDigest}`,
       '',
@@ -83,6 +90,12 @@ export async function runAcceptance(root, contract, lock, gitSha) {
       durationMs: result.durationMs,
       stdoutDigest: result.stdoutDigest,
       stderrDigest: result.stderrDigest,
+      sideEffect: criterion.sideEffect ?? 'none-or-test-output',
+      isolationRequired: criterion.isolationRequired === true,
+      deterministicOutputRequired: criterion.deterministicOutputRequired === true,
+      isolation: result.isolation ?? null,
+      deterministicMismatch: result.deterministicMismatch === true,
+      sourceMutationDetected: result.sourceMutationDetected === true,
       logPath: path.relative(root, logPath).replaceAll('\\', '/'),
     });
   }

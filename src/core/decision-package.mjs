@@ -73,7 +73,7 @@ function validateScope(evidence, scope) {
 /** @param {Record<string, any>} evidence @param {Array<Record<string, any>>} acceptance */
 function validateAcceptance(evidence, acceptance) {
   invariant(acceptance.length > 0 && acceptance.length <= 12, 'ERR_DECISION_ACCEPTANCE', 'Acceptance must contain 1 to 12 criteria');
-  const allowedCommands = new Set(evidence.analysis.candidateCommands.map((entry) => `${entry.cwd ?? '.'}\0${entry.command}`));
+  const allowedCommands = new Map(evidence.analysis.candidateCommands.map((entry) => [`${entry.cwd ?? '.'}\0${entry.command}`, entry]));
   const ids = new Set();
   for (const criterion of acceptance) {
     object(criterion, 'acceptance criterion');
@@ -83,7 +83,11 @@ function validateAcceptance(evidence, acceptance) {
     invariant(criterion.type === 'command', 'ERR_DECISION_ACCEPTANCE', `${id}.type must be command`);
     const command = string(criterion.command, `${id}.command`, 500);
     const cwd = string(criterion.cwd ?? '.', `${id}.cwd`, 300);
-    invariant(allowedCommands.has(`${cwd}\0${command}`), 'ERR_DECISION_COMMAND', `Acceptance command and cwd are not supported by repository evidence: ${cwd} :: ${command}`);
+    const supported = allowedCommands.get(`${cwd}\0${command}`);
+    invariant(supported, 'ERR_DECISION_COMMAND', `Acceptance command and cwd are not supported by repository evidence: ${cwd} :: ${command}`);
+    for (const key of ['sideEffect', 'isolationRequired', 'deterministicOutputRequired', 'automaticallyRunnable']) {
+      invariant(criterion[key] === supported[key], 'ERR_DECISION_ISOLATION', `${id}.${key} does not match mechanical command policy`);
+    }
     invariant(criterion.required === true, 'ERR_DECISION_ACCEPTANCE', `${id} must be required in an automatically proposed release`);
   }
 }

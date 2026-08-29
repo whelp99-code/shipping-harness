@@ -493,6 +493,10 @@ export function buildAcceptanceCriteria(analysis) {
     cwd: candidate.cwd ?? '.',
     required: true,
     timeoutSeconds: /test|verify|e2e|integration/u.test(candidate.command) ? 600 : 300,
+    sideEffect: candidate.sideEffect ?? 'none-or-test-output',
+    isolationRequired: candidate.isolationRequired === true,
+    deterministicOutputRequired: candidate.deterministicOutputRequired === true,
+    automaticallyRunnable: candidate.automaticallyRunnable !== false,
   }));
 }
 

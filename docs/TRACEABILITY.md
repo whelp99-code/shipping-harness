@@ -17,6 +17,7 @@
 | GOAL-013 governed internal runtime reuse | REQ-UPSTREAM-001..002, REQ-OMO-001..009, NFR-RUNTIME-001..002 | AC-0701..0714 | internal OMO bridge, private pinned runtime, Shipping verification | planned bridge/runtime/adversarial/canary/rollback suites |
 | GOAL-014 internal-only product boundary | REQ-INTERNAL-001, REQ-OMO-009, NFR-LICENSE-001 | AC-0713, AC-1010..1012 | third-party policy, runtime promotion, release operations | planned policy/packaging/release tests |
 | GOAL-015 safe internal remote control | REQ-REMOTE-001..005 | AC-0901..0912 | internal gateway, signed approval, backup/restore | planned remote/security/operations suites |
+| GOAL-019 project intelligence and coverage | REQ-INTEL-001..002, REQ-COVER-001..002, REQ-ISOLATE-001..002 | AC-130-001..010 | component graph, work themes, coverage matrix, isolated acceptance | project intelligence, isolated acceptance, EvoHarvest pilot, MCP/full release suites |
 | GOAL-018 safe dirty-baseline stewardship | REQ-BASE-001..006 | AC-120-001..009 | baseline classifier, proposal preservation handshake, MCP next action | baseline steward, proposal lifecycle, OMP compatibility tests |
 | GOAL-017 canonical proposal authority | REQ-CANON-001..006 | AC-112-001..008 | proposal state projection, proposal storage/refinement, MCP output | canonical proposal, lifecycle, nested refine, OMP compatibility tests |
 | GOAL-016 stable internal product | REQ-STABLE-001..003, REQ-OPS-001..002, REQ-BENCH-001..002, REQ-SECURITY-001, REQ-HANDOVER-001, REQ-RELEASE-001 | AC-1001..1014 | stable schemas, migrations, operations, benchmark, security inventory, handover | implemented v1.0 gates |
@@ -40,6 +41,7 @@ src/adapters/registry.mjs   REQ-ADAPTER-001..006
 src/core/project-analysis.mjs REQ-ANALYZE-*
 src/core/proposal-state.mjs and src/core/proposals.mjs REQ-CANON-* (implemented v1.1.2)
 src/core/baseline.mjs and proposal refinement REQ-BASE-* (implemented v1.2.0)
+src/core/project-intelligence.mjs and isolated-verification.mjs REQ-INTEL-*, REQ-COVER-*, REQ-ISOLATE-* (implemented v1.3.0)
 src/core/proposals.mjs      REQ-PROPOSAL-*
 src/mcp/tools.mjs           REQ-MCP-003, REQ-MCP-006..008
 src/mcp/protocol.mjs        REQ-MCP-002..005
@@ -153,3 +155,14 @@ Any implementation that cannot map to a requirement is out of scope or must amen
 | AC-120-007 | explicit host commit plus same-proposal rescan test |
 | AC-120-008 | beginner text/action assertions |
 | AC-120-009 | MCP/OMP/full release verification and release receipt |
+
+## v1.3.0 verification mapping
+
+| Acceptance | Proof |
+|---|---|
+| AC-130-001..003 | `test/mcp/project-intelligence.test.mjs` component, theme, and recommendation assertions |
+| AC-130-004..005 | acceptance coverage and mechanical isolation-policy validation tests |
+| AC-130-006..007 | `test/integration/isolated-acceptance.test.mjs` source fingerprint and deterministic digest tests |
+| AC-130-008 | bounded `oneScreenApproval` assertions |
+| AC-130-009 | `scripts/evoharvest-intelligence-pilot.mjs --check` target fingerprint receipt |
+| AC-130-010 | MCP/OMP/full release verification, Shipping receipt, annotated tag, and deployment doctor |

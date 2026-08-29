@@ -34,8 +34,8 @@ For OMP, use the release-owned transactional bootstrap instead of manually editi
 
 ```bash
 cd /home/jm/orca/projects/shipping-harness
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.2.0
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.2.0 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.0
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.0 --apply
 shipping-harness-omp doctor
 ```
 
@@ -126,6 +126,14 @@ From v1.1.2, legacy `decision.approvalStatus` and `approvalBrief.status` values 
 From v1.2.0, `DIRTY_BASELINE` returns a bounded `baseline` object with categorized entries, exact blocking/non-blocking paths, a suggested host commit message, a file-set hash, and one next action: `REVIEW_BASELINE`. Untracked agent/runtime and generated output remain visible but do not block; tracked or unknown entries fail closed.
 
 Shipping does not stage, commit, stash, reset, or delete files. After the user separately approves the displayed baseline plan, the host agent may commit exactly the included paths. It then calls `shipping_refine` with `rescan: true`, the exact `baselinePlanHash`, current full `baselineCommit`, and `baselineAuthorizedByUser: true`. The commit must directly follow the reviewed Git HEAD and contain exactly the reviewed paths or refinement fails with baseline drift. Baseline preservation approval is not release-scope approval.
+
+### Mixed-stack intelligence and acceptance coverage
+
+From v1.3.0, proposals include a bounded component graph, a primary stack plus supporting stacks, one to three path-cited work themes, a recommendation-only concrete goal, and an acceptance coverage matrix. The user's stated outcome remains authoritative. If any blocking product or release-evidence path has no non-supplemental acceptance command with the correct `cwd`, the proposal becomes `NEEDS_ACCEPTANCE` even after its dirty baseline is preserved.
+
+Every acceptance command carries a side-effect class. Package/release commands are mechanically marked `generated-artifacts`, require isolated execution, and require deterministic artifact output. Shipping runs them in disposable detached Git worktrees, repeats deterministic checks, compares artifact digests, fingerprints the source worktree before and after, and fails closed on nondeterminism or source mutation. External-state and data-state commands are not automatically runnable.
+
+The beginner projection is `oneScreenApproval`: release, canonical state, explicit goal, recommendation label, included/excluded scope, exact command/`cwd`, work themes, and coverage summary. Detailed evidence remains available separately and cannot be replaced by agent prose.
 
 For repositories containing one real product below a wrapper root, Shipping scans only bounded Git-tracked manifest paths, selects the strongest runnable workspace, and binds every proposed command to its exact workspace-relative `cwd`. If candidates remain materially tied, `shipping_refine` may select one existing candidate without accepting a free-form path or command.
 

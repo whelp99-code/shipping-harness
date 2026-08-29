@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.2.0 — Safe Baseline Steward`
-**Authority:** the release is complete only when `.shipping/releases/1.2.0.json` is `CLOSED` and annotated tag `v1.2.0` points to the closure commit
+**Current release train:** `v1.3.0 — Project Intelligence and Acceptance Coverage`
+**Authority:** the release is complete only when `.shipping/releases/1.3.0.json` is `CLOSED` and annotated tag `v1.3.0` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -62,10 +62,10 @@ After `v1.1.1` is tagged, run from the clean Shipping Harness checkout:
 
 ```bash
 # Read-only preview
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.2.0
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.0
 
 # Back up, install locally, merge OMP settings, and verify
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.2.0 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.3.0 --apply
 
 # Thereafter the installed command is available
 shipping-harness-omp doctor
@@ -226,6 +226,18 @@ Selects the actual runnable workspace from bounded Git-tracked evidence, derives
 ### v1.1.1 — OMP Field Deployment and Rollback
 
 Adds `shipping-harness-omp` preview/bootstrap/doctor/rollback, retains the active OMP `18.0.10` wrapper/core, backs up the previous Shipping package and managed OMP files, validates all nine MCP tools, and runs a planning-only nested-project field pilot without target mutation or approval.
+
+### v1.1.2 — Canonical Proposal State
+
+Makes one canonical proposal state authoritative for every approval projection, safely projects legacy contradictory records without rewriting them, includes exact command `cwd` values, and makes evidence-identical refinement idempotent.
+
+### v1.2.0 — Safe Baseline Steward
+
+Classifies dirty product, release-evidence, agent-runtime, Shipping-runtime, generated, and unknown paths; produces one hash-bound preservation plan and next action; and verifies a separately user-approved host commit without exposing Git mutation through MCP.
+
+### v1.3.0 — Project Intelligence and Acceptance Coverage
+
+Builds a bounded mixed-stack component graph, groups current product work into at most three evidence-backed themes, keeps inferred goals recommendation-only, requires every changed product path to be covered by an acceptance command, and runs side-effecting package checks in disposable detached worktrees with deterministic-output and source-mutation checks.
 
 Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
 

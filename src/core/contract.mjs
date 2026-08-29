@@ -120,6 +120,11 @@ export function validateContract(input) {
     if (criterion.required) requiredCount += 1;
     if (criterion.cwd !== undefined) requireString(criterion.cwd, `${criterion.id}.cwd`);
     if (criterion.timeoutSeconds !== undefined) requireInteger(criterion.timeoutSeconds, `${criterion.id}.timeoutSeconds`, { min: 1, max: 86400 });
+    if (criterion.sideEffect !== undefined) invariant(['none-or-test-output', 'build-artifacts', 'generated-artifacts', 'data-state', 'external-state'].includes(criterion.sideEffect), 'ERR_CONTRACT_INVALID', `${criterion.id}.sideEffect is invalid`);
+    if (criterion.isolationRequired !== undefined) invariant(typeof criterion.isolationRequired === 'boolean', 'ERR_CONTRACT_INVALID', `${criterion.id}.isolationRequired must be boolean`);
+    if (criterion.deterministicOutputRequired !== undefined) invariant(typeof criterion.deterministicOutputRequired === 'boolean', 'ERR_CONTRACT_INVALID', `${criterion.id}.deterministicOutputRequired must be boolean`);
+    if (criterion.automaticallyRunnable !== undefined) invariant(typeof criterion.automaticallyRunnable === 'boolean', 'ERR_CONTRACT_INVALID', `${criterion.id}.automaticallyRunnable must be boolean`);
+    if (criterion.deterministicOutputRequired === true) invariant(criterion.isolationRequired === true, 'ERR_CONTRACT_INVALID', `${criterion.id} deterministic output requires isolation`);
   }
   invariant(requiredCount > 0, 'ERR_CONTRACT_INVALID', 'At least one acceptance criterion must be required');
 

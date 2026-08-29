@@ -1,9 +1,9 @@
 # OMP Main Harness — Install, Doctor, and Rollback
 
-**Release:** Shipping Harness v1.1.1  
-**Boundary:** personal and company-internal use only  
-**Primary tested host:** OMP 18.0.10 through the existing `omo-balance` launcher and standalone `omp-core`  
-**Compatibility host:** source-linked OMP 15.10.12  
+**Release:** Shipping Harness v1.3.0
+**Boundary:** personal and company-internal use only
+**Primary tested host:** OMP 18.0.10 through the existing `omo-balance` launcher and standalone `omp-core`
+**Compatibility host:** source-linked OMP 15.10.12
 
 ## What the installer changes
 
@@ -26,10 +26,10 @@ Run as the ordinary Ubuntu user, not root:
 cd /home/jm/orca/projects/shipping-harness
 
 # Read-only preview
-shipping-harness-omp bootstrap --tag v1.1.1
+shipping-harness-omp bootstrap --tag v1.3.0
 
 # Back up, install, merge, and verify
-shipping-harness-omp bootstrap --tag v1.1.1 --apply
+shipping-harness-omp bootstrap --tag v1.3.0 --apply
 
 # Independent post-install check
 shipping-harness-omp doctor
@@ -119,6 +119,8 @@ The field smoke does not approve or edit the supplied project. It:
 6. records that target source was not changed.
 
 A dirty target remains dirty and is reported truthfully. The field smoke does not commit, stash, reset, or discard it.
+
+For v1.3.0, the source release additionally runs `scripts/evoharvest-intelligence-pilot.mjs --check`. It proves the mixed Python/Node/Playwright/Alembic/Shell graph, bounded authentication and packaging themes, complete changed-path coverage, package isolation metadata, and an unchanged target fingerprint.
 
 ## Rollback
 

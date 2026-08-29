@@ -60,6 +60,8 @@ export function buildUserStatusView(status) {
       dirtyPathCount: proposal.dirtyPathCount,
       acceptanceStrength: proposal.acceptanceStrength,
       baseline: proposal.baseline ?? null,
+      intelligence: proposal.intelligence ?? null,
+      oneScreenApproval: proposal.oneScreenApproval ?? null,
       nextActionCode: proposal.nextAction ?? null,
     };
   }

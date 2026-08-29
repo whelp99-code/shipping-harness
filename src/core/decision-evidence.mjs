@@ -2,6 +2,7 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { hashObject, sha256, stableStringify } from './crypto.mjs';
 import { analyzeBaseline } from './baseline.mjs';
+import { buildProjectIntelligence } from './project-intelligence.mjs';
 import { invariant } from './errors.mjs';
 import { assertContainedPath, exists } from './fs.mjs';
 import { currentGitSha, gitStatus } from './git.mjs';
@@ -100,6 +101,9 @@ export async function buildDecisionEvidence(root, input) {
   const manifests = await manifestReceipts(root, analysis.manifests);
   const history = await releaseHistory(root);
   const baseline = analyzeBaseline(root, git.porcelain, { gitSha });
+  const intelligence = buildProjectIntelligence(root, analysis, baseline, input.goal.trim());
+  analysis.candidateCommands = intelligence.acceptanceCommands;
+  analysis.intelligence = intelligence;
   const sourceChanges = baseline.blockingPaths.slice(0, 200);
   const createdAt = (input.now ?? new Date()).toISOString();
   const facts = [
@@ -112,6 +116,7 @@ export async function buildDecisionEvidence(root, input) {
     { id: 'EVID-007', kind: 'workspace-selection', source: 'repository-metadata', claim: { selected: analysis.workspace, candidates: analysis.workspaceCandidates }, trust: 'untrusted-repository-data' },
     { id: 'EVID-008', kind: 'version-evidence', source: 'repository-metadata', claim: analysis.versionEvidence, trust: 'untrusted-repository-data' },
     { id: 'EVID-009', kind: 'baseline-classification', source: 'git-status', claim: baseline, trust: 'trusted-mechanical' },
+    { id: 'EVID-010', kind: 'project-intelligence', source: 'tracked-path-and-manifest-evidence', claim: intelligence, trust: 'trusted-mechanical-projection' },
   ];
   const pack = {
     schema: 'shipping-harness/decision-evidence-v1',
@@ -128,6 +133,7 @@ export async function buildDecisionEvidence(root, input) {
     operationalSurface: operationalSurface(analysis),
     sourceChanges,
     baseline,
+    intelligence,
     facts,
   };
   pack.hash = hashObject(pack);

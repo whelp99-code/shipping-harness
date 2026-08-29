@@ -10,7 +10,7 @@ function deepFreeze(value) {
 
 export const COMPATIBILITY = deepFreeze({
   schema: STABLE_SCHEMAS.compatibility,
-  shippingVersion: '1.2.0',
+  shippingVersion: '1.3.0',
   supportedReleases: [...SUPPORTED_RELEASES],
   platforms: ['linux', 'darwin'],
   architectures: ['x64', 'arm64'],

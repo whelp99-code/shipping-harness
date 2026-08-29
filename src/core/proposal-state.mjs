@@ -53,6 +53,16 @@ function normalizedText(value) {
 /** @param {Record<string, any>} analysis */
 export function classifyAcceptanceStrength(analysis = {}) {
   const candidates = Array.isArray(analysis.candidateCommands) ? analysis.candidateCommands : [];
+  const coverage = analysis.intelligence?.acceptanceCoverage;
+  if (coverage && coverage.totalPaths > 0 && coverage.complete !== true) {
+    return {
+      level: 'UNCOVERED',
+      sufficient: false,
+      commands: candidates.map((entry) => entry.command).filter(Boolean),
+      reason: `Acceptance does not cover ${coverage.uncoveredPaths.length} changed product path(s).`,
+      uncoveredPaths: coverage.uncoveredPaths,
+    };
+  }
   const strong = candidates.filter((entry) => {
     const command = typeof entry?.command === 'string' ? entry.command.trim() : '';
     return command

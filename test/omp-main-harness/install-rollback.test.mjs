@@ -9,13 +9,15 @@ import { installedShippingVersion, packShippingSource, shippingPrefixPaths } fro
 import { ompMainPaths } from '../../packages/omp-main-harness/paths.mjs';
 import { createFakeOmpEnvironment, createOldShippingPackage, installPackage } from './helpers.mjs';
 
+const CURRENT_VERSION = JSON.parse(await readFile(new URL('../../package.json', import.meta.url), 'utf8')).version;
+
 async function currentPackage(environment) {
   const destination = path.join(environment.root, 'current-pack');
   await mkdir(destination, { recursive: true });
   return packShippingSource({ destination, npmCommand: '/usr/bin/npm' });
 }
 
-test('user-local upgrade installs v1.1.1, merges OMP safely, passes doctor, and rolls back exactly', async () => {
+test('user-local upgrade installs the current package, merges OMP safely, passes doctor, and rolls back exactly', async () => {
   const environment = await createFakeOmpEnvironment();
   try {
     const oldPackage = await createOldShippingPackage(environment.root);
@@ -23,7 +25,7 @@ test('user-local upgrade installs v1.1.1, merges OMP safely, passes doctor, and 
     assert.equal(installedShippingVersion(environment.prefix), '1.0.1');
     const before = await environment.snapshot();
     const packed = await currentPackage(environment);
-    assert.equal(packed.version, '1.1.1');
+    assert.equal(packed.version, CURRENT_VERSION);
 
     const installed = await installOmpMainHarness({
       home: environment.home,
@@ -32,15 +34,15 @@ test('user-local upgrade installs v1.1.1, merges OMP safely, passes doctor, and 
       ompCommand: environment.omp,
       npmCommand: '/usr/bin/npm',
       packagePath: packed.path,
-      sourceTag: 'v1.1.1-test',
+      sourceTag: `v${CURRENT_VERSION}-test`,
       dryRun: false,
     });
-    assert.equal(installed.shippingVersion, '1.1.1');
+    assert.equal(installed.shippingVersion, CURRENT_VERSION);
     assert.equal(installed.ompVersion, '18.0.10');
     assert.equal(installed.tools, 9);
     assert.equal(installed.mainHarness, true);
     assert.equal(installed.doctor.healthy, true);
-    assert.equal(installedShippingVersion(environment.prefix), '1.1.1');
+    assert.equal(installedShippingVersion(environment.prefix), CURRENT_VERSION);
 
     const mcp = JSON.parse(await readFile(path.join(environment.agentDir, 'mcp.json'), 'utf8'));
     assert.deepEqual(mcp.preserve, { value: true });
@@ -52,7 +54,7 @@ test('user-local upgrade installs v1.1.1, merges OMP safely, passes doctor, and 
     assert.equal(agents.split('<!-- >>> SHIPPING-HARNESS-MAIN >>>').length - 1, 1);
     assert.match(agents, /Keep this rule/u);
     const receipt = JSON.parse(await readFile(path.join(environment.agentDir, 'shipping-harness-install.json'), 'utf8'));
-    assert.equal(receipt.shippingHarness.version, '1.1.1');
+    assert.equal(receipt.shippingHarness.version, CURRENT_VERSION);
     assert.equal(receipt.omp.version, '18.0.10');
     assert.equal(receipt.integration.tools, 9);
     assert.equal(receipt.integration.managerSmoke, 'PASS');
@@ -70,7 +72,7 @@ test('user-local upgrade installs v1.1.1, merges OMP safely, passes doctor, and 
       agentDir: environment.agentDir,
       shippingPrefix: environment.prefix,
       ompCommand: environment.omp,
-      expectedVersion: '1.1.1',
+      expectedVersion: CURRENT_VERSION,
     });
     assert.equal(doctor.healthy, true);
 
@@ -108,7 +110,7 @@ test('preview is read-only and reports the actual OMP host and target package', 
     });
     assert.equal(preview.dryRun, true);
     assert.equal(preview.currentShippingVersion, '1.0.1');
-    assert.equal(preview.targetShippingVersion, '1.1.1');
+    assert.equal(preview.targetShippingVersion, CURRENT_VERSION);
     assert.equal(preview.omp.version, '18.0.10');
     assert.deepEqual(await environment.snapshot(), before);
   } finally {

@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 4,
+    "requiredFailed": 0,
+    "total": 4
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "380cd9229ddf157f61bb1dfd6263f093021b8b61",
+  "closedAt": "2026-08-29T11:12:40.981Z",
+  "closedGitSha": "3b968cf7df53bb050042ecc5d4e57e6ce5dd9df6",
+  "contractHash": "d0a7c43b2991c09411922f884e6dd0a6b39c64029a3aa579de1e8c41da006c28",
+  "evidenceRunId": "run-2026-08-29T11-12-16-449Z-803d83ae",
+  "fixCycles": 0,
+  "goal": "Classify dirty work safely, present a bounded baseline preservation plan, and rescan the same proposal only after an explicitly approved host-side commit without exposing Git mutation through MCP.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.2.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

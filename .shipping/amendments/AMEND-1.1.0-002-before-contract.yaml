@@ -150,7 +150,6 @@
         "packages/shipping-plugin/skill/SKILL.md",
         "packages/stable-control/compatibility.mjs",
         "schemas/v1/**",
-        "scripts/v1-doc-audit.mjs",
         "src/core/decision-evidence.mjs",
         "src/core/decision-package.mjs",
         "src/core/project-analysis.mjs",

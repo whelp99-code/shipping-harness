@@ -1,0 +1,22 @@
+{
+  "actor": "sequential-build",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": "scripts/v1-doc-audit.mjs"
+    }
+  ],
+  "correctedContractHash": "9b06594ce856182b1918282ba0af822d3cd0b6e08fa34b041d0f69906b84bf18",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-1.1.0-002",
+  "kind": "stable-v1-doc-audit-correction",
+  "previousContractHash": "944bfd1234cdb047fcd88fc5f779bdf0ae0a692165b90c1be07cb49554902628",
+  "project": "shipping-harness",
+  "reason": "The v1 documentation audit must permit the planned backward-compatible v1.1.x release train rather than only v1.0.x patches.",
+  "recordedAt": "2026-08-29T05:45:42.089Z",
+  "release": "1.1.0",
+  "removed": [],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticProductScopeExpansion": false,
+  "sourceGitSha": "2642d4915f866761a1d832594c9b9d4e01cfb707"
+}

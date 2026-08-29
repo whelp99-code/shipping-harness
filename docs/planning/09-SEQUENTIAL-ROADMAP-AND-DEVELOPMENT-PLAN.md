@@ -33,6 +33,7 @@ The roadmap below defines sequence and dependency. Implementation must use the c
 | v1.1.2 | [`21-V1.1.2-CANONICAL-PROPOSAL-STATE-DEVELOPMENT-PLAN.md`](21-V1.1.2-CANONICAL-PROPOSAL-STATE-DEVELOPMENT-PLAN.md) |
 | v1.2.0 | [`22-V1.2.0-SAFE-BASELINE-STEWARD-DEVELOPMENT-PLAN.md`](22-V1.2.0-SAFE-BASELINE-STEWARD-DEVELOPMENT-PLAN.md) |
 | v1.3.0 | [`23-V1.3.0-PROJECT-INTELLIGENCE-AND-ACCEPTANCE-COVERAGE-DEVELOPMENT-PLAN.md`](23-V1.3.0-PROJECT-INTELLIGENCE-AND-ACCEPTANCE-COVERAGE-DEVELOPMENT-PLAN.md) |
+| v1.3.1 | [`24-V1.3.1-OMP-BOOTSTRAP-TEMPORARY-PACKAGE-RACE-PATCH.md`](24-V1.3.1-OMP-BOOTSTRAP-TEMPORARY-PACKAGE-RACE-PATCH.md) |
 
 If this summary conflicts with a version-specific plan, the direction document wins first, then the version-specific plan, then this summary.
 
@@ -67,6 +68,7 @@ Canonical decision: [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERN
 | v1.1.2 | Canonical Proposal State | One authority state controls every approval projection and no-op refine is idempotent. |
 | v1.2.0 | Safe Baseline Steward | Dirty work is classified and safely preserved through an explicit host-side handshake. |
 | v1.3.0 | Project Intelligence and Coverage | Mixed-stack work themes and acceptance coverage make the proposed release concrete and provable. |
+| v1.3.1 | OMP Bootstrap Race Patch | Temporary package cleanup is ordered after the complete install and proven by real bootstrap apply. |
 
 ---
 

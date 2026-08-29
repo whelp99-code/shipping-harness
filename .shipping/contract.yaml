@@ -1,28 +1,28 @@
 {
   "acceptance": [
     {
-      "command": "node --test --test-reporter=spec test/mcp/project-intelligence.test.mjs test/mcp/baseline-steward.test.mjs test/mcp/nested-workspace-refine.test.mjs",
+      "command": "node --test --test-reporter=spec test/omp-main-harness/bootstrap-cleanup-race.test.mjs test/omp-main-harness/install-rollback.test.mjs",
       "cwd": ".",
-      "description": "Mixed-stack graph, work themes, coverage matrix, and one-screen proposal tests pass.",
-      "id": "AC-13001",
+      "description": "The real bootstrap apply lifecycle, doctor, receipt, and rollback regression pass.",
+      "id": "AC-13101",
       "required": true,
-      "timeoutSeconds": 360,
+      "timeoutSeconds": 600,
       "type": "command"
     },
     {
-      "command": "node --test --test-reporter=spec test/integration/isolated-acceptance.test.mjs",
+      "command": "npm run test:omp-main && npm run smoke:omp-main",
       "cwd": ".",
-      "description": "Side-effecting acceptance isolation and deterministic package tests pass.",
-      "id": "AC-13002",
+      "description": "All OMP main-harness and current-host field smoke tests pass.",
+      "id": "AC-13102",
       "required": true,
-      "timeoutSeconds": 360,
+      "timeoutSeconds": 900,
       "type": "command"
     },
     {
       "command": "npm run test:mcp && npm run release:verify",
       "cwd": ".",
-      "description": "All MCP, OMP, and full release regression, security, license, and docs gates pass.",
-      "id": "AC-13003",
+      "description": "All MCP and full regression, security, license, and documentation gates pass.",
+      "id": "AC-13103",
       "required": true,
       "timeoutSeconds": 900,
       "type": "command"
@@ -30,8 +30,8 @@
     {
       "command": "node scripts/evoharvest-intelligence-pilot.mjs --check",
       "cwd": ".",
-      "description": "The real EvoHarvest planning pilot is non-destructive and records mixed-stack, theme, coverage, and baseline evidence.",
-      "id": "AC-13004",
+      "description": "The real EvoHarvest intelligence pilot remains non-destructive.",
+      "id": "AC-13104",
       "required": true,
       "timeoutSeconds": 300,
       "type": "command"
@@ -40,7 +40,7 @@
       "command": "git diff --check",
       "cwd": ".",
       "description": "No whitespace or conflict-marker errors remain.",
-      "id": "AC-13005",
+      "id": "AC-13105",
       "required": true,
       "timeoutSeconds": 60,
       "type": "command"
@@ -99,7 +99,7 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Fix the OMP bootstrap temporary-package cleanup race, prove real bootstrap apply and automatic rollback, and deploy the closed patch to OMP 18 without changing product authority or MCP behavior.",
+  "goal": "Fix the OMP bootstrap temporary-package cleanup race, prove real bootstrap apply and rollback, and deploy the closed patch to OMP 18 without changing product authority or MCP behavior.",
   "project": "shipping-harness",
   "release": "1.3.1",
   "releasePolicy": {
@@ -109,29 +109,28 @@
     "generateReport": true
   },
   "requirements": [
-    "REQ-INTEL-001",
-    "REQ-INTEL-002",
-    "REQ-COVER-001",
-    "REQ-COVER-002",
-    "REQ-ISOLATE-001",
-    "REQ-ISOLATE-002"
+    "REQ-BOOTSTRAP-001",
+    "REQ-BOOTSTRAP-002",
+    "REQ-BOOTSTRAP-003",
+    "REQ-BOOTSTRAP-004",
+    "REQ-BOOTSTRAP-005",
+    "REQ-BOOTSTRAP-006"
   ],
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Executing product deployment, external services, paid actions, production migrations, or Git mutation in target projects.",
-      "Overriding the explicit user goal with an inferred work theme or auto-approving an inferred scope.",
-      "Unbounded semantic analysis or reading untracked secrets/content for theme inference.",
-      "A tenth MCP tool, OMP core/model-router changes, Team/DAG, public publication, or public listeners."
+      "Proposal, baseline, project-intelligence, acceptance-coverage, isolation-policy, or MCP semantic changes.",
+      "OMP core/router/provider/model-routing changes or OMP downgrade.",
+      "A tenth MCP tool, Team/DAG, push, deploy, publication, public listeners, or target-project mutation.",
+      "Reopening or modifying the closed v1.3.0 release."
     ],
     "include": [
-      "Build a bounded path-based component graph and identify primary/supporting stacks from tracked repository evidence.",
-      "Group changed product paths into one to three evidence-backed work themes and recommend a concrete release goal without overriding the explicit user goal.",
-      "Map every blocking product/release-evidence path to authority-bearing acceptance commands and exact cwd; uncovered paths force NEEDS_ACCEPTANCE.",
-      "Annotate acceptance commands with side-effect class, isolation requirement, and deterministic-output requirement where applicable.",
-      "Run side-effecting package/release acceptance in a temporary Git worktree or isolated copy and compare repeat output digests without mutating the source worktree.",
-      "Expose a bounded one-screen approval summary while preserving expandable detailed evidence.",
-      "Run a non-destructive real EvoHarvest planning pilot and preserve OMP 18.0.10, nine MCP tools, human approval, and all prior guarantees."
+      "Await the complete OMP main-harness installation before deleting the temporary bootstrap package directory.",
+      "Add a real end-to-end bootstrap apply regression with disposable home/prefix, real local npm packaging, fake OMP 18 host, doctor, receipt, and explicit rollback.",
+      "Preserve automatic rollback behavior and verify the previous package and managed OMP files are recoverable.",
+      "Update v1.3.1 version, compatibility, planning, requirements, traceability, and operator documentation.",
+      "After source CLOSED/tag, deploy the tagged v1.3.1 package to the user environment while preserving actual OMP 18 launcher/core hashes.",
+      "Verify installed doctor, nine MCP tools, truthful receipt, and a non-destructive EvoHarvest pilot."
     ],
     "paths": {
       "exclude": [
@@ -150,31 +149,14 @@
         "docs/TRACEABILITY.md",
         "docs/operations/OMP-MAIN-HARNESS.md",
         "docs/planning/02-REQUIREMENTS.md",
-        "docs/planning/23-V1.3.0-PROJECT-INTELLIGENCE-AND-ACCEPTANCE-COVERAGE-DEVELOPMENT-PLAN.md",
+        "docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md",
+        "docs/planning/24-V1.3.1-OMP-BOOTSTRAP-TEMPORARY-PACKAGE-RACE-PATCH.md",
         "package.json",
-        "packages/omp-main-harness/constants.mjs",
+        "packages/omp-main-harness/install.mjs",
         "packages/shipping-plugin/manifest/plugin.json",
-        "packages/shipping-plugin/skill/SKILL.md",
         "packages/stable-control/compatibility.mjs",
         "schemas/v1/examples/plugin.example.json",
-        "scripts/evoharvest-intelligence-pilot.mjs",
-        "src/core/baseline.mjs",
-        "src/core/contract.mjs",
-        "src/core/decision-evidence.mjs",
-        "src/core/decision-package.mjs",
-        "src/core/evidence.mjs",
-        "src/core/isolated-verification.mjs",
-        "src/core/project-analysis.mjs",
-        "src/core/project-intelligence.mjs",
-        "src/core/proposal-state.mjs",
-        "src/core/proposals.mjs",
-        "src/mcp/tools.mjs",
-        "src/mcp/user-view.mjs",
-        "test/integration/isolated-acceptance.test.mjs",
-        "test/mcp/baseline-steward.test.mjs",
-        "test/mcp/nested-workspace-refine.test.mjs",
-        "test/mcp/omp-compatibility.test.mjs",
-        "test/mcp/project-intelligence.test.mjs",
+        "test/omp-main-harness/bootstrap-cleanup-race.test.mjs",
         "test/omp-main-harness/install-rollback.test.mjs"
       ]
     }

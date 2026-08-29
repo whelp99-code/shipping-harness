@@ -1,31 +1,49 @@
 {
   "acceptance": [
     {
-      "command": "node --test --test-reporter=spec test/mcp/omp-compatibility.test.mjs",
+      "id": "AC-10201",
+      "description": "Canonical proposal lifecycle, idempotency, mode authority, and weak-gate tests pass.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/mcp/proposal-lifecycle.test.mjs",
       "cwd": ".",
-      "description": "OMP 15.10.12 protocol 2025-03-26 initializes and retains that negotiated version.",
-      "id": "AC-10101",
       "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
+      "timeoutSeconds": 180
     },
     {
+      "id": "AC-10202",
+      "description": "All MCP proposal and protocol regression tests pass.",
+      "type": "command",
       "command": "npm run test:mcp",
       "cwd": ".",
-      "description": "Existing MCP latest and legacy regression suite passes.",
-      "id": "AC-10102",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-10203",
+      "description": "Decision and beginner usability policy tests pass.",
+      "type": "command",
+      "command": "npm run test:decision",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-10204",
+      "description": "Beginner user-view regression tests pass.",
+      "type": "command",
+      "command": "npm run test:usability",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-10205",
+      "description": "Full release, security, license, and documentation verification passes.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "All release tests and security checks pass without authority regression.",
-      "id": "AC-10103",
       "required": true,
-      "timeoutSeconds": 600,
-      "type": "command"
+      "timeoutSeconds": 900
     }
   ],
   "adapters": {
@@ -91,24 +109,27 @@
     "generateReport": true
   },
   "requirements": [
-    "REQ-MCP-COMPAT-001",
-    "REQ-MCP-COMPAT-002",
-    "REQ-MCP-COMPAT-003"
+    "REQ-PROPOSAL-STATE-001",
+    "REQ-PROPOSAL-IDEMPOTENCY-001",
+    "REQ-MODE-AUTHORITY-001",
+    "REQ-ACCEPTANCE-FLOOR-001",
+    "REQ-PENDING-STATUS-001"
   ],
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "New Shipping tools or changed authority semantics",
-      "Changes to OMP source code",
-      "Team or DAG activation",
-      "Remote protocol changes",
-      "Public distribution or deployment"
+      "Nested workspace scanning or selection.",
+      "shipping_refine or any new user-facing MCP tool.",
+      "Executing target project code during planning.",
+      "Automatic commit, stash, reset, push, deploy, purchase, or publication.",
+      "Changes to OMP source, private OMO runtime, Team/DAG, or remote protocol."
     ],
     "include": [
-      "MCP initialization compatibility for OMP 15.10.12 protocol 2025-03-26",
-      "Regression tests for OMP-style initialize, tools/list, and shipping_status",
-      "Compatibility documentation and v1.0.1 package version",
-      "Corrected internal OMP bootstrap target and probes"
+      "Derive one canonical proposal lifecycle state used by status and approval.",
+      "Return the existing active proposal for materially identical shipping_start calls and audit supersession for changed requests.",
+      "Keep AUTO mode unless an explicit user-authorized mode receipt permits a change.",
+      "Reject weak fallback-only acceptance and dirty or unresolved proposals before approval.",
+      "Expose pending proposal state and next action through shipping_status and the OMP skill."
     ],
     "paths": {
       "exclude": [
@@ -123,11 +144,18 @@
         "README.md",
         "docs/COMPATIBILITY.md",
         "docs/MCP.md",
+        "package-lock.json",
         "package.json",
-        "packages/stable-control/compatibility.mjs",
-        "scripts/v1-doc-audit.mjs",
-        "src/mcp/protocol.mjs",
-        "test/mcp/**"
+        "packages/shipping-plugin/manifest/plugin.json",
+        "packages/shipping-plugin/skill/SKILL.md",
+        "src/core/decision-package.mjs",
+        "src/core/proposal-state.mjs",
+        "src/core/proposals.mjs",
+        "src/mcp/tools.mjs",
+        "src/mcp/user-view.mjs",
+        "test/adversarial/**",
+        "test/mcp/**",
+        "test/usability/**"
       ]
     }
   },

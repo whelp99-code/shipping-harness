@@ -427,6 +427,25 @@
 | AC-131-008 | Actual user installation reports v1.3.1 while OMP remains 18.0.10 and protected hashes are unchanged. |
 | AC-131-009 | Installed doctor, MCP tool inventory, receipt audit, and non-destructive EvoHarvest pilot pass. |
 
+### v1.4.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-140-001 | All proposal and active-release states compile the four required beginner sections: problems, improvements, next plan, and summary. |
+| AC-140-002 | Every brief item is bound to a mechanical code and evidence reference; model advisory text has no authority field. |
+| AC-140-003 | Every state produces exactly one primary next action plus explicit allowed and forbidden actions. |
+| AC-140-004 | Dirty-baseline output summarizes product, release-evidence, agent-runtime, and Shipping-runtime groups without flooding the default view with exact paths. |
+| AC-140-005 | No-model, weak-model, and strong-model host fixtures produce an identical brief hash for identical Shipping authority input. |
+| AC-140-006 | Host attempts to reinterpret dirty or blocked states, recommend destructive discard, or close early cannot change the compiled result. |
+| AC-140-007 | Normal brief compilation performs no Git subprocess, network request, or model call and meets the local latency/size budget. |
+| AC-140-008 | Deterministic quality checks detect contradiction, duplicate next action, missing evidence, unbounded output, and verification self-reference. |
+| AC-140-009 | Rendering/quality failure returns raw authority fields and never changes canonical state or approval readiness. |
+| AC-140-010 | MCP remains exactly nine tools with unchanged operational authority and input schemas. |
+| AC-140-011 | OMP 18.0.10 renders the Shipping-generated beginner contract and passes doctor, protocol, and receipt checks. |
+| AC-140-012 | The EvoHarvest field pilot emits the plain brief, one safe action, correct workspace/version/coverage, and zero target mutation, approval, or execution. |
+| AC-140-013 | Full release, security, license, docs, plugin, OMO, remote, stable, and adversarial regressions pass. |
+| AC-140-014 | v1.4.0 closes with fresh evidence, zero blockers/unknowns, annotated tag at the closure commit, clean source, and verified OMP installation. |
+
 ## Definition of Done
 
 A release is done when its acceptance criteria pass, required checks succeed, release blockers are zero, non-blockers are moved to backlog, release documentation exists, and Git has a clean committed tag. A missing remote is documented and does not justify fabricating a push.

@@ -11,6 +11,7 @@ Shipping Harness v1.0.0 has no required third-party runtime package dependencies
 | OMO Native / Oh My OpenAgent | `omo` process/config/event bridge and code-audit reference | Actual source runs from a separately pinned private internal runtime with its own notices, modification log, tests, artifact digest, and rollback pin | Repository default Sustainable Use License permits the accepted personal/company-internal direction but constrains distribution; no public/customer bundle is planned |
 | Node.js HTTPS and crypto | TLS-only internal remote transport, HMAC request/receipt signing, and bounded local filesystem state | Stable v1 internal control-plane transport | Node.js standard library; no hosted service or runtime package dependency |
 | OpenSSL executable | Disposable smoke-test certificate generation only | None required for production certificate issuance | Locally installed executable; not bundled, vendored, downloaded, or invoked by the production gateway |
+| Paperthin | Conceptual reference for restraint, one-next-action, single-source-of-truth, independent verification, and post-output QA | Original deterministic Shipping checks only; no runtime package, skill catalog, copied source, or auto-update | MIT reference; conceptual provenance recorded in `docs/research/PAPERTHIN-APPLICATION-DECISION.md`; any future copied material requires explicit notice and inventory |
 
 ## Internal OMO conditions
 

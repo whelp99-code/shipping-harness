@@ -147,9 +147,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Analyze repository evidence first, discover only material product ambiguities through a bounded user-friendly interview, record immutable decisions and direction candidates, and hand an accepted direction to the existing Release Train and policy autopilot without technical interrogation or model authority.",
+  "goal": "Prove policy-authorized autopilot across diverse real and disposable repository lanes with zero false authority, bounded performance and retention, crash-safe recovery, and unchanged OMP 18 binaries.",
   "project": "shipping-harness",
-  "release": "1.7.0",
+  "release": "1.6.1",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

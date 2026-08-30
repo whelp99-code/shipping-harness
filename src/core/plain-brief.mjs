@@ -195,7 +195,14 @@ function actionPolicyFor(state, blockerCount) {
 export function buildActionEnvelope(input = {}) {
   const state = normalizedState(input);
   const blockerCount = normalizedCount(input.blockerCount ?? input.issues?.counts?.BLOCKER ?? input.state?.blockerCount);
-  const policy = actionPolicyFor(state, blockerCount);
+  const discoveryQuestions = input.goalDiscovery?.questions ?? [];
+  const policy = state === 'NEEDS_INPUT' && discoveryQuestions.length > 0
+    ? {
+        ...ACTION_POLICY.NEEDS_INPUT,
+        label: '목표 권장안 검토',
+        exactPhrase: '권장안으로 결정해.',
+      }
+    : actionPolicyFor(state, blockerCount);
   const allowedNow = [...new Set(policy.allowedNow)];
   const forbiddenNow = ALL_ACTIONS.filter((action) => !allowedNow.includes(action));
   const body = {
@@ -266,6 +273,16 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
       modelAuthority: false,
     }, ['releaseTrain.releases']));
   }
+  if (input.goalDiscovery && ((input.goalDiscovery.questions?.length ?? 0) > 0 || state === 'READY_FOR_APPROVAL')) {
+    facts.push(fact('GOAL_DISCOVERY', {
+      status: input.goalDiscovery.status,
+      round: input.goalDiscovery.round,
+      questionCount: input.goalDiscovery.questions?.length ?? 0,
+      recommendedCandidateId: input.goalDiscovery.recommendedCandidateId ?? null,
+      directionHash: input.goalDiscovery.direction?.hash ?? null,
+      modelAuthority: false,
+    }, ['goalDiscovery.status', 'goalDiscovery.questions', 'goalDiscovery.direction']));
+  }
   facts.push(fact('REPORT_COMPILER', 'deterministic-no-model', ['plainBrief.schema'], 'mechanical', 'exact'));
   const body = {
     schema: 'shipping-harness/brief-fact-graph-v1',
@@ -311,6 +328,23 @@ function proposalBrief(input, state) {
   const questions = normalizedCount(input.questionCount ?? input.questions?.length ?? input.decision?.questions?.length);
   const coverage = input.intelligence?.acceptanceCoverage ?? input.analysis?.intelligence?.acceptanceCoverage ?? input.coverage;
   if (state === 'DIRTY_BASELINE') return dirtyBrief(input);
+  if (state === 'NEEDS_INPUT' && (input.goalDiscovery?.questions?.length ?? 0) > 0) {
+    const questions = input.goalDiscovery.questions.slice(0, 3);
+    return {
+      headline: '목표와 방향을 확정하기 위한 짧은 확인이 필요합니다.',
+      problems: [item('UNRESOLVED_GOAL_DIRECTION', `저장소 증거만으로 결정할 수 없는 제품 질문 ${questions.length}개가 남았습니다.`, ['goalDiscovery.questions', 'goalDiscovery.critic'])],
+      improvements: [
+        item('USE_PRODUCT_LEVEL_QUESTIONS_ONLY', '기술 구현이 아니라 사용자 결과·대상·운영 범위만 확인합니다.', ['goalDiscovery.questionPolicy', 'goalDiscovery.questions']),
+        item('OFFER_REVERSIBLE_DEFAULTS', '모든 질문에는 현재 구조를 보존하는 안전한 권장안이 함께 제공됩니다.', ['goalDiscovery.questions.recommendedChoice']),
+      ],
+      nextPlan: [
+        item('PLAN_REVIEW_GOAL_DEFAULTS', '표시된 제품 질문과 권장안을 확인합니다.', ['goalDiscovery.questions']),
+        item('PLAN_ACCEPT_OR_REPLACE_DEFAULTS', '권장안을 위임하거나 원하는 결과만 짧게 답합니다.', ['goalDiscovery.questions', 'decision.resolutions']),
+        item('PLAN_COMPILE_ACCEPTED_DIRECTION', '같은 제안에서 목표·비목표·완료 의미를 확정합니다.', ['goalDiscovery.candidates', 'goalDiscovery.direction', 'goalDiscovery.critic']),
+      ],
+      summary: item('SUMMARY_BOUNDED_GOAL_DISCOVERY', '사용자가 기술 인터뷰를 할 필요는 없으며, 모르면 “권장안으로 결정해”라고 답하면 됩니다.', ['goalDiscovery.maxRounds', 'goalDiscovery.questions']),
+    };
+  }
   if (state === 'NEEDS_INPUT') return {
     headline: '개발 전에 꼭 필요한 결정이 남아 있습니다.',
     problems: [item('UNRESOLVED_EXCEPTION', `안전하게 자동 결정할 수 없는 핵심 질문 ${questions || 1}개가 남았습니다.`, ['decision.questions', 'canonicalState'])],

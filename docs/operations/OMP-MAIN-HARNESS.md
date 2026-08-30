@@ -1,6 +1,6 @@
 # OMP Main Harness — Install, Doctor, and Rollback
 
-**Release:** Shipping Harness v1.6.1
+**Release:** Shipping Harness v1.7.0
 **Boundary:** personal and company-internal use only
 **Primary tested host:** OMP 18.0.10 through the existing `omo-balance` launcher and standalone `omp-core`
 **Compatibility host:** source-linked OMP 15.10.12
@@ -26,10 +26,10 @@ Run as the ordinary Ubuntu user, not root:
 cd /home/jm/orca/projects/shipping-harness
 
 # Read-only preview
-shipping-harness-omp bootstrap --tag v1.6.1
+shipping-harness-omp bootstrap --tag v1.7.0
 
 # Back up, install, merge, and verify
-shipping-harness-omp bootstrap --tag v1.6.1 --apply
+shipping-harness-omp bootstrap --tag v1.7.0 --apply
 
 # Independent post-install check
 shipping-harness-omp doctor
@@ -176,3 +176,7 @@ OMP treats the Shipping-returned policy profile, action, decision, reason codes,
 ## v1.6.1 field evidence
 
 The tagged installation must preserve the pre-install `omp` and `omp-core` paths and SHA-256 values, keep exactly nine Shipping MCP tools, pass doctor and worker smoke, retain the verified rollback preview, and run the Autopilot field pilot without mutating available real projects. Field hardening adds evidence only; it does not add tools, policy permissions, background workers, production authority, or automatic `RELEASED`.
+
+## v1.7.0 bounded discovery presentation
+
+OMP must render Shipping-generated goal questions, recommended choices, direction candidates, critic result, and Decision Ledger summary without rewriting their authority. Specific goals skip the interview. Broad or conflicting goals show at most three non-technical questions and the exact action `권장안으로 결정해.` when delegated defaults are available. OMP may explain consequences in simple language, but it cannot add questions, continue after the two-round STOP, select a different candidate, modify hashes, approve scope, execute, close, deploy, or mark `RELEASED`. Doctor continues to require exactly nine tools and the installed Skill/AGENTS block; no new MCP tool is added.

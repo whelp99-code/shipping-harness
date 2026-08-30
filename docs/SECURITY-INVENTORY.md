@@ -39,3 +39,12 @@ The machine-readable inventory and critical-file digests are stored in `docs/rep
 - Autopilot decision p95, ledger event/byte retention, mutation receipt retention, and output are bounded.
 - The field report requires all false-authority, false-close, false-release, next-release, external-impact, target-mutation, and model-leak counters to be zero.
 - OMP and `omp-core` path/hash preservation, exact nine tools, doctor, rollback preview, and `released=false` remain deployment gates.
+
+## v1.7.0 discovery and ledger controls
+
+- Goal questions are compiled locally from bounded repository evidence; repository prose and host-model text cannot change Shipping policy or authority.
+- Technical implementation interrogation is forbidden by validation and adversarial tests.
+- Discovery has fixed question, round, candidate, output, and latency budgets.
+- Decision Ledger events are append-only, hash chained, proposal/Git bound, replay protected, and retention limited.
+- Direction artifacts explicitly deny command, approval, closure, deployment, model, and `RELEASED` authority.
+- Full Paperthin runtime, Ouroboros infinite current-version evolution, OMO Team/DAG activation, raw shell, production, public, customer, cost, credential, data, authentication, security, and license authority remain excluded.

@@ -1,0 +1,81 @@
+{
+  "schema": "shipping-harness/decision-ledger-event-v1",
+  "sequence": 1,
+  "occurredAt": "2026-08-30T12:41:35.278Z",
+  "proposalId": "proposal-2026-08-30T12-41-35-268Z-c5ff81af",
+  "proposalRevision": 1,
+  "proposalHash": "93119e326b7295e624a5f0e085372d955ba05a763434e9ed32a3eff552831a02",
+  "gitSha": "d5ac489c1aacc4cda97acabb7a101c95ec7c15a0",
+  "type": "discovery.created",
+  "questionId": null,
+  "directionHash": null,
+  "discoveryHash": "5055c78f91853b1ddb4ae28f508a8d1d5b574ba9f203ae63315dc89f147fb330",
+  "choice": null,
+  "provenance": "mechanical-discovery",
+  "evidenceRefs": [
+    "proposal.goalDiscovery",
+    "proposal.evidence.hash"
+  ],
+  "details": {
+    "status": "NEEDS_INPUT",
+    "round": 1,
+    "questions": [
+      {
+        "id": "Q-GOAL-001",
+        "category": "primary-outcome",
+        "prompt": "이 프로젝트가 완성됐을 때 사용자가 가장 먼저 할 수 있어야 하는 한 가지는 무엇입니까?",
+        "recommendedChoice": "Preserve current behavior and deliver the smallest verified core workflow in .."
+      },
+      {
+        "id": "Q-GOAL-002",
+        "category": "primary-user",
+        "prompt": "누가 이 결과를 가장 먼저 사용합니까?",
+        "recommendedChoice": "현재 저장소의 기존 사용자와 회사 내부 운영자를 우선합니다."
+      },
+      {
+        "id": "Q-GOAL-003",
+        "category": "operating-boundary",
+        "prompt": "이번 완성 범위는 어디까지입니까?",
+        "recommendedChoice": "로컬·회사 내부에서 되돌릴 수 있는 운영까지 완료하고 외부 배포는 별도 승인으로 분리합니다."
+      }
+    ],
+    "candidates": [
+      {
+        "id": "DIR-001",
+        "type": "DELIVER_CORE_WORKFLOW",
+        "value": "가장 중요한 사용자 흐름 하나를 현재 스택과 실제 완료조건으로 끝까지 제공한다.",
+        "confidence": "high"
+      },
+      {
+        "id": "DIR-002",
+        "type": "OPERATE_AND_RECOVER",
+        "value": "핵심 흐름뿐 아니라 설치·상태 확인·복구 경계까지 내부 운영 가능한 형태로 완성한다.",
+        "confidence": "low"
+      }
+    ],
+    "recommendedCandidateId": "DIR-001",
+    "critic": {
+      "status": "NEEDS_INPUT",
+      "blockerCount": 1,
+      "findings": [
+        {
+          "code": "UNRESOLVED_MATERIAL_QUESTIONS",
+          "severity": "high",
+          "blocking": true,
+          "evidenceRefs": [
+            "goalDiscovery.questions"
+          ]
+        }
+      ]
+    },
+    "direction": null,
+    "nextAction": "ANSWER_MATERIAL_QUESTION",
+    "modelAuthority": false,
+    "hash": "5055c78f91853b1ddb4ae28f508a8d1d5b574ba9f203ae63315dc89f147fb330"
+  },
+  "eventKey": "02f807973b58b315f48bc3a28b7f39c42e89e385d3869f748ecee7376f4e03fa",
+  "previousHash": null,
+  "modelAuthority": false,
+  "released": false,
+  "hash": "3194fb9dc29170551833930f29197727a9ad50faed78f44b2bf0f5001afe01cc"
+}

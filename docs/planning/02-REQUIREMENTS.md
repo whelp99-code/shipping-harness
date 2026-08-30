@@ -514,3 +514,26 @@ A release is done when its acceptance criteria pass, required checks succeed, re
 | AC-16011 | Existing nine MCP tools, OMP 18, plain brief, security, remote, OMO, and stable-control tests pass. |
 | AC-16012 | Shipping verification is SHIPPABLE with zero blockers/unknowns and fresh evidence. |
 | AC-16013 | CLOSED receipt and annotated `v1.6.0` tag point to the closure commit with a clean worktree. |
+
+## v1.7.0 — Bounded Goal Discovery and Direction Ledger
+
+| ID | Requirement |
+|---|---|
+| REQ-DISCOVERY-001 | Analyze repository evidence before asking a product question. |
+| REQ-DISCOVERY-002 | Skip discovery for a specific delivery outcome. |
+| REQ-DISCOVERY-003 | Ask at most three non-technical product questions per round. |
+| REQ-DISCOVERY-004 | Bound discovery to two rounds and STOP if material ambiguity remains. |
+| REQ-DISCOVERY-005 | Offer a conservative reversible recommended choice for every question. |
+| REQ-DISCOVERY-006 | Preserve explicit-answer and delegated-default provenance. |
+| REQ-DISCOVERY-007 | Produce identical authority hashes regardless of host-model prose. |
+| REQ-DIRECTION-001 | Generate one to three evidence-bound direction candidates. |
+| REQ-DIRECTION-002 | Run one deterministic critic and keep unresolved questions blocking. |
+| REQ-DIRECTION-003 | Bind a ready direction to outcome, user, boundary, value, non-goals, success, rollback, and replan triggers. |
+| REQ-DIRECTION-004 | Deny command, approval, closure, deployment, model, and RELEASED authority to every direction. |
+| REQ-DIRECTION-005 | Feed only a ready direction into the existing Release Train. |
+| REQ-LEDGER-001 | Persist discovery events in an append-only hash chain. |
+| REQ-LEDGER-002 | Bind events to proposal revision/hash, Git SHA, discovery/direction hashes, and provenance. |
+| REQ-LEDGER-003 | Reject tamper, gaps, stale binding, replay, and retention overflow. |
+| REQ-LEDGER-004 | Keep the ledger bounded to 256 events and 1 MiB. |
+| REQ-BOUNDARY-001 | Preserve exactly nine MCP tools and existing OMP compatibility. |
+| REQ-BOUNDARY-002 | Do not introduce Paperthin runtime, Team/DAG, infinite evolution, raw shell, push, deploy, or public authority. |

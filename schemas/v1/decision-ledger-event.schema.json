@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shipping-harness.local/schemas/v1/decision-ledger-event.schema.json",
+  "title": "Shipping Harness decision ledger event",
+  "description": "One bounded append-only, hash-chained goal-discovery or accepted-direction authority event. It never marks RELEASED and never grants model authority.",
+  "type": "object",
+  "required": [
+    "schema",
+    "sequence",
+    "occurredAt",
+    "proposalId",
+    "proposalRevision",
+    "proposalHash",
+    "gitSha",
+    "type",
+    "questionId",
+    "directionHash",
+    "discoveryHash",
+    "choice",
+    "provenance",
+    "evidenceRefs",
+    "details",
+    "eventKey",
+    "previousHash",
+    "modelAuthority",
+    "released",
+    "hash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/decision-ledger-event-v1"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 256
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "proposalId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]+$",
+      "maxLength": 160
+    },
+    "proposalRevision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "proposalHash": {
+      "$ref": "#/$defs/hash"
+    },
+    "gitSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "type": {
+      "enum": [
+        "discovery.created",
+        "discovery.refined",
+        "question.resolved",
+        "direction.ready",
+        "direction.accepted",
+        "direction.superseded",
+        "replan.triggered"
+      ]
+    },
+    "questionId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "directionHash": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/hash"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "discoveryHash": {
+      "$ref": "#/$defs/hash"
+    },
+    "choice": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 2000
+    },
+    "provenance": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      }
+    },
+    "details": {
+      "type": "object"
+    },
+    "eventKey": {
+      "$ref": "#/$defs/hash"
+    },
+    "previousHash": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/hash"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "modelAuthority": {
+      "const": false
+    },
+    "released": {
+      "const": false
+    },
+    "hash": {
+      "$ref": "#/$defs/hash"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "x-shipping-version": "1.0.0"
+}

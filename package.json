@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -31,7 +31,8 @@
     "THIRD_PARTY.md",
     "scripts/release-train-pilot.mjs",
     "scripts/autopilot-pilot.mjs",
-    "scripts/autopilot-field-pilot.mjs"
+    "scripts/autopilot-field-pilot.mjs",
+    "scripts/goal-discovery-pilot.mjs"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -52,7 +53,7 @@
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",
     "license:check": "node scripts/license-check.mjs",
-    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs && npm run smoke:release-train && npm run smoke:autopilot && npm run smoke:autopilot:field",
+    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs && npm run smoke:release-train && npm run smoke:autopilot && npm run smoke:autopilot:field && npm run smoke:goal-discovery",
     "test:omo-bridge": "node --test --test-reporter=spec test/omo/*.test.mjs",
     "test:remote": "node --test --test-reporter=spec test/remote/*.test.mjs test/adversarial/remote-attacks.test.mjs",
     "smoke:remote": "node scripts/remote-gateway-smoke.mjs --check",
@@ -68,7 +69,9 @@
     "test:autopilot": "node --test --test-reporter=spec test/autopilot/*.test.mjs test/adversarial/autopilot-attacks.test.mjs test/adversarial/autopilot-field-attacks.test.mjs",
     "smoke:autopilot": "node scripts/autopilot-pilot.mjs --check",
     "test:autopilot:field": "node --test --test-reporter=spec test/autopilot/field-matrix.test.mjs test/autopilot/autopilot-performance.test.mjs test/adversarial/autopilot-field-attacks.test.mjs",
-    "smoke:autopilot:field": "node scripts/autopilot-field-pilot.mjs --check"
+    "smoke:autopilot:field": "node scripts/autopilot-field-pilot.mjs --check",
+    "test:goal-discovery": "node --test --test-reporter=spec test/mcp/goal-discovery.test.mjs test/adversarial/goal-discovery-attacks.test.mjs test/integration/decision-ledger.test.mjs test/integration/goal-discovery-performance.test.mjs",
+    "smoke:goal-discovery": "node scripts/goal-discovery-pilot.mjs --check"
   },
   "license": "MIT"
 }

@@ -13,6 +13,8 @@ export function runtimePaths(root) {
     issues: path.join(directory, 'issues.json'),
     backlog: path.join(directory, 'backlog.json'),
     releaseTrain: path.join(directory, 'release-train.json'),
+    decisionLedger: path.join(directory, 'decision-ledger.jsonl'),
+    decisionLedgerLock: path.join(directory, '.decision-ledger.lock'),
     autopilotPolicy: path.join(directory, 'autopilot-policy.json'),
     autopilotState: path.join(directory, 'autopilot-state.json'),
     autopilotLedger: path.join(directory, 'autopilot-ledger.jsonl'),

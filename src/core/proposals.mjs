@@ -28,6 +28,8 @@ import { prepareNextRelease } from './release-transition.mjs';
 import { buildReleaseTrain, persistApprovedReleaseTrain, releaseTrainSummary } from './release-train.mjs';
 import { validateAutopilotDecision } from './autopilot-policy.mjs';
 import { loadAutopilotPolicy } from './autopilot.mjs';
+import { compileGoalDiscovery, goalDiscoverySummary, mergeGoalDiscoveryQuestions } from './goal-discovery.mjs';
+import { appendDecisionLedgerEvent, decisionLedgerSummary } from './decision-ledger.mjs';
 import { initializeState, readState, recordLedger, transitionState } from './state.mjs';
 
 const PROPOSAL_TTL_MS = 24 * 60 * 60 * 1000;
@@ -128,7 +130,7 @@ export function projectProposalAuthority(input) {
     proposal.approvalBrief = buildApprovalBrief(proposal.decision);
   }
   proposal.releaseTrain = buildReleaseTrain({
-    finalGoal: proposal.goal,
+    finalGoal: proposal.goalDiscovery?.direction?.outcome ?? proposal.goal,
     proposalRelease: proposal.release,
     gitSha: proposal.gitSha,
     proposalId: proposal.id,
@@ -152,10 +154,31 @@ export function projectProposalAuthority(input) {
 /** @param {Record<string, any>} input */
 function authorityFingerprint(input) {
   const proposal = projectProposalAuthority(input);
+  const baseline = structuredClone(proposal.baseline ?? null);
+  if (baseline && typeof baseline === 'object') {
+    baseline.entries = (baseline.entries ?? []).filter((entry) => entry.blocking === true);
+    baseline.counts = {
+      PRODUCT: baseline.counts?.PRODUCT ?? 0,
+      RELEASE_EVIDENCE: baseline.counts?.RELEASE_EVIDENCE ?? 0,
+      UNKNOWN: baseline.counts?.UNKNOWN ?? 0,
+    };
+    delete baseline.nonBlockingPaths;
+    if (baseline.plan) {
+      delete baseline.plan.excludePaths;
+      delete baseline.plan.hash;
+    }
+  }
   const evidence = structuredClone(proposal.evidence ?? null);
   if (evidence && typeof evidence === 'object') {
     delete evidence.createdAt;
     delete evidence.hash;
+    delete evidence.baseline;
+    evidence.facts = (evidence.facts ?? []).filter((entry) => entry.id !== 'EVID-009');
+  }
+  const goalDiscovery = structuredClone(proposal.goalDiscovery ?? null);
+  if (goalDiscovery && typeof goalDiscovery === 'object') {
+    delete goalDiscovery.hash;
+    delete goalDiscovery.evidenceHash;
   }
   const decision = structuredClone(proposal.decision ?? null);
   if (decision && typeof decision === 'object') {
@@ -165,6 +188,11 @@ function authorityFingerprint(input) {
     decision.resolutions = decision.resolutions ?? [];
     for (const resolution of decision.resolutions) delete resolution.resolvedAt;
   }
+  const releaseTrain = structuredClone(proposal.releaseTrain ?? null);
+  if (releaseTrain && typeof releaseTrain === 'object') {
+    delete releaseTrain.hash;
+    if (releaseTrain.source) delete releaseTrain.source.baselinePlanHash;
+  }
   return hashObject({
     gitSha: proposal.gitSha,
     release: proposal.release,
@@ -173,9 +201,10 @@ function authorityFingerprint(input) {
     mode: proposal.mode,
     modeAuthorization: proposal.modeAuthorization ?? null,
     sourceChanges: proposal.sourceChanges ?? [],
-    baseline: proposal.baseline ?? null,
+    baseline,
     baselinePreservation: proposal.baselinePreservation ?? null,
     intelligence: proposal.intelligence ?? proposal.analysis?.intelligence ?? null,
+    goalDiscovery,
     acceptanceStrength: proposal.acceptanceStrength,
     workspace: proposal.workspace,
     workspaceCandidates: proposal.workspaceCandidates,
@@ -186,7 +215,7 @@ function authorityFingerprint(input) {
     contract: proposal.contract,
     plan: proposal.plan,
     diagnostics: proposal.diagnostics,
-    releaseTrain: proposal.releaseTrain,
+    releaseTrain,
     canonicalState: proposal.canonicalState,
   });
 }
@@ -257,6 +286,20 @@ async function supersedeProposal(root, proposal, supersededBy) {
   projected.hash = proposalHash(projected);
   const target = path.join(runtimePaths(root).proposals, `${projected.id}.json`);
   await writeJsonAtomic(target, projected);
+  if (projected.goalDiscovery) {
+    await appendDecisionLedgerEvent(root, {
+      type: 'direction.superseded',
+      proposalId: projected.id,
+      proposalRevision: projected.revision ?? 1,
+      proposalHash: projected.hash,
+      gitSha: projected.gitSha,
+      discoveryHash: projected.goalDiscovery.hash,
+      directionHash: projected.goalDiscovery.direction?.hash ?? null,
+      provenance: 'mechanical-lifecycle',
+      evidenceRefs: ['proposal.lifecycle.supersededBy'],
+      details: { supersededBy },
+    });
+  }
   return projected;
 }
 
@@ -319,6 +362,11 @@ export async function createScopeProposal(root, input) {
       proposerId: typeof input.proposerId === 'string' && input.proposerId.trim() ? input.proposerId.trim().slice(0, 160) : undefined,
     });
     decision = applyDecisionPolicy(evidence, decision, { budgets: base.budgets });
+    const goalDiscovery = compileGoalDiscovery(evidence);
+    decision.questions = mergeGoalDiscoveryQuestions(decision, goalDiscovery, evidence.questionBudget);
+    decision.approvalStatus = decision.questions.length > 0 ? 'NEEDS_INPUT' : 'APPROVABLE';
+    decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
+    decision = validateDecisionPackage(evidence, decision);
     const approvalBrief = buildApprovalBrief(decision);
     const contract = compileDecisionContract(base, decision);
     const acceptance = contract.acceptance;
@@ -348,6 +396,7 @@ export async function createScopeProposal(root, input) {
       sourceChanges,
       baseline,
       intelligence: evidence.intelligence,
+      goalDiscovery,
       acceptanceStrength,
       workspace: analysis.workspace,
       workspaceCandidates: analysis.workspaceCandidates,
@@ -373,6 +422,7 @@ export async function createScopeProposal(root, input) {
     if (active && !isTerminalProposalState(active.summary.state)) await supersedeProposal(root, active.proposal, proposal.id);
     await writeJsonAtomic(proposalPath, projectedProposal);
     await writeActiveProposalIndex(root, projectedProposal);
+    await recordGoalDiscoveryEvents(root, projectedProposal, 'discovery.created', []);
     return {
       proposal: projectedProposal,
       proposalPath,
@@ -405,6 +455,54 @@ function boundedRefinementText(value, max = 1000) {
 }
 
 /** @param {Array<Record<string, any>>} questions @param {Array<Record<string, any>>} answers */
+async function recordGoalDiscoveryEvents(root, proposal, type, resolutions = []) {
+  const discovery = proposal.goalDiscovery;
+  if (!discovery) return null;
+  await appendDecisionLedgerEvent(root, {
+    type,
+    proposalId: proposal.id,
+    proposalRevision: proposal.revision ?? 1,
+    proposalHash: proposal.hash,
+    gitSha: proposal.gitSha,
+    discoveryHash: discovery.hash,
+    directionHash: discovery.direction?.hash ?? null,
+    provenance: 'mechanical-discovery',
+    evidenceRefs: ['proposal.goalDiscovery', 'proposal.evidence.hash'],
+    details: goalDiscoverySummary(discovery),
+  });
+  for (const resolution of resolutions) {
+    await appendDecisionLedgerEvent(root, {
+      type: 'question.resolved',
+      proposalId: proposal.id,
+      proposalRevision: proposal.revision ?? 1,
+      proposalHash: proposal.hash,
+      gitSha: proposal.gitSha,
+      discoveryHash: discovery.hash,
+      directionHash: discovery.direction?.hash ?? null,
+      questionId: resolution.questionId,
+      choice: resolution.choice,
+      provenance: resolution.usedRecommendedChoice ? 'delegated-recommended-default' : 'explicit-user-refinement',
+      evidenceRefs: ['proposal.decision.resolutions', 'proposal.goalDiscovery.questions'],
+      details: { category: resolution.category, usedRecommendedChoice: resolution.usedRecommendedChoice === true },
+    });
+  }
+  if (discovery.direction) {
+    await appendDecisionLedgerEvent(root, {
+      type: 'direction.ready',
+      proposalId: proposal.id,
+      proposalRevision: proposal.revision ?? 1,
+      proposalHash: proposal.hash,
+      gitSha: proposal.gitSha,
+      discoveryHash: discovery.hash,
+      directionHash: discovery.direction.hash,
+      provenance: 'mechanical-critic',
+      evidenceRefs: ['proposal.goalDiscovery.direction', 'proposal.goalDiscovery.critic'],
+      details: { directionId: discovery.direction.id, criticHash: discovery.critic.hash },
+    });
+  }
+  return decisionLedgerSummary(root, proposal.id);
+}
+
 function resolveDecisionQuestions(questions, answers) {
   const available = new Map(questions.map((question) => [question.id, question]));
   const seen = new Set();
@@ -436,7 +534,7 @@ function resolveDecisionQuestions(questions, answers) {
 /**
  * Refine one active proposal identity using bounded structured user decisions.
  * @param {string} root
- * @param {{proposalId:string, proposalHash:string, answers?:Array<{questionId:string,choice:string}>, workspaceCandidateId?:string|null, mode?:string|null, modeAuthorizedByUser?:boolean, rescan?:boolean, baselinePlanHash?:string, baselineCommit?:string, baselineAuthorizedByUser?:boolean}} input
+ * @param {{proposalId:string, proposalHash:string, answers?:Array<{questionId:string,choice:string}>, acceptRecommendedDiscoveryDefaults?:boolean, workspaceCandidateId?:string|null, mode?:string|null, modeAuthorizedByUser?:boolean, rescan?:boolean, baselinePlanHash?:string, baselineCommit?:string, baselineAuthorizedByUser?:boolean}} input
  */
 export async function refineScopeProposal(root, input) {
   return withProposalLock(root, async () => {
@@ -460,8 +558,14 @@ export async function refineScopeProposal(root, input) {
       boundedRefinementText(input.workspaceCandidateId, 100);
       invariant((proposal.workspaceCandidates ?? []).some((candidate) => candidate.id === input.workspaceCandidateId), 'ERR_WORKSPACE_CANDIDATE', `Unknown workspace candidate: ${input.workspaceCandidateId}`);
     }
-    const answers = input.answers ?? [];
-    invariant(Array.isArray(answers) && answers.length <= 3, 'ERR_PROPOSAL_REFINE', 'Refinement accepts at most three grouped answers');
+    let answers = [...(input.answers ?? [])];
+    invariant(Array.isArray(answers), 'ERR_PROPOSAL_REFINE', 'Refinement answers must be an array');
+    if (input.acceptRecommendedDiscoveryDefaults === true) {
+      const delegated = (proposal.goalDiscovery?.questions ?? []).map((question) => ({ questionId: question.id, choice: 'recommended' }));
+      const supplied = new Set(answers.map((entry) => entry?.questionId));
+      answers = [...answers, ...delegated.filter((entry) => !supplied.has(entry.questionId))];
+    }
+    invariant(answers.length <= 3, 'ERR_PROPOSAL_REFINE', 'Refinement accepts at most three grouped answers');
     invariant(answers.length > 0 || input.workspaceCandidateId || requestedMode !== proposal.mode || input.rescan === true, 'ERR_PROPOSAL_REFINE', 'Refinement must include an answer, workspace selection, authorized mode change, or rescan');
     if (input.baselinePlanHash !== undefined) invariant(/^[a-f0-9]{64}$/u.test(input.baselinePlanHash), 'ERR_BASELINE_PLAN', 'baselinePlanHash must be a SHA-256 hex digest');
     if (input.baselineCommit !== undefined) invariant(/^[a-f0-9]{40}$/u.test(input.baselineCommit), 'ERR_BASELINE_COMMIT', 'baselineCommit must be a full Git SHA');
@@ -492,11 +596,16 @@ export async function refineScopeProposal(root, input) {
       proposerId: proposal.decision?.proposer?.id ?? 'mcp-host-agent',
     });
     decision = applyDecisionPolicy(evidence, decision, { budgets: base.budgets });
+    const priorResolutions = proposal.decision?.resolutions ?? [];
+    const answeredDiscovery = answers.some((entry) => String(entry?.questionId ?? '').startsWith('Q-GOAL-'));
+    const discoveryRound = Math.min(2, (proposal.goalDiscovery?.round ?? 1) + (answeredDiscovery ? 1 : 0));
+    let goalDiscovery = compileGoalDiscovery(evidence, { resolutions: priorResolutions, round: discoveryRound });
+    decision.questions = mergeGoalDiscoveryQuestions(decision, goalDiscovery, evidence.questionBudget);
     const availableQuestions = new Map([
       ...(proposal.decision?.questions ?? []).map((question) => [question.id, question]),
+      ...(goalDiscovery.questions ?? []).map((question) => [question.id, question]),
       ...(decision.questions ?? []).map((question) => [question.id, question]),
     ]);
-    const priorResolutions = proposal.decision?.resolutions ?? [];
     const previouslyResolvedIds = new Set(priorResolutions.map((entry) => entry.questionId));
     decision.questions = decision.questions.filter((question) => !previouslyResolvedIds.has(question.id));
     const resolved = resolveDecisionQuestions([...availableQuestions.values()], answers);
@@ -506,6 +615,11 @@ export async function refineScopeProposal(root, input) {
       ...(proposal.decision?.resolutions ?? []),
       ...resolved.resolutions,
     ].slice(-20);
+    goalDiscovery = compileGoalDiscovery(evidence, { resolutions: decision.resolutions, round: discoveryRound });
+    decision.questions = mergeGoalDiscoveryQuestions({
+      ...decision,
+      questions: decision.questions.filter((question) => !question.id.startsWith('Q-GOAL-')),
+    }, goalDiscovery, evidence.questionBudget);
     decision.approvalStatus = decision.questions.length > 0 ? 'NEEDS_INPUT' : 'APPROVABLE';
     decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
     decision = validateDecisionPackage(evidence, decision);
@@ -560,6 +674,7 @@ export async function refineScopeProposal(root, input) {
       baseline,
       baselinePreservation,
       intelligence,
+      goalDiscovery,
       acceptanceStrength,
       workspace: proposalAnalysis.workspace,
       workspaceCandidates: proposalAnalysis.workspaceCandidates,
@@ -608,6 +723,7 @@ export async function refineScopeProposal(root, input) {
     updated.hash = proposalHash(updated);
     await writeJsonAtomic(proposalPath, updated);
     await writeActiveProposalIndex(root, updated);
+    await recordGoalDiscoveryEvents(root, updated, 'discovery.refined', resolved.resolutions);
     return {
       proposal: updated,
       proposalPath,
@@ -646,6 +762,7 @@ export async function approveScopeProposal(root, input) {
   const { proposal, projectedProposal, proposalPath, summary } = await loadScopeProposal(root, input.proposalId);
   invariant(input.proposalHash === proposal.hash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match');
   invariant(summary.state === 'READY_FOR_APPROVAL', 'ERR_DECISION_NEEDS_INPUT', `Proposal has unresolved mandatory risks or questions, a dirty baseline, weak acceptance, or another non-ready condition: ${summary.state}`);
+  invariant(projectedProposal.goalDiscovery?.status === 'READY' && projectedProposal.goalDiscovery?.direction, 'ERR_DIRECTION_NOT_READY', 'A bounded accepted direction is required before scope approval');
   if (approverType === 'human') invariant(approverId !== proposal.decision?.proposer?.id, 'ERR_MODEL_SELF_APPROVAL', 'The proposer cannot approve its own decision package');
   invariant(Date.parse(proposal.expiresAt) > Date.now(), 'ERR_PROPOSAL_EXPIRED', 'Proposal has expired; create a new proposal');
   invariant(currentGitSha(root) === proposal.gitSha, 'ERR_PROPOSAL_STALE', 'Repository HEAD changed after proposal creation');
@@ -701,6 +818,18 @@ export async function approveScopeProposal(root, input) {
   };
   await writeJsonAtomic(proposalPath, approved);
   await writeActiveProposalIndex(root, approved);
+  await appendDecisionLedgerEvent(root, {
+    type: 'direction.accepted',
+    proposalId: proposal.id,
+    proposalRevision: proposal.revision ?? 1,
+    proposalHash: proposal.hash,
+    gitSha: proposal.gitSha,
+    discoveryHash: projectedProposal.goalDiscovery.hash,
+    directionHash: projectedProposal.goalDiscovery.direction.hash,
+    provenance: approverType === 'autopilot-policy' ? 'policy-authorized-continuation' : 'explicit-human-approval',
+    evidenceRefs: ['proposal.goalDiscovery.direction', 'proposal.approval'],
+    details: { approverType, approverId, contractHash: lock.contractHash },
+  });
   await recordLedger(root, {
     type: 'proposal.approved',
     proposalId: proposal.id,

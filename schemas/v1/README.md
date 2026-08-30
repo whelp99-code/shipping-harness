@@ -32,3 +32,10 @@ These schemas freeze the internal v1 authority surfaces. Every root rejects unkn
 
 - `release-train.schema.json` — deterministic one-to-five-version rolling plan; only the first release may bind current contract authority.
 - Autopilot policy, decision, and state remain model-independent, default-deny, local-first, and unable to mark a release `RELEASED`.
+
+## Goal discovery and Decision Ledger
+
+- `goal-discovery.schema.json` / `examples/goal-discovery.example.json`: bounded questions, candidate directions, critic, and ready direction with all execution and release authority disabled.
+- `decision-ledger-event.schema.json` / `examples/decision-ledger-event.example.json`: one append-only hash-chain event bound to proposal and Git evidence.
+
+These schemas describe authority evidence, not an executable prompt format. A valid document cannot approve, execute, close, deploy, or mark `RELEASED`.

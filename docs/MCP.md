@@ -181,7 +181,7 @@ Every protocol message occupies one stdout line. Logs and startup errors use std
 - Local agent integration uses project-root-fixed STDIO. The separate optional internal gateway does not change the local MCP root.
 - One fixed Git repository per MCP server process.
 - No web or mobile dashboard.
-- No full Gajae deep interview.
+- No unbounded consultancy-style or technical implementation interview; v1.7.0 supports only bounded product-outcome discovery.
 - No OMO multi-agent team or automatic model routing.
 - No Ouroboros evolutionary generation loop.
 - No automatic Git push or deployment.
@@ -225,3 +225,13 @@ See `docs/internal-remote/README.md` for request signing, one-time approval rece
 ### v1.6.1 field hardening
 
 The existing nine tools are unchanged. The release gate includes deterministic model/consequence field tests, bounded retention/performance, a disposable automatic-closure lane, and read-only fingerprints for locally available real projects. The field report is evidence only; it cannot approve, close, release, deploy, or change a target.
+
+## v1.7.0 bounded goal discovery
+
+`shipping_start` now analyzes bounded Git, manifest, workspace, version, acceptance, baseline, and project-intelligence evidence before deciding whether any product question is needed. A concrete delivery goal proceeds without an interview. A materially broad or conflicting outcome produces zero to three user-level questions covering only the primary result, primary user, and operating boundary. Framework, library, database-table, file-path, shell, package-manager, and programming-language questions are prohibited.
+
+Each question exposes a conservative reversible `recommendedChoice`. `shipping_refine` keeps the same proposal identity and accepts either explicit structured answers or the one-step delegated-recommendation flag already present in its schema. Discovery is limited to two rounds. If material ambiguity remains at the second round, the critic returns `STOP`; the host cannot continue asking forever or convert uncertainty into approval.
+
+The same proposal exposes `goalDiscovery`, deterministic direction candidates, critic findings, accepted `direction`, and `decisionLedger`. Candidate and direction hashes ignore host-model prose. Every direction has `commandAuthority=false`, `approvalAuthority=false`, `closureAuthority=false`, `released=false`, and `modelAuthority=false`. The accepted outcome can seed the Release Train only after questions and critic blockers are zero; it cannot approve scope, run a command, weaken acceptance, close a release, deploy, or mark `RELEASED`.
+
+The Decision Ledger is append-only JSONL under `.shipping/decision-ledger.jsonl`, bounded to 256 events and 1 MiB. It records proposal/revision/hash, current Git SHA, discovery hash, answer provenance, direction hash, evidence references, sequence, previous hash, and event hash. Tamper, sequence gaps, stale bindings, duplicate event keys, and retention overflow fail closed. The nine-tool MCP inventory remains unchanged.

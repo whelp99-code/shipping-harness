@@ -9,6 +9,7 @@ import { runGit } from '../core/git.mjs';
 import { runtimePaths } from '../core/paths.mjs';
 import { proposalNextAction } from '../core/proposal-state.mjs';
 import { loadApprovedReleaseTrain, releaseTrainSummary } from '../core/release-train.mjs';
+import { decisionLedgerSummary } from '../core/decision-ledger.mjs';
 import { AUTOPILOT_PROFILES, autopilotPolicySummary } from '../core/autopilot-policy.mjs';
 import {
   activateAutopilot,
@@ -72,6 +73,7 @@ export const SHIPPING_TOOLS = Object.freeze([
             additionalProperties: false,
           },
         },
+        acceptRecommendedDiscoveryDefaults: { type: 'boolean', default: false, description: 'Resolve every currently displayed goal-discovery question with its conservative recommended choice.' },
         workspaceCandidateId: { type: 'string', pattern: '^WS-[a-f0-9]{12}$' },
         mode: { type: 'string', enum: ['AUTO', 'SAFE', 'INTERVIEW'] },
         modeAuthorizedByUser: { type: 'boolean', default: false },
@@ -364,6 +366,8 @@ export async function callShippingTool(root, name, rawArguments) {
       plainBriefError: proposal.plainBriefError,
       releaseTrain: proposal.releaseTrain,
       releaseTrainSummary: proposal.releaseTrainSummary,
+      goalDiscovery: proposal.goalDiscovery ?? null,
+      decisionLedger: await decisionLedgerSummary(root, proposal.id),
       nextAction: proposalNextAction(proposal.canonicalState),
       acceptanceStrength: proposal.acceptanceStrength,
       scope: proposal.contract.scope,
@@ -405,7 +409,7 @@ export async function callShippingTool(root, name, rawArguments) {
   }
 
   if (name === 'shipping_refine') {
-    rejectUnknownKeys(args, ['proposalId', 'proposalHash', 'answers', 'workspaceCandidateId', 'mode', 'modeAuthorizedByUser', 'rescan', 'baselinePlanHash', 'baselineCommit', 'baselineAuthorizedByUser']);
+    rejectUnknownKeys(args, ['proposalId', 'proposalHash', 'answers', 'acceptRecommendedDiscoveryDefaults', 'workspaceCandidateId', 'mode', 'modeAuthorizedByUser', 'rescan', 'baselinePlanHash', 'baselineCommit', 'baselineAuthorizedByUser']);
     const proposalId = requiredString(args.proposalId, 'proposalId', 1, 160);
     const proposalHash = requiredString(args.proposalHash, 'proposalHash', 64, 64);
     invariant(/^[a-f0-9]{64}$/u.test(proposalHash), 'ERR_MCP_ARGUMENTS', 'proposalHash must be a lowercase SHA-256 value');
@@ -415,6 +419,7 @@ export async function callShippingTool(root, name, rawArguments) {
     }
     if (args.mode !== undefined) invariant(['AUTO', 'SAFE', 'INTERVIEW'].includes(args.mode), 'ERR_MCP_ARGUMENTS', `Unsupported decision mode: ${String(args.mode)}`);
     invariant(args.modeAuthorizedByUser === undefined || typeof args.modeAuthorizedByUser === 'boolean', 'ERR_MCP_ARGUMENTS', 'modeAuthorizedByUser must be boolean');
+    invariant(args.acceptRecommendedDiscoveryDefaults === undefined || typeof args.acceptRecommendedDiscoveryDefaults === 'boolean', 'ERR_MCP_ARGUMENTS', 'acceptRecommendedDiscoveryDefaults must be boolean');
     invariant(args.rescan === undefined || typeof args.rescan === 'boolean', 'ERR_MCP_ARGUMENTS', 'rescan must be boolean');
     if (args.baselinePlanHash !== undefined) invariant(/^[a-f0-9]{64}$/u.test(args.baselinePlanHash), 'ERR_MCP_ARGUMENTS', 'baselinePlanHash must be a lowercase SHA-256 value');
     if (args.baselineCommit !== undefined) invariant(/^[a-f0-9]{40}$/u.test(args.baselineCommit), 'ERR_MCP_ARGUMENTS', 'baselineCommit must be a full lowercase Git SHA');
@@ -432,6 +437,7 @@ export async function callShippingTool(root, name, rawArguments) {
       proposalId,
       proposalHash,
       answers: args.answers,
+      acceptRecommendedDiscoveryDefaults: args.acceptRecommendedDiscoveryDefaults === true,
       workspaceCandidateId: args.workspaceCandidateId,
       mode: args.mode,
       modeAuthorizedByUser: args.modeAuthorizedByUser === true,
@@ -465,6 +471,8 @@ export async function callShippingTool(root, name, rawArguments) {
       plainBriefError: proposal.plainBriefError,
       releaseTrain: proposal.releaseTrain,
       releaseTrainSummary: proposal.releaseTrainSummary,
+      goalDiscovery: proposal.goalDiscovery ?? null,
+      decisionLedger: await decisionLedgerSummary(root, proposal.id),
       baselinePreservation: proposal.baselinePreservation ?? null,
       nextAction: proposalNextAction(proposal.canonicalState),
       acceptanceStrength: proposal.acceptanceStrength,
@@ -489,6 +497,8 @@ export async function callShippingTool(root, name, rawArguments) {
         plainBriefText: proposal.plainBriefText,
         plainBriefError: proposal.plainBriefError,
         releaseTrain: proposal.releaseTrainSummary,
+        goalDiscovery: proposal.goalDiscovery ?? null,
+        decisionLedger: await decisionLedgerSummary(root, proposal.id),
         nextAction: proposalNextAction(proposal.canonicalState),
         included: proposal.approvalBrief.included,
         deferred: proposal.approvalBrief.deferred,

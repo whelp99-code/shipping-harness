@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.6.1 — Autopilot Field Hardening`
-**Authority:** the release is complete only when `.shipping/releases/1.6.1.json` is `CLOSED` and annotated tag `v1.6.1` points to the closure commit
+**Current release train:** `v1.7.0 — Bounded Goal Discovery and Direction Ledger`
+**Authority:** the release is complete only when `.shipping/releases/1.7.0.json` is `CLOSED` and annotated tag `v1.7.0` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -58,14 +58,14 @@ The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency
 
 ## OMP main-harness installation
 
-After `v1.6.1` is closed and tagged, run from the clean Shipping Harness checkout:
+After `v1.7.0` is closed and tagged, run from the clean Shipping Harness checkout:
 
 ```bash
 # Read-only preview
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.6.1
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.7.0
 
 # Back up, install locally, merge OMP settings, and verify
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.6.1 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.7.0 --apply
 
 # Thereafter the installed command is available
 shipping-harness-omp doctor
@@ -297,3 +297,7 @@ Proves the accepted v1.6.0 policy boundary across clean, dirty nested, weak-acce
 See [`docs/ADAPTERS.md`](docs/ADAPTERS.md) for the capability, artifact, and lifecycle protocols.
 
 Shipping Harness runs only commands explicitly stored in a repository-owned contract or supplied by the operator. Artifact collection accepts only validated repository-relative paths, stores metadata and hashes rather than raw third-party content, and rejects home directories, credential-like files, protected runtime paths, and symlink escapes. It does not auto-push, auto-deploy, mutate provider credentials, install external harnesses, or bypass a human stop. The private OMO runtime remains subordinate to the same policy and is not a public/customer distribution target.
+
+### v1.7.0 — Bounded Goal Discovery and Direction Ledger
+
+Analyzes repository evidence before asking anything, skips interviews for specific goals, and asks at most three product-outcome questions across at most two rounds when the goal is materially ambiguous. Every question carries a conservative reversible default, and the existing `shipping_refine` tool can record explicit answers or delegated recommended choices without adding a tenth tool. One to three deterministic direction candidates are reviewed by a bounded critic, while an append-only hash-chained Decision Ledger records discovery, answer provenance, direction readiness, acceptance, supersession, and replan triggers. Directions never gain command, approval, closure, deployment, model, or `RELEASED` authority; the accepted outcome only becomes input to the existing Release Train and policy Autopilot.

@@ -85,6 +85,8 @@ const REQUIRED_FIELDS = Object.freeze({
   autopilotPolicy: ['id', 'profile', 'enabled', 'modelAuthority', 'defaultDecision', 'permissions', 'consequencePolicy', 'closureRequirements', 'limits', 'binding', 'hash'],
   autopilotDecision: ['policyId', 'policyHash', 'action', 'decision', 'code', 'allowed', 'requiresHuman', 'stopsAutomation', 'effects', 'reasons', 'nextState', 'released', 'message', 'inputFingerprint', 'hash'],
   autopilotState: ['enabled', 'profile', 'modelAuthority', 'policyHash', 'releaseTrainHash', 'currentRelease', 'currentIndex', 'phase', 'sequence', 'replanRequired', 'released', 'baselineSha', 'startedAt', 'updatedAt', 'hash'],
+  goalDiscovery: ['evidenceHash', 'gitSha', 'explicitGoal', 'round', 'maxRounds', 'status', 'questions', 'resolutions', 'candidates', 'recommendedCandidateId', 'critic', 'direction', 'nextAction', 'questionPolicy', 'modelAuthority', 'hash'],
+  decisionLedgerEvent: ['sequence', 'occurredAt', 'proposalId', 'proposalRevision', 'proposalHash', 'gitSha', 'type', 'discoveryHash', 'provenance', 'evidenceRefs', 'eventKey', 'previousHash', 'modelAuthority', 'released', 'hash'],
 });
 
 export function stableSchemaNames() {

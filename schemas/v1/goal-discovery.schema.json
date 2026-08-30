@@ -1,0 +1,487 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shipping-harness.local/schemas/v1/goal-discovery.schema.json",
+  "title": "Shipping Harness bounded goal discovery",
+  "description": "A deterministic, evidence-bound product-direction discovery projection with no model, command, approval, closure, deployment, or RELEASED authority.",
+  "type": "object",
+  "required": [
+    "schema",
+    "evidenceHash",
+    "gitSha",
+    "explicitGoal",
+    "round",
+    "maxRounds",
+    "status",
+    "questions",
+    "resolutions",
+    "candidates",
+    "recommendedCandidateId",
+    "critic",
+    "direction",
+    "nextAction",
+    "questionPolicy",
+    "modelAuthority",
+    "hash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/goal-discovery-v1"
+    },
+    "evidenceHash": {
+      "$ref": "#/$defs/hash"
+    },
+    "gitSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "explicitGoal": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "round": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2
+    },
+    "maxRounds": {
+      "const": 2
+    },
+    "status": {
+      "enum": [
+        "READY",
+        "NEEDS_INPUT",
+        "STOP"
+      ]
+    },
+    "questions": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/question"
+      }
+    },
+    "resolutions": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/resolution"
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/candidate"
+      }
+    },
+    "recommendedCandidateId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 80
+    },
+    "critic": {
+      "$ref": "#/$defs/critic"
+    },
+    "direction": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/direction"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nextAction": {
+      "enum": [
+        "ANSWER_MATERIAL_QUESTION",
+        "STOP",
+        "BUILD_RELEASE_TRAIN"
+      ]
+    },
+    "questionPolicy": {
+      "const": "product-outcome-only-no-technical-interrogation"
+    },
+    "modelAuthority": {
+      "const": false
+    },
+    "hash": {
+      "$ref": "#/$defs/hash"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "strings": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000
+      }
+    },
+    "question": {
+      "type": "object",
+      "required": [
+        "id",
+        "category",
+        "prompt",
+        "recommendedChoice",
+        "riskIds",
+        "evidenceRefs",
+        "authority"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "recommendedChoice": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "riskIds": {
+          "$ref": "#/$defs/strings"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/strings"
+        },
+        "authority": {
+          "const": "mechanical-question"
+        }
+      },
+      "additionalProperties": false
+    },
+    "resolution": {
+      "type": "object",
+      "required": [
+        "questionId",
+        "category",
+        "choice",
+        "recommendedChoice",
+        "usedRecommendedChoice",
+        "authority"
+      ],
+      "properties": {
+        "questionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "category": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        },
+        "choice": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "recommendedChoice": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 2000
+        },
+        "usedRecommendedChoice": {
+          "type": "boolean"
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      },
+      "additionalProperties": false
+    },
+    "candidate": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "outcome",
+        "primaryUser",
+        "operatingBoundary",
+        "value",
+        "include",
+        "nonGoals",
+        "successCriteria",
+        "risks",
+        "rollback",
+        "replanTriggers",
+        "evidenceRefs",
+        "confidence",
+        "reversibility",
+        "authority",
+        "commandAuthority",
+        "modelAuthority",
+        "hash"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "type": {
+          "enum": [
+            "PRESERVE_AND_STABILIZE",
+            "DELIVER_CORE_WORKFLOW",
+            "OPERATE_AND_RECOVER"
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "primaryUser": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "operatingBoundary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1600
+        },
+        "include": {
+          "$ref": "#/$defs/strings"
+        },
+        "nonGoals": {
+          "$ref": "#/$defs/strings"
+        },
+        "successCriteria": {
+          "$ref": "#/$defs/strings"
+        },
+        "risks": {
+          "$ref": "#/$defs/strings"
+        },
+        "rollback": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "replanTriggers": {
+          "$ref": "#/$defs/strings"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/strings"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "reversibility": {
+          "enum": [
+            "reversible",
+            "conditionally-reversible"
+          ]
+        },
+        "authority": {
+          "const": "advisory-until-direction-ready"
+        },
+        "commandAuthority": {
+          "const": false
+        },
+        "modelAuthority": {
+          "const": false
+        },
+        "hash": {
+          "$ref": "#/$defs/hash"
+        }
+      },
+      "additionalProperties": false
+    },
+    "critic": {
+      "type": "object",
+      "required": [
+        "schema",
+        "status",
+        "findings",
+        "blockerCount",
+        "modelAuthority",
+        "hash"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "NEEDS_INPUT",
+            "STOP"
+          ]
+        },
+        "findings": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object"
+          }
+        },
+        "blockerCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "modelAuthority": {
+          "const": false
+        },
+        "hash": {
+          "$ref": "#/$defs/hash"
+        }
+      },
+      "additionalProperties": false
+    },
+    "direction": {
+      "type": "object",
+      "required": [
+        "schema",
+        "id",
+        "selectedCandidateId",
+        "explicitGoal",
+        "outcome",
+        "primaryUser",
+        "operatingBoundary",
+        "value",
+        "include",
+        "nonGoals",
+        "successCriteria",
+        "rollback",
+        "replanTriggers",
+        "evidenceRefs",
+        "candidateHash",
+        "criticHash",
+        "commandAuthority",
+        "approvalAuthority",
+        "closureAuthority",
+        "released",
+        "modelAuthority",
+        "hash"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "selectedCandidateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "explicitGoal": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "primaryUser": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "operatingBoundary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1600
+        },
+        "include": {
+          "$ref": "#/$defs/strings"
+        },
+        "nonGoals": {
+          "$ref": "#/$defs/strings"
+        },
+        "successCriteria": {
+          "$ref": "#/$defs/strings"
+        },
+        "rollback": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "replanTriggers": {
+          "$ref": "#/$defs/strings"
+        },
+        "evidenceRefs": {
+          "$ref": "#/$defs/strings"
+        },
+        "candidateHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "criticHash": {
+          "$ref": "#/$defs/hash"
+        },
+        "commandAuthority": {
+          "const": false
+        },
+        "approvalAuthority": {
+          "const": false
+        },
+        "closureAuthority": {
+          "const": false
+        },
+        "released": {
+          "const": false
+        },
+        "modelAuthority": {
+          "const": false
+        },
+        "hash": {
+          "$ref": "#/$defs/hash"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "x-shipping-version": "1.0.0"
+}

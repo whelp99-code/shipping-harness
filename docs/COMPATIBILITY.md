@@ -75,3 +75,7 @@ The compatible private runtime is recorded in `config/upstreams/omo-pin.json`. S
 ## Internal-only boundary
 
 This matrix does not authorize public package publication, public SaaS, customer installation, or public redistribution of the integrated OMO runtime. Any such requirement is a direction change and release blocker until licensing and architecture are reviewed.
+
+## v1.7.0 bounded discovery compatibility
+
+v1.7.0 extends the structured output of `shipping_start`, `shipping_refine`, and `shipping_status` with bounded `goalDiscovery`, accepted-direction, and Decision Ledger projections. It reuses the existing refinement tool and preserves the exact nine-tool protocol inventory, MCP protocol `2025-03-26`, OMP 18.0.10 primary lane, OMP 15.10.12 compatibility lane, approval map, plain brief, Release Train, Autopilot, pause/abort, and `CLOSED != RELEASED` semantics. Older stored proposals are projected without gaining discovery authority. No model, Paperthin runtime, Team/DAG mode, raw command, public listener, background worker, or automatic deployment is introduced.

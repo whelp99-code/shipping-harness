@@ -1,0 +1,199 @@
+{
+  "schema": "shipping-harness/goal-discovery-v1",
+  "evidenceHash": "5843cfa6e31f78d4b616410433691ee341b25ac62d48925e7cd752a7121c61a2",
+  "gitSha": "d5ac489c1aacc4cda97acabb7a101c95ec7c15a0",
+  "explicitGoal": "이 프로젝트를 완성해",
+  "round": 2,
+  "maxRounds": 2,
+  "status": "READY",
+  "questions": [],
+  "resolutions": [
+    {
+      "questionId": "Q-GOAL-001",
+      "category": "primary-outcome",
+      "choice": "Preserve current behavior and deliver the smallest verified core workflow in ..",
+      "recommendedChoice": "Preserve current behavior and deliver the smallest verified core workflow in ..",
+      "usedRecommendedChoice": true,
+      "authority": "explicit-user-refinement"
+    },
+    {
+      "questionId": "Q-GOAL-002",
+      "category": "primary-user",
+      "choice": "현재 저장소의 기존 사용자와 회사 내부 운영자를 우선합니다.",
+      "recommendedChoice": "현재 저장소의 기존 사용자와 회사 내부 운영자를 우선합니다.",
+      "usedRecommendedChoice": true,
+      "authority": "explicit-user-refinement"
+    },
+    {
+      "questionId": "Q-GOAL-003",
+      "category": "operating-boundary",
+      "choice": "로컬·회사 내부에서 되돌릴 수 있는 운영까지 완료하고 외부 배포는 별도 승인으로 분리합니다.",
+      "recommendedChoice": "로컬·회사 내부에서 되돌릴 수 있는 운영까지 완료하고 외부 배포는 별도 승인으로 분리합니다.",
+      "usedRecommendedChoice": true,
+      "authority": "explicit-user-refinement"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "DIR-001",
+      "type": "DELIVER_CORE_WORKFLOW",
+      "outcome": "Preserve current behavior and deliver the smallest verified core workflow in ..",
+      "primaryUser": "현재 저장소의 기존 사용자와 회사 내부 운영자를 우선합니다.",
+      "operatingBoundary": "로컬·회사 내부에서 되돌릴 수 있는 운영까지 완료하고 외부 배포는 별도 승인으로 분리합니다.",
+      "value": "가장 중요한 사용자 흐름 하나를 현재 스택과 실제 완료조건으로 끝까지 제공한다.",
+      "include": [
+        "핵심 사용자 흐름",
+        "오류 처리",
+        "현재 저장소 검증",
+        "관련 운영 설명"
+      ],
+      "nonGoals": [
+        "핵심 가치와 무관한 기능 확장",
+        "자동 외부 배포",
+        "데이터·인증·보안·비용 영향의 무승인 실행",
+        "현재 버전을 끝없이 진화시키는 반복",
+        "Paperthin 전체 런타임 또는 스킬 카탈로그 의존"
+      ],
+      "successCriteria": [
+        "저장소가 소유한 필수 검증 명령이 통과한다.",
+        "BLOCKER와 UNKNOWN이 0이다.",
+        "현재 Git SHA와 완료 증거가 일치한다."
+      ],
+      "risks": [
+        "범위가 핵심 가치보다 커질 수 있다."
+      ],
+      "rollback": "현재 Git 기준선과 Shipping 영수증으로 되돌릴 수 있어야 한다.",
+      "replanTriggers": [
+        "핵심 사용자 가치 변경",
+        "완료조건 약화 필요",
+        "외부·데이터·인증·보안·비용 영향 발견",
+        "저장소 구조와 계획의 중대한 불일치"
+      ],
+      "evidenceRefs": [
+        "EVID-001",
+        "EVID-002",
+        "EVID-004",
+        "EVID-006",
+        "EVID-010"
+      ],
+      "confidence": "high",
+      "reversibility": "reversible",
+      "authority": "advisory-until-direction-ready",
+      "commandAuthority": false,
+      "modelAuthority": false,
+      "hash": "b124421ecf7d96a2ee697e4e20d1397bee78dfa8a53a38bcc437f091b8fcc399"
+    },
+    {
+      "id": "DIR-002",
+      "type": "OPERATE_AND_RECOVER",
+      "outcome": "Preserve current behavior and deliver the smallest verified core workflow in ..",
+      "primaryUser": "현재 저장소의 기존 사용자와 회사 내부 운영자를 우선합니다.",
+      "operatingBoundary": "로컬·회사 내부에서 되돌릴 수 있는 운영까지 완료하고 외부 배포는 별도 승인으로 분리합니다.",
+      "value": "핵심 흐름뿐 아니라 설치·상태 확인·복구 경계까지 내부 운영 가능한 형태로 완성한다.",
+      "include": [
+        "핵심 사용자 흐름",
+        "설치·실행",
+        "상태 확인",
+        "Rollback·복구"
+      ],
+      "nonGoals": [
+        "핵심 가치와 무관한 기능 확장",
+        "자동 외부 배포",
+        "데이터·인증·보안·비용 영향의 무승인 실행",
+        "현재 버전을 끝없이 진화시키는 반복",
+        "Paperthin 전체 런타임 또는 스킬 카탈로그 의존"
+      ],
+      "successCriteria": [
+        "저장소가 소유한 필수 검증 명령이 통과한다.",
+        "BLOCKER와 UNKNOWN이 0이다.",
+        "현재 Git SHA와 완료 증거가 일치한다."
+      ],
+      "risks": [
+        "범위가 핵심 가치보다 커질 수 있다."
+      ],
+      "rollback": "현재 Git 기준선과 Shipping 영수증으로 되돌릴 수 있어야 한다.",
+      "replanTriggers": [
+        "핵심 사용자 가치 변경",
+        "완료조건 약화 필요",
+        "외부·데이터·인증·보안·비용 영향 발견",
+        "저장소 구조와 계획의 중대한 불일치"
+      ],
+      "evidenceRefs": [
+        "EVID-001",
+        "EVID-002",
+        "EVID-004",
+        "EVID-006",
+        "EVID-010"
+      ],
+      "confidence": "low",
+      "reversibility": "conditionally-reversible",
+      "authority": "advisory-until-direction-ready",
+      "commandAuthority": false,
+      "modelAuthority": false,
+      "hash": "1b15b56d58ff3f79e8591ca6c090530b2ee35566112ff629c747c18a93ab3538"
+    }
+  ],
+  "recommendedCandidateId": "DIR-001",
+  "critic": {
+    "schema": "shipping-harness/direction-critic-v1",
+    "status": "PASS",
+    "findings": [],
+    "blockerCount": 0,
+    "modelAuthority": false,
+    "hash": "f7462e44e2c945494ade49f00d0106582076b5c14da8a38f9cd41cc632244828"
+  },
+  "direction": {
+    "schema": "shipping-harness/accepted-direction-v1",
+    "id": "DIRECTION-b124421ecf7d",
+    "selectedCandidateId": "DIR-001",
+    "explicitGoal": "이 프로젝트를 완성해",
+    "outcome": "Preserve current behavior and deliver the smallest verified core workflow in ..",
+    "primaryUser": "현재 저장소의 기존 사용자와 회사 내부 운영자를 우선합니다.",
+    "operatingBoundary": "로컬·회사 내부에서 되돌릴 수 있는 운영까지 완료하고 외부 배포는 별도 승인으로 분리합니다.",
+    "value": "가장 중요한 사용자 흐름 하나를 현재 스택과 실제 완료조건으로 끝까지 제공한다.",
+    "include": [
+      "핵심 사용자 흐름",
+      "오류 처리",
+      "현재 저장소 검증",
+      "관련 운영 설명"
+    ],
+    "nonGoals": [
+      "핵심 가치와 무관한 기능 확장",
+      "자동 외부 배포",
+      "데이터·인증·보안·비용 영향의 무승인 실행",
+      "현재 버전을 끝없이 진화시키는 반복",
+      "Paperthin 전체 런타임 또는 스킬 카탈로그 의존"
+    ],
+    "successCriteria": [
+      "저장소가 소유한 필수 검증 명령이 통과한다.",
+      "BLOCKER와 UNKNOWN이 0이다.",
+      "현재 Git SHA와 완료 증거가 일치한다."
+    ],
+    "rollback": "현재 Git 기준선과 Shipping 영수증으로 되돌릴 수 있어야 한다.",
+    "replanTriggers": [
+      "핵심 사용자 가치 변경",
+      "완료조건 약화 필요",
+      "외부·데이터·인증·보안·비용 영향 발견",
+      "저장소 구조와 계획의 중대한 불일치"
+    ],
+    "evidenceRefs": [
+      "EVID-001",
+      "EVID-002",
+      "EVID-004",
+      "EVID-006",
+      "EVID-010"
+    ],
+    "candidateHash": "b124421ecf7d96a2ee697e4e20d1397bee78dfa8a53a38bcc437f091b8fcc399",
+    "criticHash": "f7462e44e2c945494ade49f00d0106582076b5c14da8a38f9cd41cc632244828",
+    "commandAuthority": false,
+    "approvalAuthority": false,
+    "closureAuthority": false,
+    "released": false,
+    "modelAuthority": false,
+    "hash": "af87d517e2b9549852f3749d41e58b5a1d4b9e3251f58468e6e3142baa5be820"
+  },
+  "nextAction": "BUILD_RELEASE_TRAIN",
+  "questionPolicy": "product-outcome-only-no-technical-interrogation",
+  "modelAuthority": false,
+  "hash": "02d62d9d5b662d4fdfe98e2f8a2be9c2a187f1af587241791935f5d052f719bc"
+}

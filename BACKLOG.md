@@ -10,7 +10,7 @@ Shipping Harness v1 deliberately closes with a small internal product surface. I
 - [ ] BACKLOG-004: Internal dashboard and long-term completion metrics store.
 - [ ] BACKLOG-005: Extended company RBAC beyond the current internal remote actor/project/action allowlists.
 - [ ] BACKLOG-006: Optional LLM-assisted issue triage subordinate to deterministic blocker policy.
-- [ ] BACKLOG-007: Optional Gajae-style bounded interview/plan critic for users who explicitly choose interview mode.
+- [x] BACKLOG-007: Evidence-first Gajae-style bounded product interview and deterministic direction critic, completed in v1.7.0 without technical interrogation or model authority.
 - [ ] BACKLOG-008: Ouroboros-style next-version evolution proposals; never automatic reopening of a closed release.
 - [ ] BACKLOG-009: OMO memory/reflection evaluation only after a measured internal need and separate license/security review.
 - [ ] BACKLOG-010: Team/DAG reconsideration only after a real coordination bottleneck and measurable completion benefit are proven.
@@ -25,7 +25,8 @@ Shipping Harness v1 deliberately closes with a small internal product surface. I
 - Separate private OMO runtime, signed bridge, bounded execution, canary, and rollback: completed in v0.7.0.
 - Team/DAG evidence gate: completed in v0.8.0 with the feature deliberately disabled.
 - Authenticated internal TLS remote control and signed backup/restore: completed in v0.9.0.
-- Stable schemas, migrations, compatibility, operations, benchmark, security inventory, and handover: v1.0.0 release scope.
+- Stable schemas, migrations, compatibility, operations, benchmark, security inventory, and handover: completed in v1.0.0.
+- Evidence-first bounded goal discovery, deterministic direction critic, and append-only Decision Ledger: completed in v1.7.0.
 
 ## Permanent exclusions under the locked direction
 

@@ -1,0 +1,81 @@
+{
+  "schema": "shipping-harness/goal-discovery-pilot-v1",
+  "release": "1.7.0",
+  "status": "PASS",
+  "toolCount": 9,
+  "modelCalls": 0,
+  "networkCalls": 0,
+  "disposable": {
+    "status": "PASS",
+    "initialState": "NEEDS_INPUT",
+    "questionCount": 3,
+    "technicalQuestions": 0,
+    "delegatedDefault": true,
+    "finalState": "READY_FOR_APPROVAL",
+    "directionHash": "af87d517e2b9549852f3749d41e58b5a1d4b9e3251f58468e6e3142baa5be820",
+    "ledgerEvents": 6,
+    "modelVariants": 4,
+    "modelIndependent": true,
+    "unchanged": true,
+    "performance": {
+      "samples": 500,
+      "p95Ms": 0.323,
+      "maxMs": 0.799
+    },
+    "released": false
+  },
+  "realProjects": [
+    {
+      "path": "/home/jm/orca/projects/EvoHarvest",
+      "available": true,
+      "unchanged": true,
+      "head": "fcc16972f7a5e68d550ecca5e7c3ab16b0976ab9",
+      "statusEntries": 6,
+      "workspace": "evoharvest-runtime-v1.1.0",
+      "discoveryStatus": "READY",
+      "questionCount": 0,
+      "technicalQuestions": 0,
+      "candidateCount": 2,
+      "modelAuthority": false,
+      "released": false
+    },
+    {
+      "path": "/home/jm/orca/projects/second-brain-app",
+      "available": true,
+      "unchanged": true,
+      "head": "9d8e3aa310530f9eb26f3ed7504c7e80e66e13f7",
+      "statusEntries": 9,
+      "workspace": ".",
+      "discoveryStatus": "READY",
+      "questionCount": 0,
+      "technicalQuestions": 0,
+      "candidateCount": 3,
+      "modelAuthority": false,
+      "released": false
+    },
+    {
+      "path": "/home/jm/orca/projects/AI-CRM+PM",
+      "available": true,
+      "unchanged": true,
+      "head": "e235c483a0e50b743a6b2ef0f188a61c735028ff",
+      "statusEntries": 27,
+      "workspace": "apps/api",
+      "discoveryStatus": "READY",
+      "questionCount": 0,
+      "technicalQuestions": 0,
+      "candidateCount": 3,
+      "modelAuthority": false,
+      "released": false
+    }
+  ],
+  "safety": {
+    "technicalQuestions": 0,
+    "modelAuthorityLeaks": 0,
+    "falseDirectionReady": 0,
+    "falseReady": 0,
+    "falseClosed": 0,
+    "automaticReleased": 0,
+    "targetMutation": 0,
+    "newMcpTools": 0
+  }
+}

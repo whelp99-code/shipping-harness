@@ -236,3 +236,13 @@ Any implementation that cannot map to a requirement is out of scope or must amen
 | AC-16106 | `npm run test:mcp`, `npm run test:omp-main`, and `npm run release:verify` |
 | AC-16107..16109 | `git diff --check`, Shipping status, and `docs/reports/v1.6.1-autopilot-field.json` |
 | AC-16110..16111 | Shipping CLOSED receipt/tag/clean audit and tagged OMP hash/doctor/tool/rollback deployment audit |
+
+## v1.7.0 Goal Discovery and Decision Ledger
+
+| Requirement | Implementation | Verification |
+|---|---|---|
+| REQ-DISCOVERY-001..007 | `src/core/goal-discovery.mjs`, proposal/MCP integration, Korean plain brief | `test/mcp/goal-discovery.test.mjs`, `test/adversarial/goal-discovery-attacks.test.mjs` |
+| REQ-DIRECTION-001..005 | deterministic candidates, critic, accepted direction, Release Train input | goal-discovery MCP/adversarial tests and `scripts/goal-discovery-pilot.mjs --check` |
+| REQ-LEDGER-001..004 | `src/core/decision-ledger.mjs`, runtime paths, proposal lifecycle events | `test/integration/decision-ledger.test.mjs`, retention/performance tests |
+| REQ-BOUNDARY-001..002 | nine-tool reuse, no technical questions, no model/command/approval/close/release authority | MCP inventory, OMP tests, hostile-model tests, read-only real-project pilot |
+| AC-17001..17016 | locked v1.7.0 contract acceptance and closure evidence | full `npm run release:verify`, Shipping receipt, annotated tag, clean source, installed doctor/rollback audit |

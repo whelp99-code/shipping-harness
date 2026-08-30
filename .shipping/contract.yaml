@@ -1,49 +1,49 @@
 {
   "acceptance": [
     {
-      "command": "node --test --test-reporter=spec test/mcp/plain-brief.test.mjs test/adversarial/plain-brief-attacks.test.mjs test/integration/plain-brief-performance.test.mjs",
+      "id": "AC-15001",
+      "description": "Release-train compiler, persistence, model-independence, and adversarial tests pass.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/mcp/release-train.test.mjs test/adversarial/release-train-attacks.test.mjs",
       "cwd": ".",
-      "description": "Deterministic state matrix, evidence binding, model-independence, hostile-host, fallback, and performance tests pass.",
-      "id": "AC-14001",
       "required": true,
-      "timeoutSeconds": 600,
-      "type": "command"
+      "timeoutSeconds": 600
     },
     {
+      "id": "AC-15002",
+      "description": "The exact nine-tool MCP and OMP presentation surfaces remain compatible.",
+      "type": "command",
       "command": "npm run test:mcp && npm run test:omp-main",
       "cwd": ".",
-      "description": "The exact nine-tool MCP surface and OMP main-harness presentation/doctor regressions pass.",
-      "id": "AC-14002",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
-      "command": "node scripts/plain-brief-pilot.mjs --check && node scripts/evoharvest-intelligence-pilot.mjs --check",
+      "id": "AC-15003",
+      "description": "Generic and EvoHarvest read-only release-train pilots pass without target mutation.",
+      "type": "command",
+      "command": "node scripts/release-train-pilot.mjs --check && node scripts/evoharvest-intelligence-pilot.mjs --check",
       "cwd": ".",
-      "description": "The generic plain-brief pilot and real EvoHarvest read-only field pilot emit the required sections and one safe action without target mutation.",
-      "id": "AC-14003",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-15004",
+      "description": "Full regression, security, license, docs, OMP, remote, stable-control, and adversarial gates pass.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full regression, security, license, documentation, plugin, OMO, remote, stable-control, and adversarial gates pass.",
-      "id": "AC-14004",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
+      "id": "AC-15005",
+      "description": "No whitespace or conflict-marker errors remain.",
+      "type": "command",
       "command": "git diff --check",
       "cwd": ".",
-      "description": "No whitespace or conflict-marker errors remain.",
-      "id": "AC-14005",
       "required": true,
-      "timeoutSeconds": 60,
-      "type": "command"
+      "timeoutSeconds": 60
     }
   ],
   "adapters": {
@@ -99,7 +99,15 @@
     "missing-brief-evidence",
     "verification-self-reference",
     "presentation-rewrite",
-    "plain-brief-performance-regression"
+    "plain-brief-performance-regression",
+    "empty-value-release",
+    "duplicate-train-version",
+    "stale-release-train",
+    "future-plan-authority",
+    "release-train-hash-drift",
+    "missing-value-gate",
+    "missing-replan-gate",
+    "train-model-authority-leak"
   ],
   "budgets": {
     "maxAgentRuns": 3,
@@ -117,75 +125,68 @@
     "generateReport": true
   },
   "requirements": [
-    "REQ-BRIEF-001",
-    "REQ-BRIEF-002",
-    "REQ-BRIEF-003",
-    "REQ-BRIEF-004",
-    "REQ-BRIEF-005",
-    "REQ-BRIEF-006",
-    "REQ-BRIEF-007",
-    "REQ-BRIEF-008",
-    "REQ-BRIEF-009",
-    "REQ-BRIEF-010",
-    "REQ-BRIEF-011",
-    "REQ-BRIEF-012"
+    "REQ-TRAIN-001",
+    "REQ-TRAIN-002",
+    "REQ-TRAIN-003",
+    "REQ-TRAIN-004",
+    "REQ-TRAIN-005",
+    "REQ-TRAIN-006",
+    "REQ-TRAIN-007",
+    "REQ-TRAIN-008",
+    "REQ-TRAIN-009",
+    "REQ-TRAIN-010",
+    "REQ-TRAIN-011",
+    "REQ-TRAIN-012"
   ],
   "schema": "shipping-harness/v1",
   "scope": {
-    "exclude": [
-      "Changing canonical proposal/release state, approval readiness, acceptance authority, blocker classification, pause/abort, isolation, evidence freshness, SHIPPABLE, or CLOSED semantics.",
-      "Adding a tenth MCP tool, raw command field, automatic commit/stash/reset/discard, automatic approval, automatic close, Team/DAG, or public listener.",
-      "Installing, vendoring, copying, auto-updating, or depending on the Paperthin runtime or skill catalog.",
-      "Changing OMP core/router/provider/model-routing/credentials, downgrading OMP, publishing packages, pushing Git, deploying externally, or mutating EvoHarvest.",
-      "Reopening or modifying the closed v1.3.1 release."
-    ],
     "include": [
-      "Add an original deterministic brief fact graph derived only from existing Shipping authority data.",
-      "Add a state-derived action envelope with exactly one primary next action, allowed/forbidden actions, human-approval requirement, and safe exact user phrase where applicable.",
-      "Compile Korean beginner output with fixed sections 문제점, 개선안, 다음 진행 플랜, 요약 while keeping exact paths, hashes, commands, and evidence references in structured details.",
-      "Return the compiled plain brief and deterministic rendering from shipping_start, shipping_refine, and shipping_status without changing operational tool schemas or authority.",
-      "Update the OMP Skill and managed presentation rules so Shipping-generated beginner output is shown verbatim before any clearly non-authoritative model advice.",
-      "Implement original deterministic quality checks inspired by general read-understanding, one-next-action, SSOT, restraint, independent-verification, and post-output-QA principles without a Paperthin runtime dependency or copied source.",
-      "Add state-matrix, model-independence, adversarial, fallback, no-extra-process, performance, OMP 18, and EvoHarvest read-only pilot verification.",
-      "Update v1.4.0 version, compatibility, schemas, requirements, traceability, quickstart, MCP, operations, and handover documentation.",
-      "After source CLOSED/tag, install the tagged v1.4.0 package to the user environment while preserving actual OMP 18 launcher/core hashes and verify doctor, nine tools, receipt, and EvoHarvest non-destructive field smoke."
+      "Add a deterministic one-to-five-version release-train compiler from explicit outcome and existing Shipping authority evidence.",
+      "Add value, entry, exit, rollback, replan, risk, authority, and rolling-detail gates for every train release.",
+      "Bind the first train release exactly to the current proposal release, contract, Git SHA, scope, and acceptance.",
+      "Expose train preview through shipping_start, shipping_refine, shipping_status, plain brief, and OMP without adding an MCP tool.",
+      "Persist the exact approved train atomically and bind it to proposal hash, contract hash, and baseline SHA.",
+      "Add stable schema/example, migration-safe projection, deterministic hashing, Korean summary, docs, and traceability.",
+      "Add clean, dirty, nested, monorepo, weak-acceptance, insufficient-value, stale, and hostile-model verification.",
+      "Update version and compatibility surfaces to v1.5.0 after all focused tests pass."
+    ],
+    "exclude": [
+      "Automatic implementation, automatic close, automatic next-version activation, production release, push, merge, deploy, purchase, or customer communication.",
+      "A tenth MCP tool, raw commands, free-form future paths, model-authored authority, or speculative distant implementation tasks.",
+      "Changing canonical proposal/release state, evidence freshness, blocker classification, pause/abort, SHIPPABLE, CLOSED, or RELEASED authority.",
+      "Automatic commit, stash, reset, discard, data migration, auth/security policy change, license change, external listener, Team/DAG, or public SaaS.",
+      "Reopening or modifying v1.4.0 CLOSED history."
     ],
     "paths": {
-      "exclude": [
-        ".shipping/contract.yaml",
-        ".shipping/contract.lock",
-        ".git/**",
-        "dist/**",
-        "coverage/**",
-        "node_modules/**",
-        "docs/reports/**"
-      ],
       "include": [
         "README.md",
-        "THIRD_PARTY.md",
         "package.json",
         "package-lock.json",
-        "src/core/plain-brief.mjs",
-        "src/core/project-intelligence.mjs",
+        "src/core/release-train.mjs",
         "src/core/proposals.mjs",
+        "src/core/paths.mjs",
+        "src/core/plain-brief.mjs",
         "src/mcp/tools.mjs",
         "src/mcp/user-view.mjs",
         "packages/shipping-plugin/skill/SKILL.md",
         "packages/shipping-plugin/manifest/plugin.json",
-        "packages/omp-main-harness/config.mjs",
-        "packages/omp-main-harness/doctor.mjs",
+        "packages/omp-main-harness/constants.mjs",
+        "packages/stable-control/schema-registry.mjs",
         "packages/stable-control/compatibility.mjs",
+        "schemas/v1/release-train.schema.json",
+        "schemas/v1/examples/release-train.example.json",
+        "schemas/v1/examples/plugin.example.json",
         "schemas/v1/plain-brief.schema.json",
         "schemas/v1/examples/plain-brief.example.json",
-        "schemas/v1/examples/plugin.example.json",
-        "scripts/plain-brief-pilot.mjs",
+        "scripts/release-train-pilot.mjs",
         "scripts/evoharvest-intelligence-pilot.mjs",
         "scripts/v1-doc-audit.mjs",
+        "test/mcp/release-train.test.mjs",
+        "test/adversarial/release-train-attacks.test.mjs",
         "test/mcp/plain-brief.test.mjs",
-        "test/adversarial/plain-brief-attacks.test.mjs",
-        "test/integration/plain-brief-performance.test.mjs",
-        "test/mcp/project-intelligence.test.mjs",
+        "test/mcp/proposal-lifecycle.test.mjs",
         "test/omp-main-harness/**",
+        "test/stable/**",
         "docs/BEGINNER-QUICKSTART-KO.md",
         "docs/COMPATIBILITY.md",
         "docs/MCP.md",
@@ -194,8 +195,16 @@
         "docs/operations/OMP-MAIN-HARNESS.md",
         "docs/planning/02-REQUIREMENTS.md",
         "docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md",
-        "docs/planning/25-V1.4.0-EVIDENCE-FIRST-PLAIN-BRIEF-DEVELOPMENT-PLAN.md",
-        "docs/research/PAPERTHIN-APPLICATION-DECISION.md"
+        "docs/planning/26-V1.5.0-RELEASE-TRAIN-PLANNER-DEVELOPMENT-PLAN.md"
+      ],
+      "exclude": [
+        ".shipping/contract.yaml",
+        ".shipping/contract.lock",
+        ".git/**",
+        "node_modules/**",
+        "dist/**",
+        "coverage/**",
+        "docs/reports/**"
       ]
     }
   },

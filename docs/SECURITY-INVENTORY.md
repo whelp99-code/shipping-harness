@@ -30,3 +30,12 @@ Shipping Harness v1 is an internal-only governance control plane.
 The private OMO runtime is separately pinned and licensed for personal or company-internal use. Its notices and modifications are preserved outside Shipping Core. Signed receipts remain subordinate to independent Shipping verification, and no public OMO source, binary, image, or service is produced.
 
 The machine-readable inventory and critical-file digests are stored in `docs/reports/v1-security-inventory.json`.
+
+## v1.6.1 field-hardening evidence
+
+- Model prose variants cannot change policy decision hashes or release authority.
+- Dangerous production, public, customer, cost, destructive data, credential, auth, security, license, core-value-reduction, and unknown lanes remain `ASK` or `STOP`.
+- Disposable mutation lanes and read-only real-project fingerprints prevent unapproved target changes.
+- Autopilot decision p95, ledger event/byte retention, mutation receipt retention, and output are bounded.
+- The field report requires all false-authority, false-close, false-release, next-release, external-impact, target-mutation, and model-leak counters to be zero.
+- OMP and `omp-core` path/hash preservation, exact nine tools, doctor, rollback preview, and `released=false` remain deployment gates.

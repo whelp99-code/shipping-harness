@@ -1,0 +1,236 @@
+{
+  "schema": "shipping-harness/autopilot-field-pilot-v1",
+  "status": "PASS",
+  "checkedAt": "2026-08-30T04:02:40.932Z",
+  "source": {
+    "version": "1.6.1",
+    "beforeHash": "41f8d35c48233ce1b5da9a195cb3b7a246184aa4209d61411666a6aaabf6d511",
+    "afterHash": "41f8d35c48233ce1b5da9a195cb3b7a246184aa4209d61411666a6aaabf6d511",
+    "unchanged": true
+  },
+  "mcpTools": 9,
+  "cleanDisposable": {
+    "schema": "shipping-harness/autopilot-pilot-v1",
+    "status": "PASS",
+    "checkedAt": "2026-08-30T04:02:40.680Z",
+    "sourceHead": "288d6e81902f35f9ac4ad0867ab8185e6d4275ce",
+    "closureHead": "46bc5032666aa6a84414c5c890abb0c82fe7f6df",
+    "mcpTools": 9,
+    "policy": {
+      "profile": "LOCAL_REVERSIBLE",
+      "modelAuthority": false,
+      "released": false
+    },
+    "firstRelease": {
+      "release": "0.7.0",
+      "verification": "SHIPPABLE",
+      "autoClosed": true,
+      "released": false
+    },
+    "continuation": {
+      "release": "0.8.0",
+      "decision": "NOTIFY",
+      "state": "LOCKED"
+    },
+    "publicRelease": {
+      "decision": "ASK",
+      "allowed": false,
+      "released": false
+    },
+    "humanStop": {
+      "pause": "PASS",
+      "resume": "PASS"
+    },
+    "ledgerEvents": 10,
+    "publicPublish": false
+  },
+  "dirtyNested": {
+    "status": "PASS",
+    "proposalState": "DIRTY_BASELINE",
+    "readyForApproval": false,
+    "workspace": "runtime-v1.1.0",
+    "release": "1.1.1",
+    "blockingPaths": 2,
+    "recommendation": "PRESERVE",
+    "beforeHash": "c859d3b4c9e15d27a6b89fee8df8ccfe1a2482d100e336f5cb84d89c059e0061",
+    "afterHash": "c859d3b4c9e15d27a6b89fee8df8ccfe1a2482d100e336f5cb84d89c059e0061",
+    "unchanged": true,
+    "released": false
+  },
+  "policyMatrix": {
+    "policyHash": "a8b0acc0b3e1c30022a7772e3f30039550ec2cd1baaf50cbec960cf2c979f411",
+    "modelVariants": 4,
+    "modelDecisionHash": "e2234db0a236d061bbaf69e674e3c2037c4c088df9f252cbd0b52eb76a39c5b5",
+    "modelIndependent": true,
+    "consequenceLanes": [
+      {
+        "action": "RELEASE",
+        "effects": [
+          "PRODUCTION"
+        ],
+        "decision": "ASK",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "RELEASE",
+        "effects": [
+          "PUBLIC",
+          "EXTERNAL_NETWORK_WRITE"
+        ],
+        "decision": "ASK",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "IMPLEMENT",
+        "effects": [
+          "CUSTOMER_COMMUNICATION"
+        ],
+        "decision": "ASK",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "IMPLEMENT",
+        "effects": [
+          "COST"
+        ],
+        "decision": "ASK",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "IMPLEMENT",
+        "effects": [
+          "DATA_DESTRUCTIVE"
+        ],
+        "decision": "STOP",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "IMPLEMENT",
+        "effects": [
+          "DATA_STATE"
+        ],
+        "decision": "ASK",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "IMPLEMENT",
+        "effects": [
+          "SECRET"
+        ],
+        "decision": "STOP",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "IMPLEMENT",
+        "effects": [
+          "AUTH"
+        ],
+        "decision": "ASK",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "IMPLEMENT",
+        "effects": [
+          "SECURITY_POLICY"
+        ],
+        "decision": "ASK",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "IMPLEMENT",
+        "effects": [
+          "LICENSE"
+        ],
+        "decision": "ASK",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "IMPLEMENT",
+        "effects": [
+          "CORE_VALUE_REDUCTION"
+        ],
+        "decision": "STOP",
+        "allowed": false,
+        "released": false
+      },
+      {
+        "action": "IMPLEMENT",
+        "effects": [
+          "UNKNOWN"
+        ],
+        "decision": "STOP",
+        "allowed": false,
+        "released": false
+      }
+    ],
+    "performance": {
+      "decisions": 1000,
+      "p50Ms": 0.05,
+      "p95Ms": 0.07,
+      "maxMs": 0.373
+    }
+  },
+  "realProjects": [
+    {
+      "path": "/home/jm/orca/projects/EvoHarvest",
+      "available": true,
+      "unchanged": true,
+      "head": "fcc16972f7a5e68d550ecca5e7c3ab16b0976ab9",
+      "statusEntries": 6,
+      "workspace": "evoharvest-runtime-v1.1.0",
+      "recommendedVersion": "1.1.1",
+      "baselineBlockingPaths": 6,
+      "acceptanceStrength": "COVERED"
+    },
+    {
+      "path": "/home/jm/orca/projects/second-brain-app",
+      "available": true,
+      "unchanged": true,
+      "head": "9d8e3aa310530f9eb26f3ed7504c7e80e66e13f7",
+      "statusEntries": 9,
+      "workspace": ".",
+      "recommendedVersion": "1.0.1",
+      "baselineBlockingPaths": 9,
+      "acceptanceStrength": "COVERED"
+    },
+    {
+      "path": "/home/jm/orca/projects/AI-CRM+PM",
+      "available": true,
+      "unchanged": true,
+      "head": "e235c483a0e50b743a6b2ef0f188a61c735028ff",
+      "statusEntries": 27,
+      "workspace": "apps/api",
+      "recommendedVersion": "2.0.1",
+      "baselineBlockingPaths": 26,
+      "acceptanceStrength": "REVIEW"
+    }
+  ],
+  "safety": {
+    "falseAuto": 0,
+    "falseNotify": 0,
+    "falseAsk": 0,
+    "falseStop": 0,
+    "falseClose": 0,
+    "falseRelease": 0,
+    "falseNextReleaseActivation": 0,
+    "unauthorizedExternalImpact": 0,
+    "targetMutations": 0,
+    "modelAuthorityLeaks": 0
+  },
+  "released": false,
+  "productionDeploy": false,
+  "publicPublish": false,
+  "customerContact": false,
+  "purchase": false,
+  "networkWrites": false
+}

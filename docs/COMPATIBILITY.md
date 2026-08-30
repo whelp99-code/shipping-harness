@@ -1,6 +1,6 @@
 # Shipping Harness v1 Compatibility
 
-Shipping Harness v1.6.0 is an internal-only control plane. A component is supported only after its exact combination passes local compatibility checks; discovery of a binary alone is not readiness proof.
+Shipping Harness v1.6.1 is an internal-only control plane. A component is supported only after its exact combination passes local compatibility checks; discovery of a binary alone is not readiness proof.
 
 The v1.0.2 proposal surface exposes one canonical state. `NEEDS_INPUT`, `DIRTY_BASELINE`, and `NEEDS_ACCEPTANCE` are fail-closed states and can never be interpreted as approval readiness by a host agent.
 
@@ -22,6 +22,8 @@ The v1.5.0 planning surface adds `shipping-harness/release-train-v1`: one to fiv
 
 The v1.6.0 policy surface adds stable autopilot policy, decision, and state documents. `LOCAL_REVERSIBLE` may automate only exact-scope, rollback-backed local work and local `CLOSED`; every external, destructive, data, authentication, security, license, cost, production, public, or customer consequence remains `ASK` or `STOP`. Host-model text has no permission authority and `RELEASED` is always false.
 
+The v1.6.1 field-hardening surface adds no authority. It proves the existing policy against model variants, hostile consequences, dirty nested work, idempotence, crash recovery, bounded retention, real-project read-only fingerprints, and disposable automatic closure. The mandatory field report requires all false-authority and target-mutation counters to remain zero.
+
 ## Supported core environment
 
 | Surface | Supported v1 range | Failure behavior |
@@ -30,7 +32,7 @@ The v1.6.0 policy surface adds stable autopilot policy, decision, and state docu
 | CPU | x64 and arm64 | Other architectures report unsupported |
 | Node.js | 22 or newer; 22.23.2 tested on Ubuntu | Startup or compatibility gate fails |
 | Git | 2.30 or newer | Git-bound evidence and locking are unavailable |
-| Shipping package upgrade | v0.6.0 through v1.4.0 | Earlier releases require manual export/reinitialization |
+| Shipping package upgrade | v0.6.0 through v1.6.0 | Earlier releases require manual export/reinitialization |
 | MCP | current `2026-07-28`; compatible initialize clients `2025-11-25` and `2025-03-26` | Unsupported versions fail clearly |
 | OMP primary host | `18.0.10`, `omo-balance` wrapper + standalone `omp-core`, MCP `2025-03-26` | Version, worker smoke, nine-tool inventory, and status call must pass |
 | OMP compatibility host | source-linked `15.10.12`, MCP `2025-03-26` | Same protocol and nine-tool checks apply |

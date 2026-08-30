@@ -222,3 +222,6 @@ Local MCP and CLI remain the recovery and higher-authority control paths. In par
 
 See `docs/internal-remote/README.md` for request signing, one-time approval receipts, private-listener restrictions, and backup rules.
 
+### v1.6.1 field hardening
+
+The existing nine tools are unchanged. The release gate includes deterministic model/consequence field tests, bounded retention/performance, a disposable automatic-closure lane, and read-only fingerprints for locally available real projects. The field report is evidence only; it cannot approve, close, release, deploy, or change a target.

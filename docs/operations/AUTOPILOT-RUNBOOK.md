@@ -1,6 +1,6 @@
 # Policy-Authorized Autopilot Operations
 
-**Release:** Shipping Harness v1.6.0  
+**Release:** Shipping Harness v1.6.1  
 **Boundary:** personal and company-internal development only  
 **External authority:** production, public release, customer communication, cost, license, destructive data, authentication, and security changes remain human-owned
 
@@ -121,7 +121,7 @@ Source rollback is annotated tag `v1.5.0`. Runtime rollback never reopens or del
 
 # Autopilot Recovery and Incident Procedure
 
-**Release:** Shipping Harness v1.6.0  
+**Release:** Shipping Harness v1.6.1  
 **Applies to:** repository-local Policy-Authorized Autopilot state  
 **Authority:** human pause/abort and Shipping evidence remain final
 
@@ -249,3 +249,7 @@ released = false
 ```
 
 Do not force `SHIPPABLE`, `CLOSED`, or the next release by editing runtime records.
+
+## v1.6.1 field-hardening proof
+
+`npm run test:autopilot:field` and `npm run smoke:autopilot:field` exercise policy/model invariance, dirty nested planning, dangerous consequence classification, idempotence, retention, performance, disposable automatic closure, and locally available real-project read-only fingerprints. `docs/reports/v1.6.1-autopilot-field.json` is repository evidence and is intentionally excluded from the installable package. Any non-zero false-authority, target-mutation, external-impact, or false-release counter blocks closure.

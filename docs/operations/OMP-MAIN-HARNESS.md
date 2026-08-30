@@ -1,6 +1,6 @@
 # OMP Main Harness — Install, Doctor, and Rollback
 
-**Release:** Shipping Harness v1.6.0
+**Release:** Shipping Harness v1.6.1
 **Boundary:** personal and company-internal use only
 **Primary tested host:** OMP 18.0.10 through the existing `omo-balance` launcher and standalone `omp-core`
 **Compatibility host:** source-linked OMP 15.10.12
@@ -26,10 +26,10 @@ Run as the ordinary Ubuntu user, not root:
 cd /home/jm/orca/projects/shipping-harness
 
 # Read-only preview
-shipping-harness-omp bootstrap --tag v1.6.0
+shipping-harness-omp bootstrap --tag v1.6.1
 
 # Back up, install, merge, and verify
-shipping-harness-omp bootstrap --tag v1.6.0 --apply
+shipping-harness-omp bootstrap --tag v1.6.1 --apply
 
 # Independent post-install check
 shipping-harness-omp doctor
@@ -172,3 +172,7 @@ OMP renders Shipping-generated `plainBriefText` first. Its `전체 개발계획`
 ## v1.6.0 policy-autopilot presentation
 
 OMP treats the Shipping-returned policy profile, action, decision, reason codes, durable phase, and `released=false` as authority. For `AUTO` or `NOTIFY`, it may continue only the locked reversible local work order. For `ASK`, it explains the real consequence and waits. For `STOP`, it stops without weakening value, acceptance, rollback, scope, or evidence gates. Human pause/abort always wins, automatic local `CLOSED` does not imply deployment or `RELEASED`, and the integration remains exactly nine MCP tools. See [`AUTOPILOT-RUNBOOK.md`](AUTOPILOT-RUNBOOK.md).
+
+## v1.6.1 field evidence
+
+The tagged installation must preserve the pre-install `omp` and `omp-core` paths and SHA-256 values, keep exactly nine Shipping MCP tools, pass doctor and worker smoke, retain the verified rollback preview, and run the Autopilot field pilot without mutating available real projects. Field hardening adds evidence only; it does not add tools, policy permissions, background workers, production authority, or automatic `RELEASED`.

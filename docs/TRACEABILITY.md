@@ -21,6 +21,7 @@
 | GOAL-020 evidence-first beginner report | REQ-BRIEF-001..012 | AC-140-001..014 | deterministic fact graph, action envelope, Korean plain brief, quality gate, OMP presentation | plain-brief state matrix, model-independence, adversarial, performance, OMP, and EvoHarvest pilots |
 | GOAL-021 deterministic release train | REQ-TRAIN-001..012 | AC-15001..15012 | release-train compiler, proposal binding, train persistence, bounded plain-brief summary | release-train unit/adversarial/pilot/EvoHarvest/MCP/OMP/full release tests |
 | GOAL-022 policy-authorized autopilot | REQ-AUTOPOL-001..004, REQ-AUTO-001..012 | AC-16001..16013 | deterministic policy engine, durable autopilot state/ledger, exact mutation receipts, verify/fix/close/advance integration | policy, flow, recovery, adversarial, pilot, MCP/OMP/full release tests |
+| GOAL-024 autopilot field hardening | REQ-FIELD-001..010 | AC-16101..16111 | field matrix, bounded retention, model/consequence invariance, disposable/read-only pilot, immutable evidence | field, adversarial, performance, recovery, real-project fingerprint, MCP/OMP/full release tests |
 | GOAL-023 race-free OMP bootstrap deployment | REQ-BOOTSTRAP-001..006 | AC-131-001..009 | OMP bootstrap await ordering, package lifecycle, backup/rollback, field deployment | bootstrap cleanup race, OMP main-harness, doctor, MCP, EvoHarvest pilot |
 | GOAL-018 safe dirty-baseline stewardship | REQ-BASE-001..006 | AC-120-001..009 | baseline classifier, proposal preservation handshake, MCP next action | baseline steward, proposal lifecycle, OMP compatibility tests |
 | GOAL-017 canonical proposal authority | REQ-CANON-001..006 | AC-112-001..008 | proposal state projection, proposal storage/refinement, MCP output | canonical proposal, lifecycle, nested refine, OMP compatibility tests |
@@ -49,6 +50,7 @@ src/core/project-intelligence.mjs and isolated-verification.mjs REQ-INTEL-*, REQ
 src/core/plain-brief.mjs, src/mcp/user-view.mjs, and OMP presentation config REQ-BRIEF-* (implemented v1.4.0)
 src/core/release-train.mjs, proposal approval persistence, status, and plain-brief train projection REQ-TRAIN-* (implemented v1.5.0)
 src/core/autopilot-policy.mjs, src/core/autopilot.mjs, and existing MCP orchestration REQ-AUTOPOL-*, REQ-AUTO-* (implemented v1.6.0)
+scripts/autopilot-field-pilot.mjs and field matrix/adversarial/performance tests REQ-FIELD-* (implemented v1.6.1)
 packages/omp-main-harness/install.mjs REQ-BOOTSTRAP-* (implemented v1.3.1)
 src/core/proposals.mjs      REQ-PROPOSAL-*
 src/mcp/tools.mjs           REQ-MCP-003, REQ-MCP-006..008
@@ -221,3 +223,16 @@ Any implementation that cannot map to a requirement is out of scope or must amen
 | AC-16011 | stable autopilot schemas/examples, exact nine MCP tools, OMP 18, plain brief, remote, OMO, security, license, and full regression gates |
 | AC-16012 | Shipping verify result with fresh current-Git evidence, zero blockers, and zero unknowns |
 | AC-16013 | CLOSED receipt, annotated `v1.6.0` tag, and clean source audit |
+
+## v1.6.1 verification mapping
+
+| Acceptance | Proof |
+|---|---|
+| AC-16101 | `test/autopilot/field-matrix.test.mjs` and `test/adversarial/autopilot-field-attacks.test.mjs` mandatory and hostile lanes |
+| AC-16102 | `test/autopilot/autopilot-recovery.test.mjs`, bounded mutation receipts, ledger replay, pause, and idempotence assertions |
+| AC-16103 | `scripts/autopilot-field-pilot.mjs --check` clean/dirty/model/consequence/performance/real-project lanes |
+| AC-16104 | `npm run test:autopilot` and `node scripts/autopilot-pilot.mjs --check` regression |
+| AC-16105 | `test/autopilot/autopilot-performance.test.mjs` p95 and retention limits |
+| AC-16106 | `npm run test:mcp`, `npm run test:omp-main`, and `npm run release:verify` |
+| AC-16107..16109 | `git diff --check`, Shipping status, and `docs/reports/v1.6.1-autopilot-field.json` |
+| AC-16110..16111 | Shipping CLOSED receipt/tag/clean audit and tagged OMP hash/doctor/tool/rollback deployment audit |

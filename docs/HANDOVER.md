@@ -73,3 +73,7 @@ Stop and re-plan before public publication, customer deployment, multi-tenant se
 ## v1.6.0 policy-autopilot authority
 
 One explicit approval may bind `MANUAL` or `LOCAL_REVERSIBLE` to the exact proposal, contract, baseline, and release train. The deterministic policy engine, not the host model, selects `AUTO`, `NOTIFY`, `ASK`, or `STOP`. Reversible local implementation, verification, bounded blocker repair, local `CLOSED`, and predecessor-gated continuation may run only while every binding and rollback remains current. Production, public/customer, external write, cost, license, destructive data, authentication, and security consequences remain human-owned. Pause/abort is immediate, stale or tampered state fails closed, and `CLOSED` never marks `RELEASED`. Operations are defined in `docs/operations/AUTOPILOT-RUNBOOK.md`.
+
+## v1.6.1 field evidence handover
+
+Operators retain `docs/reports/v1.6.1-autopilot-field.json` with the source repository. It records tested lanes, decision performance, read-only project fingerprints, and zero-valued safety counters. The file is not shipped in the npm package. Installation handover additionally records pre/post OMP hashes, doctor, exact nine tools, package digest, backup ID, and rollback preview.

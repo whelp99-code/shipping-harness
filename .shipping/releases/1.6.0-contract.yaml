@@ -1,0 +1,250 @@
+{
+  "acceptance": [
+    {
+      "id": "AC-16001",
+      "description": "Policy normalization, consequence classification, stable decisions, and adversarial default-deny tests pass.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/autopilot/policy-engine.test.mjs test/adversarial/autopilot-attacks.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 600
+    },
+    {
+      "id": "AC-16002",
+      "description": "Autopilot durable flow, automatic close, pause, and recovery tests pass.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/autopilot/autopilot-flow.test.mjs test/autopilot/autopilot-recovery.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 600
+    },
+    {
+      "id": "AC-16003",
+      "description": "Disposable policy-authorized autopilot pilot closes safely and leaves external release false.",
+      "type": "command",
+      "command": "node scripts/autopilot-pilot.mjs --check",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-16004",
+      "description": "Existing exact nine-tool MCP and OMP 18 main-harness compatibility pass.",
+      "type": "command",
+      "command": "npm run test:mcp && npm run test:omp-main",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 900
+    },
+    {
+      "id": "AC-16005",
+      "description": "Full regression, security, license, docs, remote, OMO, stable, train, and autopilot smoke gates pass.",
+      "type": "command",
+      "command": "npm run release:verify",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 900
+    },
+    {
+      "id": "AC-16006",
+      "description": "No whitespace or conflict-marker errors remain.",
+      "type": "command",
+      "command": "git diff --check",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 60
+    }
+  ],
+  "adapters": {
+    "codex": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "gajae": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "generic": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "omo": {
+      "artifactPaths": [],
+      "command": null
+    },
+    "ouroboros": {
+      "artifactPaths": [],
+      "command": null
+    }
+  },
+  "blockerPolicy": [
+    "acceptance-failure",
+    "contract-tamper",
+    "stale-evidence",
+    "scope-drift",
+    "data-loss",
+    "critical-security",
+    "human-stop-override",
+    "automatic-approval",
+    "model-self-approval",
+    "raw-command-surface",
+    "public-listener",
+    "false-user-state",
+    "hidden-blocker",
+    "unbounded-card-content",
+    "installer-path-escape",
+    "destructive-migration",
+    "migration-without-rollback",
+    "unsupported-schema-accepted",
+    "compatibility-fabrication",
+    "terminal-state-replay",
+    "internal-boundary-violation",
+    "missing-handover",
+    "missing-fallback-renderer",
+    "false-plain-brief",
+    "multiple-primary-actions",
+    "model-authority-leak",
+    "unbounded-plain-brief",
+    "missing-brief-evidence",
+    "verification-self-reference",
+    "presentation-rewrite",
+    "plain-brief-performance-regression",
+    "empty-value-release",
+    "duplicate-train-version",
+    "stale-release-train",
+    "future-plan-authority",
+    "release-train-hash-drift",
+    "missing-value-gate",
+    "missing-replan-gate",
+    "train-model-authority-leak",
+    "policy-authority-leak",
+    "automatic-external-effect",
+    "automatic-released",
+    "missing-rollback-auto-close",
+    "missing-value-auto-close",
+    "stale-autopilot-receipt",
+    "duplicate-autopilot-mutation",
+    "autopilot-pause-race",
+    "acceptance-weakening",
+    "core-value-deferral"
+  ],
+  "budgets": {
+    "maxAgentRuns": 4,
+    "maxCommandSeconds": 900,
+    "maxFixCycles": 2,
+    "maxOutputBytes": 1048576
+  },
+  "goal": "Execute the approved release train under a deterministic default-deny policy that authorizes reversible local work, returns AUTO/NOTIFY/ASK/STOP, automatically closes only fully proven local releases, preserves human pause and external consequence authority, and separates CLOSED from RELEASED.",
+  "project": "shipping-harness",
+  "release": "1.6.0",
+  "releasePolicy": {
+    "autoCommit": false,
+    "autoPush": false,
+    "autoTag": false,
+    "generateReport": true
+  },
+  "requirements": [
+    "REQ-POLICY-001",
+    "REQ-POLICY-002",
+    "REQ-POLICY-003",
+    "REQ-POLICY-004",
+    "REQ-AUTO-001",
+    "REQ-AUTO-002",
+    "REQ-AUTO-003",
+    "REQ-AUTO-004",
+    "REQ-AUTO-005",
+    "REQ-AUTO-006",
+    "REQ-AUTO-007",
+    "REQ-AUTO-008",
+    "REQ-AUTO-009",
+    "REQ-AUTO-010",
+    "REQ-AUTO-011",
+    "REQ-AUTO-012"
+  ],
+  "schema": "shipping-harness/v1",
+  "scope": {
+    "include": [
+      "Add stable default-deny autopilot policy, decision, and durable state documents with deterministic hashes.",
+      "Classify each bounded Shipping action as exactly AUTO, NOTIFY, ASK, or STOP from mechanical consequence evidence.",
+      "Allow one explicit LOCAL_REVERSIBLE policy authorization through the existing scope-approval tool while MANUAL remains default.",
+      "Integrate policy decisions into existing execute, verify, blocker-fix, status, pause, and close paths without adding an MCP tool.",
+      "Return bounded host-agent work orders for safe local implementation and exact mutation receipts; do not expose raw shell authority.",
+      "Automatically close only a local release with proven value, required acceptance, rollback, fresh evidence, zero blockers/unknowns, and no scope drift.",
+      "Keep production, public, customer, cost, license, destructive data, auth, security, and unknown consequences ASK or STOP.",
+      "Separate CLOSED from RELEASED and keep automatic RELEASED permanently false in this release.",
+      "Add durable recovery, duplicate-call idempotence, pause/abort precedence, replan signaling, Korean notifications, schemas, docs, and pilots.",
+      "Update version and OMP compatibility surfaces to v1.6.0 only after all focused and full gates pass."
+    ],
+    "exclude": [
+      "Production deploy, public release, customer communication, purchasing, paid service activation, or external network writes.",
+      "Automatic destructive migration, data deletion, authentication/authorization weakening, security-policy change, license change, or secret handling.",
+      "Raw shell, free-form policy, free-form future path, model-authored permission, unlimited retries, background execution, Team/DAG, or a tenth MCP tool.",
+      "Treating CLOSED as RELEASED, bypassing current contracts, weakening acceptance, reopening closed history, or changing human pause/abort precedence.",
+      "Automatically editing an arbitrary target project without a locked scope and bounded host work order."
+    ],
+    "paths": {
+      "include": [
+        "README.md",
+        "package.json",
+        "scripts/run-tests.mjs",
+        "src/core/autopilot-policy.mjs",
+        "src/core/autopilot.mjs",
+        "src/core/paths.mjs",
+        "src/core/proposals.mjs",
+        "src/core/release-train.mjs",
+        "src/core/plain-brief.mjs",
+        "src/mcp/tools.mjs",
+        "src/mcp/user-view.mjs",
+        "src/cli.mjs",
+        "packages/shipping-plugin/skill/SKILL.md",
+        "packages/shipping-plugin/manifest/plugin.json",
+        "packages/omp-main-harness/constants.mjs",
+        "packages/stable-control/schema-registry.mjs",
+        "packages/stable-control/compatibility.mjs",
+        "schemas/v1/autopilot-policy.schema.json",
+        "schemas/v1/autopilot-decision.schema.json",
+        "schemas/v1/autopilot-state.schema.json",
+        "schemas/v1/examples/autopilot-policy.example.json",
+        "schemas/v1/examples/autopilot-decision.example.json",
+        "schemas/v1/examples/autopilot-state.example.json",
+        "schemas/v1/examples/plugin.example.json",
+        "schemas/v1/README.md",
+        "scripts/autopilot-pilot.mjs",
+        "scripts/v1-doc-audit.mjs",
+        "scripts/v1-security-inventory.mjs",
+        "docs/reports/v1-security-inventory.json",
+        "test/autopilot/**",
+        "test/adversarial/autopilot-attacks.test.mjs",
+        "test/mcp/tools.test.mjs",
+        "test/mcp/uninitialized-flow.test.mjs",
+        "test/mcp/release-train.test.mjs",
+        "test/omp-main-harness/**",
+        "test/stable/**",
+        "docs/BEGINNER-QUICKSTART-KO.md",
+        "docs/COMPATIBILITY.md",
+        "docs/MCP.md",
+        "docs/TRACEABILITY.md",
+        "docs/HANDOVER.md",
+        "docs/operations/OMP-MAIN-HARNESS.md",
+        "docs/operations/AUTOPILOT-RUNBOOK.md",
+        "docs/planning/02-REQUIREMENTS.md",
+        "docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md",
+        "docs/planning/27-V1.6.0-POLICY-AUTHORIZED-AUTOPILOT-DEVELOPMENT-PLAN.md"
+      ],
+      "exclude": [
+        ".shipping/contract.yaml",
+        ".shipping/contract.lock",
+        ".git/**",
+        "node_modules/**",
+        "dist/**",
+        "coverage/**"
+      ]
+    }
+  },
+  "stopPolicy": {
+    "autoContinueAfterInterrupt": false,
+    "closeWhenRequiredGatesPass": true,
+    "humanInterruptWins": true
+  },
+  "worker": "shipping-harness"
+}

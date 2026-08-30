@@ -1,0 +1,38 @@
+{
+  "schema": "shipping-harness/v1.7-v1.8.1-sequential-audit-v1",
+  "generatedAt": "2026-08-30T12:46:54.285Z",
+  "overall": "IN_PROGRESS",
+  "source": {
+    "version": "1.7.0",
+    "state": "1.7.0:LOCKED",
+    "head": "ad7372e0f0fc426106be443f21447c491e32fa45",
+    "clean": true
+  },
+  "releases": {
+    "1.7.0": {
+      "implementationCommit": "ad7372e0f0fc426106be443f21447c491e32fa45",
+      "focusedTests": "PASS",
+      "releaseVerify": "PASS",
+      "receipt": false,
+      "tag": false
+    },
+    "1.8.0": {
+      "status": "NOT_STARTED"
+    },
+    "1.8.1": {
+      "status": "NOT_STARTED"
+    }
+  },
+  "installation": {
+    "shipping": "1.6.0",
+    "omp": "18.0.10",
+    "tools": 9,
+    "upgradePending": true
+  },
+  "boundaries": {
+    "push": false,
+    "publish": false,
+    "productionDeploy": false,
+    "released": false
+  }
+}

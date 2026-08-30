@@ -85,7 +85,7 @@
     "stableRegistry": "32acc0f72254b2118cf7c9efa44b5a1211c08eb37c8c5e953b9ce2232188dce3",
     "migration": "2047305a7527eda6fc9d9735ad3640b0be050ed88d4264f31519ce4840662826",
     "autopilotPolicy": "ae5ebfdc0a0123139cefc3d981caf0f57b53b0e809714cf20f5f385c6300746a",
-    "autopilotRuntime": "057e995f1533b5faadf350be303af0fbcfd5242a69956b66212c87b5926e52b6"
+    "autopilotRuntime": "c63d768704bf06cb7a7d4d061922c320f2d4ac6cf73cc4d43e1c33d04a9392dc"
   },
   "requiredRecords": [
     "THIRD_PARTY.md",

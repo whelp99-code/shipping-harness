@@ -1,4 +1,4 @@
-# Sequential Roadmap and Development Plan — v0.4.0 to v1.4.0
+# Sequential Roadmap and Development Plan — v0.4.0 to v1.6.1
 
 **Status:** ROADMAP LOCKED
 **Canonical direction:** [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md)
@@ -35,6 +35,9 @@ The roadmap below defines sequence and dependency. Implementation must use the c
 | v1.3.0 | [`23-V1.3.0-PROJECT-INTELLIGENCE-AND-ACCEPTANCE-COVERAGE-DEVELOPMENT-PLAN.md`](23-V1.3.0-PROJECT-INTELLIGENCE-AND-ACCEPTANCE-COVERAGE-DEVELOPMENT-PLAN.md) |
 | v1.3.1 | [`24-V1.3.1-OMP-BOOTSTRAP-TEMPORARY-PACKAGE-RACE-PATCH.md`](24-V1.3.1-OMP-BOOTSTRAP-TEMPORARY-PACKAGE-RACE-PATCH.md) |
 | v1.4.0 | [`25-V1.4.0-EVIDENCE-FIRST-PLAIN-BRIEF-DEVELOPMENT-PLAN.md`](25-V1.4.0-EVIDENCE-FIRST-PLAIN-BRIEF-DEVELOPMENT-PLAN.md) |
+| v1.5.0 | [`26-V1.5.0-RELEASE-TRAIN-PLANNER-DEVELOPMENT-PLAN.md`](26-V1.5.0-RELEASE-TRAIN-PLANNER-DEVELOPMENT-PLAN.md) |
+| v1.6.0 | [`27-V1.6.0-POLICY-AUTHORIZED-AUTOPILOT-DEVELOPMENT-PLAN.md`](27-V1.6.0-POLICY-AUTHORIZED-AUTOPILOT-DEVELOPMENT-PLAN.md) |
+| v1.6.1 | [`28-V1.6.1-AUTOPILOT-FIELD-HARDENING-DEVELOPMENT-PLAN.md`](28-V1.6.1-AUTOPILOT-FIELD-HARDENING-DEVELOPMENT-PLAN.md) |
 
 If this summary conflicts with a version-specific plan, the direction document wins first, then the version-specific plan, then this summary.
 
@@ -71,6 +74,9 @@ Canonical decision: [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](10-INTERN
 | v1.3.0 | Project Intelligence and Coverage | Mixed-stack work themes and acceptance coverage make the proposed release concrete and provable. |
 | v1.3.1 | OMP Bootstrap Race Patch | Temporary package cleanup is ordered after the complete install and proven by real bootstrap apply. |
 | v1.4.0 | Evidence-First Plain Brief | Shipping compiles the user-facing problem, improvement, next plan, summary, and one action from mechanical evidence rather than host-model prose. |
+| v1.5.0 | Release Train Planner | One final outcome becomes a deterministic rolling sequence of value-bearing versions with entry, exit, rollback, and replan gates. |
+| v1.6.0 | Policy-Authorized Autopilot | A pre-authorized policy decides AUTO, NOTIFY, ASK, or STOP and may complete reversible local releases to CLOSED. |
+| v1.6.1 | Autopilot Field Hardening | Cross-project, model-variant, crash, replay, and consequence pilots prove zero false or unauthorized authority transitions. |
 
 ---
 

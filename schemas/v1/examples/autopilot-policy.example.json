@@ -1,0 +1,73 @@
+{
+  "schema": "shipping-harness/autopilot-policy-v1",
+  "id": "POLICY-1881c15b2185",
+  "profile": "LOCAL_REVERSIBLE",
+  "enabled": true,
+  "modelAuthority": false,
+  "defaultDecision": "STOP",
+  "permissions": {
+    "ANALYZE": "AUTO",
+    "PRESERVE_BASELINE": "NOTIFY",
+    "LOCAL_COMMIT": "NOTIFY",
+    "IMPLEMENT": "AUTO",
+    "VERIFY": "AUTO",
+    "FIX_BLOCKERS": "AUTO",
+    "CLOSE": "NOTIFY",
+    "ADVANCE_RELEASE": "NOTIFY",
+    "RELEASE": "ASK"
+  },
+  "consequencePolicy": {
+    "hardStop": [
+      "DATA_DESTRUCTIVE",
+      "SECRET",
+      "CORE_VALUE_REDUCTION",
+      "ACCEPTANCE_WEAKENING",
+      "UNKNOWN"
+    ],
+    "humanDecision": [
+      "DATA_STATE",
+      "AUTH",
+      "SECURITY_POLICY",
+      "LICENSE",
+      "COST",
+      "EXTERNAL_NETWORK_WRITE",
+      "CUSTOMER_COMMUNICATION",
+      "PRODUCTION",
+      "PUBLIC"
+    ],
+    "automaticReleased": false,
+    "productionAutomatic": false,
+    "publicAutomatic": false,
+    "externalWriteAutomatic": false,
+    "costAutomatic": false,
+    "licenseChangeAutomatic": false,
+    "destructiveDataAutomatic": false,
+    "authSecurityAutomatic": false
+  },
+  "closureRequirements": {
+    "policyBindingCurrent": true,
+    "valueGateProven": true,
+    "acceptancePassed": true,
+    "evidenceFresh": true,
+    "rollbackAvailable": true,
+    "blockerCount": 0,
+    "unknownCount": 0,
+    "scopeDrift": 0,
+    "released": false
+  },
+  "limits": {
+    "maxFixCycles": 2,
+    "maxAgentRuns": 4,
+    "maxReleases": 3,
+    "maxCommandSeconds": 900
+  },
+  "binding": {
+    "proposalId": "proposal-autopilot-example",
+    "proposalHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "contractHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "baselineSha": "cccccccccccccccccccccccccccccccccccccccc",
+    "releaseTrainHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "approvedAt": "2026-08-30T00:00:00.000Z"
+  },
+  "hash": "f51231530904c4cd17d3f033b3f7b311aa8dac01fd316c8401ebdc0d5895fe3a"
+}

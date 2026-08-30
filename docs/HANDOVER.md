@@ -69,3 +69,7 @@ Stop and re-plan before public publication, customer deployment, multi-tenant se
 ## v1.5.0 release-train authority
 
 `shipping_start` deterministically compiles a rolling one-to-five-version train. The first release exactly matches the current proposal contract. Future releases carry value, entry, exit, rollback, and replan gates only and cannot execute or grant current authority. Exact approval writes `.shipping/release-train.json`, bound to proposal hash, contract hash, and baseline SHA. Replan after every predecessor closure; a train never implies `RELEASED`.
+
+## v1.6.0 policy-autopilot authority
+
+One explicit approval may bind `MANUAL` or `LOCAL_REVERSIBLE` to the exact proposal, contract, baseline, and release train. The deterministic policy engine, not the host model, selects `AUTO`, `NOTIFY`, `ASK`, or `STOP`. Reversible local implementation, verification, bounded blocker repair, local `CLOSED`, and predecessor-gated continuation may run only while every binding and rollback remains current. Production, public/customer, external write, cost, license, destructive data, authentication, and security consequences remain human-owned. Pause/abort is immediate, stale or tampered state fails closed, and `CLOSED` never marks `RELEASED`. Operations are defined in `docs/operations/AUTOPILOT-RUNBOOK.md`.

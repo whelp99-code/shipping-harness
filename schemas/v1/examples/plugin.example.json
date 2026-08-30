@@ -2,7 +2,7 @@
   "schema": "shipping-harness/plugin-v1",
   "name": "shipping-harness",
   "displayName": "Shipping Harness",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "localOnly": true,
   "mcp": {
     "transport": "stdio",
@@ -34,6 +34,8 @@
     "baseline-plan",
     "project-intelligence",
     "acceptance-coverage",
-    "release-train"
+    "plain-brief",
+    "release-train",
+    "policy-autopilot"
   ]
 }

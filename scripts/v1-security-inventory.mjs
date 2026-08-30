@@ -37,6 +37,9 @@ export function inventory() {
       omoReceiptsRequireShippingVerification: true,
       scopeApprovalHumanOnly: true,
       closedVersionsNeverReopen: true,
+      autopilotModelAuthority: false,
+      automaticReleased: false,
+      externalConsequencesHumanOnly: true,
     },
     limits: {
       unlimitedValuesAllowed: false,
@@ -65,12 +68,33 @@ export function inventory() {
       dag: v08.enabled === true ? 'ENABLED' : 'DISABLED',
       entryGateDecision: v08.decision,
     },
+    policyAutopilot: {
+      profiles: ['MANUAL', 'LOCAL_REVERSIBLE'],
+      decisions: ['AUTO', 'NOTIFY', 'ASK', 'STOP'],
+      defaultDecision: 'STOP',
+      localReversibleOnly: true,
+      automaticClosed: true,
+      automaticReleased: false,
+      humanOwnedConsequences: [
+        'PRODUCTION',
+        'PUBLIC',
+        'CUSTOMER',
+        'EXTERNAL_NETWORK_WRITE',
+        'COST',
+        'LICENSE_CHANGE',
+        'DATA_DESTRUCTIVE',
+        'AUTH_CHANGE',
+        'SECURITY_CHANGE',
+      ],
+    },
     criticalFiles: {
       remotePolicy: digest('packages/internal-remote/policy.mjs'),
       remoteRequest: digest('packages/internal-remote/request.mjs'),
       omoReceiptValidator: digest('packages/internal-omo-bridge/receipt.mjs'),
       stableRegistry: digest('packages/stable-control/schema-registry.mjs'),
       migration: digest('packages/stable-control/migration.mjs'),
+      autopilotPolicy: digest('src/core/autopilot-policy.mjs'),
+      autopilotRuntime: digest('src/core/autopilot.mjs'),
     },
     requiredRecords: [
       'THIRD_PARTY.md',
@@ -78,6 +102,7 @@ export function inventory() {
       'docs/HANDOVER.md',
       'docs/operations/INTERNAL-REMOTE-INCIDENT.md',
       'docs/operations/RETENTION-SUPPORT.md',
+      'docs/operations/AUTOPILOT-RUNBOOK.md',
       'docs/internal-runtime/OMO-RUNTIME.md',
       pin.evidence.license,
       pin.evidence.modifications,
@@ -90,6 +115,8 @@ export function inventory() {
       'npm run test:omo-bridge',
       'npm run test:remote',
       'npm run test:stable',
+      'npm run test:autopilot',
+      'npm run smoke:autopilot',
     ],
   };
 }
@@ -104,6 +131,13 @@ if (process.argv.includes('--record')) {
   if (JSON.stringify(stored) !== JSON.stringify(next)) throw new Error('v1 security inventory is stale');
   if (!stored.boundaries.internalOnly || stored.boundaries.rawShellMcp || stored.boundaries.rawShellRemote || stored.limits.unlimitedValuesAllowed) {
     throw new Error('v1 security boundary failed');
+  }
+  if (stored.authority.autopilotModelAuthority !== false
+    || stored.authority.automaticReleased !== false
+    || stored.policyAutopilot.defaultDecision !== 'STOP'
+    || stored.policyAutopilot.automaticReleased !== false
+    || stored.policyAutopilot.localReversibleOnly !== true) {
+    throw new Error('v1 autopilot authority boundary failed');
   }
 } else {
   throw new Error('Use --record or --check');

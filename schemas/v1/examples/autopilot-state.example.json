@@ -1,0 +1,23 @@
+{
+  "schema": "shipping-harness/autopilot-state-v1",
+  "enabled": true,
+  "profile": "LOCAL_REVERSIBLE",
+  "modelAuthority": false,
+  "policyHash": "f51231530904c4cd17d3f033b3f7b311aa8dac01fd316c8401ebdc0d5895fe3a",
+  "releaseTrainHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "currentRelease": "1.6.0",
+  "currentIndex": 0,
+  "phase": "TRAIN_READY",
+  "resumePhase": null,
+  "sequence": 1,
+  "lastEventHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "lastDecisionHash": null,
+  "lastAction": null,
+  "lastDecision": null,
+  "replanRequired": false,
+  "released": false,
+  "baselineSha": "cccccccccccccccccccccccccccccccccccccccc",
+  "startedAt": "2026-08-30T00:00:00.000Z",
+  "updatedAt": "2026-08-30T00:00:00.000Z",
+  "hash": "8aa5034caef3b1f3bba09b01212d1b30a2387fb601de7100106d73c103cc6c60"
+}

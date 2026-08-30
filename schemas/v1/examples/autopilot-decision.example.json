@@ -1,0 +1,20 @@
+{
+  "schema": "shipping-harness/autopilot-decision-v1",
+  "policyId": "POLICY-1881c15b2185",
+  "policyHash": "f51231530904c4cd17d3f033b3f7b311aa8dac01fd316c8401ebdc0d5895fe3a",
+  "action": "IMPLEMENT",
+  "decision": "AUTO",
+  "code": "AUTO_IMPLEMENT",
+  "allowed": true,
+  "requiresHuman": false,
+  "stopsAutomation": false,
+  "effects": [
+    "LOCAL_REVERSIBLE"
+  ],
+  "reasons": [],
+  "nextState": "IMPLEMENTING",
+  "released": false,
+  "message": "IMPLEMENT은 승인된 로컬 정책 안에서 자동 진행할 수 있습니다.",
+  "inputFingerprint": "50d30614c8eb227e0c2349009f7a69314d3d3277e223b1ba6e03a0474778e56c",
+  "hash": "4a40ef14ce6475290184ca200edf0ac4c8e75c202e363e6cd8b49e3a475af4ec"
+}

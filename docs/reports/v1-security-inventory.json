@@ -17,7 +17,10 @@
     "shippingFinisherOnly": true,
     "omoReceiptsRequireShippingVerification": true,
     "scopeApprovalHumanOnly": true,
-    "closedVersionsNeverReopen": true
+    "closedVersionsNeverReopen": true,
+    "autopilotModelAuthority": false,
+    "automaticReleased": false,
+    "externalConsequencesHumanOnly": true
   },
   "limits": {
     "unlimitedValuesAllowed": false,
@@ -48,12 +51,41 @@
     "dag": "DISABLED",
     "entryGateDecision": "DISABLED"
   },
+  "policyAutopilot": {
+    "profiles": [
+      "MANUAL",
+      "LOCAL_REVERSIBLE"
+    ],
+    "decisions": [
+      "AUTO",
+      "NOTIFY",
+      "ASK",
+      "STOP"
+    ],
+    "defaultDecision": "STOP",
+    "localReversibleOnly": true,
+    "automaticClosed": true,
+    "automaticReleased": false,
+    "humanOwnedConsequences": [
+      "PRODUCTION",
+      "PUBLIC",
+      "CUSTOMER",
+      "EXTERNAL_NETWORK_WRITE",
+      "COST",
+      "LICENSE_CHANGE",
+      "DATA_DESTRUCTIVE",
+      "AUTH_CHANGE",
+      "SECURITY_CHANGE"
+    ]
+  },
   "criticalFiles": {
     "remotePolicy": "9bdb4a423452a53e66d85876171186355c8d298df9c2a3f383686e4447feb4c8",
     "remoteRequest": "55660d2ae0f55d8982f32909c6260b483a983ed1605d6dc94cf95b039e2c0bfe",
     "omoReceiptValidator": "451f90c754fb3afd4ed3ea5330336248d9c546e15dc04bc4408b85ca1a7a4132",
-    "stableRegistry": "413a213d1186b525e3b26c06157cf7579b31a4d46739af605007b4cbdb26b77a",
-    "migration": "2047305a7527eda6fc9d9735ad3640b0be050ed88d4264f31519ce4840662826"
+    "stableRegistry": "32acc0f72254b2118cf7c9efa44b5a1211c08eb37c8c5e953b9ce2232188dce3",
+    "migration": "2047305a7527eda6fc9d9735ad3640b0be050ed88d4264f31519ce4840662826",
+    "autopilotPolicy": "ae5ebfdc0a0123139cefc3d981caf0f57b53b0e809714cf20f5f385c6300746a",
+    "autopilotRuntime": "057e995f1533b5faadf350be303af0fbcfd5242a69956b66212c87b5926e52b6"
   },
   "requiredRecords": [
     "THIRD_PARTY.md",
@@ -61,6 +93,7 @@
     "docs/HANDOVER.md",
     "docs/operations/INTERNAL-REMOTE-INCIDENT.md",
     "docs/operations/RETENTION-SUPPORT.md",
+    "docs/operations/AUTOPILOT-RUNBOOK.md",
     "docs/internal-runtime/OMO-RUNTIME.md",
     "/home/jm/orca/projects/shipping-harness-omo-runtime/shipping-internal/LICENSE.md",
     "/home/jm/orca/projects/shipping-harness-omo-runtime/shipping-internal/MODIFICATIONS.md",
@@ -72,6 +105,8 @@
     "npm run test:adversarial",
     "npm run test:omo-bridge",
     "npm run test:remote",
-    "npm run test:stable"
+    "npm run test:stable",
+    "npm run test:autopilot",
+    "npm run smoke:autopilot"
   ]
 }

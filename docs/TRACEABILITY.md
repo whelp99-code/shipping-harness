@@ -20,7 +20,8 @@
 | GOAL-019 project intelligence and coverage | REQ-INTEL-001..002, REQ-COVER-001..002, REQ-ISOLATE-001..002 | AC-130-001..010 | component graph, work themes, coverage matrix, isolated acceptance | project intelligence, isolated acceptance, EvoHarvest pilot, MCP/full release suites |
 | GOAL-020 evidence-first beginner report | REQ-BRIEF-001..012 | AC-140-001..014 | deterministic fact graph, action envelope, Korean plain brief, quality gate, OMP presentation | plain-brief state matrix, model-independence, adversarial, performance, OMP, and EvoHarvest pilots |
 | GOAL-021 deterministic release train | REQ-TRAIN-001..012 | AC-15001..15012 | release-train compiler, proposal binding, train persistence, bounded plain-brief summary | release-train unit/adversarial/pilot/EvoHarvest/MCP/OMP/full release tests |
-| GOAL-020 race-free OMP bootstrap deployment | REQ-BOOTSTRAP-001..006 | AC-131-001..009 | OMP bootstrap await ordering, package lifecycle, backup/rollback, field deployment | bootstrap cleanup race, OMP main-harness, doctor, MCP, EvoHarvest pilot |
+| GOAL-022 policy-authorized autopilot | REQ-AUTOPOL-001..004, REQ-AUTO-001..012 | AC-16001..16013 | deterministic policy engine, durable autopilot state/ledger, exact mutation receipts, verify/fix/close/advance integration | policy, flow, recovery, adversarial, pilot, MCP/OMP/full release tests |
+| GOAL-023 race-free OMP bootstrap deployment | REQ-BOOTSTRAP-001..006 | AC-131-001..009 | OMP bootstrap await ordering, package lifecycle, backup/rollback, field deployment | bootstrap cleanup race, OMP main-harness, doctor, MCP, EvoHarvest pilot |
 | GOAL-018 safe dirty-baseline stewardship | REQ-BASE-001..006 | AC-120-001..009 | baseline classifier, proposal preservation handshake, MCP next action | baseline steward, proposal lifecycle, OMP compatibility tests |
 | GOAL-017 canonical proposal authority | REQ-CANON-001..006 | AC-112-001..008 | proposal state projection, proposal storage/refinement, MCP output | canonical proposal, lifecycle, nested refine, OMP compatibility tests |
 | GOAL-016 stable internal product | REQ-STABLE-001..003, REQ-OPS-001..002, REQ-BENCH-001..002, REQ-SECURITY-001, REQ-HANDOVER-001, REQ-RELEASE-001 | AC-1001..1014 | stable schemas, migrations, operations, benchmark, security inventory, handover | implemented v1.0 gates |
@@ -47,6 +48,7 @@ src/core/baseline.mjs and proposal refinement REQ-BASE-* (implemented v1.2.0)
 src/core/project-intelligence.mjs and isolated-verification.mjs REQ-INTEL-*, REQ-COVER-*, REQ-ISOLATE-* (implemented v1.3.0)
 src/core/plain-brief.mjs, src/mcp/user-view.mjs, and OMP presentation config REQ-BRIEF-* (implemented v1.4.0)
 src/core/release-train.mjs, proposal approval persistence, status, and plain-brief train projection REQ-TRAIN-* (implemented v1.5.0)
+src/core/autopilot-policy.mjs, src/core/autopilot.mjs, and existing MCP orchestration REQ-AUTOPOL-*, REQ-AUTO-* (implemented v1.6.0)
 packages/omp-main-harness/install.mjs REQ-BOOTSTRAP-* (implemented v1.3.1)
 src/core/proposals.mjs      REQ-PROPOSAL-*
 src/mcp/tools.mjs           REQ-MCP-003, REQ-MCP-006..008
@@ -207,3 +209,15 @@ Any implementation that cannot map to a requirement is out of scope or must amen
 | AC-15009 | nine-tool inventory, no raw command/mutation tests, bounded compiler implementation |
 | AC-15010 | `scripts/release-train-pilot.mjs`, read-only EvoHarvest pilot, OMP and full release gates |
 | AC-15011..15012 | Shipping verify/close receipt, annotated tag, and clean source audit |
+
+## v1.6.0 verification mapping
+
+| Acceptance | Proof |
+|---|---|
+| AC-16001..16003 | `test/autopilot/policy-engine.test.mjs` deterministic policy and model-independence assertions |
+| AC-16004..16007 | `test/autopilot/autopilot-flow.test.mjs` activation, work order, bounded repair, auto-close, and continuation assertions |
+| AC-16008 | `test/adversarial/autopilot-attacks.test.mjs` external, destructive, data, auth, security, license, cost, and RELEASED authority attacks |
+| AC-16009..16010 | `test/autopilot/autopilot-recovery.test.mjs` pause/abort, idempotence, crash recovery, stale binding, and history-preserving replan tests |
+| AC-16011 | stable autopilot schemas/examples, exact nine MCP tools, OMP 18, plain brief, remote, OMO, security, license, and full regression gates |
+| AC-16012 | Shipping verify result with fresh current-Git evidence, zero blockers, and zero unknowns |
+| AC-16013 | CLOSED receipt, annotated `v1.6.0` tag, and clean source audit |

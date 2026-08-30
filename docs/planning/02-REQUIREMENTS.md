@@ -465,3 +465,21 @@ A release is done when its acceptance criteria pass, required checks succeed, re
 | AC-15010 | Full regression, security, license, docs, OMP 18, and read-only EvoHarvest pilot pass. |
 | AC-15011 | Shipping verification is SHIPPABLE with zero blockers/unknowns and fresh evidence. |
 | AC-15012 | CLOSED receipt and annotated `v1.5.0` tag point to the closure commit with a clean worktree. |
+
+### v1.6.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-16001 | Policy fixtures produce exactly one stable AUTO/NOTIFY/ASK/STOP decision for each action. |
+| AC-16002 | Default policy permits safe read/verify and denies external, destructive, security, auth, license, cost, and unknown actions. |
+| AC-16003 | Identical facts produce identical policy decision hashes independent of host-model text. |
+| AC-16004 | Only the first incomplete train release can activate; predecessor bypass is impossible. |
+| AC-16005 | Policy-authorized local baseline and commits are exact-path/head/hash bound and rollback-backed. |
+| AC-16006 | Autopilot runs implementation work orders, verification, bounded blocker repair, and fresh re-verification without raw shell authority. |
+| AC-16007 | Automatic CLOSED occurs only with value, acceptance, scope, evidence, rollback, policy, blocker, and unknown gates passing. |
+| AC-16008 | Production/public/customer/cost/data/security/license effects produce ASK or STOP and never automatic RELEASED. |
+| AC-16009 | Pause/abort, restart, duplicate invocation, stale receipts, and crash recovery are idempotent and fail closed. |
+| AC-16010 | Replan triggers preserve completed releases and cannot rewrite active or closed history. |
+| AC-16011 | Existing nine MCP tools, OMP 18, plain brief, security, remote, OMO, and stable-control tests pass. |
+| AC-16012 | Shipping verification is SHIPPABLE with zero blockers/unknowns and fresh evidence. |
+| AC-16013 | CLOSED receipt and annotated `v1.6.0` tag point to the closure commit with a clean worktree. |

@@ -26,6 +26,8 @@ import {
 } from './proposal-state.mjs';
 import { prepareNextRelease } from './release-transition.mjs';
 import { buildReleaseTrain, persistApprovedReleaseTrain, releaseTrainSummary } from './release-train.mjs';
+import { validateAutopilotDecision } from './autopilot-policy.mjs';
+import { loadAutopilotPolicy } from './autopilot.mjs';
 import { initializeState, readState, recordLedger, transitionState } from './state.mjs';
 
 const PROPOSAL_TTL_MS = 24 * 60 * 60 * 1000;
@@ -619,13 +621,20 @@ export async function refineScopeProposal(root, input) {
 /**
  * Approve a proposal and atomically move the release into LOCKED state.
  * @param {string} root
- * @param {{proposalId: string, proposalHash: string, confirm: boolean, approverType?: string, approverId?: string}} input
+ * @param {{proposalId: string, proposalHash: string, confirm: boolean, approverType?: string, approverId?: string, policyAuthorization?: Record<string,any>|null}} input
  */
 export async function approveScopeProposal(root, input) {
-  invariant(input.confirm === true, 'ERR_APPROVAL_REQUIRED', 'Explicit confirm=true is required to approve scope');
   const approverType = input.approverType ?? 'human';
   const approverId = typeof input.approverId === 'string' && input.approverId.trim() ? input.approverId.trim().slice(0, 160) : 'local-user';
-  invariant(approverType === 'human', 'ERR_MODEL_SELF_APPROVAL', 'Only a human approver may lock a decision proposal');
+  if (approverType === 'human') {
+    invariant(input.confirm === true, 'ERR_APPROVAL_REQUIRED', 'Explicit confirm=true is required to approve scope');
+  } else {
+    invariant(approverType === 'autopilot-policy', 'ERR_MODEL_SELF_APPROVAL', 'Only a human approver or a verified autopilot policy may lock a decision proposal');
+    const policy = await loadAutopilotPolicy(root);
+    const authorization = validateAutopilotDecision(input.policyAuthorization);
+    invariant(policy && authorization.policyHash === policy.hash, 'ERR_AUTOPILOT_POLICY_BINDING', 'Autopilot approval belongs to a different policy');
+    invariant(authorization.action === 'ADVANCE_RELEASE' && authorization.allowed === true && ['AUTO', 'NOTIFY'].includes(authorization.decision), 'ERR_AUTOPILOT_ADVANCE', 'Autopilot policy did not authorize the next release');
+  }
   const existingPaths = runtimePaths(root);
   if (await exists(existingPaths.state)) {
     const existingState = await readState(root);
@@ -637,7 +646,7 @@ export async function approveScopeProposal(root, input) {
   const { proposal, projectedProposal, proposalPath, summary } = await loadScopeProposal(root, input.proposalId);
   invariant(input.proposalHash === proposal.hash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match');
   invariant(summary.state === 'READY_FOR_APPROVAL', 'ERR_DECISION_NEEDS_INPUT', `Proposal has unresolved mandatory risks or questions, a dirty baseline, weak acceptance, or another non-ready condition: ${summary.state}`);
-  invariant(approverId !== proposal.decision?.proposer?.id, 'ERR_MODEL_SELF_APPROVAL', 'The proposer cannot approve its own decision package');
+  if (approverType === 'human') invariant(approverId !== proposal.decision?.proposer?.id, 'ERR_MODEL_SELF_APPROVAL', 'The proposer cannot approve its own decision package');
   invariant(Date.parse(proposal.expiresAt) > Date.now(), 'ERR_PROPOSAL_EXPIRED', 'Proposal has expired; create a new proposal');
   invariant(currentGitSha(root) === proposal.gitSha, 'ERR_PROPOSAL_STALE', 'Repository HEAD changed after proposal creation');
   const baseline = currentBaseline(root);
@@ -676,7 +685,7 @@ export async function approveScopeProposal(root, input) {
     approvedProposalHash: proposal.hash,
     releaseTrainHash: projectedProposal.releaseTrain.hash,
     releaseTrainPath: path.relative(root, persistedTrain.path).replaceAll('\\', '/'),
-  }, 'scope proposal explicitly approved');
+  }, approverType === 'autopilot-policy' ? 'scope proposal approved by pre-authorized autopilot policy' : 'scope proposal explicitly approved');
   const approved = {
     ...proposal,
     releaseTrain: projectedProposal.releaseTrain,
@@ -700,6 +709,8 @@ export async function approveScopeProposal(root, input) {
     contractHash: lock.contractHash,
     baselineSha: lock.baselineSha,
     releaseTrainHash: projectedProposal.releaseTrain.hash,
+    approverType,
+    policyAuthorizationHash: input.policyAuthorization?.hash ?? null,
   });
   return { proposal: approved, contract, lock, state: locked, releaseTrain: persistedTrain.envelope };
 }

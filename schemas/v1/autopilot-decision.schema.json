@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/autopilot-decision-v1",
+  "title": "Shipping Harness deterministic autopilot decision",
+  "description": "One model-independent AUTO, NOTIFY, ASK, or STOP decision for a mechanically classified action.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys",
+  "type": "object",
+  "required": ["schema", "policyId", "policyHash", "action", "decision", "code", "allowed", "requiresHuman", "stopsAutomation", "effects", "reasons", "nextState", "released", "message", "inputFingerprint", "hash"],
+  "properties": {
+    "schema": { "const": "shipping-harness/autopilot-decision-v1", "type": "string" },
+    "policyId": { "type": "string", "pattern": "^POLICY-[a-f0-9]{12}$" },
+    "policyHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "action": { "enum": ["ANALYZE", "PRESERVE_BASELINE", "LOCAL_COMMIT", "IMPLEMENT", "VERIFY", "FIX_BLOCKERS", "CLOSE", "ADVANCE_RELEASE", "RELEASE"] },
+    "decision": { "enum": ["AUTO", "NOTIFY", "ASK", "STOP"] },
+    "code": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "allowed": { "type": "boolean" },
+    "requiresHuman": { "type": "boolean" },
+    "stopsAutomation": { "type": "boolean" },
+    "effects": { "type": "array", "minItems": 1, "maxItems": 24, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 80 } },
+    "reasons": { "type": "array", "maxItems": 24, "uniqueItems": true, "items": { "type": "string", "minLength": 1, "maxLength": 160 } },
+    "nextState": { "enum": ["POLICY_READY", "IMPLEMENTING", "VERIFYING", "FIXING_BLOCKERS", "CLOSING", "REPLAN_CHECK", "ASKING", "REPLAN_REQUIRED", "STOPPED"] },
+    "released": { "const": false },
+    "message": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "inputFingerprint": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "additionalProperties": false
+}

@@ -57,11 +57,12 @@ export const OMP_AGENT_BLOCK = `${OMP_AGENT_BLOCK_START}
 8. changed product path가 Acceptance coverage에 연결되지 않으면 \`NEEDS_ACCEPTANCE\`를 유지한다. 모델 설명으로 검증을 보강하지 않는다.
 9. package/release 검증은 Shipping이 표시한 isolation·determinism 정책을 약화하지 않는다. 외부상태·데이터상태 명령을 자동 실행하지 않는다.
 10. Shipping이 생성한 \`plainBriefText\`와 \`전체 개발계획\`을 기본 보고서로 그대로 표시한다. 모델이 버전 순서·상태·다음 행동을 다시 작성하지 않는다.
-11. 사용자가 현재 버전 범위를 명시적으로 승인하기 전에는 \`mcp__shipping_harness_shipping_approve_scope\`를 호출하지 않는다.
-12. 승인 후 잠긴 현재 버전 범위와 예산만 구현하고 \`mcp__shipping_harness_shipping_verify\`를 호출한다. BLOCKER만 수정하고 NEXT는 다음 버전으로 넘긴다.
-13. 모델 문장이나 OMP Task 완료를 완료 증거로 보지 않는다. Shipping 상태가 CLOSED일 때만 완료를 보고한다.
-14. 사용자 pause/abort가 모든 자동 재개보다 우선한다. 자동 push, merge, deploy, 구매, 고객 연락, 공개 노출은 별도 승인 없이는 수행하지 않는다.
-15. CLOSED 버전을 다시 열지 않고 다음 Train 버전은 새 계약과 재계획을 통해서만 시작한다.
+11. 첫 현재 버전과 운영 정책은 사용자가 명시적으로 승인한다. \`LOCAL_REVERSIBLE\`은 \`confirmAutopilot: true\`로 한 번만 결합하고, 그렇지 않으면 \`MANUAL\`을 사용한다.
+12. Shipping의 오토파일럿 판단을 그대로 따른다. \`AUTO\`/\`NOTIFY\`는 잠긴 비파괴 로컬 작업만 계속하고, \`ASK\`는 실제 영향에 대한 사람의 결정을 기다리며, \`STOP\`은 모델 문장으로 우회하지 않는다.
+13. 승인 후 잠긴 현재 버전 범위와 예산만 구현하고 \`mcp__shipping_harness_shipping_verify\`를 호출한다. BLOCKER만 수정하고 NEXT는 다음 버전으로 넘긴다.
+14. 모델 문장이나 OMP Task 완료를 완료 증거로 보지 않는다. \`LOCAL_REVERSIBLE\`에서는 모든 Gate가 통과한 로컬 버전을 Shipping이 자동 CLOSED할 수 있고, \`MANUAL\`에서는 사용자의 종료 확인을 기다린다.
+15. 사용자 pause/abort가 모든 자동 재개보다 우선한다. 자동 push, merge, deploy, 구매, 고객 연락, 공개 노출은 별도 승인 없이는 수행하지 않는다.
+16. CLOSED는 개발 완료 경계일 뿐 RELEASED가 아니다. CLOSED 버전을 다시 열지 않고 다음 Train 버전은 커밋된 전 버전 종료와 새 재계획을 통해서만 시작한다.
 ${OMP_AGENT_BLOCK_END}`;
 
 export const MANAGED_RELATIVE_PATHS = Object.freeze([

@@ -1,6 +1,6 @@
 # Shipping Harness v1 Compatibility
 
-Shipping Harness v1.5.0 is an internal-only control plane. A component is supported only after its exact combination passes local compatibility checks; discovery of a binary alone is not readiness proof.
+Shipping Harness v1.6.0 is an internal-only control plane. A component is supported only after its exact combination passes local compatibility checks; discovery of a binary alone is not readiness proof.
 
 The v1.0.2 proposal surface exposes one canonical state. `NEEDS_INPUT`, `DIRTY_BASELINE`, and `NEEDS_ACCEPTANCE` are fail-closed states and can never be interpreted as approval readiness by a host agent.
 
@@ -19,6 +19,8 @@ The v1.3.1 deployment patch awaits the full bootstrap install Promise before tem
 The v1.4.0 presentation surface adds a deterministic Korean `plainBrief`, mechanical fact graph, one-action envelope, bounded output QA, raw-authority fallback, and OMP verbatim-rendering contract. It adds no model call, network request, Git subprocess, Paperthin runtime dependency, or tenth MCP tool.
 
 The v1.5.0 planning surface adds `shipping-harness/release-train-v1`: one to five strictly increasing value-bearing releases, full current detail, bounded future gates, exact proposal/contract/Git bindings, and zero future command authority. It uses the existing nine tools and adds no model or network call.
+
+The v1.6.0 policy surface adds stable autopilot policy, decision, and state documents. `LOCAL_REVERSIBLE` may automate only exact-scope, rollback-backed local work and local `CLOSED`; every external, destructive, data, authentication, security, license, cost, production, public, or customer consequence remains `ASK` or `STOP`. Host-model text has no permission authority and `RELEASED` is always false.
 
 ## Supported core environment
 

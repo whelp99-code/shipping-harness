@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -29,7 +29,8 @@
     "README.md",
     "LICENSE",
     "THIRD_PARTY.md",
-    "scripts/release-train-pilot.mjs"
+    "scripts/release-train-pilot.mjs",
+    "scripts/autopilot-pilot.mjs"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -50,7 +51,7 @@
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",
     "license:check": "node scripts/license-check.mjs",
-    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs && npm run smoke:release-train",
+    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs && npm run smoke:release-train && npm run smoke:autopilot",
     "test:omo-bridge": "node --test --test-reporter=spec test/omo/*.test.mjs",
     "test:remote": "node --test --test-reporter=spec test/remote/*.test.mjs test/adversarial/remote-attacks.test.mjs",
     "smoke:remote": "node scripts/remote-gateway-smoke.mjs --check",
@@ -62,7 +63,9 @@
     "acceptance:v1": "node scripts/v1-acceptance.mjs --all",
     "status:v1": "node scripts/v1-status-report.mjs",
     "test:release-train": "node --test --test-reporter=spec test/mcp/release-train.test.mjs test/adversarial/release-train-attacks.test.mjs",
-    "smoke:release-train": "node scripts/release-train-pilot.mjs --check"
+    "smoke:release-train": "node scripts/release-train-pilot.mjs --check",
+    "test:autopilot": "node --test --test-reporter=spec test/autopilot/*.test.mjs test/adversarial/autopilot-attacks.test.mjs",
+    "smoke:autopilot": "node scripts/autopilot-pilot.mjs --check"
   },
   "license": "MIT"
 }

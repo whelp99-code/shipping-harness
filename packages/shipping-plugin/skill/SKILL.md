@@ -17,11 +17,13 @@ The user is the approver, not the technical interview respondent. Use the nine S
 6. For a bounded question, tied workspace, or reviewed baseline rescan, call `shipping_refine` with the exact active ID/hash. Meaningful refinement increments the same proposal revision; `changed: false` is not a new revision.
 7. If coverage is incomplete, keep `NEEDS_ACCEPTANCE`. Never add stronger completion claims only in prose.
 8. Render Shipping-generated `plainBriefText` first and verbatim, including `전체 개발계획`. Do not let host-model prose rewrite train order, state, readiness, acceptance, or next action. Keep exact technical evidence expandable.
-9. Require explicit user confirmation before `shipping_approve_scope`, and only for the current release from `READY_FOR_APPROVAL`.
-10. After approval, implement only the locked current release. Use `shipping_execute` or host editing, then call `shipping_verify`.
-11. Do not weaken isolation or determinism metadata. Shipping runs generated-artifact package/release checks in detached worktrees; external-state and data-state commands remain manual-only.
-12. Use `shipping_fix_blockers` only for release blockers within the remaining budget. NEXT work is deferred.
-13. Human pause or abort overrides every continuation request. Call `shipping_close` only when the core reports `SHIPPABLE`. A train never implies `RELEASED`.
+9. Require explicit user confirmation before the first `shipping_approve_scope`. If the user selects `LOCAL_REVERSIBLE`, bind that one-time policy only with `confirmAutopilot: true`; otherwise use `MANUAL`.
+10. When Shipping returns an autopilot decision, obey it exactly. `AUTO` and `NOTIFY` may continue only the locked reversible local work. `ASK` waits for the real consequence decision. `STOP` cannot be overridden by model prose.
+11. After approval, implement only the locked current release. Use `shipping_execute` or host editing, then call `shipping_verify`.
+12. Do not weaken isolation or determinism metadata. Shipping runs generated-artifact package/release checks in detached worktrees; external-state and data-state commands remain manual-only.
+13. Use `shipping_fix_blockers` only for release blockers within the remaining budget. NEXT work is deferred.
+14. Human pause or abort overrides every continuation request. Under `LOCAL_REVERSIBLE`, Shipping may close a fully proven local version automatically; under `MANUAL`, call `shipping_close` only after the core reports `SHIPPABLE` and the user confirms.
+15. `CLOSED` is a development boundary, never `RELEASED`. Never infer deployment, publication, customer delivery, cost, data, auth/security, or license authority from an autopilot decision.
 
 ## User-facing language
 

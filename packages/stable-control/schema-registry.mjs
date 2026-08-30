@@ -33,6 +33,9 @@ const descriptors = {
   health: ['shipping-harness/health-v1', 'health.schema.json', 'health.example.json'],
   compatibility: [COMPATIBILITY_SCHEMA_ID, 'compatibility.schema.json', 'compatibility.example.json'],
   releaseTrain: ['shipping-harness/release-train-v1', 'release-train.schema.json', 'release-train.example.json'],
+  autopilotPolicy: ['shipping-harness/autopilot-policy-v1', 'autopilot-policy.schema.json', 'autopilot-policy.example.json'],
+  autopilotDecision: ['shipping-harness/autopilot-decision-v1', 'autopilot-decision.schema.json', 'autopilot-decision.example.json'],
+  autopilotState: ['shipping-harness/autopilot-state-v1', 'autopilot-state.schema.json', 'autopilot-state.example.json'],
 };
 
 export const STABLE_SCHEMA_DESCRIPTORS = Object.freeze(Object.fromEntries(
@@ -79,6 +82,9 @@ const REQUIRED_FIELDS = Object.freeze({
   health: ['status', 'checks', 'internalOnly'],
   compatibility: [COMPATIBILITY_SCHEMA_ID, 'compatibility.schema.json', 'compatibility.example.json'],
   releaseTrain: ['id', 'project', 'finalGoal', 'status', 'currentIndex', 'currentRelease', 'modelAuthority', 'deterministic', 'rollingPlan', 'source', 'limits', 'releases', 'trainCompleteWhen', 'hash'],
+  autopilotPolicy: ['id', 'profile', 'enabled', 'modelAuthority', 'defaultDecision', 'permissions', 'consequencePolicy', 'closureRequirements', 'limits', 'binding', 'hash'],
+  autopilotDecision: ['policyId', 'policyHash', 'action', 'decision', 'code', 'allowed', 'requiresHuman', 'stopsAutomation', 'effects', 'reasons', 'nextState', 'released', 'message', 'inputFingerprint', 'hash'],
+  autopilotState: ['enabled', 'profile', 'modelAuthority', 'policyHash', 'releaseTrainHash', 'currentRelease', 'currentIndex', 'phase', 'sequence', 'replanRequired', 'released', 'baselineSha', 'startedAt', 'updatedAt', 'hash'],
 });
 
 export function stableSchemaNames() {

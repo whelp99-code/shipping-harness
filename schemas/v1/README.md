@@ -25,5 +25,10 @@ These schemas freeze the internal v1 authority surfaces. Every root rejects unkn
 | stableEvent | `shipping-harness/stable-v1` | [stable-event.schema.json](./stable-event.schema.json) | [stable-event.example.json](./examples/stable-event.example.json) | reject |
 | health | `shipping-harness/health-v1` | [health.schema.json](./health.schema.json) | [health.example.json](./examples/health.example.json) | reject |
 | compatibility | `shipping-harness/stable-v1` | [compatibility.schema.json](./compatibility.schema.json) | [compatibility.example.json](./examples/compatibility.example.json) | reject |
+| releaseTrain | `shipping-harness/release-train-v1` | [release-train.schema.json](./release-train.schema.json) | [release-train.example.json](./examples/release-train.example.json) | reject |
+| autopilotPolicy | `shipping-harness/autopilot-policy-v1` | [autopilot-policy.schema.json](./autopilot-policy.schema.json) | [autopilot-policy.example.json](./examples/autopilot-policy.example.json) | reject |
+| autopilotDecision | `shipping-harness/autopilot-decision-v1` | [autopilot-decision.schema.json](./autopilot-decision.schema.json) | [autopilot-decision.example.json](./examples/autopilot-decision.example.json) | reject |
+| autopilotState | `shipping-harness/autopilot-state-v1` | [autopilot-state.schema.json](./autopilot-state.schema.json) | [autopilot-state.example.json](./examples/autopilot-state.example.json) | reject |
 
 - `release-train.schema.json` — deterministic one-to-five-version rolling plan; only the first release may bind current contract authority.
+- Autopilot policy, decision, and state remain model-independent, default-deny, local-first, and unable to mark a release `RELEASED`.

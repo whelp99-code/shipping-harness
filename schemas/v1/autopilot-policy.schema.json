@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/autopilot-policy-v1",
+  "title": "Shipping Harness policy-authorized autopilot policy",
+  "description": "A deterministic, model-independent, default-deny operating policy bound to one proposal, contract, baseline, and release train.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys",
+  "type": "object",
+  "required": ["schema", "id", "profile", "enabled", "modelAuthority", "defaultDecision", "permissions", "consequencePolicy", "closureRequirements", "limits", "binding", "hash"],
+  "properties": {
+    "schema": { "const": "shipping-harness/autopilot-policy-v1", "type": "string" },
+    "id": { "type": "string", "pattern": "^POLICY-[a-f0-9]{12}$" },
+    "profile": { "enum": ["MANUAL", "LOCAL_REVERSIBLE"] },
+    "enabled": { "type": "boolean" },
+    "modelAuthority": { "const": false },
+    "defaultDecision": { "const": "STOP" },
+    "permissions": {
+      "type": "object",
+      "required": ["ANALYZE", "PRESERVE_BASELINE", "LOCAL_COMMIT", "IMPLEMENT", "VERIFY", "FIX_BLOCKERS", "CLOSE", "ADVANCE_RELEASE", "RELEASE"],
+      "properties": {
+        "ANALYZE": { "enum": ["AUTO", "NOTIFY", "ASK", "STOP"] },
+        "PRESERVE_BASELINE": { "enum": ["AUTO", "NOTIFY", "ASK", "STOP"] },
+        "LOCAL_COMMIT": { "enum": ["AUTO", "NOTIFY", "ASK", "STOP"] },
+        "IMPLEMENT": { "enum": ["AUTO", "NOTIFY", "ASK", "STOP"] },
+        "VERIFY": { "enum": ["AUTO", "NOTIFY", "ASK", "STOP"] },
+        "FIX_BLOCKERS": { "enum": ["AUTO", "NOTIFY", "ASK", "STOP"] },
+        "CLOSE": { "enum": ["AUTO", "NOTIFY", "ASK", "STOP"] },
+        "ADVANCE_RELEASE": { "enum": ["AUTO", "NOTIFY", "ASK", "STOP"] },
+        "RELEASE": { "enum": ["AUTO", "NOTIFY", "ASK", "STOP"] }
+      },
+      "additionalProperties": false
+    },
+    "consequencePolicy": {
+      "type": "object",
+      "required": ["hardStop", "humanDecision", "automaticReleased", "productionAutomatic", "publicAutomatic", "externalWriteAutomatic", "costAutomatic", "licenseChangeAutomatic", "destructiveDataAutomatic", "authSecurityAutomatic"],
+      "properties": {
+        "hardStop": { "type": "array", "minItems": 1, "maxItems": 10, "uniqueItems": true, "items": { "type": "string", "maxLength": 80 } },
+        "humanDecision": { "type": "array", "minItems": 1, "maxItems": 16, "uniqueItems": true, "items": { "type": "string", "maxLength": 80 } },
+        "automaticReleased": { "const": false },
+        "productionAutomatic": { "const": false },
+        "publicAutomatic": { "const": false },
+        "externalWriteAutomatic": { "const": false },
+        "costAutomatic": { "const": false },
+        "licenseChangeAutomatic": { "const": false },
+        "destructiveDataAutomatic": { "const": false },
+        "authSecurityAutomatic": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "closureRequirements": {
+      "type": "object",
+      "required": ["policyBindingCurrent", "valueGateProven", "acceptancePassed", "evidenceFresh", "rollbackAvailable", "blockerCount", "unknownCount", "scopeDrift", "released"],
+      "properties": {
+        "policyBindingCurrent": { "const": true },
+        "valueGateProven": { "const": true },
+        "acceptancePassed": { "const": true },
+        "evidenceFresh": { "const": true },
+        "rollbackAvailable": { "const": true },
+        "blockerCount": { "const": 0 },
+        "unknownCount": { "const": 0 },
+        "scopeDrift": { "const": 0 },
+        "released": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "limits": {
+      "type": "object",
+      "required": ["maxFixCycles", "maxAgentRuns", "maxReleases", "maxCommandSeconds"],
+      "properties": {
+        "maxFixCycles": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "maxAgentRuns": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "maxReleases": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "maxCommandSeconds": { "type": "integer", "minimum": 1, "maximum": 1800 }
+      },
+      "additionalProperties": false
+    },
+    "binding": {
+      "type": "object",
+      "required": ["proposalId", "proposalHash", "contractHash", "baselineSha", "releaseTrainHash", "approvedAt"],
+      "properties": {
+        "proposalId": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "proposalHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "contractHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "baselineSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "releaseTrainHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "approvedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "additionalProperties": false
+}

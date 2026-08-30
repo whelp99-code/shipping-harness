@@ -1,49 +1,49 @@
 {
   "acceptance": [
     {
+      "id": "AC-15001",
+      "description": "Release-train compiler, persistence, model-independence, and adversarial tests pass.",
+      "type": "command",
       "command": "node --test --test-reporter=spec test/mcp/release-train.test.mjs test/adversarial/release-train-attacks.test.mjs",
       "cwd": ".",
-      "description": "Release-train compiler, persistence, model-independence, and adversarial tests pass.",
-      "id": "AC-15001",
       "required": true,
-      "timeoutSeconds": 600,
-      "type": "command"
+      "timeoutSeconds": 600
     },
     {
+      "id": "AC-15002",
+      "description": "The exact nine-tool MCP and OMP presentation surfaces remain compatible.",
+      "type": "command",
       "command": "npm run test:mcp && npm run test:omp-main",
       "cwd": ".",
-      "description": "The exact nine-tool MCP and OMP presentation surfaces remain compatible.",
-      "id": "AC-15002",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
+      "id": "AC-15003",
+      "description": "Generic and EvoHarvest read-only release-train pilots pass without target mutation.",
+      "type": "command",
       "command": "node scripts/release-train-pilot.mjs --check && node scripts/evoharvest-intelligence-pilot.mjs --check",
       "cwd": ".",
-      "description": "Generic and EvoHarvest read-only release-train pilots pass without target mutation.",
-      "id": "AC-15003",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-15004",
+      "description": "Full regression, security, license, docs, OMP, remote, stable-control, and adversarial gates pass.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full regression, security, license, docs, OMP, remote, stable-control, and adversarial gates pass.",
-      "id": "AC-15004",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
+      "id": "AC-15005",
+      "description": "No whitespace or conflict-marker errors remain.",
+      "type": "command",
       "command": "git diff --check",
       "cwd": ".",
-      "description": "No whitespace or conflict-marker errors remain.",
-      "id": "AC-15005",
       "required": true,
-      "timeoutSeconds": 60,
-      "type": "command"
+      "timeoutSeconds": 60
     }
   ],
   "adapters": {
@@ -115,9 +115,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Execute the approved release train under a deterministic default-deny policy that authorizes reversible local work, returns AUTO/NOTIFY/ASK/STOP, automatically closes only fully proven local releases, preserves human pause and external consequence authority, and separates CLOSED from RELEASED.",
+  "goal": "Compile one explicit final outcome into a deterministic rolling release train with value, entry, exit, rollback, replan, and authority gates; expose and persist it through the existing nine-tool Shipping surface without enabling automatic execution.",
   "project": "shipping-harness",
-  "release": "1.6.0",
+  "release": "1.5.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -140,13 +140,6 @@
   ],
   "schema": "shipping-harness/v1",
   "scope": {
-    "exclude": [
-      "Automatic implementation, automatic close, automatic next-version activation, production release, push, merge, deploy, purchase, or customer communication.",
-      "A tenth MCP tool, raw commands, free-form future paths, model-authored authority, or speculative distant implementation tasks.",
-      "Changing canonical proposal/release state, evidence freshness, blocker classification, pause/abort, SHIPPABLE, CLOSED, or RELEASED authority.",
-      "Automatic commit, stash, reset, discard, data migration, auth/security policy change, license change, external listener, Team/DAG, or public SaaS.",
-      "Reopening or modifying v1.4.0 CLOSED history."
-    ],
     "include": [
       "Add a deterministic one-to-five-version release-train compiler from explicit outcome and existing Shipping authority evidence.",
       "Add value, entry, exit, rollback, replan, risk, authority, and rolling-detail gates for every train release.",
@@ -157,15 +150,14 @@
       "Add clean, dirty, nested, monorepo, weak-acceptance, insufficient-value, stale, and hostile-model verification.",
       "Update version and compatibility surfaces to v1.5.0 after all focused tests pass."
     ],
+    "exclude": [
+      "Automatic implementation, automatic close, automatic next-version activation, production release, push, merge, deploy, purchase, or customer communication.",
+      "A tenth MCP tool, raw commands, free-form future paths, model-authored authority, or speculative distant implementation tasks.",
+      "Changing canonical proposal/release state, evidence freshness, blocker classification, pause/abort, SHIPPABLE, CLOSED, or RELEASED authority.",
+      "Automatic commit, stash, reset, discard, data migration, auth/security policy change, license change, external listener, Team/DAG, or public SaaS.",
+      "Reopening or modifying v1.4.0 CLOSED history."
+    ],
     "paths": {
-      "exclude": [
-        ".shipping/contract.yaml",
-        ".shipping/contract.lock",
-        ".git/**",
-        "node_modules/**",
-        "dist/**",
-        "coverage/**"
-      ],
       "include": [
         "README.md",
         "docs/BEGINNER-QUICKSTART-KO.md",
@@ -207,6 +199,14 @@
         "test/mcp/release-train.test.mjs",
         "test/omp-main-harness/**",
         "test/stable/**"
+      ],
+      "exclude": [
+        ".shipping/contract.yaml",
+        ".shipping/contract.lock",
+        ".git/**",
+        "node_modules/**",
+        "dist/**",
+        "coverage/**"
       ]
     }
   },

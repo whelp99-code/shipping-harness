@@ -42,6 +42,8 @@ const PHASES = Object.freeze([
 ]);
 const TERMINAL_PHASES = new Set(['TRAIN_COMPLETE', 'ABORTED']);
 const AUTOPILOT_LOCK_ATTEMPTS = 100;
+const MAX_AUTOPILOT_LEDGER_EVENTS = 512;
+const MAX_AUTOPILOT_LEDGER_BYTES = 2 * 1024 * 1024;
 
 function stateHash(state) {
   const { hash: _hash, ...body } = state;
@@ -139,24 +141,36 @@ function validateAutopilotEvent(event, previous = null) {
   return event;
 }
 
-export async function readAutopilotLedger(root) {
+async function readAutopilotLedgerSnapshot(root) {
   const target = runtimePaths(root).autopilotLedger;
-  if (!(await exists(target))) return [];
+  if (!(await exists(target))) return { events: [], bytes: 0 };
   await assertContainedPath(root, target);
   const text = await readText(target);
-  const events = text.split('\n').filter(Boolean).map((line) => JSON.parse(line));
+  const bytes = Buffer.byteLength(text, 'utf8');
+  invariant(bytes <= MAX_AUTOPILOT_LEDGER_BYTES, 'ERR_AUTOPILOT_RETENTION', `Autopilot ledger exceeds ${MAX_AUTOPILOT_LEDGER_BYTES} bytes`);
+  const lines = text.split('\n').filter(Boolean);
+  invariant(lines.length <= MAX_AUTOPILOT_LEDGER_EVENTS, 'ERR_AUTOPILOT_RETENTION', `Autopilot ledger exceeds ${MAX_AUTOPILOT_LEDGER_EVENTS} events`);
+  const events = lines.map((line) => JSON.parse(line));
   let previous = null;
   for (const event of events) {
     validateAutopilotEvent(event, previous);
     previous = event;
   }
-  return events;
+  return { events, bytes };
+}
+
+export async function readAutopilotLedger(root) {
+  return (await readAutopilotLedgerSnapshot(root)).events;
 }
 
 async function appendEvent(root, event) {
   const target = runtimePaths(root).autopilotLedger;
   await assertContainedPath(root, target);
-  await appendFile(target, `${JSON.stringify(event)}\n`, { encoding: 'utf8', mode: 0o600 });
+  const snapshot = await readAutopilotLedgerSnapshot(root);
+  const line = `${JSON.stringify(event)}\n`;
+  invariant(snapshot.events.length < MAX_AUTOPILOT_LEDGER_EVENTS, 'ERR_AUTOPILOT_RETENTION', `Autopilot ledger reached ${MAX_AUTOPILOT_LEDGER_EVENTS} events`);
+  invariant(snapshot.bytes + Buffer.byteLength(line, 'utf8') <= MAX_AUTOPILOT_LEDGER_BYTES, 'ERR_AUTOPILOT_RETENTION', `Autopilot ledger reached ${MAX_AUTOPILOT_LEDGER_BYTES} bytes`);
+  await appendFile(target, line, { encoding: 'utf8', mode: 0o600 });
 }
 
 async function writeState(root, body) {
@@ -635,4 +649,7 @@ export const AUTOPILOT = Object.freeze({
   eventSchema: AUTOPILOT_EVENT_SCHEMA,
   mutationSchema: AUTOPILOT_MUTATION_SCHEMA,
   phases: PHASES,
+  maxLedgerEvents: MAX_AUTOPILOT_LEDGER_EVENTS,
+  maxLedgerBytes: MAX_AUTOPILOT_LEDGER_BYTES,
+  maxActiveMutationReceipts: 1,
 });

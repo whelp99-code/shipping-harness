@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.6.0 — Policy-Authorized Autopilot`
-**Authority:** the release is complete only when `.shipping/releases/1.6.0.json` is `CLOSED` and annotated tag `v1.6.0` points to the closure commit
+**Current release train:** `v1.6.1 — Autopilot Field Hardening`
+**Authority:** the release is complete only when `.shipping/releases/1.6.1.json` is `CLOSED` and annotated tag `v1.6.1` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -58,14 +58,14 @@ The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency
 
 ## OMP main-harness installation
 
-After `v1.6.0` is closed and tagged, run from the clean Shipping Harness checkout:
+After `v1.6.1` is closed and tagged, run from the clean Shipping Harness checkout:
 
 ```bash
 # Read-only preview
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.6.0
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.6.1
 
 # Back up, install locally, merge OMP settings, and verify
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.6.0 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.6.1 --apply
 
 # Thereafter the installed command is available
 shipping-harness-omp doctor
@@ -256,6 +256,10 @@ Compiles one final outcome into a deterministic rolling train of one to five val
 Adds a model-independent, default-deny AUTO/NOTIFY/ASK/STOP policy bound to the exact proposal, contract, Git baseline, and release train. Safe reversible local implementation, verification, blocker repair, `CLOSED`, and predecessor-gated train continuation may proceed under the approved policy; production, public release, external writes, cost, license, destructive data, authentication, and security consequences remain human-owned. `CLOSED` never means `RELEASED`, and the existing nine MCP tools remain unchanged.
 
 Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
+
+### v1.6.1 — Autopilot Field Hardening
+
+Proves the accepted v1.6.0 policy boundary across clean, dirty nested, weak-acceptance, missing-rollback, destructive, authentication/security, external/cost/public, model-variant, replay, crash-recovery, pause/abort, and next-release lanes. Mutation lanes use disposable repositories; available real projects are fingerprinted read-only. Field evidence must report zero false authority, zero unauthorized target mutation, bounded decision latency and retention, nine unchanged MCP tools, `CLOSED != RELEASED`, and unchanged OMP binaries.
 
 ## Documentation
 

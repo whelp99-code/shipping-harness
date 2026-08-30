@@ -24,6 +24,14 @@ const required = [
   'schemas/v1/examples/plain-brief.example.json',
   'docs/planning/25-V1.4.0-EVIDENCE-FIRST-PLAIN-BRIEF-DEVELOPMENT-PLAN.md',
   'docs/planning/26-V1.5.0-RELEASE-TRAIN-PLANNER-DEVELOPMENT-PLAN.md',
+  'docs/planning/27-V1.6.0-POLICY-AUTHORIZED-AUTOPILOT-DEVELOPMENT-PLAN.md',
+  'docs/planning/28-V1.6.1-AUTOPILOT-FIELD-HARDENING-DEVELOPMENT-PLAN.md',
+  'docs/operations/AUTOPILOT-RUNBOOK.md',
+  'scripts/autopilot-field-pilot.mjs',
+  'test/autopilot/field-matrix.test.mjs',
+  'test/autopilot/autopilot-performance.test.mjs',
+  'test/adversarial/autopilot-field-attacks.test.mjs',
+  'docs/reports/v1.6.1-autopilot-field.json',
   'schemas/v1/release-train.schema.json',
   'schemas/v1/examples/release-train.example.json',
   'docs/research/PAPERTHIN-APPLICATION-DECISION.md',
@@ -80,6 +88,10 @@ const trainSchema = JSON.parse(readFileSync(path.join(root, 'schemas', 'v1', 're
 const trainExample = JSON.parse(readFileSync(path.join(root, 'schemas', 'v1', 'examples', 'release-train.example.json'), 'utf8'));
 if (trainSchema.$id !== 'shipping-harness/release-train-v1') failures.push('release train schema identifier mismatch');
 if (trainExample.schema !== 'shipping-harness/release-train-v1' || trainExample.modelAuthority !== false || trainExample.releases?.length < 1) failures.push('release train example is not a bounded model-independent train');
+const fieldReport = JSON.parse(readFileSync(path.join(root, 'docs', 'reports', 'v1.6.1-autopilot-field.json'), 'utf8'));
+if (fieldReport.schema !== 'shipping-harness/autopilot-field-pilot-v1' || fieldReport.status !== 'PASS' || fieldReport.released !== false || fieldReport.mcpTools !== 9) failures.push('autopilot field report is not a passing bounded internal report');
+if (Object.values(fieldReport.safety ?? {}).some((value) => value !== 0)) failures.push('autopilot field report contains a non-zero safety counter');
+if ((fieldReport.realProjects ?? []).filter((entry) => entry.available).some((entry) => entry.unchanged !== true)) failures.push('autopilot field report contains a mutated real-project lane');
 const activeContract = JSON.parse(readFileSync(path.join(root, '.shipping', 'contract.yaml'), 'utf8'));
 if (packageJson.version !== activeContract.release) failures.push(`package version is ${packageJson.version}, active release is ${activeContract.release}`);
 if (!/^1\.\d+\.\d+$/u.test(packageJson.version)) failures.push(`package version ${packageJson.version} is outside the stable v1 release line`);

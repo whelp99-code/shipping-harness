@@ -174,6 +174,21 @@
 | REQ-HANDOVER-001 | Produce release notes, operator handover, known limitations, support boundaries, and next-version backlog. | 1.0.0 |
 | REQ-RELEASE-001 | Close v1.0.0 with zero release blockers while preserving every governance invariant across supported execution paths. | 1.0.0 |
 
+### Autopilot field-hardening requirements
+
+| ID | Requirement | Release |
+|---|---|---|
+| REQ-FIELD-001 | Define mandatory clean, dirty nested, missing-acceptance, missing-rollback, destructive, auth/security, external/cost/public, core-value, model-variant, replay/crash, pause/abort, and next-release field lanes. | 1.6.1 |
+| REQ-FIELD-002 | Require every field lane to emit immutable input, expected outcome, observed outcome, policy/train/contract/Git bindings, and before/after fingerprints. | 1.6.1 |
+| REQ-FIELD-003 | Keep all mutation lanes disposable and all available real-project lanes read-only unless a separate exact policy authorizes change. | 1.6.1 |
+| REQ-FIELD-004 | Prove no-model, weak-host, strong-host, and hostile-host prose cannot change policy, train, value, action, close, or release authority. | 1.6.1 |
+| REQ-FIELD-005 | Prove dangerous production, public, customer, cost, data, credential, auth, security, license, core-value-reduction, and unknown effects remain `ASK` or `STOP`. | 1.6.1 |
+| REQ-FIELD-006 | Prove crashes, duplicate effects, pause/abort, and restart recovery cannot repeat commits, verification, closure, release activation, or mutation receipts. | 1.6.1 |
+| REQ-FIELD-007 | Bound policy-decision latency, ledger retention, receipt retention, output size, and field-run duration without weakening fail-closed behavior. | 1.6.1 |
+| REQ-FIELD-008 | Record zero false `AUTO`, `NOTIFY`, `ASK`, `STOP`, `CLOSED`, `RELEASED`, next-release activation, external impact, target mutation, and model-authority leakage. | 1.6.1 |
+| REQ-FIELD-009 | Preserve exactly nine MCP tools, OMP 18.0.10 binaries, local-only transport, rollback preview, and `CLOSED != RELEASED`. | 1.6.1 |
+| REQ-FIELD-010 | Fix only defects inside the accepted v1.6.0 authority boundary and move optional expansion to a later release. | 1.6.1 |
+
 ## Non-functional requirements
 
 | ID | Requirement |
@@ -445,6 +460,22 @@
 | AC-140-012 | The EvoHarvest field pilot emits the plain brief, one safe action, correct workspace/version/coverage, and zero target mutation, approval, or execution. |
 | AC-140-013 | Full release, security, license, docs, plugin, OMO, remote, stable, and adversarial regressions pass. |
 | AC-140-014 | v1.4.0 closes with fresh evidence, zero blockers/unknowns, annotated tag at the closure commit, clean source, and verified OMP installation. |
+
+### v1.6.1
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-16101 | Field matrix and hostile consequence tests pass with no false authority. |
+| AC-16102 | Crash, replay, pause, recovery, and bounded mutation-receipt retention pass. |
+| AC-16103 | The field pilot passes clean, dirty, model, consequence, performance, and real-project read-only lanes. |
+| AC-16104 | The existing v1.6.0 Autopilot and disposable pilot remain green. |
+| AC-16105 | Policy decisions and retention stay within the accepted performance and storage bounds. |
+| AC-16106 | Exact nine-tool MCP, OMP main-harness, full regression, security, license, stable schema, and documentation gates pass. |
+| AC-16107 | Git diff check passes and no locked-contract scope drift remains. |
+| AC-16108 | Shipping verification is `SHIPPABLE` with current evidence, zero blockers, and zero unknowns. |
+| AC-16109 | The repository field report exists, records zero safety violations, and is excluded from the package. |
+| AC-16110 | Source closes with annotated `v1.6.1`, a clean worktree, and a receipt bound to the closure commit. |
+| AC-16111 | Tagged OMP deployment preserves OMP hashes, passes doctor, nine tools, field smoke, and rollback preview. |
 
 ## Definition of Done
 

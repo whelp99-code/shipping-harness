@@ -173,7 +173,7 @@ function buildReleaseTrainBrief(train) {
     steps: train.releases.slice(0, 5).map((release, index) => ({
       version: release.version,
       current: index === (train.currentIndex ?? 0),
-      value: boundedTrainText(release.valueGate?.statement, 96),
+      value: boundedTrainText(release.valueGate?.statement, 80),
     })),
   };
 }

@@ -10,13 +10,13 @@ function deepFreeze(value) {
 
 export const COMPATIBILITY = deepFreeze({
   schema: STABLE_SCHEMAS.compatibility,
-  shippingVersion: '1.6.0',
+  shippingVersion: '1.6.1',
   supportedReleases: [...SUPPORTED_RELEASES],
   platforms: ['linux', 'darwin'],
   architectures: ['x64', 'arm64'],
   node: { minimum: 22, tested: ['22.23.2'] },
   git: { minimum: '2.30' },
-  plugin: { upgradeFrom: ['0.6.0', '0.7.0', '0.8.0', '0.9.0', '1.0.0', '1.0.1', '1.0.2', '1.1.0', '1.1.1', '1.1.2', '1.2.0', '1.3.0', '1.3.1', '1.4.0', '1.5.0'], localOnly: true },
+  plugin: { upgradeFrom: ['0.6.0', '0.7.0', '0.8.0', '0.9.0', '1.0.0', '1.0.1', '1.0.2', '1.1.0', '1.1.1', '1.1.2', '1.2.0', '1.3.0', '1.3.1', '1.4.0', '1.5.0', '1.6.0'], localOnly: true },
   omoRuntime: {
     shippingBridge: '0.7.0',
     upstreamVersion: '5.0.0-beta.23',
@@ -43,6 +43,7 @@ export const COMPATIBILITY = deepFreeze({
       profiles: ['MANUAL', 'LOCAL_REVERSIBLE'],
       decisions: ['AUTO', 'NOTIFY', 'ASK', 'STOP'],
       automaticReleased: false,
+    fieldHardening: { reportSchema: 'shipping-harness/autopilot-field-pilot-v1', falseAuthorityMetrics: 0, readOnlyTargets: true },
       modelAuthority: false,
     },
     nestedWorkspace: true,

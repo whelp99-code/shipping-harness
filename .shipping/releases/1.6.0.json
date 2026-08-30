@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 6,
+    "requiredFailed": 0,
+    "total": 6
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "1e2087be748c21aa872bc44ce149061a422f3fba",
+  "closedAt": "2026-08-30T03:32:15.945Z",
+  "closedGitSha": "83b3378c39d9e55bf41907c6ff523f8a94f46747",
+  "contractHash": "2dad043bd3128470c7de5ab5f715f0c48e0cb2d6b199fac7a4f1c8859ac65f2c",
+  "evidenceRunId": "run-2026-08-30T03-31-45-493Z-e05b8b06",
+  "fixCycles": 0,
+  "goal": "Execute the approved release train under a deterministic default-deny policy that authorizes reversible local work, returns AUTO/NOTIFY/ASK/STOP, automatically closes only fully proven local releases, preserves human pause and external consequence authority, and separates CLOSED from RELEASED.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.6.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

@@ -1,20 +1,21 @@
 {
   "agentRuns": 0,
   "baselineSha": "5166722a4000fa61527217c989f01555f3789790",
-  "blockerCount": 0,
+  "blockerCount": 1,
   "contractHash": "c2187696381b3117aca6444c6ea7e78641f96087534deccd7f9f75ac086491d6",
   "createdAt": "2026-08-30T03:36:43.097Z",
-  "currentEvidenceSha": null,
+  "currentEvidenceSha": "71436071c52d94b80b53238e206eab28e30810b5",
   "fixCycles": 0,
   "humanStop": false,
   "ignoreCount": 0,
-  "lastRunId": null,
+  "lastRunId": "run-2026-08-30T11-08-16-717Z-f4536d64",
+  "lastVerifiedAt": "2026-08-30T11:08:37.591Z",
   "nextCount": 0,
   "previousRelease": "1.6.0",
   "release": "1.6.1",
   "resumeState": null,
   "schema": "shipping-harness/state-v1",
-  "state": "LOCKED",
+  "state": "TRIAGE",
   "unknownCount": 0,
-  "updatedAt": "2026-08-30T03:38:18.925Z"
+  "updatedAt": "2026-08-30T11:08:37.592Z"
 }

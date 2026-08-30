@@ -1,11 +1,27 @@
 {
   "counts": {
-    "BLOCKER": 0,
+    "BLOCKER": 1,
     "IGNORE": 0,
     "NEXT": 0,
     "UNKNOWN": 0
   },
-  "issues": [],
+  "issues": [
+    {
+      "basisId": "POLICY-SCOPE",
+      "classification": "BLOCKER",
+      "createdAt": "2026-08-30T11:08:37.589Z",
+      "description": "Changed path violates scope policy (outside-include).",
+      "diagnostics": [],
+      "evidenceRef": "git:docs/reports/v1-security-inventory.json",
+      "id": "ISSUE-SCOPE-001",
+      "path": "docs/reports/v1-security-inventory.json",
+      "requestedClassification": "BLOCKER",
+      "runId": "run-2026-08-30T11-08-16-717Z-f4536d64",
+      "source": "scope",
+      "title": "Unapproved scope drift: docs/reports/v1-security-inventory.json",
+      "updatedAt": "2026-08-30T11:08:37.589Z"
+    }
+  ],
   "schema": "shipping-harness/issues-v1",
-  "updatedAt": "2026-08-30T03:36:43.097Z"
+  "updatedAt": "2026-08-30T11:08:37.589Z"
 }

@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 6,
+    "requiredFailed": 0,
+    "total": 6
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "a749e57bb4e037086c5515aa6fe1940e97415d3c",
+  "closedAt": "2026-08-30T14:50:41.618Z",
+  "closedGitSha": "735723effcf04823e14e2a23e90de53cfa68bd40",
+  "contractHash": "08759ee681fa4d9776feb72e82c1c14def9958e83a01209b307943a9dbb614dc",
+  "evidenceRunId": "run-2026-08-30T14-50-02-144Z-7f0131a1",
+  "fixCycles": 0,
+  "goal": "Bind the accepted product direction into one immutable Goal Charter connected to proposal, Git, contract, Release Train, Decision Ledger, and replan policy without adding execution or release authority.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.8.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

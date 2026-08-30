@@ -151,8 +151,6 @@ export function proposalSummary(proposal) {
     workspaceCandidates: proposal.workspaceCandidates ?? proposal.analysis?.workspaceCandidates ?? [],
     versionEvidence: proposal.versionEvidence ?? proposal.analysis?.versionEvidence ?? null,
     intelligence: proposal.intelligence ?? proposal.analysis?.intelligence ?? null,
-    goalDiscovery: proposal.goalDiscovery ?? null,
-    goalCharter: proposal.goalCharter ?? null,
     releaseTrain: proposal.releaseTrain ?? null,
     releaseTrainSummary: proposal.releaseTrainSummary ?? null,
     oneScreenApproval: proposal.oneScreenApproval ?? null,

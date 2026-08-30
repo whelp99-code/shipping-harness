@@ -1,58 +1,58 @@
 {
   "acceptance": [
     {
-      "command": "node --test --test-reporter=spec test/mcp/goal-discovery.test.mjs test/adversarial/goal-discovery-attacks.test.mjs",
+      "id": "AC-18001",
+      "description": "Goal Charter unit and approval integration tests pass with deterministic preview and exact accepted binding.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/unit/goal-charter.test.mjs test/integration/goal-charter-approval.test.mjs",
       "cwd": ".",
-      "description": "Specific, vague, and conflicting goals, recommended defaults, deterministic candidates, critic, no technical questions, and hostile model attempts pass.",
-      "id": "AC-17001",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
-      "command": "node --test --test-reporter=spec test/integration/decision-ledger.test.mjs test/integration/goal-discovery-performance.test.mjs",
+      "id": "AC-18005",
+      "description": "Goal Charter tamper, stale binding, authority leak, replan bypass, and bounded performance tests pass.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/adversarial/goal-charter-attacks.test.mjs test/integration/goal-charter-performance.test.mjs",
       "cwd": ".",
-      "description": "Decision ledger integrity, recovery, bounded rounds, model invariance, and performance and retention limits pass.",
-      "id": "AC-17006",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
-      "command": "node scripts/goal-discovery-pilot.mjs --check",
+      "id": "AC-18010",
+      "description": "Disposable and real-project read-only Goal Charter pilot passes without target mutation.",
+      "type": "command",
+      "command": "node scripts/goal-charter-pilot.mjs --check",
       "cwd": ".",
-      "description": "Disposable and read-only real-project discovery pilot passes without target mutation.",
-      "id": "AC-17013",
       "required": true,
-      "timeoutSeconds": 600,
-      "type": "command"
+      "timeoutSeconds": 600
     },
     {
-      "command": "npm run test:mcp && npm run test:omp-main",
+      "id": "AC-18012",
+      "description": "MCP, OMP main harness, and stable schema regressions pass with exactly nine tools.",
+      "type": "command",
+      "command": "npm run test:mcp && npm run test:omp-main && npm run test:stable",
       "cwd": ".",
-      "description": "Exact nine-tool MCP and OMP 18 compatibility, presentation, install, doctor, and rollback regressions pass.",
-      "id": "AC-17012",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
+      "id": "AC-18013",
+      "description": "Full regression, security, license, docs, remote, OMO, train, autopilot, discovery, charter, and field gates pass.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full regression, security, license, docs, remote, OMO, train, autopilot, field, discovery, and ledger gates pass.",
-      "id": "AC-17014",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
+      "id": "AC-18014",
+      "description": "No whitespace or conflict-marker errors remain.",
+      "type": "command",
       "command": "git diff --check",
       "cwd": ".",
-      "description": "No whitespace or conflict-marker errors remain.",
-      "id": "AC-17015",
       "required": true,
-      "timeoutSeconds": 60,
-      "type": "command"
+      "timeoutSeconds": 60
     }
   ],
   "adapters": {
@@ -150,7 +150,19 @@
     "direction-without-resolution",
     "critic-bypass",
     "infinite-current-version-evolution",
-    "paperthin-runtime-dependency"
+    "paperthin-runtime-dependency",
+    "goal-charter-tamper",
+    "goal-charter-stale-binding",
+    "goal-charter-in-place-mutation",
+    "goal-charter-without-ready-direction",
+    "goal-charter-authority-leak",
+    "goal-charter-hash-drift",
+    "goal-charter-replan-bypass",
+    "goal-charter-contract-mismatch",
+    "goal-charter-train-mismatch",
+    "goal-charter-git-mismatch",
+    "goal-charter-without-rollback",
+    "goal-charter-success-weakening"
   ],
   "budgets": {
     "maxAgentRuns": 4,
@@ -158,7 +170,7 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Bind the accepted product direction into one immutable Goal Charter connected to proposal, Git, contract, release train, Decision Ledger, and replan policy without adding execution or release authority.",
+  "goal": "Bind the accepted product direction into one immutable Goal Charter connected to proposal, Git, contract, Release Train, Decision Ledger, and replan policy without adding execution or release authority.",
   "project": "shipping-harness",
   "release": "1.8.0",
   "releasePolicy": {
@@ -168,48 +180,39 @@
     "generateReport": true
   },
   "requirements": [
-    "REQ-DISCOVERY-001",
-    "REQ-DISCOVERY-002",
-    "REQ-DISCOVERY-003",
-    "REQ-DISCOVERY-004",
-    "REQ-DISCOVERY-005",
-    "REQ-DISCOVERY-006",
-    "REQ-DISCOVERY-007",
-    "REQ-DIRECTION-001",
-    "REQ-DIRECTION-002",
-    "REQ-DIRECTION-003",
-    "REQ-DIRECTION-004",
-    "REQ-DIRECTION-005",
-    "REQ-LEDGER-001",
-    "REQ-LEDGER-002",
-    "REQ-LEDGER-003",
-    "REQ-LEDGER-004",
-    "REQ-BOUNDARY-001",
-    "REQ-BOUNDARY-002"
+    "REQ-CHARTER-001",
+    "REQ-CHARTER-002",
+    "REQ-CHARTER-003",
+    "REQ-CHARTER-004",
+    "REQ-CHARTER-005",
+    "REQ-CHARTER-006",
+    "REQ-CHARTER-007",
+    "REQ-CHARTER-008",
+    "REQ-CHARTER-009",
+    "REQ-CHARTER-010",
+    "REQ-CHARTER-011",
+    "REQ-CHARTER-012"
   ],
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Long consultancy-style or technical implementation interviews.",
-      "Model-authored question, answer, candidate, critic, direction, approval, verification, close, or release authority.",
-      "Automatic destructive, data, authentication, security, privacy, legal, license, cost, production, public, customer, credential, or external consequences.",
-      "Changing a locked release contract from interview prose or reopening a CLOSED release.",
-      "Ouroboros-style infinite current-version evolution; improvements become a later release proposal.",
-      "Installing, vendoring, copying, invoking, or auto-updating the full Paperthin runtime or skill catalog.",
-      "Team/DAG activation, a tenth MCP tool, raw shell, arbitrary commands, Git push, merge, production deploy, purchase, customer contact, or public publish.",
-      "Mutating real pilot repositories."
+      "Any command, approval, closure, deployment, model, external-write, public, customer, cost, data, authentication, security, license, or RELEASED authority in Goal Charter.",
+      "New MCP tools, raw shell or arbitrary command fields, background workers, public listeners, or automatic deployment.",
+      "Paperthin runtime or skill-catalog dependency, OMO Team/DAG activation, or Ouroboros-style infinite mutation of the current version.",
+      "Changing an ACCEPTED Goal Charter in place or reopening a CLOSED release.",
+      "Weakening existing scope, acceptance, rollback, blocker, unknown, pause, abort, Release Train, or Autopilot gates.",
+      "Mutating real pilot repositories, Git push, merge, public publish, purchase, customer contact, credential changes, or production deployment."
     ],
     "include": [
-      "Analyze repository evidence before asking any discovery question.",
-      "Compile zero to three material product-level questions with conservative reversible recommended choices.",
-      "Allow explicit answers or delegated recommended defaults through the existing shipping_refine tool.",
-      "Generate one to three deterministic direction candidates with value, non-goals, success criteria, risks, rollback, and replan triggers.",
-      "Run one bounded deterministic direction critic and accept a direction only with zero unresolved material questions or critic blockers.",
-      "Persist discovery, answers, recommendations, critic results, direction acceptance, supersession, and replan triggers in an append-only decision ledger.",
-      "Project the accepted direction into proposal, status, plain brief, Release Train, and OMP presentation without granting execution or closure authority.",
-      "Prove model-independent hashes, bounded rounds, no technical interrogation, ledger integrity, read-only pilots, and unchanged nine-tool MCP/OMP boundaries.",
-      "Update stable schemas, security inventory, compatibility, requirements, traceability, beginner, MCP, handover, and operations documentation.",
-      "Package and deploy v1.7.0 only after full regression and Shipping closure gates pass."
+      "Compile one deterministic PROPOSED Goal Charter from a ready bounded direction and critic.",
+      "Persist one ACCEPTED Goal Charter only during successful exact scope approval.",
+      "Bind the accepted charter to proposal, revision, proposal hash, Git SHA, contract hash, baseline SHA, Release Train hash, approver, and acceptance time.",
+      "Record the accepted Goal Charter hash in the append-only Decision Ledger and approved Release Train binding.",
+      "Expose the same Goal Charter through proposal, refine, approve, status, user view, plain brief, resources, and OMP without adding a tool.",
+      "Reject stale, tampered, foreign, weakened, or silently mutated charters and require a new proposal for authority-bearing direction changes.",
+      "Add stable schemas, runtime-authentic examples, unit, integration, adversarial, performance, disposable, and real-project read-only evidence.",
+      "Update requirements, traceability, compatibility, handover, security inventory, beginner, MCP, OMP, and operations documentation.",
+      "Package and close v1.8.0 only after all current-Git Shipping gates pass."
     ],
     "paths": {
       "exclude": [
@@ -225,32 +228,33 @@
         "BACKLOG.md",
         "package.json",
         "scripts/run-tests.mjs",
-        "scripts/goal-discovery-pilot.mjs",
+        "scripts/goal-charter-pilot.mjs",
         "scripts/v1-doc-audit.mjs",
         "scripts/v1-security-inventory.mjs",
-        "docs/reports/v1.7.0-goal-discovery.json",
+        "docs/reports/v1.8.0-goal-charter.json",
         "docs/reports/v1-security-inventory.json",
+        "src/core/goal-charter.mjs",
         "src/core/goal-discovery.mjs",
         "src/core/decision-ledger.mjs",
         "src/core/paths.mjs",
         "src/core/proposals.mjs",
-        "src/core/proposal-state.mjs",
-        "src/core/decision-policy.mjs",
-        "src/core/decision-package.mjs",
         "src/core/plain-brief.mjs",
         "src/core/release-train.mjs",
+        "src/core/release-transition.mjs",
         "src/mcp/tools.mjs",
         "src/mcp/user-view.mjs",
+        "src/mcp/resources.mjs",
         "src/cli.mjs",
         "packages/shipping-plugin/skill/SKILL.md",
         "packages/shipping-plugin/manifest/plugin.json",
         "packages/omp-main-harness/**",
-        "packages/stable-control/compatibility.mjs",
         "packages/stable-control/schema-registry.mjs",
+        "packages/stable-control/compatibility.mjs",
         "schemas/v1/**",
-        "test/mcp/**",
+        "test/unit/**",
         "test/integration/**",
         "test/adversarial/**",
+        "test/mcp/**",
         "test/omp-main-harness/**",
         "test/stable/**",
         "test/helpers/**",
@@ -262,11 +266,8 @@
         "docs/SECURITY-INVENTORY.md",
         "docs/operations/OMP-MAIN-HARNESS.md",
         "docs/operations/AUTOPILOT-RUNBOOK.md",
-        "docs/planning/01-CHARTER-AND-SCOPE.md",
         "docs/planning/02-REQUIREMENTS.md",
-        "docs/planning/29-V1.7.0-BOUNDED-GOAL-DISCOVERY-AND-DIRECTION-LEDGER-DEVELOPMENT-PLAN.md",
-        "docs/research/upstream-code-audit/04-ABSORPTION-DECISION-MATRIX.md",
-        "docs/research/PAPERTHIN-APPLICATION-DECISION.md"
+        "docs/planning/30-V1.8.0-GOAL-CHARTER-AND-DIRECTION-CRITIC-DEVELOPMENT-PLAN.md"
       ]
     }
   },

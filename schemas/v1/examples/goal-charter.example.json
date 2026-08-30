@@ -1,0 +1,73 @@
+{
+  "approvalAuthority": false,
+  "assumptions": [],
+  "binding": {
+    "acceptedAt": "2026-08-30T13:15:17.976Z",
+    "approverId": "schema-example-user",
+    "approverType": "human",
+    "baselineSha": "ab664c95d9a9192944ce47c0c35c9e0f8b79a4bf",
+    "contractHash": "6fdc5d457125904e814781b866a0a63cd995d2bf35d5b3fa9702bb218c7cd9ca",
+    "previewHash": "588da1411175afbc993e234e619d79102dec8b86659fbe75b0c3f956a07c17f3",
+    "releaseTrainHash": "cfa093d9df3b6ede7b468f9d5435950a027acb3bda7230ee3bf2c7f48445ec67"
+  },
+  "candidateHash": "722568688c78ef1a456ec1f3e7351122a00e42b8914b9d2fe28e486ebacae3f7",
+  "closureAuthority": false,
+  "commandAuthority": false,
+  "criticHash": "f7462e44e2c945494ade49f00d0106582076b5c14da8a38f9cd41cc632244828",
+  "deploymentAuthority": false,
+  "directionHash": "1445ab546d45053b07bebbac7a8d933ecfe7154fde24034f6dc502c4835fbe1e",
+  "discoveryHash": "b0f04b398e4b31066423984a388a5330d4741cf8d376275ee45b3f1f8a392835",
+  "evidenceRefs": [
+    "EVID-001",
+    "EVID-002",
+    "EVID-004",
+    "EVID-006",
+    "EVID-010",
+    "proposal.goalDiscovery.direction",
+    "proposal.goalDiscovery.critic",
+    "proposal.decision.resolutions",
+    "proposal.contract.scope",
+    "proposal.contract.acceptance"
+  ],
+  "gitSha": "ab664c95d9a9192944ce47c0c35c9e0f8b79a4bf",
+  "hash": "c684680a31089cca46df980a9f69b9eef32776c46462b6469e38234c0bba9859",
+  "id": "CHARTER-1445ab546d45",
+  "include": [
+    "핵심 사용자 흐름",
+    "오류 처리",
+    "현재 저장소 검증",
+    "관련 운영 설명"
+  ],
+  "modelAuthority": false,
+  "nonGoals": [
+    "핵심 가치와 무관한 기능 확장",
+    "자동 외부 배포",
+    "데이터·인증·보안·비용 영향의 무승인 실행",
+    "현재 버전을 끝없이 진화시키는 반복",
+    "Paperthin 전체 런타임 또는 스킬 카탈로그 의존"
+  ],
+  "operatingBoundary": "COMPANY_INTERNAL",
+  "outcome": "Complete the existing internal validation workflow and prove it with npm test.",
+  "primaryUser": "현재 저장소의 기존 사용자와 내부 운영자",
+  "project": "shipping-harness-fixture",
+  "proposalHash": "ccee933e5c21b4b64883f9d204aa6238f857c9c616ccf73e910828d2a14940b8",
+  "proposalId": "proposal-2026-08-30T13-15-17-931Z-44b5ffa7",
+  "proposalRevision": 1,
+  "release": "0.1.0",
+  "released": false,
+  "replanTriggers": [
+    "핵심 사용자 가치 변경",
+    "완료조건 약화 필요",
+    "외부·데이터·인증·보안·비용 영향 발견",
+    "저장소 구조와 계획의 중대한 불일치"
+  ],
+  "rollback": "현재 Git 기준선과 Shipping 영수증으로 되돌릴 수 있어야 한다.",
+  "schema": "shipping-harness/goal-charter-v1",
+  "status": "ACCEPTED",
+  "successCriteria": [
+    "저장소가 소유한 필수 검증 명령이 통과한다.",
+    "BLOCKER와 UNKNOWN이 0이다.",
+    "현재 Git SHA와 완료 증거가 일치한다."
+  ],
+  "value": "가장 중요한 사용자 흐름 하나를 현재 스택과 실제 완료조건으로 끝까지 제공한다."
+}

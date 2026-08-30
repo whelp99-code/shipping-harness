@@ -277,7 +277,7 @@ function versionsFor(currentRelease, stages) {
 /**
  * Compile a deterministic rolling release train from existing Shipping authority data.
  * No repository prose or host-model output grants authority.
- * @param {{finalGoal:string,proposalRelease:string,gitSha:string,proposalId?:string|null,projectName?:string|null,analysis?:Record<string,any>,baseline?:Record<string,any>|null,acceptanceStrength?:Record<string,any>|null,contract?:Record<string,any>|null}} input
+ * @param {{finalGoal:string,proposalRelease:string,gitSha:string,proposalId?:string|null,projectName?:string|null,goalCharterHash?:string|null,analysis?:Record<string,any>,baseline?:Record<string,any>|null,acceptanceStrength?:Record<string,any>|null,contract?:Record<string,any>|null}} input
  */
 export function buildReleaseTrain(input) {
   const finalGoal = boundedText(input.finalGoal, 'final outcome', 4000);
@@ -285,6 +285,8 @@ export function buildReleaseTrain(input) {
   parseSemver(proposalRelease);
   const gitSha = boundedText(input.gitSha, 'Git SHA', 80);
   invariant(/^[a-f0-9]{40}$/u.test(gitSha), 'ERR_RELEASE_TRAIN_GIT', 'Release train requires a full lowercase Git SHA');
+  const goalCharterHash = input.goalCharterHash ?? null;
+  if (goalCharterHash !== null) invariant(/^[a-f0-9]{64}$/u.test(goalCharterHash), 'ERR_RELEASE_TRAIN_CHARTER', 'Goal Charter hash must be SHA-256');
   const analysis = input.analysis ?? {};
   const profiles = projectProfiles(analysis);
   const documentationOnly = profiles.length === 1 && profiles[0] === 'documentation';
@@ -309,6 +311,7 @@ export function buildReleaseTrain(input) {
     currentRelease: proposalRelease,
     gitSha,
     proposalId: input.proposalId ?? null,
+    goalCharterHash,
     workspace: analysis.workspace?.root ?? '.',
     profiles,
     releases: releases.map((entry) => ({ version: entry.version, stage: entry.stage, detailLevel: entry.detailLevel })),
@@ -327,6 +330,7 @@ export function buildReleaseTrain(input) {
     source: {
       gitSha,
       proposalId: input.proposalId ?? null,
+      goalCharterHash,
       workspace: seed.workspace,
       baselinePlanHash: baseline?.plan?.hash ?? null,
       projectProfiles: profiles,
@@ -425,12 +429,14 @@ export function bindApprovedReleaseTrain(train, binding) {
       proposalHash: boundedText(binding.proposalHash, 'proposal hash', 64),
       contractHash: boundedText(binding.contractHash, 'contract hash', 64),
       baselineSha: boundedText(binding.baselineSha, 'baseline SHA', 40),
+      goalCharterHash: binding.goalCharterHash ?? null,
       approvedAt: boundedText(binding.approvedAt, 'approval time', 80),
     },
   };
   invariant(/^[a-f0-9]{64}$/u.test(body.binding.proposalHash), 'ERR_RELEASE_TRAIN_BINDING', 'Proposal hash must be SHA-256');
   invariant(/^[a-f0-9]{64}$/u.test(body.binding.contractHash), 'ERR_RELEASE_TRAIN_BINDING', 'Contract hash must be SHA-256');
   invariant(/^[a-f0-9]{40}$/u.test(body.binding.baselineSha), 'ERR_RELEASE_TRAIN_BINDING', 'Baseline SHA must be a full Git SHA');
+  if (body.binding.goalCharterHash !== null) invariant(/^[a-f0-9]{64}$/u.test(body.binding.goalCharterHash), 'ERR_RELEASE_TRAIN_BINDING', 'Goal Charter hash must be SHA-256');
   invariant(Number.isFinite(Date.parse(body.binding.approvedAt)), 'ERR_RELEASE_TRAIN_BINDING', 'Approval time must be ISO date-time');
   return { ...body, hash: hashObject(body) };
 }

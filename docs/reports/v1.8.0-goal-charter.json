@@ -1,0 +1,76 @@
+{
+  "schema": "shipping-harness/goal-charter-pilot-v1",
+  "release": "1.8.0",
+  "status": "PASS",
+  "toolCount": 9,
+  "modelCalls": 0,
+  "networkCalls": 0,
+  "disposable": {
+    "status": "PASS",
+    "proposalState": "READY_FOR_APPROVAL",
+    "previewHash": "558920fcbbd109a132172767f1b2d46b3cd0a5813fe5510ec01c2c92245fdf46",
+    "acceptedHash": "8a6a1b8de4f7e31504d7b43c99bab8595d0876359ce754e6333d2dd320f00f92",
+    "trainHash": "c1f72e169e249e2f7829767c36e616b60954fb22e822af0640fca6c16f3e3bd5",
+    "ledgerEvents": 3,
+    "locked": true,
+    "unchanged": true,
+    "toolCount": 9,
+    "released": false
+  },
+  "realProjects": [
+    {
+      "path": "/home/jm/orca/projects/EvoHarvest",
+      "available": true,
+      "unchanged": true,
+      "head": "fcc16972f7a5e68d550ecca5e7c3ab16b0976ab9",
+      "statusEntries": 6,
+      "workspace": "evoharvest-runtime-v1.1.0",
+      "directionHash": "b101119fee2131e7322dab146e67ac9dd3635f241f136afe7c526d23c77aebc8",
+      "charterHash": "cb55bcee44b97a233017617817ed4d8dee7d4776a328b5d5c47088be82539bef",
+      "outcome": "현재 프로젝트를 분석하고 실제 내부에서 쓸 수 있는 가장 작은 다음 버전을 제안해.",
+      "modelAuthority": false,
+      "commandAuthority": false,
+      "released": false
+    },
+    {
+      "path": "/home/jm/orca/projects/second-brain-app",
+      "available": true,
+      "unchanged": true,
+      "head": "0ef3866d29179fd2da4d235737c99a1e311ddb3c",
+      "statusEntries": 0,
+      "workspace": ".",
+      "directionHash": "09d12afe615270bc275e18f54d6fae477f5ee2ac174a37cf5ab7a9c4ccd061e8",
+      "charterHash": "bf01c284ef084690f9e04da46ec8bc69b7de6c38ed59e68888a31004933b79b0",
+      "outcome": "현재 프로젝트를 분석하고 실제 내부에서 쓸 수 있는 가장 작은 다음 버전을 제안해.",
+      "modelAuthority": false,
+      "commandAuthority": false,
+      "released": false
+    },
+    {
+      "path": "/home/jm/orca/projects/AI-CRM+PM",
+      "available": true,
+      "unchanged": true,
+      "head": "e235c483a0e50b743a6b2ef0f188a61c735028ff",
+      "statusEntries": 27,
+      "workspace": "apps/api",
+      "directionHash": "b101119fee2131e7322dab146e67ac9dd3635f241f136afe7c526d23c77aebc8",
+      "charterHash": "df039fe7f315098d3364192779e1477d200d0907bde8ced7bcb1f3d67fbcfb6c",
+      "outcome": "현재 프로젝트를 분석하고 실제 내부에서 쓸 수 있는 가장 작은 다음 버전을 제안해.",
+      "modelAuthority": false,
+      "commandAuthority": false,
+      "released": false
+    }
+  ],
+  "safety": {
+    "falseCharterReady": 0,
+    "charterAuthorityLeaks": 0,
+    "charterHashDrift": 0,
+    "trainBindingDrift": 0,
+    "ledgerAcceptanceMissing": 0,
+    "falseReady": 0,
+    "falseClosed": 0,
+    "automaticReleased": 0,
+    "targetMutation": 0,
+    "newMcpTools": 0
+  }
+}

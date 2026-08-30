@@ -1,105 +1,51 @@
 {
-  "schema": "shipping-harness/release-train-v1",
-  "id": "TRAIN-000000000001",
-  "project": "example-project",
-  "finalGoal": "Provide one useful internal workflow and make it operable with verified rollback.",
-  "status": "PLANNED",
   "currentIndex": 0,
-  "currentRelease": "1.5.0",
-  "modelAuthority": false,
+  "currentRelease": "0.1.0",
   "deterministic": true,
-  "rollingPlan": true,
-  "source": {
-    "gitSha": "0000000000000000000000000000000000000000",
-    "proposalId": "proposal-example",
-    "workspace": ".",
-    "baselinePlanHash": null,
-    "projectProfiles": [
-      "software",
-      "operations"
-    ],
-    "acceptanceStrength": "STRONG"
-  },
+  "finalGoal": "Complete the existing internal validation workflow and prove it with npm test.",
+  "hash": "cfa093d9df3b6ede7b468f9d5435950a027acb3bda7230ee3bf2c7f48445ec67",
+  "id": "TRAIN-99a940babc78",
   "limits": {
-    "minReleases": 1,
+    "actualReleases": 3,
     "maxReleases": 5,
-    "actualReleases": 3
+    "minReleases": 1
   },
+  "modelAuthority": false,
+  "project": "shipping-harness-fixture",
   "releases": [
     {
-      "id": "REL-001",
-      "order": 1,
-      "version": "1.5.0",
-      "predecessor": null,
-      "stage": "DELIVER_CORE_VALUE",
-      "detailLevel": "CURRENT_FULL",
-      "authority": "CURRENT_CONTRACT_CANDIDATE",
-      "canGrantCurrentAuthority": true,
-      "goal": "Provide one useful internal workflow and make it operable with verified rollback.",
-      "valueGate": {
-        "measurable": true,
-        "statement": "The user can complete the core workflow from start to result.",
-        "criteria": [
-          {
-            "code": "CORE_FLOW_USABLE",
-            "text": "The core workflow is usable from start to result.",
-            "proofClass": "USER_FLOW",
-            "required": true
-          }
-        ],
-        "testsAloneSufficient": false
-      },
-      "prerequisites": [
-        "AUTHORITY_EVIDENCE_CURRENT",
-        "NO_ACTIVE_CONFLICTING_RELEASE"
-      ],
-      "scope": {
-        "include": [
-          "Core workflow"
-        ],
-        "exclude": [
-          "Production deployment"
-        ]
-      },
       "acceptance": {
         "exactCommands": [
           {
-            "id": "AC-001",
-            "description": "Tests pass.",
-            "type": "command",
+            "automaticallyRunnable": true,
             "command": "npm test",
             "cwd": ".",
-            "required": true,
-            "timeoutSeconds": 300,
-            "sideEffect": "none-or-test-output",
-            "isolationRequired": false,
+            "description": "Existing package script 'test' passes.",
             "deterministicOutputRequired": false,
-            "automaticallyRunnable": true
+            "id": "AC-001",
+            "isolationRequired": false,
+            "required": true,
+            "sideEffect": "none-or-test-output",
+            "timeoutSeconds": 600,
+            "type": "command"
           }
         ],
+        "futureCommandsAreAuthority": true,
         "requiredClasses": [
           "BUILD_AND_REQUIRED_TESTS",
           "SCOPE_AND_CURRENT_GIT_EVIDENCE",
-          "HEALTH_MONITORING_AND_RECOVERY",
-          "OPERATOR_RUNBOOK_AND_ROLLBACK"
-        ],
-        "futureCommandsAreAuthority": true
+          "REPRODUCIBLE_PACKAGE_DIGEST",
+          "INSTALL_AND_ROLLBACK_SMOKE"
+        ]
       },
-      "riskProfile": "LOCAL_REVERSIBLE",
+      "authority": "CURRENT_CONTRACT_CANDIDATE",
       "autonomyRecommendation": "PLAN_ONLY",
-      "rollback": {
-        "required": true,
-        "class": "PREVIOUS_CLOSED_RELEASE",
-        "evidenceRequired": true,
-        "releaseHistoryImmutable": true
-      },
-      "replanTriggers": [
-        "GIT_OR_MANIFEST_AUTHORITY_CHANGED",
-        "CURRENT_ACCEPTANCE_BECAME_INVALID"
-      ],
+      "canGrantCurrentAuthority": true,
+      "detailLevel": "CURRENT_FULL",
       "entryGate": [
         "AUTHORITY_EVIDENCE_CURRENT",
-        "NO_ACTIVE_CONFLICTING_RELEASE"
+        "NO_ACTIVE_CONFLICTING_RELEASE",
+        "BASELINE_REVIEWED_OR_CLEAN"
       ],
       "exitGate": [
         "VALUE_GATE_PASS",
@@ -110,155 +56,182 @@
         "CURRENT_GIT_EVIDENCE_FRESH",
         "ROLLBACK_PROVEN"
       ],
+      "goal": "Complete the existing internal validation workflow and prove it with npm test.",
+      "id": "REL-001",
+      "order": 1,
+      "predecessor": null,
+      "prerequisites": [
+        "AUTHORITY_EVIDENCE_CURRENT",
+        "NO_ACTIVE_CONFLICTING_RELEASE",
+        "BASELINE_REVIEWED_OR_CLEAN"
+      ],
+      "replanTriggers": [
+        "GIT_OR_MANIFEST_AUTHORITY_CHANGED",
+        "CURRENT_ACCEPTANCE_BECAME_INVALID",
+        "CORE_VALUE_WOULD_BE_REMOVED_OR_DEFERRED",
+        "NEW_EXTERNAL_DATA_SECURITY_LICENSE_OR_COST_EFFECT",
+        "ROLLBACK_EVIDENCE_MISSING",
+        "PROJECT_PROFILE_CHANGED"
+      ],
+      "riskProfile": "LOCAL_REVERSIBLE",
+      "rollback": {
+        "class": "PREVIOUS_CLOSED_RELEASE",
+        "evidenceRequired": true,
+        "releaseHistoryImmutable": true,
+        "required": true
+      },
+      "scope": {
+        "exclude": [
+          "Unrequested web, mobile, cloud, multi-user, and deployment features.",
+          "Speculative architecture rewrites and refactors not required by a failing acceptance criterion.",
+          "Optional polish, additional integrations, and future extensibility work."
+        ],
+        "include": [
+          "Deliver the stated release goal: Complete the existing internal validation workflow and prove it with npm test.",
+          "Preserve existing behavior outside the stated goal.",
+          "Make every required acceptance check pass and document how to run the shipped result."
+        ]
+      },
+      "stage": "DELIVER_CORE_VALUE",
       "transition": {
-        "nextReleaseRequiresClosedReceipt": true,
         "cleanCommittedClosureRequired": true,
+        "nextReleaseRequiresClosedReceipt": true,
         "releaseDoesNotImplyReleased": true
-      }
+      },
+      "valueGate": {
+        "criteria": [
+          {
+            "code": "CORE_FLOW_USABLE",
+            "proofClass": "USER_FLOW",
+            "required": true,
+            "text": "사용자가 이번 버전의 핵심 흐름을 시작부터 결과까지 실제로 수행할 수 있다."
+          },
+          {
+            "code": "CURRENT_SCOPE_PROVEN",
+            "proofClass": "CURRENT_ACCEPTANCE",
+            "required": true,
+            "text": "잠긴 범위와 현재 Git 증거에서 모든 필수 완료조건이 통과한다."
+          }
+        ],
+        "measurable": true,
+        "statement": "최종 목표의 핵심 사용 흐름을 가장 작은 운영 가능한 범위로 제공한다: Complete the existing internal validation workflow and prove it with npm test.",
+        "testsAloneSufficient": false
+      },
+      "version": "0.1.0"
     },
     {
+      "acceptance": {
+        "exactCommands": [],
+        "futureCommandsAreAuthority": false,
+        "requiredClasses": [
+          "BUILD_AND_REQUIRED_TESTS",
+          "SCOPE_AND_CURRENT_GIT_EVIDENCE",
+          "REPRODUCIBLE_PACKAGE_DIGEST",
+          "INSTALL_AND_ROLLBACK_SMOKE"
+        ]
+      },
+      "authority": "ADVISORY_REPLAN_REQUIRED",
+      "autonomyRecommendation": "REPLAN_BEFORE_ACTIVATION",
+      "canGrantCurrentAuthority": false,
+      "detailLevel": "NEXT_BOUNDED",
+      "entryGate": [
+        "AUTHORITY_EVIDENCE_CURRENT",
+        "NO_ACTIVE_CONFLICTING_RELEASE",
+        "PREDECESSOR_0.1.0_CLOSED",
+        "BASELINE_REVIEWED_OR_CLEAN"
+      ],
+      "exitGate": [
+        "VALUE_GATE_PASS",
+        "REQUIRED_ACCEPTANCE_PASS",
+        "BLOCKER_ZERO",
+        "UNKNOWN_ZERO",
+        "SCOPE_DRIFT_ZERO",
+        "CURRENT_GIT_EVIDENCE_FRESH",
+        "ROLLBACK_PROVEN"
+      ],
+      "goal": "package 결과를 내부에서 설치·운영하고 실패 시 복구할 수 있게 한다.",
       "id": "REL-002",
       "order": 2,
-      "version": "1.6.0",
-      "predecessor": "1.5.0",
+      "predecessor": "0.1.0",
+      "prerequisites": [
+        "AUTHORITY_EVIDENCE_CURRENT",
+        "NO_ACTIVE_CONFLICTING_RELEASE",
+        "PREDECESSOR_0.1.0_CLOSED",
+        "BASELINE_REVIEWED_OR_CLEAN"
+      ],
+      "replanTriggers": [
+        "GIT_OR_MANIFEST_AUTHORITY_CHANGED",
+        "CURRENT_ACCEPTANCE_BECAME_INVALID",
+        "CORE_VALUE_WOULD_BE_REMOVED_OR_DEFERRED",
+        "NEW_EXTERNAL_DATA_SECURITY_LICENSE_OR_COST_EFFECT",
+        "ROLLBACK_EVIDENCE_MISSING",
+        "PROJECT_PROFILE_CHANGED"
+      ],
+      "riskProfile": "LOCAL_OPERATIONAL",
+      "rollback": {
+        "class": "BACKUP_RESTORE_OR_PREVIOUS_RELEASE",
+        "evidenceRequired": true,
+        "releaseHistoryImmutable": true,
+        "required": true
+      },
+      "scope": {
+        "exclude": [
+          "새로운 핵심 제품 기능",
+          "고객 또는 공개 배포",
+          "무관한 UI polish"
+        ],
+        "include": [
+          "설치·실행·상태 확인",
+          "운영 오류 대응",
+          "백업·복구·Rollback"
+        ]
+      },
       "stage": "OPERATE_AND_RECOVER",
-      "detailLevel": "NEXT_BOUNDED",
-      "authority": "ADVISORY_REPLAN_REQUIRED",
-      "canGrantCurrentAuthority": false,
-      "goal": "Make the internal result installable, observable, and recoverable.",
+      "transition": {
+        "cleanCommittedClosureRequired": true,
+        "nextReleaseRequiresClosedReceipt": true,
+        "releaseDoesNotImplyReleased": true
+      },
       "valueGate": {
-        "measurable": true,
-        "statement": "Operators can install, observe, and recover the internal result.",
         "criteria": [
           {
             "code": "OPERABLE_INTERNAL_RESULT",
-            "text": "Install, status, and recovery are reproducible.",
             "proofClass": "OPERATIONS_SMOKE",
-            "required": true
+            "required": true,
+            "text": "설치 또는 실행, 상태 확인, 오류 대응이 재현 가능하다."
+          },
+          {
+            "code": "ROLLBACK_PROVEN",
+            "proofClass": "ROLLBACK",
+            "required": true,
+            "text": "실패 시 되돌리거나 복구하는 경로와 증거가 있다."
           }
         ],
+        "measurable": true,
+        "statement": "package 결과를 내부에서 설치·운영하고 실패 시 복구할 수 있게 한다.",
         "testsAloneSufficient": false
       },
-      "prerequisites": [
-        "AUTHORITY_EVIDENCE_CURRENT",
-        "NO_ACTIVE_CONFLICTING_RELEASE",
-        "PREDECESSOR_1.5.0_CLOSED",
-        "BASELINE_REVIEWED_OR_CLEAN"
-      ],
-      "scope": {
-        "include": [
-          "Install and recovery"
-        ],
-        "exclude": [
-          "Production deployment"
-        ]
-      },
-      "acceptance": {
-        "exactCommands": [],
-        "requiredClasses": [
-          "BUILD_AND_REQUIRED_TESTS",
-          "SCOPE_AND_CURRENT_GIT_EVIDENCE",
-          "HEALTH_MONITORING_AND_RECOVERY",
-          "OPERATOR_RUNBOOK_AND_ROLLBACK"
-        ],
-        "futureCommandsAreAuthority": false
-      },
-      "riskProfile": "LOCAL_OPERATIONAL",
-      "autonomyRecommendation": "REPLAN_BEFORE_ACTIVATION",
-      "rollback": {
-        "required": true,
-        "class": "BACKUP_RESTORE_OR_PREVIOUS_RELEASE",
-        "evidenceRequired": true,
-        "releaseHistoryImmutable": true
-      },
-      "replanTriggers": [
-        "GIT_OR_MANIFEST_AUTHORITY_CHANGED",
-        "PROJECT_PROFILE_CHANGED"
-      ],
-      "entryGate": [
-        "AUTHORITY_EVIDENCE_CURRENT",
-        "NO_ACTIVE_CONFLICTING_RELEASE",
-        "PREDECESSOR_1.5.0_CLOSED",
-        "BASELINE_REVIEWED_OR_CLEAN"
-      ],
-      "exitGate": [
-        "VALUE_GATE_PASS",
-        "REQUIRED_ACCEPTANCE_PASS",
-        "BLOCKER_ZERO",
-        "UNKNOWN_ZERO",
-        "SCOPE_DRIFT_ZERO",
-        "CURRENT_GIT_EVIDENCE_FRESH",
-        "ROLLBACK_PROVEN"
-      ],
-      "transition": {
-        "nextReleaseRequiresClosedReceipt": true,
-        "cleanCommittedClosureRequired": true,
-        "releaseDoesNotImplyReleased": true
-      }
+      "version": "0.2.0"
     },
     {
-      "id": "REL-003",
-      "order": 3,
-      "version": "1.6.1",
-      "predecessor": "1.6.0",
-      "stage": "FIELD_HARDEN",
-      "detailLevel": "FUTURE_GATES",
-      "authority": "ADVISORY_REPLAN_REQUIRED",
-      "canGrantCurrentAuthority": false,
-      "goal": "Prove the internal result in a bounded field pilot.",
-      "valueGate": {
-        "measurable": true,
-        "statement": "A bounded internal field pilot passes with zero false completion.",
-        "criteria": [
-          {
-            "code": "FIELD_PILOT_PASS",
-            "text": "The internal field pilot passes.",
-            "proofClass": "FIELD_PILOT",
-            "required": true
-          }
-        ],
-        "testsAloneSufficient": false
-      },
-      "prerequisites": [
-        "AUTHORITY_EVIDENCE_CURRENT",
-        "NO_ACTIVE_CONFLICTING_RELEASE",
-        "PREDECESSOR_1.6.0_CLOSED",
-        "BASELINE_REVIEWED_OR_CLEAN"
-      ],
-      "scope": {
-        "include": [
-          "Internal field pilot"
-        ],
-        "exclude": [
-          "New product features"
-        ]
-      },
       "acceptance": {
         "exactCommands": [],
+        "futureCommandsAreAuthority": false,
         "requiredClasses": [
           "BUILD_AND_REQUIRED_TESTS",
           "SCOPE_AND_CURRENT_GIT_EVIDENCE",
-          "HEALTH_MONITORING_AND_RECOVERY",
-          "OPERATOR_RUNBOOK_AND_ROLLBACK"
-        ],
-        "futureCommandsAreAuthority": false
+          "REPRODUCIBLE_PACKAGE_DIGEST",
+          "INSTALL_AND_ROLLBACK_SMOKE"
+        ]
       },
-      "riskProfile": "LOCAL_FIELD_VALIDATION",
+      "authority": "ADVISORY_REPLAN_REQUIRED",
       "autonomyRecommendation": "REPLAN_BEFORE_ACTIVATION",
-      "rollback": {
-        "required": true,
-        "class": "PREVIOUS_CLOSED_RELEASE",
-        "evidenceRequired": true,
-        "releaseHistoryImmutable": true
-      },
-      "replanTriggers": [
-        "GIT_OR_MANIFEST_AUTHORITY_CHANGED",
-        "PROJECT_PROFILE_CHANGED"
-      ],
+      "canGrantCurrentAuthority": false,
+      "detailLevel": "FUTURE_GATES",
       "entryGate": [
         "AUTHORITY_EVIDENCE_CURRENT",
         "NO_ACTIVE_CONFLICTING_RELEASE",
-        "PREDECESSOR_1.6.0_CLOSED",
+        "PREDECESSOR_0.2.0_CLOSED",
         "BASELINE_REVIEWED_OR_CLEAN"
       ],
       "exitGate": [
@@ -271,17 +244,89 @@
         "ROLLBACK_PROVEN",
         "FIELD_ADVERSARIAL_METRICS_PASS"
       ],
+      "goal": "실제 내부 파일럿에서 발견된 릴리스 차단 문제를 제거하고 반복 사용 가능한 상태로 안정화한다.",
+      "id": "REL-003",
+      "order": 3,
+      "predecessor": "0.2.0",
+      "prerequisites": [
+        "AUTHORITY_EVIDENCE_CURRENT",
+        "NO_ACTIVE_CONFLICTING_RELEASE",
+        "PREDECESSOR_0.2.0_CLOSED",
+        "BASELINE_REVIEWED_OR_CLEAN"
+      ],
+      "replanTriggers": [
+        "GIT_OR_MANIFEST_AUTHORITY_CHANGED",
+        "CURRENT_ACCEPTANCE_BECAME_INVALID",
+        "CORE_VALUE_WOULD_BE_REMOVED_OR_DEFERRED",
+        "NEW_EXTERNAL_DATA_SECURITY_LICENSE_OR_COST_EFFECT",
+        "ROLLBACK_EVIDENCE_MISSING",
+        "PROJECT_PROFILE_CHANGED"
+      ],
+      "riskProfile": "LOCAL_FIELD_VALIDATION",
+      "rollback": {
+        "class": "PREVIOUS_CLOSED_RELEASE",
+        "evidenceRequired": true,
+        "releaseHistoryImmutable": true,
+        "required": true
+      },
+      "scope": {
+        "exclude": [
+          "새 기능 확장",
+          "현재 안정성과 무관한 개선",
+          "공개 또는 production 배포"
+        ],
+        "include": [
+          "내부 파일럿",
+          "회귀·적대적 검증",
+          "발견된 릴리스 차단 문제 수정"
+        ]
+      },
+      "stage": "FIELD_HARDEN",
       "transition": {
-        "nextReleaseRequiresClosedReceipt": true,
         "cleanCommittedClosureRequired": true,
+        "nextReleaseRequiresClosedReceipt": true,
         "releaseDoesNotImplyReleased": true
-      }
+      },
+      "valueGate": {
+        "criteria": [
+          {
+            "code": "FIELD_PILOT_PASS",
+            "proofClass": "FIELD_PILOT",
+            "required": true,
+            "text": "실제 또는 비파괴 내부 파일럿이 명시된 핵심 흐름을 통과한다."
+          },
+          {
+            "code": "FALSE_COMPLETION_ZERO",
+            "proofClass": "ADVERSARIAL_METRIC",
+            "required": true,
+            "text": "거짓 승인·거짓 완료·무단 외부 영향이 0건이다."
+          }
+        ],
+        "measurable": true,
+        "statement": "실제 내부 파일럿에서 발견된 릴리스 차단 문제를 제거하고 반복 사용 가능한 상태로 안정화한다.",
+        "testsAloneSufficient": false
+      },
+      "version": "0.2.1"
     }
   ],
+  "rollingPlan": true,
+  "schema": "shipping-harness/release-train-v1",
+  "source": {
+    "acceptanceStrength": "STRONG",
+    "baselinePlanHash": "9c87cd6fcb302a9733c2a78983f2bb1434f8c6f2835af614022987435ddf1f7a",
+    "gitSha": "ab664c95d9a9192944ce47c0c35c9e0f8b79a4bf",
+    "goalCharterHash": "588da1411175afbc993e234e619d79102dec8b86659fbe75b0c3f956a07c17f3",
+    "projectProfiles": [
+      "software",
+      "package"
+    ],
+    "proposalId": "proposal-2026-08-30T13-15-17-931Z-44b5ffa7",
+    "workspace": "."
+  },
+  "status": "PLANNED",
   "trainCompleteWhen": [
     "ALL_RELEASES_CLOSED",
     "FINAL_VALUE_GATE_PASS",
     "AUTOMATIC_RELEASED_FALSE"
-  ],
-  "hash": "0000000000000000000000000000000000000000000000000000000000000000"
+  ]
 }

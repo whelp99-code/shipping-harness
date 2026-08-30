@@ -10,6 +10,7 @@ import { runtimePaths } from '../core/paths.mjs';
 import { proposalNextAction } from '../core/proposal-state.mjs';
 import { loadApprovedReleaseTrain, releaseTrainSummary } from '../core/release-train.mjs';
 import { decisionLedgerSummary } from '../core/decision-ledger.mjs';
+import { goalCharterSummary, loadGoalCharter } from '../core/goal-charter.mjs';
 import { AUTOPILOT_PROFILES, autopilotPolicySummary } from '../core/autopilot-policy.mjs';
 import {
   activateAutopilot,
@@ -292,11 +293,14 @@ async function statusOrUninitialized(root) {
     ? active.summary
     : null;
   const autopilotProjection = await safeAutopilotStatus(root);
+  const acceptedGoalCharter = await loadGoalCharter(root);
   if (!(await exists(runtimePaths(root).state))) {
     return {
       initialized: false,
       state: pendingProposal ? 'PROPOSAL' : 'UNINITIALIZED',
       pendingProposal,
+      goalCharter: acceptedGoalCharter,
+      goalCharterSummary: goalCharterSummary(acceptedGoalCharter),
       nextAction: pendingProposal
         ? 'Resolve the active proposal state before approval.'
         : 'Call shipping_start with the desired release outcome.',
@@ -309,6 +313,8 @@ async function statusOrUninitialized(root) {
     initialized: true,
     ...status,
     pendingProposal,
+    goalCharter: acceptedGoalCharter,
+    goalCharterSummary: goalCharterSummary(acceptedGoalCharter),
     releaseTrain: releaseTrainBinding?.train ?? null,
     releaseTrainSummary: releaseTrainBinding?.train ? releaseTrainSummary(releaseTrainBinding.train) : null,
     releaseTrainBinding: releaseTrainBinding?.binding ?? null,
@@ -367,6 +373,7 @@ export async function callShippingTool(root, name, rawArguments) {
       releaseTrain: proposal.releaseTrain,
       releaseTrainSummary: proposal.releaseTrainSummary,
       goalDiscovery: proposal.goalDiscovery ?? null,
+      goalCharter: proposal.goalCharter ?? null,
       decisionLedger: await decisionLedgerSummary(root, proposal.id),
       nextAction: proposalNextAction(proposal.canonicalState),
       acceptanceStrength: proposal.acceptanceStrength,
@@ -472,6 +479,7 @@ export async function callShippingTool(root, name, rawArguments) {
       releaseTrain: proposal.releaseTrain,
       releaseTrainSummary: proposal.releaseTrainSummary,
       goalDiscovery: proposal.goalDiscovery ?? null,
+      goalCharter: proposal.goalCharter ?? null,
       decisionLedger: await decisionLedgerSummary(root, proposal.id),
       baselinePreservation: proposal.baselinePreservation ?? null,
       nextAction: proposalNextAction(proposal.canonicalState),
@@ -614,6 +622,8 @@ export async function callShippingTool(root, name, rawArguments) {
       baselineSha: result.lock.baselineSha,
       proposalId: result.proposal.id,
       releaseTrainHash: result.releaseTrain?.train?.hash ?? result.proposal.releaseTrain?.hash ?? null,
+      goalCharter: result.goalCharter ?? result.proposal.goalCharter ?? null,
+      goalCharterHash: result.goalCharter?.hash ?? result.proposal.goalCharter?.hash ?? null,
       releaseTrainCount: result.proposal.releaseTrain?.releases?.length ?? 0,
       autopilot: activation ? autopilotPolicySummary(activation.policy) : null,
       autopilotState: activation?.state ?? null,

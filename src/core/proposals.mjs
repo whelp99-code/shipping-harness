@@ -26,6 +26,7 @@ import {
 } from './proposal-state.mjs';
 import { prepareNextRelease } from './release-transition.mjs';
 import { buildReleaseTrain, persistApprovedReleaseTrain, releaseTrainSummary } from './release-train.mjs';
+import { acceptGoalCharter, compileGoalCharterPreview, persistAcceptedGoalCharter, validateGoalCharter } from './goal-charter.mjs';
 import { validateAutopilotDecision } from './autopilot-policy.mjs';
 import { loadAutopilotPolicy } from './autopilot.mjs';
 import { compileGoalDiscovery, goalDiscoverySummary, mergeGoalDiscoveryQuestions } from './goal-discovery.mjs';
@@ -96,6 +97,7 @@ function proposalHash(proposal) {
     plainBrief: _plainBrief,
     plainBriefText: _plainBriefText,
     plainBriefError: _plainBriefError,
+    goalCharter: _goalCharter,
     ...body
   } = proposal;
   return hashObject(body);
@@ -129,11 +131,18 @@ export function projectProposalAuthority(input) {
     proposal.decision.hash = decisionHash(proposal.decision);
     proposal.approvalBrief = buildApprovalBrief(proposal.decision);
   }
+  if (proposal.goalCharter?.status === 'ACCEPTED') validateGoalCharter(proposal.goalCharter);
+  else proposal.goalCharter = proposal.goalDiscovery?.status === 'READY' && proposal.goalDiscovery?.direction
+    ? compileGoalCharterPreview(proposal)
+    : null;
   proposal.releaseTrain = buildReleaseTrain({
-    finalGoal: proposal.goalDiscovery?.direction?.outcome ?? proposal.goal,
+    finalGoal: proposal.goalCharter?.outcome ?? proposal.goalDiscovery?.direction?.outcome ?? proposal.goal,
     proposalRelease: proposal.release,
     gitSha: proposal.gitSha,
     proposalId: proposal.id,
+    goalCharterHash: proposal.goalCharter?.status === 'ACCEPTED'
+      ? proposal.goalCharter.binding.previewHash
+      : proposal.goalCharter?.hash ?? null,
     projectName: proposal.contract?.project ?? proposal.analysis?.projectName ?? null,
     analysis: proposal.analysis,
     baseline: proposal.baseline,
@@ -188,10 +197,20 @@ function authorityFingerprint(input) {
     decision.resolutions = decision.resolutions ?? [];
     for (const resolution of decision.resolutions) delete resolution.resolvedAt;
   }
+  const goalCharter = structuredClone(proposal.goalCharter ?? null);
+  if (goalCharter && typeof goalCharter === 'object' && goalCharter.status === 'PROPOSED') {
+    delete goalCharter.hash;
+    delete goalCharter.discoveryHash;
+    delete goalCharter.proposalRevision;
+  }
   const releaseTrain = structuredClone(proposal.releaseTrain ?? null);
   if (releaseTrain && typeof releaseTrain === 'object') {
     delete releaseTrain.hash;
-    if (releaseTrain.source) delete releaseTrain.source.baselinePlanHash;
+    delete releaseTrain.id;
+    if (releaseTrain.source) {
+      delete releaseTrain.source.baselinePlanHash;
+      delete releaseTrain.source.goalCharterHash;
+    }
   }
   return hashObject({
     gitSha: proposal.gitSha,
@@ -205,6 +224,7 @@ function authorityFingerprint(input) {
     baselinePreservation: proposal.baselinePreservation ?? null,
     intelligence: proposal.intelligence ?? proposal.analysis?.intelligence ?? null,
     goalDiscovery,
+    goalCharter,
     acceptanceStrength: proposal.acceptanceStrength,
     workspace: proposal.workspace,
     workspaceCandidates: proposal.workspaceCandidates,
@@ -787,13 +807,24 @@ export async function approveScopeProposal(root, input) {
   const sha = currentGitSha(root);
   const { contract, lock } = await lockContract(root, sha);
   const approvedAt = new Date().toISOString();
+  const acceptedGoalCharter = acceptGoalCharter(projectedProposal.goalCharter, {
+    proposalHash: proposal.hash,
+    contractHash: lock.contractHash,
+    baselineSha: lock.baselineSha,
+    releaseTrainHash: projectedProposal.releaseTrain.hash,
+    approverType,
+    approverId,
+    acceptedAt: approvedAt,
+  });
   const persistedTrain = await persistApprovedReleaseTrain(root, projectedProposal.releaseTrain, {
     proposalId: proposal.id,
     proposalHash: proposal.hash,
     contractHash: lock.contractHash,
     baselineSha: lock.baselineSha,
+    goalCharterHash: acceptedGoalCharter.hash,
     approvedAt,
   });
+  const persistedCharter = await persistAcceptedGoalCharter(root, acceptedGoalCharter);
   const locked = await transitionState(root, 'LOCKED', {
     release: contract.release,
     contractHash: lock.contractHash,
@@ -802,11 +833,14 @@ export async function approveScopeProposal(root, input) {
     approvedProposalHash: proposal.hash,
     releaseTrainHash: projectedProposal.releaseTrain.hash,
     releaseTrainPath: path.relative(root, persistedTrain.path).replaceAll('\\', '/'),
+    goalCharterHash: acceptedGoalCharter.hash,
+    goalCharterPath: path.relative(root, persistedCharter.path).replaceAll('\\', '/'),
   }, approverType === 'autopilot-policy' ? 'scope proposal approved by pre-authorized autopilot policy' : 'scope proposal explicitly approved');
   const approved = {
     ...proposal,
     releaseTrain: projectedProposal.releaseTrain,
     releaseTrainSummary: projectedProposal.releaseTrainSummary,
+    goalCharter: acceptedGoalCharter,
     approval: {
       confirmed: true,
       approvedAt,
@@ -827,8 +861,8 @@ export async function approveScopeProposal(root, input) {
     discoveryHash: projectedProposal.goalDiscovery.hash,
     directionHash: projectedProposal.goalDiscovery.direction.hash,
     provenance: approverType === 'autopilot-policy' ? 'policy-authorized-continuation' : 'explicit-human-approval',
-    evidenceRefs: ['proposal.goalDiscovery.direction', 'proposal.approval'],
-    details: { approverType, approverId, contractHash: lock.contractHash },
+    evidenceRefs: ['proposal.goalDiscovery.direction', 'proposal.goalCharter', 'proposal.approval'],
+    details: { approverType, approverId, contractHash: lock.contractHash, goalCharterHash: acceptedGoalCharter.hash },
   });
   await recordLedger(root, {
     type: 'proposal.approved',
@@ -838,8 +872,9 @@ export async function approveScopeProposal(root, input) {
     contractHash: lock.contractHash,
     baselineSha: lock.baselineSha,
     releaseTrainHash: projectedProposal.releaseTrain.hash,
+    goalCharterHash: acceptedGoalCharter.hash,
     approverType,
     policyAuthorizationHash: input.policyAuthorization?.hash ?? null,
   });
-  return { proposal: approved, contract, lock, state: locked, releaseTrain: persistedTrain.envelope };
+  return { proposal: approved, contract, lock, state: locked, releaseTrain: persistedTrain.envelope, goalCharter: acceptedGoalCharter };
 }

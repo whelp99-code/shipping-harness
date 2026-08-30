@@ -68,6 +68,7 @@
       "required": [
         "gitSha",
         "proposalId",
+        "goalCharterHash",
         "workspace",
         "baselinePlanHash",
         "projectProfiles",
@@ -84,6 +85,13 @@
             "null"
           ],
           "maxLength": 160
+        },
+        "goalCharterHash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
         },
         "workspace": {
           "type": "string",

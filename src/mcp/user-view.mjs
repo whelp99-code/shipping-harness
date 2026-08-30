@@ -70,6 +70,8 @@ export function buildUserStatusView(status) {
       acceptanceStrength: proposal.acceptanceStrength,
       baseline: proposal.baseline ?? null,
       intelligence: proposal.intelligence ?? null,
+      goalDiscovery: proposal.goalDiscovery ?? null,
+      goalCharter: proposal.goalCharter ?? null,
       oneScreenApproval: proposal.oneScreenApproval ?? null,
       releaseTrain: proposal.releaseTrain ?? null,
       releaseTrainSummary: proposal.releaseTrainSummary ?? null,
@@ -149,6 +151,8 @@ export function buildUserStatusView(status) {
     releaseTrain: status.releaseTrain ?? null,
     releaseTrainSummary: status.releaseTrainSummary ?? null,
     releaseTrainBinding: status.releaseTrainBinding ?? null,
+    goalCharter: status.goalCharter ?? null,
+    goalCharterSummary: status.goalCharterSummary ?? null,
     plainBriefError: compiled.error ?? null,
   };
 }

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://shipping-harness.local/schemas/v1/decision-ledger-event.schema.json",
+  "$id": "shipping-harness/decision-ledger-event-v1",
   "title": "Shipping Harness decision ledger event",
   "description": "One bounded append-only, hash-chained goal-discovery or accepted-direction authority event. It never marks RELEASED and never grants model authority.",
   "type": "object",
@@ -74,14 +74,11 @@
       "maxLength": 80
     },
     "directionHash": {
-      "oneOf": [
-        {
-          "$ref": "#/$defs/hash"
-        },
-        {
-          "type": "null"
-        }
-      ]
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
     },
     "discoveryHash": {
       "$ref": "#/$defs/hash"
@@ -114,14 +111,11 @@
       "$ref": "#/$defs/hash"
     },
     "previousHash": {
-      "oneOf": [
-        {
-          "$ref": "#/$defs/hash"
-        },
-        {
-          "type": "null"
-        }
-      ]
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
     },
     "modelAuthority": {
       "const": false

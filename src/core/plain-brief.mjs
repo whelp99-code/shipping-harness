@@ -283,6 +283,17 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
       modelAuthority: false,
     }, ['goalDiscovery.status', 'goalDiscovery.questions', 'goalDiscovery.direction']));
   }
+  if (input.goalCharter && (state === 'READY_FOR_APPROVAL' || input.goalCharter.status === 'ACCEPTED')) {
+    facts.push(fact('GOAL_CHARTER', {
+      status: input.goalCharter.status ?? null,
+      hash: input.goalCharter.hash ?? null,
+      outcome: boundedTrainText(input.goalCharter.outcome, 120),
+      primaryUser: boundedTrainText(input.goalCharter.primaryUser, 80),
+      operatingBoundary: boundedTrainText(input.goalCharter.operatingBoundary, 80),
+      modelAuthority: false,
+      released: false,
+    }, ['goalCharter.status', 'goalCharter.hash', 'goalCharter.outcome', 'goalCharter.primaryUser', 'goalCharter.operatingBoundary']));
+  }
   facts.push(fact('REPORT_COMPILER', 'deterministic-no-model', ['plainBrief.schema'], 'mechanical', 'exact'));
   const body = {
     schema: 'shipping-harness/brief-fact-graph-v1',
@@ -365,7 +376,11 @@ function proposalBrief(input, state) {
   if (state === 'READY_FOR_APPROVAL') return {
     headline: '개발을 시작할 범위가 준비됐습니다.',
     problems: [item('SCOPE_NOT_YET_APPROVED', '범위와 완료조건은 준비됐지만 아직 사용자가 승인하지 않았습니다.', ['canonicalState', 'readyForApproval'])],
-    improvements: [item('REVIEW_ONE_SCOPE', '이번 버전에 넣을 것, 미룰 것, 완료조건을 한 번 확인합니다.', ['oneScreenApproval', 'contract.scope', 'contract.acceptance'])],
+    improvements: [item('REVIEW_ONE_SCOPE', input.goalCharter
+      ? `확정할 결과는 “${boundedTrainText(input.goalCharter.outcome, 100)}”이며, 대상 사용자·운영 경계·비목표·완료조건을 함께 확인합니다.`
+      : '이번 버전에 넣을 것, 미룰 것, 완료조건을 한 번 확인합니다.', input.goalCharter
+      ? ['goalCharter.outcome', 'goalCharter.primaryUser', 'goalCharter.operatingBoundary', 'goalCharter.nonGoals', 'contract.acceptance']
+      : ['oneScreenApproval', 'contract.scope', 'contract.acceptance'])],
     nextPlan: [item('PLAN_APPROVE_SCOPE', '내용이 맞으면 범위를 승인합니다.', ['proposalId', 'proposalHash']), item('PLAN_IMPLEMENT_LOCKED_SCOPE', '승인 후에는 잠긴 범위만 구현합니다.', ['contract.scope']), item('PLAN_VERIFY_CURRENT_SHA', '현재 Git 상태에서 필수 완료조건을 검증합니다.', ['contract.acceptance', 'gitSha'])],
     summary: item('SUMMARY_READY_FOR_APPROVAL', '내용이 맞으면 한 번 승인한 뒤 잠긴 범위만 개발합니다.', ['canonicalState', 'readyForApproval']),
   };
@@ -569,6 +584,7 @@ export function compilePlainBrief(input = {}) {
         input.intelligence ?? input.analysis?.intelligence ? 'intelligence' : null,
         input.contract ? 'contract' : null,
         input.releaseTrain ? 'releaseTrain' : null,
+        input.goalCharter && (state === 'READY_FOR_APPROVAL' || input.goalCharter.status === 'ACCEPTED') ? 'goalCharter' : null,
         input.issues ? 'issues' : null,
         typeof input.evidenceFresh === 'boolean' ? 'evidenceFresh' : null,
       ]),

@@ -36,6 +36,9 @@ const descriptors = {
   autopilotPolicy: ['shipping-harness/autopilot-policy-v1', 'autopilot-policy.schema.json', 'autopilot-policy.example.json'],
   autopilotDecision: ['shipping-harness/autopilot-decision-v1', 'autopilot-decision.schema.json', 'autopilot-decision.example.json'],
   autopilotState: ['shipping-harness/autopilot-state-v1', 'autopilot-state.schema.json', 'autopilot-state.example.json'],
+  goalDiscovery: ['shipping-harness/goal-discovery-v1', 'goal-discovery.schema.json', 'goal-discovery.example.json'],
+  decisionLedgerEvent: ['shipping-harness/decision-ledger-event-v1', 'decision-ledger-event.schema.json', 'decision-ledger-event.example.json'],
+  goalCharter: ['shipping-harness/goal-charter-v1', 'goal-charter.schema.json', 'goal-charter.example.json'],
 };
 
 export const STABLE_SCHEMA_DESCRIPTORS = Object.freeze(Object.fromEntries(
@@ -87,6 +90,7 @@ const REQUIRED_FIELDS = Object.freeze({
   autopilotState: ['enabled', 'profile', 'modelAuthority', 'policyHash', 'releaseTrainHash', 'currentRelease', 'currentIndex', 'phase', 'sequence', 'replanRequired', 'released', 'baselineSha', 'startedAt', 'updatedAt', 'hash'],
   goalDiscovery: ['evidenceHash', 'gitSha', 'explicitGoal', 'round', 'maxRounds', 'status', 'questions', 'resolutions', 'candidates', 'recommendedCandidateId', 'critic', 'direction', 'nextAction', 'questionPolicy', 'modelAuthority', 'hash'],
   decisionLedgerEvent: ['sequence', 'occurredAt', 'proposalId', 'proposalRevision', 'proposalHash', 'gitSha', 'type', 'discoveryHash', 'provenance', 'evidenceRefs', 'eventKey', 'previousHash', 'modelAuthority', 'released', 'hash'],
+  goalCharter: ['id', 'status', 'project', 'release', 'proposalId', 'proposalRevision', 'proposalHash', 'gitSha', 'discoveryHash', 'directionHash', 'candidateHash', 'criticHash', 'outcome', 'primaryUser', 'operatingBoundary', 'value', 'include', 'nonGoals', 'successCriteria', 'assumptions', 'rollback', 'replanTriggers', 'evidenceRefs', 'binding', 'commandAuthority', 'approvalAuthority', 'closureAuthority', 'deploymentAuthority', 'modelAuthority', 'released', 'hash'],
 });
 
 export function stableSchemaNames() {

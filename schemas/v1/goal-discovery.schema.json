@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://shipping-harness.local/schemas/v1/goal-discovery.schema.json",
+  "$id": "shipping-harness/goal-discovery-v1",
   "title": "Shipping Harness bounded goal discovery",
   "description": "A deterministic, evidence-bound product-direction discovery projection with no model, command, approval, closure, deployment, or RELEASED authority.",
   "type": "object",

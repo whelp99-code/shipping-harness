@@ -107,9 +107,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Compile one explicit final outcome into a deterministic rolling release train with value, entry, exit, rollback, replan, and authority gates; expose and persist it through the existing nine-tool Shipping surface without enabling automatic execution.",
+  "goal": "Compile deterministic evidence-first Korean beginner briefs and one safe next action from Shipping authority data, reduce host-model dependence without weakening performance or release authority, and deploy the verified tagged release to OMP 18 without mutating OMP or target projects.",
   "project": "shipping-harness",
-  "release": "1.5.0",
+  "release": "1.4.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

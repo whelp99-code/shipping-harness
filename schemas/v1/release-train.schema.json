@@ -1,0 +1,464 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/release-train-v1",
+  "title": "Shipping Harness deterministic rolling release train",
+  "description": "A one-to-five release plan compiled from current Shipping authority evidence. Only the first release may become current contract authority; future releases require replan before activation.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "project",
+    "finalGoal",
+    "status",
+    "currentIndex",
+    "currentRelease",
+    "modelAuthority",
+    "deterministic",
+    "rollingPlan",
+    "source",
+    "limits",
+    "releases",
+    "trainCompleteWhen",
+    "hash"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/release-train-v1",
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^TRAIN-[a-f0-9]{12}$"
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "finalGoal": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "status": {
+      "const": "PLANNED"
+    },
+    "currentIndex": {
+      "const": 0
+    },
+    "currentRelease": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "modelAuthority": {
+      "const": false
+    },
+    "deterministic": {
+      "const": true
+    },
+    "rollingPlan": {
+      "const": true
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "gitSha",
+        "proposalId",
+        "workspace",
+        "baselinePlanHash",
+        "projectProfiles",
+        "acceptanceStrength"
+      ],
+      "properties": {
+        "gitSha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "proposalId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 160
+        },
+        "workspace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "baselinePlanHash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "projectProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 9,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "software",
+              "web",
+              "api",
+              "data",
+              "package",
+              "cli",
+              "security",
+              "operations",
+              "documentation"
+            ]
+          }
+        },
+        "acceptanceStrength": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 80
+        }
+      },
+      "additionalProperties": false
+    },
+    "limits": {
+      "type": "object",
+      "required": [
+        "minReleases",
+        "maxReleases",
+        "actualReleases"
+      ],
+      "properties": {
+        "minReleases": {
+          "const": 1
+        },
+        "maxReleases": {
+          "const": 5
+        },
+        "actualReleases": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        }
+      },
+      "additionalProperties": false
+    },
+    "releases": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "order",
+          "version",
+          "predecessor",
+          "stage",
+          "detailLevel",
+          "authority",
+          "canGrantCurrentAuthority",
+          "goal",
+          "valueGate",
+          "prerequisites",
+          "scope",
+          "acceptance",
+          "riskProfile",
+          "autonomyRecommendation",
+          "rollback",
+          "replanTriggers",
+          "entryGate",
+          "exitGate",
+          "transition"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^REL-\\d{3}$"
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+          },
+          "predecessor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 80
+          },
+          "stage": {
+            "enum": [
+              "STABILIZE_BASELINE",
+              "DELIVER_CORE_VALUE",
+              "OPERATE_AND_RECOVER",
+              "FIELD_HARDEN"
+            ]
+          },
+          "detailLevel": {
+            "enum": [
+              "CURRENT_FULL",
+              "NEXT_BOUNDED",
+              "FUTURE_GATES"
+            ]
+          },
+          "authority": {
+            "enum": [
+              "CURRENT_CONTRACT_CANDIDATE",
+              "ADVISORY_REPLAN_REQUIRED"
+            ]
+          },
+          "canGrantCurrentAuthority": {
+            "type": "boolean"
+          },
+          "goal": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "valueGate": {
+            "type": "object",
+            "required": [
+              "measurable",
+              "statement",
+              "criteria",
+              "testsAloneSufficient"
+            ],
+            "properties": {
+              "measurable": {
+                "const": true
+              },
+              "statement": {
+                "type": "string",
+                "minLength": 12,
+                "maxLength": 4000
+              },
+              "criteria": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "text",
+                    "proofClass",
+                    "required"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    },
+                    "proofClass": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "required": {
+                      "const": true
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "testsAloneSufficient": {
+                "const": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "prerequisites": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          },
+          "scope": {
+            "type": "object",
+            "required": [
+              "include",
+              "exclude"
+            ],
+            "properties": {
+              "include": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 32,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                }
+              },
+              "exclude": {
+                "type": "array",
+                "maxItems": 32,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "acceptance": {
+            "type": "object",
+            "required": [
+              "exactCommands",
+              "requiredClasses",
+              "futureCommandsAreAuthority"
+            ],
+            "properties": {
+              "exactCommands": {
+                "type": "array",
+                "maxItems": 32
+              },
+              "requiredClasses": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 32,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "futureCommandsAreAuthority": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "riskProfile": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "autonomyRecommendation": {
+            "enum": [
+              "PLAN_ONLY",
+              "REPLAN_BEFORE_ACTIVATION"
+            ]
+          },
+          "rollback": {
+            "type": "object",
+            "required": [
+              "required",
+              "class",
+              "evidenceRequired",
+              "releaseHistoryImmutable"
+            ],
+            "properties": {
+              "required": {
+                "const": true
+              },
+              "class": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "evidenceRequired": {
+                "const": true
+              },
+              "releaseHistoryImmutable": {
+                "const": true
+              }
+            },
+            "additionalProperties": false
+          },
+          "replanTriggers": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          },
+          "entryGate": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          },
+          "exitGate": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            }
+          },
+          "transition": {
+            "type": "object",
+            "required": [
+              "nextReleaseRequiresClosedReceipt",
+              "cleanCommittedClosureRequired",
+              "releaseDoesNotImplyReleased"
+            ],
+            "properties": {
+              "nextReleaseRequiresClosedReceipt": {
+                "const": true
+              },
+              "cleanCommittedClosureRequired": {
+                "const": true
+              },
+              "releaseDoesNotImplyReleased": {
+                "const": true
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "trainCompleteWhen": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 160
+      }
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

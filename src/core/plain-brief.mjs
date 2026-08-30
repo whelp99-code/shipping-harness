@@ -159,6 +159,25 @@ function fact(code, value, refs, authority = 'mechanical', confidence = 'exact')
   };
 }
 
+function boundedTrainText(value, max = 180) {
+  const text = typeof value === 'string' ? value.trim().replace(/\s+/gu, ' ') : '';
+  return text.length <= max ? text : `${text.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
+}
+
+function buildReleaseTrainBrief(train) {
+  if (!train || !Array.isArray(train.releases) || train.releases.length === 0) return null;
+  return {
+    currentRelease: train.currentRelease ?? train.releases[0]?.version ?? null,
+    totalReleases: Math.min(train.releases.length, 5),
+    modelAuthority: false,
+    steps: train.releases.slice(0, 5).map((release, index) => ({
+      version: release.version,
+      current: index === (train.currentIndex ?? 0),
+      value: boundedTrainText(release.valueGate?.statement, 96),
+    })),
+  };
+}
+
 function actionPolicyFor(state, blockerCount) {
   if (ACTIVE_RELEASE_STATES.has(state)) {
     if (blockerCount > 0) return ACTION_POLICY.BLOCKED;
@@ -239,6 +258,13 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
   }
   if (typeof input.evidenceFresh === 'boolean') {
     facts.push(fact('EVIDENCE_FRESHNESS', input.evidenceFresh, ['evidenceFresh']));
+  }
+  if (input.releaseTrain) {
+    facts.push(fact('RELEASE_TRAIN', {
+      currentRelease: input.releaseTrain.currentRelease ?? null,
+      totalReleases: input.releaseTrain.releases?.length ?? 0,
+      modelAuthority: false,
+    }, ['releaseTrain.releases']));
   }
   facts.push(fact('REPORT_COMPILER', 'deterministic-no-model', ['plainBrief.schema'], 'mechanical', 'exact'));
   const body = {
@@ -417,6 +443,9 @@ export function auditPlainBrief(brief) {
     noDestructiveDefault: !['reset', 'stash', 'discard', 'delete', '폐기', '삭제', '되돌리'].some((word) => rendered.toLowerCase().includes(word))
       || brief.state === 'DIRTY_BASELINE' && rendered.includes('삭제하거나 되돌리지 않고'),
     verificationIndependent: !(brief.factGraph?.facts ?? []).some((entry) => entry.authority === 'model-advisory' && /acceptance|verify|closed|approval/u.test(entry.code.toLowerCase())),
+    releaseTrainSafe: !brief.releaseTrain || (brief.releaseTrain.modelAuthority === false
+      && brief.releaseTrain.currentRelease === brief.release
+      && brief.releaseTrain.steps.filter((entry) => entry.current).length === 1),
   };
   return {
     schema: 'shipping-harness/plain-brief-quality-v1',
@@ -432,6 +461,16 @@ function markdownList(items) {
   return items.map((entry, index) => `${index + 1}. ${entry.text}`).join('\n');
 }
 
+function renderReleaseTrain(train) {
+  if (!train) return [];
+  return [
+    '## 전체 개발계획',
+    '',
+    ...train.steps.map((release, index) => `${index + 1}. **v${release.version}${release.current ? ' — 현재 단계' : ''}**: ${release.value}`),
+    '',
+  ];
+}
+
 export function renderPlainBrief(brief) {
   const action = brief.userAction?.exactPhrase
     ? `> **${brief.userAction.exactPhrase}**`
@@ -441,6 +480,7 @@ export function renderPlainBrief(brief) {
     '',
     `**${brief.headline}**`,
     '',
+    ...renderReleaseTrain(brief.releaseTrain),
     '## 문제점',
     '',
     markdownList(brief.problems ?? []),
@@ -475,6 +515,7 @@ export function compilePlainBrief(input = {}) {
     language: 'ko',
     state,
     release: input.release ?? input.contract?.release ?? input.state?.release ?? null,
+    releaseTrain: buildReleaseTrainBrief(input.releaseTrain),
     headline: sections.headline,
     problems: sectionItems(sections.problems),
     improvements: sectionItems(sections.improvements),
@@ -493,6 +534,7 @@ export function compilePlainBrief(input = {}) {
         input.baseline ? 'baseline' : null,
         input.intelligence ?? input.analysis?.intelligence ? 'intelligence' : null,
         input.contract ? 'contract' : null,
+        input.releaseTrain ? 'releaseTrain' : null,
         input.issues ? 'issues' : null,
         typeof input.evidenceFresh === 'boolean' ? 'evidenceFresh' : null,
       ]),

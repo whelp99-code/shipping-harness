@@ -52,7 +52,7 @@
     "remotePolicy": "9bdb4a423452a53e66d85876171186355c8d298df9c2a3f383686e4447feb4c8",
     "remoteRequest": "55660d2ae0f55d8982f32909c6260b483a983ed1605d6dc94cf95b039e2c0bfe",
     "omoReceiptValidator": "451f90c754fb3afd4ed3ea5330336248d9c546e15dc04bc4408b85ca1a7a4132",
-    "stableRegistry": "acb1a3784ff530ab1bf3dd4e24415105dc9666f62b0a33ddf88b2b3ca7c71306",
+    "stableRegistry": "413a213d1186b525e3b26c06157cf7579b31a4d46739af605007b4cbdb26b77a",
     "migration": "2047305a7527eda6fc9d9735ad3640b0be050ed88d4264f31519ce4840662826"
   },
   "requiredRecords": [

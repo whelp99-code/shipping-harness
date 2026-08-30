@@ -449,3 +449,19 @@
 ## Definition of Done
 
 A release is done when its acceptance criteria pass, required checks succeed, release blockers are zero, non-blockers are moved to backlog, release documentation exists, and Git has a clean committed tag. A missing remote is documented and does not justify fabricating a push.
+### v1.5.0
+
+| ID | Acceptance criterion |
+|---|---|
+| AC-15001 | Clean, dirty, nested, and documentation fixtures compile deterministic one-to-five-release trains. |
+| AC-15002 | Every version has strict semver order, measurable user value, entry/exit, rollback, and replan gates. |
+| AC-15003 | The current release exactly matches proposal scope and acceptance; future versions have no current command authority. |
+| AC-15004 | No-model, weak-host, strong-host, and hostile-host variants produce identical authority hashes. |
+| AC-15005 | Test-only value, duplicate/backward versions, missing rollback/replan, stale binding, and model authority fail closed. |
+| AC-15006 | Existing `shipping_start`, `shipping_refine`, and `shipping_status` expose one train without adding a tool. |
+| AC-15007 | Approval atomically persists a train bound to proposal hash, contract hash, and baseline SHA. |
+| AC-15008 | Korean `plainBriefText` includes a bounded `전체 개발계획` while details remain structured. |
+| AC-15009 | No new model/network call, unbounded scan, raw command, Git mutation, push, deploy, or tenth MCP tool exists. |
+| AC-15010 | Full regression, security, license, docs, OMP 18, and read-only EvoHarvest pilot pass. |
+| AC-15011 | Shipping verification is SHIPPABLE with zero blockers/unknowns and fresh evidence. |
+| AC-15012 | CLOSED receipt and annotated `v1.5.0` tag point to the closure commit with a clean worktree. |

@@ -10,13 +10,13 @@ function deepFreeze(value) {
 
 export const COMPATIBILITY = deepFreeze({
   schema: STABLE_SCHEMAS.compatibility,
-  shippingVersion: '1.4.0',
+  shippingVersion: '1.5.0',
   supportedReleases: [...SUPPORTED_RELEASES],
   platforms: ['linux', 'darwin'],
   architectures: ['x64', 'arm64'],
   node: { minimum: 22, tested: ['22.23.2'] },
   git: { minimum: '2.30' },
-  plugin: { upgradeFrom: ['0.6.0', '0.7.0', '0.8.0', '0.9.0', '1.0.0', '1.0.1', '1.0.2', '1.1.0', '1.1.1', '1.1.2', '1.2.0', '1.3.0'], localOnly: true },
+  plugin: { upgradeFrom: ['0.6.0', '0.7.0', '0.8.0', '0.9.0', '1.0.0', '1.0.1', '1.0.2', '1.1.0', '1.1.1', '1.1.2', '1.2.0', '1.3.0', '1.3.1', '1.4.0'], localOnly: true },
   omoRuntime: {
     shippingBridge: '0.7.0',
     upstreamVersion: '5.0.0-beta.23',
@@ -35,6 +35,7 @@ export const COMPATIBILITY = deepFreeze({
     tools: 9,
     refinement: 'shipping_refine',
     plainBrief: { schema: 'shipping-harness/plain-brief-v1', language: 'ko', deterministic: true, modelAuthority: false },
+    releaseTrain: { schema: 'shipping-harness/release-train-v1', maxReleases: 5, deterministic: true, modelAuthority: false, futureAuthority: false },
     nestedWorkspace: true,
     transport: 'stdio',
   },

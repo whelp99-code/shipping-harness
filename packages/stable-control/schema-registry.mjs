@@ -32,6 +32,7 @@ const descriptors = {
   stableEvent: [EVENT_SCHEMA_ID, 'stable-event.schema.json', 'stable-event.example.json'],
   health: ['shipping-harness/health-v1', 'health.schema.json', 'health.example.json'],
   compatibility: [COMPATIBILITY_SCHEMA_ID, 'compatibility.schema.json', 'compatibility.example.json'],
+  releaseTrain: ['shipping-harness/release-train-v1', 'release-train.schema.json', 'release-train.example.json'],
 };
 
 export const STABLE_SCHEMA_DESCRIPTORS = Object.freeze(Object.fromEntries(
@@ -77,6 +78,7 @@ const REQUIRED_FIELDS = Object.freeze({
   stableEvent: [EVENT_SCHEMA_ID, 'stable-event.schema.json', 'stable-event.example.json'],
   health: ['status', 'checks', 'internalOnly'],
   compatibility: [COMPATIBILITY_SCHEMA_ID, 'compatibility.schema.json', 'compatibility.example.json'],
+  releaseTrain: ['id', 'project', 'finalGoal', 'status', 'currentIndex', 'currentRelease', 'modelAuthority', 'deterministic', 'rollingPlan', 'source', 'limits', 'releases', 'trainCompleteWhen', 'hash'],
 });
 
 export function stableSchemaNames() {

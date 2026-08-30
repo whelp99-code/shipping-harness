@@ -1,6 +1,6 @@
 # Shipping Harness v1 Compatibility
 
-Shipping Harness v1.4.0 is an internal-only control plane. A component is supported only after its exact combination passes local compatibility checks; discovery of a binary alone is not readiness proof.
+Shipping Harness v1.5.0 is an internal-only control plane. A component is supported only after its exact combination passes local compatibility checks; discovery of a binary alone is not readiness proof.
 
 The v1.0.2 proposal surface exposes one canonical state. `NEEDS_INPUT`, `DIRTY_BASELINE`, and `NEEDS_ACCEPTANCE` are fail-closed states and can never be interpreted as approval readiness by a host agent.
 
@@ -18,6 +18,8 @@ The v1.3.1 deployment patch awaits the full bootstrap install Promise before tem
 
 The v1.4.0 presentation surface adds a deterministic Korean `plainBrief`, mechanical fact graph, one-action envelope, bounded output QA, raw-authority fallback, and OMP verbatim-rendering contract. It adds no model call, network request, Git subprocess, Paperthin runtime dependency, or tenth MCP tool.
 
+The v1.5.0 planning surface adds `shipping-harness/release-train-v1`: one to five strictly increasing value-bearing releases, full current detail, bounded future gates, exact proposal/contract/Git bindings, and zero future command authority. It uses the existing nine tools and adds no model or network call.
+
 ## Supported core environment
 
 | Surface | Supported v1 range | Failure behavior |
@@ -26,7 +28,7 @@ The v1.4.0 presentation surface adds a deterministic Korean `plainBrief`, mechan
 | CPU | x64 and arm64 | Other architectures report unsupported |
 | Node.js | 22 or newer; 22.23.2 tested on Ubuntu | Startup or compatibility gate fails |
 | Git | 2.30 or newer | Git-bound evidence and locking are unavailable |
-| Shipping package upgrade | v0.6.0 through v1.3.1 | Earlier releases require manual export/reinitialization |
+| Shipping package upgrade | v0.6.0 through v1.4.0 | Earlier releases require manual export/reinitialization |
 | MCP | current `2026-07-28`; compatible initialize clients `2025-11-25` and `2025-03-26` | Unsupported versions fail clearly |
 | OMP primary host | `18.0.10`, `omo-balance` wrapper + standalone `omp-core`, MCP `2025-03-26` | Version, worker smoke, nine-tool inventory, and status call must pass |
 | OMP compatibility host | source-linked `15.10.12`, MCP `2025-03-26` | Same protocol and nine-tool checks apply |

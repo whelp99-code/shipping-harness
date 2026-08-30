@@ -19,6 +19,7 @@
 | GOAL-015 safe internal remote control | REQ-REMOTE-001..005 | AC-0901..0912 | internal gateway, signed approval, backup/restore | planned remote/security/operations suites |
 | GOAL-019 project intelligence and coverage | REQ-INTEL-001..002, REQ-COVER-001..002, REQ-ISOLATE-001..002 | AC-130-001..010 | component graph, work themes, coverage matrix, isolated acceptance | project intelligence, isolated acceptance, EvoHarvest pilot, MCP/full release suites |
 | GOAL-020 evidence-first beginner report | REQ-BRIEF-001..012 | AC-140-001..014 | deterministic fact graph, action envelope, Korean plain brief, quality gate, OMP presentation | plain-brief state matrix, model-independence, adversarial, performance, OMP, and EvoHarvest pilots |
+| GOAL-021 deterministic release train | REQ-TRAIN-001..012 | AC-15001..15012 | release-train compiler, proposal binding, train persistence, bounded plain-brief summary | release-train unit/adversarial/pilot/EvoHarvest/MCP/OMP/full release tests |
 | GOAL-020 race-free OMP bootstrap deployment | REQ-BOOTSTRAP-001..006 | AC-131-001..009 | OMP bootstrap await ordering, package lifecycle, backup/rollback, field deployment | bootstrap cleanup race, OMP main-harness, doctor, MCP, EvoHarvest pilot |
 | GOAL-018 safe dirty-baseline stewardship | REQ-BASE-001..006 | AC-120-001..009 | baseline classifier, proposal preservation handshake, MCP next action | baseline steward, proposal lifecycle, OMP compatibility tests |
 | GOAL-017 canonical proposal authority | REQ-CANON-001..006 | AC-112-001..008 | proposal state projection, proposal storage/refinement, MCP output | canonical proposal, lifecycle, nested refine, OMP compatibility tests |
@@ -45,6 +46,7 @@ src/core/proposal-state.mjs and src/core/proposals.mjs REQ-CANON-* (implemented 
 src/core/baseline.mjs and proposal refinement REQ-BASE-* (implemented v1.2.0)
 src/core/project-intelligence.mjs and isolated-verification.mjs REQ-INTEL-*, REQ-COVER-*, REQ-ISOLATE-* (implemented v1.3.0)
 src/core/plain-brief.mjs, src/mcp/user-view.mjs, and OMP presentation config REQ-BRIEF-* (implemented v1.4.0)
+src/core/release-train.mjs, proposal approval persistence, status, and plain-brief train projection REQ-TRAIN-* (implemented v1.5.0)
 packages/omp-main-harness/install.mjs REQ-BOOTSTRAP-* (implemented v1.3.1)
 src/core/proposals.mjs      REQ-PROPOSAL-*
 src/mcp/tools.mjs           REQ-MCP-003, REQ-MCP-006..008
@@ -194,3 +196,14 @@ Any implementation that cannot map to a requirement is out of scope or must amen
 | AC-140-011 | OMP main-harness config/Skill regression, bootstrap doctor, protocol, and installation receipt |
 | AC-140-012 | `scripts/plain-brief-pilot.mjs --check` and read-only `scripts/evoharvest-intelligence-pilot.mjs --check` |
 | AC-140-013..014 | full release/security/license/docs gates, Shipping SHIPPABLE/CLOSED receipt, annotated tag, clean source, and deployed doctor |
+
+## v1.5.0 verification mapping
+
+| Acceptance | Proof |
+|---|---|
+| AC-15001..15004 | `test/mcp/release-train.test.mjs` deterministic, rolling-depth, current-binding, model-independence tests |
+| AC-15005 | `test/adversarial/release-train-attacks.test.mjs` fail-closed authority attacks |
+| AC-15006..15008 | MCP start/status/refine/approval persistence and Korean plain-brief train assertions |
+| AC-15009 | nine-tool inventory, no raw command/mutation tests, bounded compiler implementation |
+| AC-15010 | `scripts/release-train-pilot.mjs`, read-only EvoHarvest pilot, OMP and full release gates |
+| AC-15011..15012 | Shipping verify/close receipt, annotated tag, and clean source audit |

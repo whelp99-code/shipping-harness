@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.4.0 — Evidence-First Plain Brief`
-**Authority:** the release is complete only when `.shipping/releases/1.4.0.json` is `CLOSED` and annotated tag `v1.4.0` points to the closure commit
+**Current release train:** `v1.5.0 — Release Train Planner`
+**Authority:** the release is complete only when `.shipping/releases/1.5.0.json` is `CLOSED` and annotated tag `v1.5.0` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
@@ -58,14 +58,14 @@ The generated `contract.yaml` is JSON-compatible YAML 1.2, allowing a dependency
 
 ## OMP main-harness installation
 
-After `v1.4.0` is closed and tagged, run from the clean Shipping Harness checkout:
+After `v1.5.0` is closed and tagged, run from the clean Shipping Harness checkout:
 
 ```bash
 # Read-only preview
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.4.0
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.5.0
 
 # Back up, install locally, merge OMP settings, and verify
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.4.0 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.5.0 --apply
 
 # Thereafter the installed command is available
 shipping-harness-omp doctor
@@ -247,6 +247,10 @@ Awaits the complete transactional OMP installation before removing its temporary
 
 Compiles one deterministic Korean beginner report directly from canonical Shipping evidence. Every proposal/status result presents `문제점`, `개선안`, `다음 진행 플랜`, `요약`, and one state-derived user action before technical evidence. Host-model commentary is non-authoritative; the nine MCP tools and all approval, evidence, pause, blocker, and closure semantics remain unchanged.
 
+### v1.5.0 — Release Train Planner
+
+Compiles one final outcome into a deterministic rolling train of one to five value-bearing versions. The current release is fully bound to the proposal contract; later releases carry only value, entry, exit, rollback, and replan gates until their predecessor closes. Future plans cannot grant current authority, add commands, or imply release. The existing nine MCP tools expose the train and the Korean plain brief shows the full version sequence without an extra model call.
+
 Shipping Harness is planned for the owner's personal use and future private use inside the owner's company. Customer delivery, resale, public SaaS, and public integrated-runtime distribution are outside the accepted direction.
 
 ## Documentation
@@ -265,6 +269,7 @@ Shipping Harness is planned for the owner's personal use and future private use 
 - [`docs/research/upstream-code-audit/README.md`](docs/research/upstream-code-audit/README.md)
 - [`docs/research/PAPERTHIN-APPLICATION-DECISION.md`](docs/research/PAPERTHIN-APPLICATION-DECISION.md)
 - [`docs/planning/25-V1.4.0-EVIDENCE-FIRST-PLAIN-BRIEF-DEVELOPMENT-PLAN.md`](docs/planning/25-V1.4.0-EVIDENCE-FIRST-PLAIN-BRIEF-DEVELOPMENT-PLAN.md)
+- [`docs/planning/26-V1.5.0-RELEASE-TRAIN-PLANNER-DEVELOPMENT-PLAN.md`](docs/planning/26-V1.5.0-RELEASE-TRAIN-PLANNER-DEVELOPMENT-PLAN.md)
 - [`docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md`](docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md)
 - [`docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md)
 - [`docs/planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](docs/planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md)

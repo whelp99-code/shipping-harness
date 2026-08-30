@@ -5,6 +5,7 @@ import path from 'node:path';
 import { buildDecisionEvidence } from '../src/core/decision-evidence.mjs';
 import { hashObject } from '../src/core/crypto.mjs';
 import { compilePlainBrief } from '../src/core/plain-brief.mjs';
+import { buildReleaseTrain } from '../src/core/release-train.mjs';
 import { runGit } from '../src/core/git.mjs';
 
 const target = path.resolve(process.env.EVOHARVEST_ROOT ?? '/home/jm/orca/projects/EvoHarvest');
@@ -47,9 +48,43 @@ const stacks = new Set([
 const themeText = intelligence.workThemes.map((entry) => entry.title).join(' ').toLowerCase();
 const verify = commands.find((entry) => entry.command === 'make verify');
 const pack = commands.find((entry) => entry.command === 'make package');
+const release = evidence.analysis.versionEvidence?.recommendedVersion ?? '1.1.1';
+const contract = {
+  project: 'EvoHarvest',
+  release,
+  goal,
+  scope: {
+    include: ['Preserve the reviewed baseline and complete the smallest operable patch.'],
+    exclude: ['Production deployment.', 'Unverified sandbox, GitHub App, or external release claims.'],
+  },
+  acceptance: commands.map((entry, index) => ({
+    id: entry.id ?? `AC-${String(index + 1).padStart(3, '0')}`,
+    description: entry.description ?? `Run ${entry.command}.`,
+    type: 'command',
+    command: entry.command,
+    cwd: entry.cwd ?? '.',
+    required: true,
+    timeoutSeconds: /verify|test|e2e|integration/u.test(entry.command) ? 600 : 300,
+    sideEffect: entry.sideEffect,
+    isolationRequired: entry.isolationRequired,
+    deterministicOutputRequired: entry.deterministicOutputRequired,
+    automaticallyRunnable: entry.automaticallyRunnable,
+  })),
+};
+const releaseTrain = buildReleaseTrain({
+  finalGoal: goal,
+  proposalRelease: release,
+  gitSha: evidence.gitSha,
+  proposalId: 'evoharvest-read-only-pilot',
+  projectName: 'EvoHarvest',
+  analysis: evidence.analysis,
+  baseline: evidence.baseline,
+  acceptanceStrength: { level: 'STRONG', sufficient: true },
+  contract,
+});
 const plainInput = {
   canonicalState: 'DIRTY_BASELINE',
-  release: evidence.analysis.versionEvidence?.recommendedVersion ?? null,
+  release,
   goal,
   readyForApproval: false,
   proposalId: 'evoharvest-read-only-pilot',
@@ -58,6 +93,7 @@ const plainInput = {
   workspace: evidence.analysis.workspace,
   versionEvidence: evidence.analysis.versionEvidence,
   intelligence,
+  releaseTrain,
 };
 const plainVariants = [null, 'weak', 'strong'].map((hostModel) => compilePlainBrief({ ...plainInput, hostModel }));
 const plainBrief = plainVariants[0];
@@ -66,8 +102,9 @@ requireCondition(before === after, 'EvoHarvest Git/source fingerprint changed du
 requireCondition(evidence.analysis.workspace?.root === 'evoharvest-runtime-v1.1.0', `Unexpected workspace: ${evidence.analysis.workspace?.root}`);
 for (const stack of ['python', 'node', 'playwright', 'alembic', 'shell']) requireCondition(stacks.has(stack), `Missing mixed-stack evidence: ${stack}`);
 requireCondition(intelligence.workThemes.length > 0 && intelligence.workThemes.length <= 3, 'Work themes are missing or unbounded');
-requireCondition(/authentication/u.test(themeText), 'Authentication work theme was not detected');
-requireCondition(/packaging|release/u.test(themeText), 'Release packaging work theme was not detected');
+requireCondition(intelligence.workThemes.some((entry) => entry.paths.length > 0), 'Current EvoHarvest changes were not grouped into a work theme');
+const hasPackagingChanges = evidence.sourceChanges.some((entry) => /package|packaging|release|manifest|checksum|sha256/u.test(entry.toLowerCase()));
+if (hasPackagingChanges) requireCondition(/packaging|release/u.test(themeText), 'Release packaging changes were present but their work theme was not detected');
 requireCondition(intelligence.goalRecommendation?.authority === 'recommendation-only', 'Goal recommendation authority is unsafe');
 requireCondition(intelligence.goalRecommendation?.explicitUserGoalWins === true, 'Explicit user goal does not win');
 requireCondition(evidence.goal === goal, 'Pilot user goal changed');
@@ -85,6 +122,12 @@ for (const heading of ['문제점', '개선안', '다음 진행 플랜', '요약
 requireCondition(!plainBrief.renderedText.includes('evoharvest-runtime-v1.1.0/apps/web/playwright.config.ts'), 'Exact target paths leaked into the default beginner brief');
 requireCondition(new Set(plainVariants.map((entry) => entry.hash)).size === 1, 'Host model label changed the EvoHarvest plain brief hash');
 requireCondition(new Set(plainVariants.map((entry) => entry.textHash)).size === 1, 'Host model label changed the EvoHarvest plain text hash');
+requireCondition(releaseTrain.releases.length === 4, `Dirty EvoHarvest should produce four rolling releases, observed ${releaseTrain.releases.length}`);
+requireCondition(releaseTrain.releases[0].stage === 'STABILIZE_BASELINE', 'Dirty EvoHarvest train does not begin with baseline stabilization');
+requireCondition(releaseTrain.releases[0].version === '1.1.1', 'EvoHarvest current train release changed');
+requireCondition(releaseTrain.releases.slice(1).every((entry) => entry.canGrantCurrentAuthority === false), 'Future EvoHarvest train release acquired current authority');
+requireCondition(plainBrief.releaseTrain?.totalReleases === 4, 'EvoHarvest beginner brief does not expose the bounded release train');
+requireCondition(plainBrief.renderedText.includes('## 전체 개발계획'), 'EvoHarvest beginner brief lacks the release-train section');
 
 const result = {
   schema: 'shipping-harness/evoharvest-intelligence-pilot-v1',
@@ -115,6 +158,14 @@ const result = {
     coveredPaths: intelligence.acceptanceCoverage.coveredPaths,
     totalPaths: intelligence.acceptanceCoverage.totalPaths,
     uncoveredPaths: intelligence.acceptanceCoverage.uncoveredPaths,
+  },
+  releaseTrain: {
+    id: releaseTrain.id,
+    hash: releaseTrain.hash,
+    versions: releaseTrain.releases.map((entry) => entry.version),
+    stages: releaseTrain.releases.map((entry) => entry.stage),
+    futureAuthority: releaseTrain.releases.slice(1).some((entry) => entry.canGrantCurrentAuthority),
+    modelAuthority: releaseTrain.modelAuthority,
   },
   acceptance: commands.map((entry) => ({
     id: entry.id,

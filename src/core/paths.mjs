@@ -12,6 +12,7 @@ export function runtimePaths(root) {
     ledger: path.join(directory, 'ledger.jsonl'),
     issues: path.join(directory, 'issues.json'),
     backlog: path.join(directory, 'backlog.json'),
+    releaseTrain: path.join(directory, 'release-train.json'),
     integrations: path.join(directory, 'integrations.json'),
     hooks: path.join(directory, 'hooks.jsonl'),
     proposals: path.join(directory, 'proposals'),

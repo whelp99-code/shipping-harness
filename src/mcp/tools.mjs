@@ -7,6 +7,7 @@ import { exists } from '../core/fs.mjs';
 import { beginFixCycle, closeRelease, releaseStatus, verifyRelease } from '../core/gate.mjs';
 import { runtimePaths } from '../core/paths.mjs';
 import { proposalNextAction } from '../core/proposal-state.mjs';
+import { loadApprovedReleaseTrain, releaseTrainSummary } from '../core/release-train.mjs';
 import { approveScopeProposal, createScopeProposal, findActiveScopeProposal, refineScopeProposal } from '../core/proposals.mjs';
 import { abort, pause, readState, resume } from '../core/state.mjs';
 import { buildBlockerView, buildUserStatusView } from './user-view.mjs';
@@ -225,7 +226,15 @@ async function statusOrUninitialized(root) {
     };
   }
   const status = await releaseStatus(root);
-  return { initialized: true, ...status, pendingProposal };
+  const releaseTrainBinding = await loadApprovedReleaseTrain(root);
+  return {
+    initialized: true,
+    ...status,
+    pendingProposal,
+    releaseTrain: releaseTrainBinding?.train ?? null,
+    releaseTrainSummary: releaseTrainBinding?.train ? releaseTrainSummary(releaseTrainBinding.train) : null,
+    releaseTrainBinding: releaseTrainBinding?.binding ?? null,
+  };
 }
 
 /**
@@ -276,6 +285,8 @@ export async function callShippingTool(root, name, rawArguments) {
       plainBrief: proposal.plainBrief,
       plainBriefText: proposal.plainBriefText,
       plainBriefError: proposal.plainBriefError,
+      releaseTrain: proposal.releaseTrain,
+      releaseTrainSummary: proposal.releaseTrainSummary,
       nextAction: proposalNextAction(proposal.canonicalState),
       acceptanceStrength: proposal.acceptanceStrength,
       scope: proposal.contract.scope,
@@ -296,6 +307,7 @@ export async function callShippingTool(root, name, rawArguments) {
         risks: proposal.approvalBrief.risks,
         questions: proposal.approvalBrief.questions,
         limits: proposal.approvalBrief.limits,
+        releaseTrain: proposal.releaseTrainSummary,
         actions: proposal.readyForApproval
           ? ['approve', 'edit-scope', 'stop']
           : proposal.canonicalState === 'DIRTY_BASELINE'
@@ -374,6 +386,8 @@ export async function callShippingTool(root, name, rawArguments) {
       plainBrief: proposal.plainBrief,
       plainBriefText: proposal.plainBriefText,
       plainBriefError: proposal.plainBriefError,
+      releaseTrain: proposal.releaseTrain,
+      releaseTrainSummary: proposal.releaseTrainSummary,
       baselinePreservation: proposal.baselinePreservation ?? null,
       nextAction: proposalNextAction(proposal.canonicalState),
       acceptanceStrength: proposal.acceptanceStrength,
@@ -397,6 +411,7 @@ export async function callShippingTool(root, name, rawArguments) {
         plainBrief: proposal.plainBrief,
         plainBriefText: proposal.plainBriefText,
         plainBriefError: proposal.plainBriefError,
+        releaseTrain: proposal.releaseTrainSummary,
         nextAction: proposalNextAction(proposal.canonicalState),
         included: proposal.approvalBrief.included,
         deferred: proposal.approvalBrief.deferred,
@@ -428,8 +443,10 @@ export async function callShippingTool(root, name, rawArguments) {
       contractHash: result.lock.contractHash,
       baselineSha: result.lock.baselineSha,
       proposalId: result.proposal.id,
+      releaseTrainHash: result.releaseTrain?.train?.hash ?? result.proposal.releaseTrain?.hash ?? null,
+      releaseTrainCount: result.proposal.releaseTrain?.releases?.length ?? 0,
     };
-    return complete(data, `Approved and locked ${data.project} ${data.release}. The host agent may now implement the locked goal and call shipping_verify.`);
+    return complete(data, `Approved and locked ${data.project} ${data.release} as release 1 of ${data.releaseTrainCount}. The host agent may now implement the locked goal and call shipping_verify.`);
   }
 
   if (name === 'shipping_status') {

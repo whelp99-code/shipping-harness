@@ -65,3 +65,7 @@ Supported internal issues include installation, MCP registration, contract/propo
 ## Direction-change triggers
 
 Stop and re-plan before public publication, customer deployment, multi-tenant service, external collaborator distribution, billing, unrestricted remote shell, automatic deployment, or a different OMO licensing boundary.
+
+## v1.5.0 release-train authority
+
+`shipping_start` deterministically compiles a rolling one-to-five-version train. The first release exactly matches the current proposal contract. Future releases carry value, entry, exit, rollback, and replan gates only and cannot execute or grant current authority. Exact approval writes `.shipping/release-train.json`, bound to proposal hash, contract hash, and baseline SHA. Replan after every predecessor closure; a train never implies `RELEASED`.

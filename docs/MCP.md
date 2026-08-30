@@ -34,8 +34,8 @@ For OMP, use the release-owned transactional bootstrap instead of manually editi
 
 ```bash
 cd /home/jm/orca/projects/shipping-harness
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.4.0
-node bin/shipping-harness-omp.mjs bootstrap --tag v1.4.0 --apply
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.5.0
+node bin/shipping-harness-omp.mjs bootstrap --tag v1.5.0 --apply
 shipping-harness-omp doctor
 ```
 
@@ -44,6 +44,8 @@ The first command is read-only. The applied command backs up the previous Shippi
 From v1.3.1, bootstrap explicitly awaits installation, configuration, doctor, receipt, and backup completion before deleting the temporary package directory. The patch changes no MCP methods, schemas, approval semantics, or nine-tool inventory.
 
 From v1.4.0, `shipping_start`, `shipping_refine`, and `shipping_status` expose `plainBrief`, `briefFactGraph`, and `actionEnvelope`. The default text is compiled locally from canonical Shipping data in the fixed order `현재 상태 → 문제점 → 개선안 → 다음 진행 플랜 → 요약 → 지금 할 일`. Exact paths, hashes, commands, and evidence remain in structured details. A host model may add a clearly labeled `AI 참고 의견`, but it cannot rewrite state, readiness, next action, acceptance, blockers, SHIPPABLE, or CLOSED. Brief compilation invokes no model, network, or extra Git process.
+
+From v1.5.0 the same three tools also expose `releaseTrain` and `releaseTrainSummary`. One explicit outcome becomes one to five strictly increasing versions. The current release repeats the exact proposal contract and command/`cwd` authority; later versions are `ADVISORY_REPLAN_REQUIRED`, contain no executable command authority, and must be recalculated after their predecessor closes. Approval atomically stores `.shipping/release-train.json` bound to the proposal hash, contract hash, and baseline SHA. The plain brief adds `전체 개발계획` without changing the nine-tool inventory.
 
 The MCP client launches this command:
 

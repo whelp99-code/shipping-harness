@@ -71,6 +71,8 @@ export function buildUserStatusView(status) {
       baseline: proposal.baseline ?? null,
       intelligence: proposal.intelligence ?? null,
       oneScreenApproval: proposal.oneScreenApproval ?? null,
+      releaseTrain: proposal.releaseTrain ?? null,
+      releaseTrainSummary: proposal.releaseTrainSummary ?? null,
       briefFactGraph: compiled.plainBrief?.factGraph ?? proposal.briefFactGraph ?? null,
       actionEnvelope: compiled.plainBrief?.actionEnvelope ?? proposal.actionEnvelope ?? null,
       plainBrief: compiled.plainBrief ?? null,
@@ -112,6 +114,7 @@ export function buildUserStatusView(status) {
     unknownCount: status.issues?.counts?.UNKNOWN ?? status.state?.unknownCount ?? 0,
     currentEvidenceSha: status.state?.currentEvidenceSha ?? null,
     contractHash: status.state?.contractHash ?? status.contract?.hash ?? null,
+    releaseTrain: status.releaseTrain ?? null,
   });
   const summaryByState = {
     PLANNING: '이번 버전의 목표와 범위를 정하는 중입니다.',
@@ -143,6 +146,9 @@ export function buildUserStatusView(status) {
     actionEnvelope: compiled.plainBrief?.actionEnvelope ?? null,
     plainBrief: compiled.plainBrief ?? null,
     plainBriefText: compiled.plainBrief?.renderedText ?? null,
+    releaseTrain: status.releaseTrain ?? null,
+    releaseTrainSummary: status.releaseTrainSummary ?? null,
+    releaseTrainBinding: status.releaseTrainBinding ?? null,
     plainBriefError: compiled.error ?? null,
   };
 }

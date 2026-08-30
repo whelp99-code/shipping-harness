@@ -25,6 +25,7 @@ import {
   proposalSummary,
 } from './proposal-state.mjs';
 import { prepareNextRelease } from './release-transition.mjs';
+import { buildReleaseTrain, persistApprovedReleaseTrain, releaseTrainSummary } from './release-train.mjs';
 import { initializeState, readState, recordLedger, transitionState } from './state.mjs';
 
 const PROPOSAL_TTL_MS = 24 * 60 * 60 * 1000;
@@ -124,6 +125,18 @@ export function projectProposalAuthority(input) {
     proposal.decision.hash = decisionHash(proposal.decision);
     proposal.approvalBrief = buildApprovalBrief(proposal.decision);
   }
+  proposal.releaseTrain = buildReleaseTrain({
+    finalGoal: proposal.goal,
+    proposalRelease: proposal.release,
+    gitSha: proposal.gitSha,
+    proposalId: proposal.id,
+    projectName: proposal.contract?.project ?? proposal.analysis?.projectName ?? null,
+    analysis: proposal.analysis,
+    baseline: proposal.baseline,
+    acceptanceStrength: proposal.acceptanceStrength,
+    contract: proposal.contract,
+  });
+  proposal.releaseTrainSummary = releaseTrainSummary(proposal.releaseTrain);
   proposal.oneScreenApproval = buildOneScreenApproval(proposal);
   const compiled = compilePlainBriefSafe(proposal);
   proposal.briefFactGraph = compiled.plainBrief?.factGraph ?? null;
@@ -171,6 +184,7 @@ function authorityFingerprint(input) {
     contract: proposal.contract,
     plan: proposal.plan,
     diagnostics: proposal.diagnostics,
+    releaseTrain: proposal.releaseTrain,
     canonicalState: proposal.canonicalState,
   });
 }
@@ -620,7 +634,7 @@ export async function approveScopeProposal(root, input) {
   const activeIndex = await readActiveProposalIndex(root);
   invariant(activeIndex?.proposalId === input.proposalId, 'ERR_PROPOSAL_ACTIVE', 'Only the active proposal may be approved');
   invariant(activeIndex?.proposalHash === input.proposalHash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match the active revision');
-  const { proposal, proposalPath, summary } = await loadScopeProposal(root, input.proposalId);
+  const { proposal, projectedProposal, proposalPath, summary } = await loadScopeProposal(root, input.proposalId);
   invariant(input.proposalHash === proposal.hash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match');
   invariant(summary.state === 'READY_FOR_APPROVAL', 'ERR_DECISION_NEEDS_INPUT', `Proposal has unresolved mandatory risks or questions, a dirty baseline, weak acceptance, or another non-ready condition: ${summary.state}`);
   invariant(approverId !== proposal.decision?.proposer?.id, 'ERR_MODEL_SELF_APPROVAL', 'The proposer cannot approve its own decision package');
@@ -646,18 +660,30 @@ export async function approveScopeProposal(root, input) {
   invariant(currentGitSha(root) === proposal.gitSha && currentBaseline(root).blockingPaths.length === 0, 'ERR_PROPOSAL_STALE', 'Repository changed during proposal approval');
   const sha = currentGitSha(root);
   const { contract, lock } = await lockContract(root, sha);
+  const approvedAt = new Date().toISOString();
+  const persistedTrain = await persistApprovedReleaseTrain(root, projectedProposal.releaseTrain, {
+    proposalId: proposal.id,
+    proposalHash: proposal.hash,
+    contractHash: lock.contractHash,
+    baselineSha: lock.baselineSha,
+    approvedAt,
+  });
   const locked = await transitionState(root, 'LOCKED', {
     release: contract.release,
     contractHash: lock.contractHash,
     baselineSha: lock.baselineSha,
     approvedProposalId: proposal.id,
     approvedProposalHash: proposal.hash,
+    releaseTrainHash: projectedProposal.releaseTrain.hash,
+    releaseTrainPath: path.relative(root, persistedTrain.path).replaceAll('\\', '/'),
   }, 'scope proposal explicitly approved');
   const approved = {
     ...proposal,
+    releaseTrain: projectedProposal.releaseTrain,
+    releaseTrainSummary: projectedProposal.releaseTrainSummary,
     approval: {
       confirmed: true,
-      approvedAt: new Date().toISOString(),
+      approvedAt,
       approverType,
       approverId,
       contractHash: lock.contractHash,
@@ -673,6 +699,7 @@ export async function approveScopeProposal(root, input) {
     release: contract.release,
     contractHash: lock.contractHash,
     baselineSha: lock.baselineSha,
+    releaseTrainHash: projectedProposal.releaseTrain.hash,
   });
-  return { proposal: approved, contract, lock, state: locked };
+  return { proposal: approved, contract, lock, state: locked, releaseTrain: persistedTrain.envelope };
 }

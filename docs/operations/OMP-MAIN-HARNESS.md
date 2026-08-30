@@ -1,6 +1,6 @@
 # OMP Main Harness — Install, Doctor, and Rollback
 
-**Release:** Shipping Harness v1.4.0
+**Release:** Shipping Harness v1.5.0
 **Boundary:** personal and company-internal use only
 **Primary tested host:** OMP 18.0.10 through the existing `omo-balance` launcher and standalone `omp-core`
 **Compatibility host:** source-linked OMP 15.10.12
@@ -26,10 +26,10 @@ Run as the ordinary Ubuntu user, not root:
 cd /home/jm/orca/projects/shipping-harness
 
 # Read-only preview
-shipping-harness-omp bootstrap --tag v1.4.0
+shipping-harness-omp bootstrap --tag v1.5.0
 
 # Back up, install, merge, and verify
-shipping-harness-omp bootstrap --tag v1.4.0 --apply
+shipping-harness-omp bootstrap --tag v1.5.0 --apply
 
 # Independent post-install check
 shipping-harness-omp doctor
@@ -53,7 +53,7 @@ It creates the package locally with npm, installs it with `--offline --global --
 
 ```text
 DONE
-Shipping Harness: 1.4.0
+Shipping Harness: 1.5.0
 OMP: omp/18.0.10
 MCP tools: 9 PASS
 Approval: always-ask
@@ -164,3 +164,7 @@ Installation is transactional at the operational level:
 5. the command reports `ERR_OMP_INSTALL_ROLLED_BACK` only after restoration succeeds.
 
 Never delete `.shipping`, `~/.omp`, or the backup directory to resolve an installation problem.
+
+## v1.5.0 release-train presentation
+
+OMP renders Shipping-generated `plainBriefText` first. Its `전체 개발계획` section shows one fully bound current release and later advisory releases. OMP must not invent future commands, approve or execute a future version, or advance without a committed predecessor CLOSED receipt and a fresh replan. The integration remains exactly nine MCP tools.

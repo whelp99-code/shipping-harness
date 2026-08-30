@@ -25,3 +25,5 @@ These schemas freeze the internal v1 authority surfaces. Every root rejects unkn
 | stableEvent | `shipping-harness/stable-v1` | [stable-event.schema.json](./stable-event.schema.json) | [stable-event.example.json](./examples/stable-event.example.json) | reject |
 | health | `shipping-harness/health-v1` | [health.schema.json](./health.schema.json) | [health.example.json](./examples/health.example.json) | reject |
 | compatibility | `shipping-harness/stable-v1` | [compatibility.schema.json](./compatibility.schema.json) | [compatibility.example.json](./examples/compatibility.example.json) | reject |
+
+- `release-train.schema.json` — deterministic one-to-five-version rolling plan; only the first release may bind current contract authority.

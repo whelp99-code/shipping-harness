@@ -208,6 +208,7 @@
         "scripts/v1-doc-audit.mjs",
         "scripts/v1-security-inventory.mjs",
         "docs/reports/v1.6.1-autopilot-field.json",
+        "docs/reports/v1-security-inventory.json",
         "src/core/autopilot-policy.mjs",
         "src/core/autopilot.mjs",
         "src/core/paths.mjs",

@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 6,
+    "requiredFailed": 0,
+    "total": 6
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "6e592152d8c207ef649db7d1beba938544afcdac",
+  "closedAt": "2026-08-30T12:51:45.677Z",
+  "closedGitSha": "946d109b4e825c409cac221a5547cedac405dfcf",
+  "contractHash": "a9ea5bfaa3d83318b54ab10164f6fb03c6bf531db6cb1119fe6fca650a5ebdff",
+  "evidenceRunId": "run-2026-08-30T12-51-04-945Z-ea0cc9ef",
+  "fixCycles": 0,
+  "goal": "Analyze repository evidence first, discover only material product ambiguities through a bounded user-friendly interview, record immutable decisions and direction candidates, and hand an accepted direction to the existing Release Train and policy autopilot without technical interrogation or model authority.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.7.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

@@ -40,6 +40,8 @@ export function inventory() {
       autopilotModelAuthority: false,
       automaticReleased: false,
       externalConsequencesHumanOnly: true,
+      goalDirectionModelAuthority: false,
+      goalCharterAuthority: false,
     },
     limits: {
       unlimitedValuesAllowed: false,
@@ -95,6 +97,10 @@ export function inventory() {
       migration: digest('packages/stable-control/migration.mjs'),
       autopilotPolicy: digest('src/core/autopilot-policy.mjs'),
       autopilotRuntime: digest('src/core/autopilot.mjs'),
+      goalDiscovery: digest('src/core/goal-discovery.mjs'),
+      decisionLedger: digest('src/core/decision-ledger.mjs'),
+      goalCharter: digest('src/core/goal-charter.mjs'),
+      goalDirectionField: digest('scripts/goal-direction-field-pilot.mjs'),
     },
     requiredRecords: [
       'THIRD_PARTY.md',
@@ -117,6 +123,10 @@ export function inventory() {
       'npm run test:stable',
       'npm run test:autopilot',
       'npm run smoke:autopilot',
+      'npm run test:goal-discovery',
+      'npm run test:goal-charter',
+      'npm run test:goal-direction:field',
+      'npm run smoke:goal-direction:field',
     ],
   };
 }
@@ -134,6 +144,8 @@ if (process.argv.includes('--record')) {
   }
   if (stored.authority.autopilotModelAuthority !== false
     || stored.authority.automaticReleased !== false
+    || stored.authority.goalDirectionModelAuthority !== false
+    || stored.authority.goalCharterAuthority !== false
     || stored.policyAutopilot.defaultDecision !== 'STOP'
     || stored.policyAutopilot.automaticReleased !== false
     || stored.policyAutopilot.localReversibleOnly !== true) {

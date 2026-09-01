@@ -35,6 +35,19 @@ const required = [
   'schemas/v1/release-train.schema.json',
   'schemas/v1/examples/release-train.example.json',
   'docs/research/PAPERTHIN-APPLICATION-DECISION.md',
+  'schemas/v1/goal-discovery.schema.json',
+  'schemas/v1/decision-ledger-event.schema.json',
+  'schemas/v1/goal-charter.schema.json',
+  'docs/planning/29-V1.7.0-BOUNDED-GOAL-DISCOVERY-AND-DIRECTION-LEDGER-DEVELOPMENT-PLAN.md',
+  'docs/planning/30-V1.8.0-GOAL-CHARTER-AND-DIRECTION-CRITIC-DEVELOPMENT-PLAN.md',
+  'docs/planning/31-V1.8.1-GOAL-DIRECTION-FIELD-HARDENING-DEVELOPMENT-PLAN.md',
+  'scripts/goal-discovery-pilot.mjs',
+  'scripts/goal-charter-pilot.mjs',
+  'scripts/goal-direction-field-pilot.mjs',
+  'test/integration/goal-direction-field.test.mjs',
+  'test/adversarial/goal-direction-field-attacks.test.mjs',
+  'test/integration/goal-direction-field-performance.test.mjs',
+  'docs/reports/v1.8.1-goal-direction-field.json',
 ];
 
 function walk(directory, output = []) {
@@ -92,6 +105,10 @@ const fieldReport = JSON.parse(readFileSync(path.join(root, 'docs', 'reports', '
 if (fieldReport.schema !== 'shipping-harness/autopilot-field-pilot-v1' || fieldReport.status !== 'PASS' || fieldReport.released !== false || fieldReport.mcpTools !== 9) failures.push('autopilot field report is not a passing bounded internal report');
 if (Object.values(fieldReport.safety ?? {}).some((value) => value !== 0)) failures.push('autopilot field report contains a non-zero safety counter');
 if ((fieldReport.realProjects ?? []).filter((entry) => entry.available).some((entry) => entry.unchanged !== true)) failures.push('autopilot field report contains a mutated real-project lane');
+const goalDirectionFieldReport = JSON.parse(readFileSync(path.join(root, 'docs', 'reports', 'v1.8.1-goal-direction-field.json'), 'utf8'));
+if (goalDirectionFieldReport.schema !== 'shipping-harness/goal-direction-field-v1' || goalDirectionFieldReport.status !== 'PASS' || goalDirectionFieldReport.released !== false || goalDirectionFieldReport.mcp?.tools !== 9) failures.push('goal direction field report is not a passing bounded internal report');
+if (Object.values(goalDirectionFieldReport.safety ?? {}).some((value) => value !== 0)) failures.push('goal direction field report contains a non-zero safety counter');
+if ((goalDirectionFieldReport.realProjects ?? []).filter((entry) => entry.available).some((entry) => entry.unchanged !== true)) failures.push('goal direction field report contains a mutated real-project lane');
 const activeContract = JSON.parse(readFileSync(path.join(root, '.shipping', 'contract.yaml'), 'utf8'));
 if (packageJson.version !== activeContract.release) failures.push(`package version is ${packageJson.version}, active release is ${activeContract.release}`);
 if (!/^1\.\d+\.\d+$/u.test(packageJson.version)) failures.push(`package version ${packageJson.version} is outside the stable v1 release line`);

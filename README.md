@@ -1,8 +1,8 @@
 # Shipping Harness
 
 **Worker name:** `shipping-harness`
-**Current release train:** `v1.7.0 — Bounded Goal Discovery and Direction Ledger`
-**Authority:** the release is complete only when `.shipping/releases/1.7.0.json` is `CLOSED` and annotated tag `v1.7.0` points to the closure commit
+**Current release train:** `v1.8.1 — Goal Direction Field Hardening`
+**Authority:** the release is complete only when `.shipping/releases/1.8.1.json` is `CLOSED` and annotated tag `v1.8.1` points to the closure commit
 **Product category:** Shipping Governance / Completion Control Plane
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.

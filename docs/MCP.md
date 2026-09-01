@@ -235,3 +235,7 @@ Each question exposes a conservative reversible `recommendedChoice`. `shipping_r
 The same proposal exposes `goalDiscovery`, deterministic direction candidates, critic findings, accepted `direction`, and `decisionLedger`. Candidate and direction hashes ignore host-model prose. Every direction has `commandAuthority=false`, `approvalAuthority=false`, `closureAuthority=false`, `released=false`, and `modelAuthority=false`. The accepted outcome can seed the Release Train only after questions and critic blockers are zero; it cannot approve scope, run a command, weaken acceptance, close a release, deploy, or mark `RELEASED`.
 
 The Decision Ledger is append-only JSONL under `.shipping/decision-ledger.jsonl`, bounded to 256 events and 1 MiB. It records proposal/revision/hash, current Git SHA, discovery hash, answer provenance, direction hash, evidence references, sequence, previous hash, and event hash. Tamper, sequence gaps, stale bindings, duplicate event keys, and retention overflow fail closed. The nine-tool MCP inventory remains unchanged.
+
+## v1.8.1 Goal Direction field boundary
+
+The existing nine tools project bounded Goal Discovery, Direction Critic, Decision Ledger, immutable Goal Charter, Release Train, and Autopilot as one authority chain. Host-model prose cannot change canonical state, hashes, next action, approval readiness, acceptance, close, deployment, or RELEASED. The field report must retain nine tools and zero false authority or target mutation counters.

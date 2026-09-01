@@ -20,7 +20,9 @@
     "closedVersionsNeverReopen": true,
     "autopilotModelAuthority": false,
     "automaticReleased": false,
-    "externalConsequencesHumanOnly": true
+    "externalConsequencesHumanOnly": true,
+    "goalDirectionModelAuthority": false,
+    "goalCharterAuthority": false
   },
   "limits": {
     "unlimitedValuesAllowed": false,
@@ -85,7 +87,11 @@
     "stableRegistry": "c6ebc4f67c0b7a2e1d370369b5f3a6dabac4ab73ffd5072e358c1ae16a498d4c",
     "migration": "2047305a7527eda6fc9d9735ad3640b0be050ed88d4264f31519ce4840662826",
     "autopilotPolicy": "ae5ebfdc0a0123139cefc3d981caf0f57b53b0e809714cf20f5f385c6300746a",
-    "autopilotRuntime": "c63d768704bf06cb7a7d4d061922c320f2d4ac6cf73cc4d43e1c33d04a9392dc"
+    "autopilotRuntime": "c63d768704bf06cb7a7d4d061922c320f2d4ac6cf73cc4d43e1c33d04a9392dc",
+    "goalDiscovery": "d78fd493adb82d09a4d56e69d1260c092a317f7d3c531ed0d4518b60c8d3a281",
+    "decisionLedger": "d8672daf42674380d7e903bdee1f59dcfd8bd5fdbecea33555fa30104234d5ef",
+    "goalCharter": "e672c6273c00491665a6a9411a6ba4cc0d133fee4f57d6f197b70656a49b9fab",
+    "goalDirectionField": "d3d17f70d1ba48561bf93f7d774a1ad95c758008f7681e508a4fac3e1ff5f2ea"
   },
   "requiredRecords": [
     "THIRD_PARTY.md",
@@ -107,6 +113,10 @@
     "npm run test:remote",
     "npm run test:stable",
     "npm run test:autopilot",
-    "npm run smoke:autopilot"
+    "npm run smoke:autopilot",
+    "npm run test:goal-discovery",
+    "npm run test:goal-charter",
+    "npm run test:goal-direction:field",
+    "npm run smoke:goal-direction:field"
   ]
 }

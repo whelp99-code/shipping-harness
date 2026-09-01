@@ -48,3 +48,7 @@ The machine-readable inventory and critical-file digests are stored in `docs/rep
 - Decision Ledger events are append-only, hash chained, proposal/Git bound, replay protected, and retention limited.
 - Direction artifacts explicitly deny command, approval, closure, deployment, model, and `RELEASED` authority.
 - Full Paperthin runtime, Ouroboros infinite current-version evolution, OMO Team/DAG activation, raw shell, production, public, customer, cost, credential, data, authentication, security, and license authority remain excluded.
+
+## v1.8.1 Goal Direction security boundary
+
+Goal Discovery, Direction Critic, Decision Ledger, Goal Charter, field pilot, Release Train, and Autopilot remain deterministic local code. They expose no raw shell, credentials, public listener, external write, model authority, automatic RELEASED, or in-place accepted-charter mutation.

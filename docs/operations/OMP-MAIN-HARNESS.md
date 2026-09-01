@@ -180,3 +180,7 @@ The tagged installation must preserve the pre-install `omp` and `omp-core` paths
 ## v1.7.0 bounded discovery presentation
 
 OMP must render Shipping-generated goal questions, recommended choices, direction candidates, critic result, and Decision Ledger summary without rewriting their authority. Specific goals skip the interview. Broad or conflicting goals show at most three non-technical questions and the exact action `권장안으로 결정해.` when delegated defaults are available. OMP may explain consequences in simple language, but it cannot add questions, continue after the two-round STOP, select a different candidate, modify hashes, approve scope, execute, close, deploy, or mark `RELEASED`. Doctor continues to require exactly nine tools and the installed Skill/AGENTS block; no new MCP tool is added.
+
+## Shipping Harness v1.8.1
+
+Install only from annotated tag `v1.8.1` after CLOSED and clean-source verification. OMP remains 18.0.10, MCP remains nine tools, and installation must preserve the pre-install `omp` and `omp-core` paths and SHA-256 hashes. Run doctor and rollback preview after installation.

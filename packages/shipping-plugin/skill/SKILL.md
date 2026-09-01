@@ -39,3 +39,7 @@ Do not claim completion from agent text, task text, or an upstream harness statu
 - `shipping_refine` accepts only bounded answers, an existing workspace candidate, rescan, explicit user-authorized mode change, or the exact reviewed baseline receipt fields.
 - No silent approval, mode change, scope expansion, budget increase, isolated-check downgrade, or closed-version reopen.
 - Do not delete or reset repository `.shipping` state during install, repair, upgrade, or uninstall.
+
+## v1.8.1 field rule
+
+Treat `goalDirectionField` and its report as evidence only. Render Shipping-generated questions, direction, Goal Charter, train, and next action without host-model rewriting. A model cannot turn field PASS into approval, execution, CLOSED, deployment, or RELEASED authority.

@@ -81,3 +81,7 @@ Operators retain `docs/reports/v1.6.1-autopilot-field.json` with the source repo
 ## v1.7.0 goal discovery handover
 
 Operators retain the CLOSED receipt, annotated tag, `docs/reports/v1.7.0-goal-discovery.json`, and the stable Goal Discovery and Decision Ledger schema examples. The field report must show nine tools, zero technical questions, zero model-authority leaks, zero false direction/ready/closed/released results, and unchanged available real-project fingerprints. `.shipping/decision-ledger.jsonl` is runtime authority evidence: do not edit, truncate, reorder, or merge it manually. A hash, sequence, event-key, Git-binding, or retention failure is an incident and must stop planning until recovered from trusted project history or a separately verified backup.
+
+## v1.8.1 handover
+
+Operators verify the tagged package, nine-tool protocol, Goal Direction field report, real-project unchanged receipts, doctor, install receipt, OMP binary hashes, and rollback preview. Any non-zero safety counter blocks handover.

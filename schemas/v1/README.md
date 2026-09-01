@@ -39,3 +39,9 @@ These schemas freeze the internal v1 authority surfaces. Every root rejects unkn
 - `decision-ledger-event.schema.json` / `examples/decision-ledger-event.example.json`: one append-only hash-chain event bound to proposal and Git evidence.
 
 These schemas describe authority evidence, not an executable prompt format. A valid document cannot approve, execute, close, deploy, or mark `RELEASED`.
+
+### Goal Discovery, Decision Ledger, and Goal Charter
+
+- `goal-discovery.schema.json`: bounded deterministic product-direction discovery.
+- `decision-ledger-event.schema.json`: append-only hash-chained decision event.
+- `goal-charter.schema.json`: immutable accepted direction bound to proposal, Git, contract, baseline, train, approver, rollback, and replan triggers.

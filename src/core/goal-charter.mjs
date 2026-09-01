@@ -1,8 +1,10 @@
 import path from 'node:path';
+import { readdir } from 'node:fs/promises';
 import { hashObject, stableStringify } from './crypto.mjs';
 import { invariant } from './errors.mjs';
 import { assertContainedPath, exists, readJson, writeJsonAtomic } from './fs.mjs';
 import { runtimePaths } from './paths.mjs';
+import { readDecisionLedger } from './decision-ledger.mjs';
 
 const CHARTER_SCHEMA = 'shipping-harness/goal-charter-v1';
 const MAX_TEXT = 4000;
@@ -252,6 +254,47 @@ export async function persistAcceptedGoalCharter(root, charter) {
   }
   await writeJsonAtomic(target, charter);
   return { path: target, charter, duplicate: false, archivedPath };
+}
+
+export async function loadArchivedGoalCharter(root, release) {
+  const target = archivedGoalCharterPath(root, release);
+  if (!(await exists(target))) return null;
+  await assertContainedPath(root, target);
+  const charter = validateGoalCharter(await readJson(target));
+  invariant(charter.status === 'ACCEPTED' && charter.release === release, 'ERR_GOAL_CHARTER_ARCHIVE_DRIFT', 'Archived Goal Charter release or status does not match its path', { release, observedRelease: charter.release, status: charter.status });
+  return charter;
+}
+
+export async function auditGoalCharterHistory(root) {
+  const paths = runtimePaths(root);
+  if (!(await exists(paths.releases))) {
+    const body = { schema: 'shipping-harness/goal-charter-history-audit-v1', status: 'PASS', entries: [], modelAuthority: false, released: false };
+    return { ...body, hash: hashObject(body) };
+  }
+  await assertContainedPath(root, paths.releases);
+  const ledger = await readDecisionLedger(root);
+  const names = (await readdir(paths.releases)).filter((name) => name.endsWith('-goal-charter.json')).sort();
+  const entries = [];
+  for (const name of names) {
+    const release = name.slice(0, -'-goal-charter.json'.length);
+    const charter = await loadArchivedGoalCharter(root, release);
+    const receiptPath = path.join(paths.releases, `${release}.json`);
+    await assertContainedPath(root, receiptPath);
+    invariant(await exists(receiptPath), 'ERR_GOAL_CHARTER_PREDECESSOR_OPEN', 'Archived Goal Charter lacks a CLOSED release receipt', { release });
+    const receipt = await readJson(receiptPath);
+    invariant(receipt?.schema === 'shipping-harness/release-v1'
+      && receipt.release === release
+      && receipt.acceptance?.requiredFailed === 0
+      && Number.isFinite(Date.parse(receipt.closedAt)),
+    'ERR_GOAL_CHARTER_PREDECESSOR_OPEN', 'Archived Goal Charter receipt is not a valid CLOSED receipt', { release });
+    const acceptedEvent = [...ledger].reverse().find((event) => event.type === 'direction.accepted'
+      && event.proposalId === charter.proposalId
+      && event.details?.goalCharterHash);
+    invariant(acceptedEvent?.details?.goalCharterHash === charter.hash, 'ERR_GOAL_CHARTER_ARCHIVE_DRIFT', 'Archived Goal Charter no longer matches its immutable Decision Ledger acceptance', { release, charterHash: charter.hash, ledgerHash: acceptedEvent?.details?.goalCharterHash ?? null });
+    entries.push({ release, hash: charter.hash, proposalId: charter.proposalId, receipt: path.relative(root, receiptPath).replaceAll('\\', '/'), archive: path.relative(root, archivedGoalCharterPath(root, release)).replaceAll('\\', '/') });
+  }
+  const body = { schema: 'shipping-harness/goal-charter-history-audit-v1', status: 'PASS', entries, modelAuthority: false, released: false };
+  return { ...body, hash: hashObject(body) };
 }
 
 export async function loadGoalCharter(root) {

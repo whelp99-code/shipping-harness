@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -54,7 +54,7 @@
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",
     "license:check": "node scripts/license-check.mjs",
-    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs && npm run smoke:release-train && npm run smoke:autopilot && npm run smoke:autopilot:field && npm run smoke:goal-discovery && npm run smoke:goal-charter",
+    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs && npm run smoke:release-train && npm run smoke:autopilot && npm run smoke:autopilot:field && npm run smoke:goal-discovery && npm run smoke:goal-charter && npm run test:goal-direction:field && npm run smoke:goal-direction:field",
     "test:omo-bridge": "node --test --test-reporter=spec test/omo/*.test.mjs",
     "test:remote": "node --test --test-reporter=spec test/remote/*.test.mjs test/adversarial/remote-attacks.test.mjs",
     "smoke:remote": "node scripts/remote-gateway-smoke.mjs --check",
@@ -74,7 +74,9 @@
     "test:goal-discovery": "node --test --test-reporter=spec test/mcp/goal-discovery.test.mjs test/adversarial/goal-discovery-attacks.test.mjs test/integration/decision-ledger.test.mjs test/integration/goal-discovery-performance.test.mjs",
     "smoke:goal-discovery": "node scripts/goal-discovery-pilot.mjs --check",
     "test:goal-charter": "node --test --test-reporter=spec test/unit/goal-charter.test.mjs test/integration/goal-charter-approval.test.mjs test/adversarial/goal-charter-attacks.test.mjs test/integration/goal-charter-performance.test.mjs",
-    "smoke:goal-charter": "node scripts/goal-charter-pilot.mjs --check"
+    "smoke:goal-charter": "node scripts/goal-charter-pilot.mjs --check",
+    "test:goal-direction:field": "node --test --test-reporter=spec test/integration/goal-direction-field.test.mjs test/adversarial/goal-direction-field-attacks.test.mjs test/integration/goal-direction-field-performance.test.mjs",
+    "smoke:goal-direction:field": "node scripts/goal-direction-field-pilot.mjs --check"
   },
   "license": "MIT"
 }

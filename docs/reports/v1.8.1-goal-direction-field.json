@@ -1,0 +1,177 @@
+{
+  "schema": "shipping-harness/goal-direction-field-v1",
+  "release": "1.8.1",
+  "status": "PASS",
+  "generatedAt": "2026-09-01T00:48:47.724Z",
+  "modelAuthority": false,
+  "released": false,
+  "modelCalls": 0,
+  "networkCalls": 0,
+  "durationMs": 1534.505,
+  "mcp": {
+    "protocol": "2025-03-26",
+    "tools": 9,
+    "toolNames": [
+      "shipping_start",
+      "shipping_refine",
+      "shipping_approve_scope",
+      "shipping_execute",
+      "shipping_status",
+      "shipping_verify",
+      "shipping_fix_blockers",
+      "shipping_pause",
+      "shipping_close"
+    ]
+  },
+  "authorityFingerprint": "7499099be71494a1b185c15486e0b119bea36a3367730547b3e20c564269860a",
+  "modelVariants": [
+    {
+      "variant": "NO_MODEL",
+      "authorityFingerprint": "7499099be71494a1b185c15486e0b119bea36a3367730547b3e20c564269860a",
+      "modelAuthority": false
+    },
+    {
+      "variant": "WEAK_MODEL",
+      "authorityFingerprint": "7499099be71494a1b185c15486e0b119bea36a3367730547b3e20c564269860a",
+      "modelAuthority": false
+    },
+    {
+      "variant": "STRONG_MODEL",
+      "authorityFingerprint": "7499099be71494a1b185c15486e0b119bea36a3367730547b3e20c564269860a",
+      "modelAuthority": false
+    },
+    {
+      "variant": "HOSTILE_MODEL",
+      "authorityFingerprint": "7499099be71494a1b185c15486e0b119bea36a3367730547b3e20c564269860a",
+      "modelAuthority": false
+    }
+  ],
+  "discovery": {
+    "status": "PASS",
+    "release": "1.7.0",
+    "directionHash": "af87d517e2b9549852f3749d41e58b5a1d4b9e3251f58468e6e3142baa5be820",
+    "safety": {
+      "technicalQuestions": 0,
+      "modelAuthorityLeaks": 0,
+      "falseDirectionReady": 0,
+      "falseReady": 0,
+      "falseClosed": 0,
+      "automaticReleased": 0,
+      "targetMutation": 0,
+      "newMcpTools": 0
+    }
+  },
+  "charter": {
+    "status": "PASS",
+    "release": "1.8.0",
+    "previewHash": "c735140d33194b00b629a9ce491f162f4d7b0dc66d9babcb9cced123df0d4211",
+    "acceptedHash": "b7faf4f6096fe01ade8917542cabff1a5fad00ca2fb963fcf7e80621f48e9b86",
+    "trainHash": "c612057a7935bb6057d0cca005d1e38f7b4f700e578e87127617f8c2ea85c5aa",
+    "safety": {
+      "falseCharterReady": 0,
+      "charterAuthorityLeaks": 0,
+      "charterHashDrift": 0,
+      "trainBindingDrift": 0,
+      "ledgerAcceptanceMissing": 0,
+      "falseReady": 0,
+      "falseClosed": 0,
+      "automaticReleased": 0,
+      "targetMutation": 0,
+      "newMcpTools": 0
+    }
+  },
+  "autopilot": {
+    "status": "PASS",
+    "released": false,
+    "safety": {
+      "falseAuto": 0,
+      "falseNotify": 0,
+      "falseAsk": 0,
+      "falseStop": 0,
+      "falseClose": 0,
+      "falseRelease": 0,
+      "falseNextReleaseActivation": 0,
+      "unauthorizedExternalImpact": 0,
+      "targetMutations": 0,
+      "modelAuthorityLeaks": 0
+    }
+  },
+  "realProjects": [
+    {
+      "path": "/home/jm/orca/projects/AI-CRM+PM",
+      "available": true,
+      "unchanged": true,
+      "lanes": 3,
+      "heads": [
+        "e235c483a0e50b743a6b2ef0f188a61c735028ff"
+      ]
+    },
+    {
+      "path": "/home/jm/orca/projects/EvoHarvest",
+      "available": true,
+      "unchanged": true,
+      "lanes": 3,
+      "heads": [
+        "fcc16972f7a5e68d550ecca5e7c3ab16b0976ab9"
+      ]
+    },
+    {
+      "path": "/home/jm/orca/projects/second-brain-app",
+      "available": true,
+      "unchanged": true,
+      "lanes": 3,
+      "heads": [
+        "0ef3866d29179fd2da4d235737c99a1e311ddb3c"
+      ]
+    }
+  ],
+  "safety": {
+    "discovery.technicalQuestions": 0,
+    "discovery.modelAuthorityLeaks": 0,
+    "discovery.falseDirectionReady": 0,
+    "discovery.falseReady": 0,
+    "discovery.falseClosed": 0,
+    "discovery.automaticReleased": 0,
+    "discovery.targetMutation": 0,
+    "discovery.newMcpTools": 0,
+    "charter.falseCharterReady": 0,
+    "charter.charterAuthorityLeaks": 0,
+    "charter.charterHashDrift": 0,
+    "charter.trainBindingDrift": 0,
+    "charter.ledgerAcceptanceMissing": 0,
+    "charter.falseReady": 0,
+    "charter.falseClosed": 0,
+    "charter.automaticReleased": 0,
+    "charter.targetMutation": 0,
+    "charter.newMcpTools": 0,
+    "autopilot.falseAuto": 0,
+    "autopilot.falseNotify": 0,
+    "autopilot.falseAsk": 0,
+    "autopilot.falseStop": 0,
+    "autopilot.falseClose": 0,
+    "autopilot.falseRelease": 0,
+    "autopilot.falseNextReleaseActivation": 0,
+    "autopilot.unauthorizedExternalImpact": 0,
+    "autopilot.targetMutations": 0,
+    "autopilot.modelAuthorityLeaks": 0,
+    "falseReady": 0,
+    "falseAuto": 0,
+    "falseShippable": 0,
+    "falseClosed": 0,
+    "automaticReleased": 0,
+    "modelAuthorityLeak": 0,
+    "targetMutation": 0,
+    "newMcpTools": 0
+  },
+  "boundaries": {
+    "boundedInterview": true,
+    "decisionLedgerAppendOnly": true,
+    "goalCharterImmutable": true,
+    "futureTrainAuthority": false,
+    "automaticReleased": false,
+    "realProjectsReadOnly": true,
+    "paperthinRuntimeDependency": false,
+    "teamDagDefault": false,
+    "infiniteCurrentVersionEvolution": false
+  }
+}

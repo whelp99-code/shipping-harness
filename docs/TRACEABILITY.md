@@ -246,3 +246,11 @@ Any implementation that cannot map to a requirement is out of scope or must amen
 | REQ-LEDGER-001..004 | `src/core/decision-ledger.mjs`, runtime paths, proposal lifecycle events | `test/integration/decision-ledger.test.mjs`, retention/performance tests |
 | REQ-BOUNDARY-001..002 | nine-tool reuse, no technical questions, no model/command/approval/close/release authority | MCP inventory, OMP tests, hostile-model tests, read-only real-project pilot |
 | AC-17001..17016 | locked v1.7.0 contract acceptance and closure evidence | full `npm run release:verify`, Shipping receipt, annotated tag, clean source, installed doctor/rollback audit |
+
+## v1.8.1 Goal Direction Field Hardening
+
+| Requirement | Evidence |
+|---|---|
+| REQ-FIELD-181-001..004 | integrated/model-variant/interview lanes in `test/integration/goal-direction-field.test.mjs` and field pilot |
+| REQ-FIELD-181-005..010 | adversarial ledger, charter, policy, pause, and RELEASED attacks |
+| REQ-FIELD-181-011..014 | read-only real-project pilot, MCP nine-tool check, safety report, and performance test |

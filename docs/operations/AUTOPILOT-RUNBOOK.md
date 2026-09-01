@@ -253,3 +253,7 @@ Do not force `SHIPPABLE`, `CLOSED`, or the next release by editing runtime recor
 ## v1.6.1 field-hardening proof
 
 `npm run test:autopilot:field` and `npm run smoke:autopilot:field` exercise policy/model invariance, dirty nested planning, dangerous consequence classification, idempotence, retention, performance, disposable automatic closure, and locally available real-project read-only fingerprints. `docs/reports/v1.6.1-autopilot-field.json` is repository evidence and is intentionally excluded from the installable package. Any non-zero false-authority, target-mutation, external-impact, or false-release counter blocks closure.
+
+## v1.8.1 Goal Direction entry gate
+
+Autopilot may begin only after bounded discovery has no unresolved material question, Direction Critic has no blocker, and an accepted Goal Charter is bound to the exact proposal, Git, contract, baseline, and Release Train. Any stale or changed binding requires a new proposal or replan.

@@ -537,3 +537,7 @@ A release is done when its acceptance criteria pass, required checks succeed, re
 | REQ-LEDGER-004 | Keep the ledger bounded to 256 events and 1 MiB. |
 | REQ-BOUNDARY-001 | Preserve exactly nine MCP tools and existing OMP compatibility. |
 | REQ-BOUNDARY-002 | Do not introduce Paperthin runtime, Team/DAG, infinite evolution, raw shell, push, deploy, or public authority. |
+
+## v1.8.1 Goal Direction field requirements
+
+REQ-FIELD-181-001 through REQ-FIELD-181-014 require model-invariant authority hashes, bounded product questions, explicit default delegation, conflict stop, ledger integrity, immutable Goal Charter, advisory-only future train entries, default-deny policy, pause/abort priority, RELEASED=false, read-only real-project pilots, nine MCP tools, zero safety counters, and bounded local performance.

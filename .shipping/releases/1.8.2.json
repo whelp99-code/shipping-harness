@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 4,
+    "requiredFailed": 0,
+    "total": 4
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "20522f21099b23ad04a04361a6cf6658e112fa66",
+  "closedAt": "2026-09-01T01:14:47.963Z",
+  "closedGitSha": "dfc48be121065459c4d4126e07d266e9addc5832",
+  "contractHash": "a375e4652e664cbc642c76678ee254c6ee60b325322945e027caf8f505eb0469",
+  "evidenceRunId": "run-2026-09-01T01-14-16-854Z-dfd6daf1",
+  "fixCycles": 0,
+  "goal": "Keep deterministic beginner reports below the fixed 8 KiB limit for legacy and goal-discovery dirty proposals by removing redundant plain-brief projections without weakening Shipping authority, evidence, or action policy.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.8.2",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

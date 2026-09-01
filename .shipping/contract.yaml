@@ -1,43 +1,25 @@
 {
   "acceptance": [
     {
-      "id": "AC-18101",
-      "description": "Goal Discovery and Goal Charter regression tests pass.",
+      "id": "AC-18201",
+      "description": "Plain Brief unit, adversarial, and Orca-JARVIS-shaped budget regression tests pass.",
       "type": "command",
-      "command": "npm run test:goal-charter",
+      "command": "node --test --test-reporter=spec test/mcp/plain-brief.test.mjs test/integration/plain-brief-budget.test.mjs test/adversarial/plain-brief-attacks.test.mjs",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 900
+      "timeoutSeconds": 300
     },
     {
-      "id": "AC-18102",
-      "description": "Goal Discovery, Decision Ledger, sequential Goal Charter, model-variant, replay, and adversarial field tests pass.",
+      "id": "AC-18202",
+      "description": "Dirty nested field pilot keeps a healthy bounded beginner report and does not mutate the target project.",
       "type": "command",
-      "command": "npm run test:goal-charter:field",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 900
-    },
-    {
-      "id": "AC-18103",
-      "description": "Disposable and read-only real-project field pilot reports PASS with all safety counters zero.",
-      "type": "command",
-      "command": "npm run smoke:goal-charter:field",
+      "command": "npm run smoke:autopilot:field",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 600
     },
     {
-      "id": "AC-18109",
-      "description": "MCP, OMP main harness, and stable schemas pass with exactly nine tools.",
-      "type": "command",
-      "command": "npm run test:mcp && npm run test:omp-main && npm run test:stable",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 900
-    },
-    {
-      "id": "AC-18110",
+      "id": "AC-18203",
       "description": "Full regression, security, license, documentation, train, autopilot, discovery, charter, and field gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -46,7 +28,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-18111",
+      "id": "AC-18204",
       "description": "No whitespace or conflict-marker errors remain.",
       "type": "command",
       "command": "git diff --check",
@@ -177,17 +159,21 @@
     "rollback-bypass-field",
     "unauthorized-external-impact-field",
     "read-only-project-mutation-field",
-    "omp-binary-mutation-field"
+    "omp-binary-mutation-field",
+    "legacy-plain-brief-over-budget",
+    "goal-discovery-plain-brief-over-budget",
+    "action-envelope-weakening",
+    "fact-graph-authority-loss"
   ],
   "budgets": {
-    "maxAgentRuns": 4,
+    "maxAgentRuns": 2,
     "maxCommandSeconds": 900,
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Harden bounded goal discovery, Decision Ledger, immutable Goal Charter, and policy Autopilot across replay, restart, sequential release, model-variant, dirty-project, and read-only real-project field lanes without adding authority.",
+  "goal": "Keep deterministic beginner reports below the fixed 8 KiB limit for legacy and goal-discovery dirty proposals by removing redundant plain-brief projections without weakening Shipping authority, evidence, or action policy.",
   "project": "shipping-harness",
-  "release": "1.8.1",
+  "release": "1.8.2",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -195,50 +181,37 @@
     "generateReport": true
   },
   "requirements": [
-    "REQ-FIELD-181-001",
-    "REQ-FIELD-181-002",
-    "REQ-FIELD-181-003",
-    "REQ-FIELD-181-004",
-    "REQ-FIELD-181-005",
-    "REQ-FIELD-181-006",
-    "REQ-FIELD-181-007",
-    "REQ-FIELD-181-008",
-    "REQ-FIELD-181-009",
-    "REQ-FIELD-181-010",
-    "REQ-FIELD-181-011",
-    "REQ-FIELD-181-012",
-    "REQ-FIELD-181-013",
-    "REQ-FIELD-181-014",
-    "REQ-FIELD-181-015",
-    "REQ-FIELD-181-016",
-    "REQ-FIELD-181-017",
-    "REQ-FIELD-181-018",
-    "REQ-FIELD-181-019",
-    "REQ-FIELD-181-020",
-    "REQ-FIELD-181-021"
+    "REQ-PB-182-001",
+    "REQ-PB-182-002",
+    "REQ-PB-182-003",
+    "REQ-PB-182-004",
+    "REQ-PB-182-005",
+    "REQ-PB-182-006"
   ],
   "schema": "shipping-harness/v1",
   "scope": {
-    "exclude": [
-      "A tenth MCP tool, raw shell, arbitrary commands, background workers, public listeners, or automatic deployment.",
-      "Full Gajae technical interviews, Ouroboros infinite current-version mutation, OMO Team/DAG default activation, or Paperthin runtime dependency.",
-      "Model approval, model completion authority, model voting, or any automatic RELEASED state.",
-      "Acceptance weakening, rollback removal, core-value deferral, or in-place mutation of accepted or archived Goal Charters.",
-      "Git push, merge, production deployment, public publish, customer contact, purchase, credential changes, or external network writes.",
-      "Mutating real pilot repositories."
-    ],
     "include": [
-      "Exercise bounded Goal Discovery, Direction Critic, Decision Ledger, Goal Charter, Release Train, and Autopilot through deterministic field and adversarial matrices.",
-      "Prove same-release charter mutation rejection and predecessor-CLOSED-gated immutable sequential charter archival.",
-      "Prove no/weak/strong/hostile model prose produces identical authority hashes and cannot change next actions or closure.",
-      "Prove interview budgets, interruption, restart, replay, concurrent append, stale binding, and tamper handling fail closed.",
-      "Prove dirty nested and monorepo planning remains non-approvable with one bounded safe action.",
-      "Run available EvoHarvest, Second Brain, and AI CRM+PM pilots read-only with unchanged Git fingerprints.",
-      "Write one bounded machine-readable v1.8.1 field report with all safety counters zero.",
-      "Preserve OMP 18.0.10, exact nine MCP tools, existing approval policy, CLOSED != RELEASED, and all external-consequence boundaries.",
-      "Update release metadata, tests, reports, requirements, traceability, compatibility, handover, security, beginner, MCP, OMP, and operations documentation."
+      "Remove only plain-brief fact projections that are zero-valued or mechanically derivable from canonical state, action envelope, or the separate Release Train summary.",
+      "Preserve the full Action Envelope, exact next action, forbidden actions, mechanical evidence binding, fixed Korean sections, and modelAuthority=false.",
+      "Add a regression fixture matching the Orca-JARVIS dirty baseline plus three unresolved Goal Discovery questions and four-release train.",
+      "Require the real-world-shaped beginner report to remain healthy at no more than 7680 structured bytes while the hard product limit remains 8192 bytes.",
+      "Keep the existing nine-tool MCP surface, OMP 18.0.10 compatibility, CLOSED != RELEASED, and all external-consequence boundaries."
+    ],
+    "exclude": [
+      "Increasing the 8192-byte product limit or weakening the quality gate.",
+      "Removing the Action Envelope, forbidden action set, evidence references, or Shipping authority checks.",
+      "Changing Goal Discovery, Goal Charter, Release Train, Autopilot, OMO runtime, model routing, or approval behavior.",
+      "Publishing, deployment, customer contact, purchase, credential changes, or external writes.",
+      "Mutating Orca-JARVIS product files or accepting its current baseline."
     ],
     "paths": {
+      "include": [
+        "package.json",
+        "src/core/plain-brief.mjs",
+        "test/mcp/plain-brief.test.mjs",
+        "test/integration/plain-brief-budget.test.mjs",
+        "docs/planning/32-V1.8.2-PLAIN-BRIEF-BUDGET-HOTFIX.md"
+      ],
       "exclude": [
         ".shipping/contract.yaml",
         ".shipping/contract.lock",
@@ -246,53 +219,13 @@
         "node_modules/**",
         "dist/**",
         "coverage/**"
-      ],
-      "include": [
-        "README.md",
-        "BACKLOG.md",
-        "package.json",
-        "scripts/run-tests.mjs",
-        "scripts/goal-charter-field-pilot.mjs",
-        "scripts/v1-doc-audit.mjs",
-        "scripts/v1-security-inventory.mjs",
-        "docs/reports/v1.8.1-goal-charter-field.json",
-        "docs/reports/v1-security-inventory.json",
-        "src/core/goal-charter.mjs",
-        "src/core/goal-discovery.mjs",
-        "src/core/decision-ledger.mjs",
-        "src/core/release-train.mjs",
-        "src/core/proposals.mjs",
-        "src/core/plain-brief.mjs",
-        "src/mcp/tools.mjs",
-        "src/mcp/user-view.mjs",
-        "packages/shipping-plugin/skill/SKILL.md",
-        "packages/omp-main-harness/**",
-        "packages/stable-control/schema-registry.mjs",
-        "schemas/v1/**",
-        "test/unit/**",
-        "test/integration/**",
-        "test/adversarial/**",
-        "test/mcp/**",
-        "test/omp-main-harness/**",
-        "test/stable/**",
-        "test/helpers/**",
-        "docs/BEGINNER-QUICKSTART-KO.md",
-        "docs/COMPATIBILITY.md",
-        "docs/MCP.md",
-        "docs/TRACEABILITY.md",
-        "docs/HANDOVER.md",
-        "docs/SECURITY-INVENTORY.md",
-        "docs/operations/OMP-MAIN-HARNESS.md",
-        "docs/operations/AUTOPILOT-RUNBOOK.md",
-        "docs/planning/02-REQUIREMENTS.md",
-        "docs/planning/31-V1.8.1-GOAL-DISCOVERY-AND-CHARTER-FIELD-HARDENING-DEVELOPMENT-PLAN.md"
       ]
     }
   },
   "stopPolicy": {
+    "humanInterruptWins": true,
     "autoContinueAfterInterrupt": false,
-    "closeWhenRequiredGatesPass": true,
-    "humanInterruptWins": true
+    "closeWhenRequiredGatesPass": true
   },
   "worker": "shipping-harness"
 }

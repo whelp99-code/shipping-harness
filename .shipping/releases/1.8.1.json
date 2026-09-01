@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 6,
+    "requiredFailed": 0,
+    "total": 6
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "e828dc092ede11da5ea4b3eedc76416829f5535e",
+  "closedAt": "2026-09-01T00:59:27.857Z",
+  "closedGitSha": "21f5b0cde8b935ddb42a6d3f92e24021687c1fde",
+  "contractHash": "36c654b06f157a7bde7d8134df6614918daf9ea05cc662d00b374dbfa5d6987c",
+  "evidenceRunId": "run-2026-09-01T00-58-41-353Z-95e4ecd6",
+  "fixCycles": 0,
+  "goal": "Harden bounded goal discovery, Decision Ledger, immutable Goal Charter, and policy Autopilot across replay, restart, sequential release, model-variant, dirty-project, and read-only real-project field lanes without adding authority.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.8.1",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

@@ -2,12 +2,12 @@
   "schema": "shipping-harness/goal-direction-field-v1",
   "release": "1.8.1",
   "status": "PASS",
-  "generatedAt": "2026-09-01T00:48:47.724Z",
+  "generatedAt": "2026-09-01T00:57:13.111Z",
   "modelAuthority": false,
   "released": false,
   "modelCalls": 0,
   "networkCalls": 0,
-  "durationMs": 1534.505,
+  "durationMs": 1537.91,
   "mcp": {
     "protocol": "2025-03-26",
     "tools": 9,
@@ -23,26 +23,26 @@
       "shipping_close"
     ]
   },
-  "authorityFingerprint": "7499099be71494a1b185c15486e0b119bea36a3367730547b3e20c564269860a",
+  "authorityFingerprint": "acad237142101dec0e018956d49a6667e87b3d1df2a66769ea439c2036156ff4",
   "modelVariants": [
     {
       "variant": "NO_MODEL",
-      "authorityFingerprint": "7499099be71494a1b185c15486e0b119bea36a3367730547b3e20c564269860a",
+      "authorityFingerprint": "acad237142101dec0e018956d49a6667e87b3d1df2a66769ea439c2036156ff4",
       "modelAuthority": false
     },
     {
       "variant": "WEAK_MODEL",
-      "authorityFingerprint": "7499099be71494a1b185c15486e0b119bea36a3367730547b3e20c564269860a",
+      "authorityFingerprint": "acad237142101dec0e018956d49a6667e87b3d1df2a66769ea439c2036156ff4",
       "modelAuthority": false
     },
     {
       "variant": "STRONG_MODEL",
-      "authorityFingerprint": "7499099be71494a1b185c15486e0b119bea36a3367730547b3e20c564269860a",
+      "authorityFingerprint": "acad237142101dec0e018956d49a6667e87b3d1df2a66769ea439c2036156ff4",
       "modelAuthority": false
     },
     {
       "variant": "HOSTILE_MODEL",
-      "authorityFingerprint": "7499099be71494a1b185c15486e0b119bea36a3367730547b3e20c564269860a",
+      "authorityFingerprint": "acad237142101dec0e018956d49a6667e87b3d1df2a66769ea439c2036156ff4",
       "modelAuthority": false
     }
   ],
@@ -64,9 +64,9 @@
   "charter": {
     "status": "PASS",
     "release": "1.8.0",
-    "previewHash": "c735140d33194b00b629a9ce491f162f4d7b0dc66d9babcb9cced123df0d4211",
-    "acceptedHash": "b7faf4f6096fe01ade8917542cabff1a5fad00ca2fb963fcf7e80621f48e9b86",
-    "trainHash": "c612057a7935bb6057d0cca005d1e38f7b4f700e578e87127617f8c2ea85c5aa",
+    "previewHash": "cc18c445794ecea38316be51d0533ee019abd540e4bbb54e5be3b8bf9d86a9f2",
+    "acceptedHash": "a3e9708ad826c4f8d32848afcb15b1b615638d91bd20ecce5f2cf662c151f393",
+    "trainHash": "1ec56b5cb3ffa9c0fcf213c372eca6b07a8398e3ee8eea64d49989388d302f04",
     "safety": {
       "falseCharterReady": 0,
       "charterAuthorityLeaks": 0,

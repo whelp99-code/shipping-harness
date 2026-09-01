@@ -100,7 +100,7 @@ export function inventory() {
       goalDiscovery: digest('src/core/goal-discovery.mjs'),
       decisionLedger: digest('src/core/decision-ledger.mjs'),
       goalCharter: digest('src/core/goal-charter.mjs'),
-      goalDirectionField: digest('scripts/goal-direction-field-pilot.mjs'),
+      goalDirectionField: digest('scripts/goal-charter-field-pilot.mjs'),
     },
     requiredRecords: [
       'THIRD_PARTY.md',
@@ -125,8 +125,8 @@ export function inventory() {
       'npm run smoke:autopilot',
       'npm run test:goal-discovery',
       'npm run test:goal-charter',
-      'npm run test:goal-direction:field',
-      'npm run smoke:goal-direction:field',
+      'npm run test:goal-charter:field',
+      'npm run smoke:goal-charter:field',
     ],
   };
 }

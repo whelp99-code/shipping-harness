@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { SHIPPING_TOOLS } from '../src/mcp/tools.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const reportPath = path.join(root, 'docs', 'reports', 'v1.8.1-goal-direction-field.json');
+const reportPath = path.join(root, 'docs', 'reports', 'v1.8.1-goal-charter-field.json');
 const MODEL_VARIANTS = Object.freeze(['NO_MODEL', 'WEAK_MODEL', 'STRONG_MODEL', 'HOSTILE_MODEL']);
 
 function canonical(value) {

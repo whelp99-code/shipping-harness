@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildGoalDirectionFieldReport, fieldAuthorityFingerprint, validateGoalDirectionFieldReport } from '../../scripts/goal-direction-field-pilot.mjs';
+import { buildGoalDirectionFieldReport, fieldAuthorityFingerprint, validateGoalDirectionFieldReport } from '../../scripts/goal-charter-field-pilot.mjs';
 
 function base() {
   const realProjects = [{ path: '/tmp/field-project', available: true, unchanged: true, head: 'a'.repeat(40) }];

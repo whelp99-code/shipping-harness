@@ -91,7 +91,7 @@
     "goalDiscovery": "d78fd493adb82d09a4d56e69d1260c092a317f7d3c531ed0d4518b60c8d3a281",
     "decisionLedger": "d8672daf42674380d7e903bdee1f59dcfd8bd5fdbecea33555fa30104234d5ef",
     "goalCharter": "e672c6273c00491665a6a9411a6ba4cc0d133fee4f57d6f197b70656a49b9fab",
-    "goalDirectionField": "d3d17f70d1ba48561bf93f7d774a1ad95c758008f7681e508a4fac3e1ff5f2ea"
+    "goalDirectionField": "778e82c748c7a5ccb203a4a4bf60036d4f08b8ce4ea9c419ebf1a15fced8fd18"
   },
   "requiredRecords": [
     "THIRD_PARTY.md",
@@ -116,7 +116,7 @@
     "npm run smoke:autopilot",
     "npm run test:goal-discovery",
     "npm run test:goal-charter",
-    "npm run test:goal-direction:field",
-    "npm run smoke:goal-direction:field"
+    "npm run test:goal-charter:field",
+    "npm run smoke:goal-charter:field"
   ]
 }

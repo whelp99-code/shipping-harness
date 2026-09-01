@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { performance } from 'node:perf_hooks';
-import { buildGoalDirectionFieldReport, fieldAuthorityFingerprint } from '../../scripts/goal-direction-field-pilot.mjs';
+import { buildGoalDirectionFieldReport, fieldAuthorityFingerprint } from '../../scripts/goal-charter-field-pilot.mjs';
 
 function fixture() {
   const realProjects = [{ path: '/tmp/field-project', available: true, unchanged: true, head: 'a'.repeat(40) }];

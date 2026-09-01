@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildGoalDirectionFieldReport, validateGoalDirectionFieldReport } from '../../scripts/goal-direction-field-pilot.mjs';
+import { buildGoalDirectionFieldReport, validateGoalDirectionFieldReport } from '../../scripts/goal-charter-field-pilot.mjs';
 
 function child(status = 'PASS') {
   return {

@@ -228,10 +228,16 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
   const facts = [
     fact('CANONICAL_STATE', state, ['canonicalState']),
     fact('PRIMARY_NEXT_ACTION', actionEnvelope.nextAction, ['actionEnvelope.nextAction']),
-    fact('APPROVAL_READINESS', state === 'READY_FOR_APPROVAL', ['canonicalState', 'readyForApproval']),
-    fact('BLOCKER_COUNT', blockerCount, ['issues.counts.BLOCKER', 'state.blockerCount']),
-    fact('UNKNOWN_COUNT', unknownCount, ['issues.counts.UNKNOWN', 'state.unknownCount', 'baseline.counts.UNKNOWN']),
   ];
+  if (state === 'READY_FOR_APPROVAL') {
+    facts.push(fact('APPROVAL_READINESS', true, ['canonicalState', 'readyForApproval']));
+  }
+  if (blockerCount > 0) {
+    facts.push(fact('BLOCKER_COUNT', blockerCount, ['issues.counts.BLOCKER', 'state.blockerCount']));
+  }
+  if (unknownCount > 0) {
+    facts.push(fact('UNKNOWN_COUNT', unknownCount, ['issues.counts.UNKNOWN', 'state.unknownCount', 'baseline.counts.UNKNOWN']));
+  }
   if (baseline) {
     facts.push(fact('BASELINE_COUNTS', {
       product: countFrom(input, 'PRODUCT'),
@@ -253,7 +259,10 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
   }
   if (input.workspace ?? input.analysis?.workspace) {
     const workspace = input.workspace ?? input.analysis.workspace;
-    facts.push(fact('SELECTED_WORKSPACE', workspace.root ?? null, ['workspace.root', 'workspace.confidence']));
+    const root = workspace.root ?? null;
+    if (root && (root !== '.' || workspace.ambiguous === true || workspace.requested === true)) {
+      facts.push(fact('SELECTED_WORKSPACE', root, ['workspace.root', 'workspace.confidence']));
+    }
   }
   if (input.versionEvidence ?? input.analysis?.versionEvidence) {
     const version = input.versionEvidence ?? input.analysis.versionEvidence;
@@ -265,13 +274,6 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
   }
   if (typeof input.evidenceFresh === 'boolean') {
     facts.push(fact('EVIDENCE_FRESHNESS', input.evidenceFresh, ['evidenceFresh']));
-  }
-  if (input.releaseTrain) {
-    facts.push(fact('RELEASE_TRAIN', {
-      currentRelease: input.releaseTrain.currentRelease ?? null,
-      totalReleases: input.releaseTrain.releases?.length ?? 0,
-      modelAuthority: false,
-    }, ['releaseTrain.releases']));
   }
   if (input.goalDiscovery && ((input.goalDiscovery.questions?.length ?? 0) > 0 || state === 'READY_FOR_APPROVAL')) {
     facts.push(fact('GOAL_DISCOVERY', {
@@ -294,7 +296,6 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
       released: false,
     }, ['goalCharter.status', 'goalCharter.hash', 'goalCharter.outcome', 'goalCharter.primaryUser', 'goalCharter.operatingBoundary']));
   }
-  facts.push(fact('REPORT_COMPILER', 'deterministic-no-model', ['plainBrief.schema'], 'mechanical', 'exact'));
   const body = {
     schema: 'shipping-harness/brief-fact-graph-v1',
     state,

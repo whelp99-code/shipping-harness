@@ -1,0 +1,28 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 6,
+    "requiredFailed": 0,
+    "total": 6
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "b0cea6aa59585629fb44bc43c589dec783e13248",
+  "closedAt": "2026-09-12T13:28:57.978Z",
+  "closedGitSha": "a3c3cf430a2ec6cb196733f88eb3cdfb6ef4dbbd",
+  "contractHash": "c30d0b806f640388605e886ae9207884026d0f6aae610816ec1e9f19fe9c418b",
+  "evidenceRunId": "run-2026-09-12T13-28-07-898Z-c62b517d",
+  "fixCycles": 0,
+  "goal": "Repeatable engineering infrastructure: CI, static analysis, coverage, documentation restructure, and maintainability refactors without changing Shipping authority, MCP surface, or schemas",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.9.0",
+  "schema": "shipping-harness/release-v1",
+  "worker": "shipping-harness"
+}

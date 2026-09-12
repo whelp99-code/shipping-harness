@@ -384,9 +384,16 @@ function selectWorkspace(candidates, requestedId) {
 }
 
 /**
- * @param {*} root
- * @param {*} options
- * @returns {Promise<*>}
+ * @typedef {{id: string, description: string, command: string, cwd?: string, source?: string, confidence?: string, aggregate?: boolean, supplemental?: boolean, sideEffect?: string, isolationRequired?: boolean, deterministicOutputRequired?: boolean, automaticallyRunnable?: boolean}} CandidateCommand
+ * @typedef {{name: string, type: string}} TopLevelEntry
+ * @typedef {{schema: string, projectName: string, types: string[], manifests: string[], sourceRoots: string[], trackedFileCount: number, trackedFileCountTruncated: boolean, topLevel: TopLevelEntry[], candidateCommands: CandidateCommand[], readme: string|null, diagnostics: string[], workspace: {id: string, root: string, score: number, confidence: string, ambiguous: boolean, requested: boolean}, workspaceCandidates: Array<{id: string, root: string, projectName: string, score: number, types: string[], manifests: string[], commandCount: number, trackedFileCount: number}>, versionEvidence: Record<string, any>, intelligence?: Record<string, any>}} ProjectAnalysis
+ * @typedef {{id: string, description: string, type: string, command: string, cwd: string, required: boolean, timeoutSeconds: number, sideEffect: string, isolationRequired: boolean, deterministicOutputRequired: boolean, automaticallyRunnable: boolean}} AcceptanceCriterion
+ */
+
+/**
+ * @param {string} root
+ * @param {{workspaceCandidateId?: string|null, goal?: string}} [options]
+ * @returns {Promise<ProjectAnalysis>}
  */
 export async function analyzeRepository(root, options = {}) {
   const files = trackedFiles(root);
@@ -459,9 +466,9 @@ export async function analyzeRepository(root, options = {}) {
 }
 
 /**
- * @param {*} analysis
- * @param {*} goal
- * @returns {*}
+ * @param {ProjectAnalysis} analysis
+ * @param {string} goal
+ * @returns {{include: string[], exclude: string[], paths: {include: string[], exclude: string[]}}}
  */
 export function buildMinimalScope(analysis, goal) {
   const includePaths = new Set([
@@ -496,8 +503,8 @@ export function buildMinimalScope(analysis, goal) {
 }
 
 /**
- * @param {*} analysis
- * @returns {*}
+ * @param {ProjectAnalysis} analysis
+ * @returns {AcceptanceCriterion[]}
  */
 export function buildAcceptanceCriteria(analysis) {
   return analysis.candidateCommands.map((candidate, index) => ({
@@ -516,9 +523,9 @@ export function buildAcceptanceCriteria(analysis) {
 }
 
 /**
- * @param {*} analysis
- * @param {*} acceptance
- * @returns {*}
+ * @param {ProjectAnalysis} analysis
+ * @param {Array<{id: string}>} acceptance
+ * @returns {Array<{id: string, title: string, detail: string, acceptance: string[]}>}
  */
 export function buildShortPlan(analysis, acceptance) {
   return [

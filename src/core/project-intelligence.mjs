@@ -100,8 +100,12 @@ function buildComponentGraph(files, analysis) {
 }
 
 /**
- * @param {*} command
- * @returns {*}
+ * @typedef {{sideEffect: string, isolationRequired: boolean, deterministicOutputRequired: boolean, automaticallyRunnable: boolean}} AcceptanceCommandMetadata
+ */
+
+/**
+ * @param {string|null|undefined} command
+ * @returns {AcceptanceCommandMetadata}
  */
 export function acceptanceCommandMetadata(command) {
   const text = String(command ?? '').trim().toLowerCase();
@@ -121,8 +125,8 @@ export function acceptanceCommandMetadata(command) {
 }
 
 /**
- * @param {*} commands
- * @returns {*}
+ * @param {import('./project-analysis.mjs').CandidateCommand[]} [commands]
+ * @returns {import('./project-analysis.mjs').CandidateCommand[]}
  */
 export function annotateAcceptanceCommands(commands = []) {
   return commands.map((entry) => ({ ...entry, ...acceptanceCommandMetadata(entry.command) }));
@@ -240,8 +244,8 @@ export function buildProjectIntelligence(root, analysis, baseline, explicitGoal)
 }
 
 /**
- * @param {*} proposal
- * @returns {*}
+ * @param {Record<string, any>} proposal
+ * @returns {{schema: string, release: string, state: string, goal: string, recommendedGoal: string|null, recommendationIsAuthority: boolean, included: unknown[], excluded: unknown[], checks: Array<{id: string, command: string, cwd: string, sideEffect: string, isolated: boolean}>, workThemes: Array<{id: string, title: string, pathCount: number}>, coverage: {complete: boolean, coveredPaths: number, totalPaths: number, uncoveredPaths: string[]}|null, readyForApproval: boolean, detailsAvailable: boolean, boundedBytes: number}}
  */
 export function buildOneScreenApproval(proposal) {
   const brief = proposal.approvalBrief ?? {};

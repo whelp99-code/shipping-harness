@@ -108,8 +108,12 @@ async function snapshot(root) {
 }
 
 /**
- * @param {*} root
- * @returns {Promise<*>}
+ * @typedef {{schema: string, sequence: number, occurredAt: string, proposalId: string, proposalRevision: number, proposalHash: string, gitSha: string, type: string, questionId: string|null, directionHash: string|null, discoveryHash: string, choice: string|null, provenance: string, evidenceRefs: string[], details: Record<string, unknown>, eventKey: string, previousHash: string|null, modelAuthority: boolean, released: boolean, hash: string}} DecisionLedgerEvent
+ */
+
+/**
+ * @param {string} root
+ * @returns {Promise<DecisionLedgerEvent[]>}
  */
 export async function readDecisionLedger(root) {
   return (await snapshot(root)).events;
@@ -140,9 +144,9 @@ async function withLedgerLock(root, operation) {
 }
 
 /**
- * @param {*} root
- * @param {*} input
- * @returns {Promise<*>}
+ * @param {string} root
+ * @param {{type: string, occurredAt?: Date, proposalId: string, proposalRevision: number, proposalHash: string, gitSha: string, questionId?: string|null, directionHash?: string|null, discoveryHash: string, choice?: string|null, provenance?: string, evidenceRefs?: string[], details?: Record<string, unknown>}} input
+ * @returns {Promise<{event: DecisionLedgerEvent, duplicate: boolean}>}
  */
 export async function appendDecisionLedgerEvent(root, input) {
   return withLedgerLock(root, async () => {
@@ -186,9 +190,9 @@ export async function appendDecisionLedgerEvent(root, input) {
 }
 
 /**
- * @param {*} root
- * @param {*} proposalId
- * @returns {Promise<*>}
+ * @param {string} root
+ * @param {string|null} [proposalId]
+ * @returns {Promise<{schema: string, eventCount: number, lastSequence: number, lastHash: string|null, lastType: string|null, acceptedDirectionHash: string|null, modelAuthority: boolean, released: boolean, bounded: {maxEvents: number, maxBytes: number}}>}
  */
 export async function decisionLedgerSummary(root, proposalId = null) {
   const events = await readDecisionLedger(root);

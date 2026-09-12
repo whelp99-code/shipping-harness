@@ -17,7 +17,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { rm } from 'node:fs/promises';
 import { assertContainedPath, ensureDir } from './fs.mjs';
-import { runGit } from './git.mjs';
+import { runGit, uncommittedPaths } from './git.mjs';
 import { analyzeScope } from './glob.mjs';
 import { runtimePaths } from './paths.mjs';
 import { runBoundedCommand } from './process.mjs';
@@ -101,15 +101,23 @@ async function replayOne(worktree, contract, criterion, failedResult, inScopeDif
 
 /**
  * Replay every failed REQUIRED acceptance command once on the locked baseline commit.
- * Skipped when the baseline is the verified commit itself or nothing required failed.
+ * Skipped when nothing required failed, or when the tree under verification *is* the clean
+ * baseline (HEAD is the baseline commit and no in-scope path is dirty) — replaying that
+ * tree against itself proves nothing. HEAD being the baseline is not enough on its own:
+ * uncommitted in-scope work makes the verified tree differ from the baseline, which is
+ * exactly the case where a criterion failing on both trees indicates a contract defect.
+ * The baseline worktree is clean by construction, so the replay is still meaningful.
  * @param {string} root
- * @param {{contract: Record<string, any>, lock: Record<string, any>, manifest: Record<string, any>, changedPaths: string[], gitSha: string}} input
+ * @param {{contract: Record<string, any>, lock: Record<string, any>, manifest: Record<string, any>, changedPaths: string[], gitSha: string, tree?: {inScopeDirtyPaths: string[]} | null}} input
  */
 export async function replayFailedAcceptanceOnBaseline(root, input) {
-  const { contract, lock, manifest, changedPaths, gitSha } = input;
+  const { contract, lock, manifest, changedPaths, gitSha, tree = null } = input;
   const baselineSha = typeof lock.baselineSha === 'string' ? lock.baselineSha : null;
   if (!baselineSha) return { skipped: 'no-baseline', baselineSha: null, inScopeChangedPaths: 0, replays: [] };
-  if (baselineSha === gitSha) return { skipped: 'baseline-is-head', baselineSha, inScopeChangedPaths: 0, replays: [] };
+  const inScopeDirty = tree ? tree.inScopeDirtyPaths : analyzeScope(uncommittedPaths(root), contract.scope.paths).allowed;
+  if (baselineSha === gitSha && inScopeDirty.length === 0) {
+    return { skipped: 'clean-baseline', baselineSha, inScopeChangedPaths: 0, replays: [] };
+  }
   const failed = manifest.results.filter((result) => result.required === true && result.status !== 'PASS');
   const inScope = analyzeScope(changedPaths, contract.scope.paths).allowed;
   if (failed.length === 0) {

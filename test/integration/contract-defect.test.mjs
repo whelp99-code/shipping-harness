@@ -72,6 +72,39 @@ test('a criterion that also fails on the baseline is flagged CONTRACT_DEFECT_SUS
   }
 });
 
+test('an uncommitted in-scope implementation still replays against the baseline and is flagged', async () => {
+  // The live replay this fix pass came from: the implementation stayed in the working tree,
+  // so HEAD was still the baseline commit and the replay was skipped as `baseline-is-head` —
+  // CONTRACT_DEFECT_SUSPECTED was never raised even though the criterion fails on the clean
+  // baseline too. HEAD == baseline is only a true skip when no in-scope path is dirty.
+  const fixture = await createFixtureRepo({ testScript: 'node ./definitely-missing-runner.mjs' });
+  try {
+    await fixture.lock();
+    await mkdir(path.join(fixture.root, 'src'), { recursive: true });
+    await writeFile(path.join(fixture.root, 'src', 'feature.mjs'), 'export const feature = true;\n', 'utf8');
+    // Deliberately NOT committed.
+
+    const result = await verifyRelease(fixture.root);
+    assert.equal(result.decision, 'TRIAGE');
+    assert.equal(result.baselineReplay.skipped, null, 'the replay must run against the dirty tree');
+    assert.equal(result.baselineReplay.baselineSha, result.manifest.gitSha, 'HEAD is still the baseline commit');
+    assert.equal(result.baselineReplay.replays[0].suspected, true);
+
+    const found = defectDiagnostic(result.issues.issues);
+    assert.ok(found, 'expected a CONTRACT_DEFECT_SUSPECTED diagnostic');
+    assert.equal(found.issue.classification, 'BLOCKER');
+    assert.equal(found.issue.basisId, 'AC-001');
+
+    // The evidence names the tree it actually ran against, not the baseline commit alone.
+    assert.deepEqual(result.manifest.dirtyPaths, ['src/feature.mjs']);
+    assert.match(result.manifest.treeFingerprint, /^[a-f0-9]{64}$/u);
+
+    await noLeftoverWorktree(fixture.root);
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
 test('a criterion that fails only because the implementation is wrong carries no diagnostic', async () => {
   const fixture = await createFixtureRepo({ testScript: 'node ./src/check.mjs' });
   try {
@@ -116,12 +149,12 @@ test('baselineReplay: false skips the replay entirely', async () => {
   }
 });
 
-test('the replay is skipped when the baseline commit is the verified commit', async () => {
+test('the replay is skipped when the verified tree is the clean baseline commit', async () => {
   const fixture = await createFixtureRepo({ testScript: 'node ./definitely-missing-runner.mjs' });
   try {
     await fixture.lock();
     const result = await verifyRelease(fixture.root);
-    assert.equal(result.baselineReplay.skipped, 'baseline-is-head');
+    assert.equal(result.baselineReplay.skipped, 'clean-baseline');
     assert.deepEqual(result.baselineReplay.replays, []);
     assert.equal(defectDiagnostic(result.issues.issues), null);
     await noLeftoverWorktree(fixture.root);

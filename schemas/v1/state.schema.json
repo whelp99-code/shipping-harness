@@ -121,6 +121,33 @@
         }
       },
       "additionalProperties": false
+    },
+    "verifyRuns": {
+      "description": "v1.10.0 Phase C: total verify runs recorded for the current release. Optional; states written before v1.10 have none and are treated as 0.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "redundantVerifyRuns": {
+      "description": "v1.10.0 Phase C: consecutive verify runs that reproduced the previous run's Git SHA and per-criterion exit codes (no new evidence). Resets on any change. Optional; absent reads as 0.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "telemetry": {
+      "description": "v1.10.0 Phase C: aggregated adapter-run cost telemetry. Optional; absent reads as no recorded agent-run duration.",
+      "type": "object",
+      "required": [
+        "totalAgentDurationMs"
+      ],
+      "properties": {
+        "totalAgentDurationMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,

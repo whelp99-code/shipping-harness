@@ -81,6 +81,8 @@ export async function prepareNextRelease(root, input) {
     nextCount: 0,
     ignoreCount: 0,
     unknownCount: 0,
+    verifyRuns: 0,
+    redundantVerifyRuns: 0,
     humanStop: false,
     resumeState: null,
     createdAt: now,

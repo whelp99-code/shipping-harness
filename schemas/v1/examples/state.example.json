@@ -19,5 +19,10 @@
     "algorithm": "sha256",
     "ledgerHead": "3f1c0a52-3a4a-4f2a-9b7e-1d0c9a6f5b21",
     "digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "verifyRuns": 3,
+  "redundantVerifyRuns": 0,
+  "telemetry": {
+    "totalAgentDurationMs": 42000
   }
 }

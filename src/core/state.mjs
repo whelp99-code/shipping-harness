@@ -50,6 +50,8 @@ export async function initializeState(root, overrides = {}) {
     blockerCount: 0,
     nextCount: 0,
     ignoreCount: 0,
+    verifyRuns: 0,
+    redundantVerifyRuns: 0,
     resumeState: null,
     humanStop: false,
     createdAt: now,

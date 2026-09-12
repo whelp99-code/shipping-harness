@@ -59,7 +59,7 @@
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",
     "license:check": "node scripts/license-check.mjs",
-    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs && npm run smoke:release-train && npm run smoke:autopilot && npm run smoke:autopilot:field && npm run smoke:goal-discovery && npm run smoke:goal-charter && npm run test:goal-charter:field && npm run smoke:goal-charter:field",
+    "release:verify": "node scripts/release-verify.mjs",
     "test:omo-bridge": "node --test --test-reporter=spec test/omo/*.test.mjs",
     "test:remote": "node --test --test-reporter=spec test/remote/*.test.mjs test/adversarial/remote-attacks.test.mjs",
     "smoke:remote": "node scripts/remote-gateway-smoke.mjs --check",

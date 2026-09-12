@@ -123,8 +123,13 @@ function charterBodyFromProposal(proposal) {
 }
 
 /**
- * @param {*} input
- * @returns {*}
+ * @typedef {{previewHash: string, contractHash: string, baselineSha: string, releaseTrainHash: string, approverType: string, approverId: string, acceptedAt: string}} GoalCharterBinding
+ * @typedef {{schema: string, id: string, status: string, project: string, release: string, proposalId: string, proposalRevision: number, proposalHash: string|null, gitSha: string, discoveryHash: string, directionHash: string, candidateHash: string, criticHash: string, outcome: string, primaryUser: string, operatingBoundary: string, value: string, include: string[], nonGoals: string[], successCriteria: string[], assumptions: string[], rollback: string, replanTriggers: string[], evidenceRefs: string[], binding: GoalCharterBinding|null, commandAuthority: boolean, approvalAuthority: boolean, closureAuthority: boolean, deploymentAuthority: boolean, modelAuthority: boolean, released: boolean, hash: string}} GoalCharter
+ */
+
+/**
+ * @param {GoalCharter} input
+ * @returns {GoalCharter}
  */
 export function validateGoalCharter(input) {
   invariant(input && typeof input === 'object' && !Array.isArray(input), 'ERR_GOAL_CHARTER', 'Goal Charter must be an object');
@@ -176,8 +181,8 @@ export function validateGoalCharter(input) {
 }
 
 /**
- * @param {*} proposal
- * @returns {*}
+ * @param {Record<string, any>} proposal
+ * @returns {GoalCharter}
  */
 export function compileGoalCharterPreview(proposal) {
   const body = charterBodyFromProposal(proposal);
@@ -185,9 +190,9 @@ export function compileGoalCharterPreview(proposal) {
 }
 
 /**
- * @param {*} preview
- * @param {*} binding
- * @returns {*}
+ * @param {GoalCharter} preview
+ * @param {{proposalHash: string, contractHash: string, baselineSha: string, releaseTrainHash: string, approverType: string, approverId: string, acceptedAt: string}} binding
+ * @returns {GoalCharter}
  */
 export function acceptGoalCharter(preview, binding) {
   validateGoalCharter(preview);
@@ -195,6 +200,7 @@ export function acceptGoalCharter(preview, binding) {
   const proposalHash = exactHash(binding?.proposalHash, 'proposal hash');
   const acceptedAt = boundedText(binding?.acceptedAt, 'Goal Charter acceptance time', 80);
   invariant(Number.isFinite(Date.parse(acceptedAt)), 'ERR_GOAL_CHARTER_TIME', 'Goal Charter acceptance time must be ISO date-time');
+  /** @type {Omit<GoalCharter, 'hash'> & {hash?: string}} */
   const body = {
     ...structuredClone(preview),
     status: 'ACCEPTED',
@@ -245,9 +251,9 @@ async function archiveClosedGoalCharter(root, charter) {
 }
 
 /**
- * @param {*} root
- * @param {*} charter
- * @returns {Promise<*>}
+ * @param {string} root
+ * @param {GoalCharter} charter
+ * @returns {Promise<{path: string, charter: GoalCharter, duplicate: boolean, archivedPath: string|null}>}
  */
 export async function persistAcceptedGoalCharter(root, charter) {
   validateGoalCharter(charter);
@@ -270,9 +276,9 @@ export async function persistAcceptedGoalCharter(root, charter) {
 }
 
 /**
- * @param {*} root
- * @param {*} release
- * @returns {Promise<*>}
+ * @param {string} root
+ * @param {string} release
+ * @returns {Promise<GoalCharter|null>}
  */
 export async function loadArchivedGoalCharter(root, release) {
   const target = archivedGoalCharterPath(root, release);
@@ -284,8 +290,8 @@ export async function loadArchivedGoalCharter(root, release) {
 }
 
 /**
- * @param {*} root
- * @returns {Promise<*>}
+ * @param {string} root
+ * @returns {Promise<{schema: string, status: string, entries: Array<{release: string, hash: string, proposalId: string, receipt: string, archive: string}>, modelAuthority: boolean, released: boolean, hash: string}>}
  */
 export async function auditGoalCharterHistory(root) {
   const paths = runtimePaths(root);
@@ -299,7 +305,8 @@ export async function auditGoalCharterHistory(root) {
   const entries = [];
   for (const name of names) {
     const release = name.slice(0, -'-goal-charter.json'.length);
-    const charter = await loadArchivedGoalCharter(root, release);
+    // The name came from a readdir of the archive directory, so the archived charter is present.
+    const charter = /** @type {GoalCharter} */ (await loadArchivedGoalCharter(root, release));
     const receiptPath = path.join(paths.releases, `${release}.json`);
     await assertContainedPath(root, receiptPath);
     invariant(await exists(receiptPath), 'ERR_GOAL_CHARTER_PREDECESSOR_OPEN', 'Archived Goal Charter lacks a CLOSED release receipt', { release });
@@ -320,8 +327,8 @@ export async function auditGoalCharterHistory(root) {
 }
 
 /**
- * @param {*} root
- * @returns {Promise<*>}
+ * @param {string} root
+ * @returns {Promise<GoalCharter|null>}
  */
 export async function loadGoalCharter(root) {
   const target = runtimePaths(root).goalCharter;
@@ -331,9 +338,9 @@ export async function loadGoalCharter(root) {
 }
 
 /**
- * @param {*} charter
- * @param {*} expected
- * @returns {*}
+ * @param {GoalCharter} charter
+ * @param {{proposalId: string, proposalHash: string, gitSha: string, release: string, contractHash: string, baselineSha: string, releaseTrainHash: string}} expected
+ * @returns {GoalCharter}
  */
 export function assertGoalCharterBinding(charter, expected) {
   validateGoalCharter(charter);
@@ -342,15 +349,15 @@ export function assertGoalCharterBinding(charter, expected) {
   invariant(charter.proposalHash === expected.proposalHash, 'ERR_GOAL_CHARTER_PROPOSAL', 'Goal Charter proposal hash is stale');
   invariant(charter.gitSha === expected.gitSha, 'ERR_GOAL_CHARTER_GIT', 'Goal Charter belongs to another Git baseline');
   invariant(charter.release === expected.release, 'ERR_GOAL_CHARTER_RELEASE', 'Goal Charter belongs to another release');
-  invariant(charter.binding.contractHash === expected.contractHash, 'ERR_GOAL_CHARTER_CONTRACT', 'Goal Charter contract hash does not match');
-  invariant(charter.binding.baselineSha === expected.baselineSha, 'ERR_GOAL_CHARTER_GIT', 'Goal Charter baseline SHA does not match');
-  invariant(charter.binding.releaseTrainHash === expected.releaseTrainHash, 'ERR_GOAL_CHARTER_TRAIN', 'Goal Charter Release Train hash does not match');
+  invariant(/** @type {GoalCharterBinding} */ (charter.binding).contractHash === expected.contractHash, 'ERR_GOAL_CHARTER_CONTRACT', 'Goal Charter contract hash does not match');
+  invariant(/** @type {GoalCharterBinding} */ (charter.binding).baselineSha === expected.baselineSha, 'ERR_GOAL_CHARTER_GIT', 'Goal Charter baseline SHA does not match');
+  invariant(/** @type {GoalCharterBinding} */ (charter.binding).releaseTrainHash === expected.releaseTrainHash, 'ERR_GOAL_CHARTER_TRAIN', 'Goal Charter Release Train hash does not match');
   return charter;
 }
 
 /**
- * @param {*} charter
- * @returns {*}
+ * @param {GoalCharter|null|undefined} charter
+ * @returns {{schema: string, id: string, status: string, hash: string, project: string, release: string, outcome: string, primaryUser: string, operatingBoundary: string, nonGoals: string[], successCriteria: string[], replanTriggers: string[], modelAuthority: boolean, released: boolean}|null}
  */
 export function goalCharterSummary(charter) {
   if (!charter) return null;

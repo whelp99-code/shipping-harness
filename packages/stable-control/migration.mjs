@@ -10,9 +10,9 @@ const LEGACY_SCHEMA_MAP = Object.freeze({
 });
 
 /**
- * @param {*} from
- * @param {*} to
- * @returns {*}
+ * @param {string} from
+ * @param {string} [to]
+ * @returns {Readonly<{from: string, to: string, supported: true}>}
  */
 export function assertSupportedUpgrade(from, to = '1.0.0') {
   stableInvariant(SUPPORTED_RELEASES.includes(from), 'ERR_MIGRATION_VERSION', `Unsupported source release: ${from}`);
@@ -47,8 +47,12 @@ export function migrateArtifact(value, { kind } = {}) {
 }
 
 /**
- * @param {*} options
- * @returns {*}
+ * @typedef {{changed?: boolean, fromSchema?: string, toSchema?: string, artifact?: Record<string, unknown>}} MigratedArtifact
+ */
+
+/**
+ * @param {{fromRelease: string, toRelease?: string, sourceState?: string, targetState?: string, artifacts: MigratedArtifact[]}} options
+ * @returns {Readonly<{schema: string, migrationId: string, fromRelease: string, toRelease: string, sourceState: string|undefined, targetState: string|undefined, changed: boolean, artifacts: MigratedArtifact[], createdAt: string}>}
  */
 export function migrationReceipt({ fromRelease, toRelease = '1.0.0', sourceState, targetState, artifacts }) {
   assertSupportedUpgrade(fromRelease, toRelease);
@@ -68,8 +72,8 @@ export function migrationReceipt({ fromRelease, toRelease = '1.0.0', sourceState
 }
 
 /**
- * @param {*} schema
- * @returns {*}
+ * @param {string} schema
+ * @returns {Readonly<{deprecated: boolean, replacement: string|null, removal: string|null}>}
  */
 export function deprecationNotice(schema) {
   if (LEGACY_SCHEMA_MAP[schema]) return Object.freeze({ deprecated: true, replacement: LEGACY_SCHEMA_MAP[schema], removal: '2.0.0' });

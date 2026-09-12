@@ -94,15 +94,24 @@ const REQUIRED_FIELDS = Object.freeze({
 });
 
 /**
- * @returns {*}
+ * @typedef {Readonly<{name: string, id: string, file: string, example: string, schemaPath: string, examplePath: string}>} StableSchemaDescriptor
+ */
+
+/**
+ * A JSON Schema 2020-12 node, limited to the keywords validateNode() understands.
+ * @typedef {{$schema?: string, $id?: string, 'x-shipping-version'?: string, type?: string|string[], required?: string[], properties?: Record<string, JsonSchemaNode>, additionalProperties?: boolean|JsonSchemaNode, items?: JsonSchemaNode, const?: unknown, enum?: unknown[], allOf?: JsonSchemaNode[], anyOf?: JsonSchemaNode[], oneOf?: JsonSchemaNode[], minLength?: number, maxLength?: number, pattern?: string, format?: string, minimum?: number, maximum?: number, exclusiveMinimum?: number, exclusiveMaximum?: number, minItems?: number, maxItems?: number, uniqueItems?: boolean, minProperties?: number, maxProperties?: number}} JsonSchemaNode
+ */
+
+/**
+ * @returns {string[]}
  */
 export function stableSchemaNames() {
   return Object.keys(STABLE_SCHEMA_DESCRIPTORS);
 }
 
 /**
- * @param {*} nameOrId
- * @returns {*}
+ * @param {string} nameOrId
+ * @returns {StableSchemaDescriptor}
  */
 export function stableSchemaDescriptor(nameOrId) {
   const descriptor = STABLE_SCHEMA_DESCRIPTORS[nameOrId] ?? BY_ID.get(nameOrId);
@@ -122,8 +131,8 @@ async function readJson(filePath) {
 }
 
 /**
- * @param {*} nameOrId
- * @returns {Promise<*>}
+ * @param {string} nameOrId
+ * @returns {Promise<JsonSchemaNode>}
  */
 export async function loadStableSchema(nameOrId) {
   const descriptor = stableSchemaDescriptor(nameOrId);
@@ -136,8 +145,8 @@ export async function loadStableSchema(nameOrId) {
 export const loadSchema = loadStableSchema;
 
 /**
- * @param {*} nameOrId
- * @returns {Promise<*>}
+ * @param {string} nameOrId
+ * @returns {Promise<Record<string, unknown>>}
  */
 export async function loadStableExample(nameOrId) {
   const descriptor = stableSchemaDescriptor(nameOrId);
@@ -145,9 +154,9 @@ export async function loadStableExample(nameOrId) {
 }
 
 /**
- * @param {*} descriptorOrName
- * @param {*} schema
- * @returns {*}
+ * @param {string|StableSchemaDescriptor} descriptorOrName
+ * @param {JsonSchemaNode} schema
+ * @returns {JsonSchemaNode}
  */
 export function validateStableSchemaDefinition(descriptorOrName, schema) {
   const descriptor = typeof descriptorOrName === 'string'
@@ -244,9 +253,9 @@ function validateNode(schema, value, location) {
 }
 
 /**
- * @param {*} nameOrId
- * @param {*} value
- * @returns {*}
+ * @param {string} nameOrId
+ * @param {Record<string, unknown>} value
+ * @returns {Record<string, unknown>}
  */
 export function validateStableArtifact(nameOrId, value) {
   const descriptor = stableSchemaDescriptor(nameOrId);
@@ -259,9 +268,9 @@ export function validateStableArtifact(nameOrId, value) {
 }
 
 /**
- * @param {*} nameOrId
- * @param {*} value
- * @returns {Promise<*>}
+ * @param {string} nameOrId
+ * @param {Record<string, unknown>} value
+ * @returns {Promise<Record<string, unknown>>}
  */
 export async function validateStableDocument(nameOrId, value) {
   const descriptor = stableSchemaDescriptor(nameOrId);
@@ -272,7 +281,7 @@ export async function validateStableDocument(nameOrId, value) {
 }
 
 /**
- * @returns {Promise<*>}
+ * @returns {Promise<readonly Readonly<{name: string, id: string, schema: string, example: string}>[]>}
  */
 export async function validateAllStableExamples() {
   const results = [];

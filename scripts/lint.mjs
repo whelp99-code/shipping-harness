@@ -3,8 +3,12 @@ import path from 'node:path';
 import { walkFiles, text, relative } from './shared.mjs';
 
 const roots = ['src', 'bin', 'scripts', 'test'];
+// scripts/archive/ holds one-off scripts from past versions (see scripts/archive/README.md);
+// they are kept for historical reference only and are excluded from lint the same way
+// eslint.config.mjs excludes them.
+const isArchived = (file) => relative(file).startsWith('scripts/archive/');
 const sourceFiles = (await Promise.all(
-  roots.map((root) => walkFiles(path.resolve(root), (file) => /\.(?:mjs|js)$/u.test(file))),
+  roots.map((root) => walkFiles(path.resolve(root), (file) => /\.(?:mjs|js)$/u.test(file) && !isArchived(file))),
 )).flat();
 
 const failures = [];

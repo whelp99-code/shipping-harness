@@ -19,7 +19,13 @@ const repoRoot = path.resolve(__dirname, '..', '..');
 
 const EXPECTED = {
   tools: 'f4cf418cff5d25ea1c373021a9e3068a3851898a89b93fb55edf8e4a5cc0e8ab',
-  help: 'cf161627cf9c2d578f77069fd5d19b4b7911eca119cfe19ed5caf643d282419c',
+  // v1.10.0 Phase B: `lock`, `verify` and `close` gained the --skip-preflight,
+  // --no-baseline-replay and --allow-uncommitted flags. A flag that cannot be discovered
+  // from help is not a usable surface, so the baseline is updated deliberately and the
+  // change is recorded in section 6 of
+  // docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md.
+  // Previous (v1.8.2) hash: cf161627cf9c2d578f77069fd5d19b4b7911eca119cfe19ed5caf643d282419c
+  help: 'be5c0995563e66b8cf936cd7074b1279388e7b608aa42e061612f429b7332396',
   // v1.10.0: schemas/v1/state.schema.json gained the optional `integrity` object and the
   // example was updated with it. Deliberate, additive, and recorded in section 6 of
   // docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md.
@@ -67,7 +73,7 @@ test('SHIPPING_TOOLS surface is byte-identical to the v1.8.2 baseline', () => {
   assert.equal(hash, EXPECTED.tools);
 });
 
-test('renderHelp() output is byte-identical to the v1.8.2 baseline', () => {
+test('renderHelp() output is byte-identical to the recorded baseline', () => {
   const hash = sha256Hex(renderHelp());
   assert.equal(hash, EXPECTED.help);
 });

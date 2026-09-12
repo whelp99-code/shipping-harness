@@ -122,6 +122,31 @@ export async function runAcceptance(root, contract, lock, gitSha) {
   return { manifest, manifestPath };
 }
 
+/**
+ * Record one baseline replay per replayed criterion into the stored evidence manifest.
+ * The manifest is the audit record of the verification, so the replay belongs in it.
+ * @param {string} root
+ * @param {Record<string, any>} manifest
+ * @param {Array<Record<string, any>>} replays
+ * @returns {Promise<Record<string, any>>}
+ */
+export async function recordBaselineReplays(root, manifest, replays) {
+  if (!Array.isArray(replays) || replays.length === 0) return manifest;
+  const byId = new Map(replays.map((row) => [row.id, row]));
+  const updated = {
+    ...manifest,
+    results: manifest.results.map((result) => {
+      const row = byId.get(result.criterionId);
+      return row
+        ? { ...result, baselineReplay: { id: row.id, exitCode: row.exitCode, durationMs: row.durationMs } }
+        : result;
+    }),
+  };
+  const manifestPath = path.join(runtimePaths(root).evidence, manifest.runId, 'manifest.json');
+  await writeJsonAtomic(manifestPath, updated);
+  return updated;
+}
+
 /** @param {string} root @param {string} runId */
 export async function loadEvidence(root, runId) {
   const manifestPath = path.join(runtimePaths(root).evidence, runId, 'manifest.json');

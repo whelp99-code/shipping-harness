@@ -196,7 +196,7 @@ function actionPolicyFor(state, blockerCount) {
  * The loose status bag every plain-brief entry point accepts. Callers pass whichever of these
  * documents they already hold; every field is optional and read defensively.
  * `state` carries the release state object, or the state name when a caller already flattened it.
- * @typedef {{canonicalState?: string, proposalState?: string, coreState?: string, state?: string & {state?: string, release?: string, blockerCount?: number, unknownCount?: number}, blockerCount?: number, unknownCount?: number, release?: string|null, evidenceFresh?: boolean, issues?: {counts?: Record<string, number>, items?: unknown[]}, contract?: {release?: string} & Record<string, unknown>, baseline?: {blockingCount?: number, counts?: Record<string, number>, plan?: Record<string, unknown>, entries?: unknown[]}|null, coverage?: BriefCoverage|null, intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}|null, analysis?: {intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence}|null, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence, releaseTrain?: import('./release-train.mjs').ReleaseTrain|null, goalDiscovery?: {questions?: unknown[], status?: string, round?: number, recommendedCandidateId?: string|null, direction?: {hash?: string}|null}|null, goalCharter?: {status?: string, hash?: string, outcome?: string, primaryUser?: string, operatingBoundary?: string}|null, currentEvidenceSha?: string|null, contractHash?: string|null, integrity?: {ok?: boolean, level?: string, reason?: string, ledgerState?: string|null}|null}} PlainBriefInput
+ * @typedef {{canonicalState?: string, proposalState?: string, coreState?: string, state?: string & {state?: string, release?: string, blockerCount?: number, unknownCount?: number}, blockerCount?: number, unknownCount?: number, release?: string|null, evidenceFresh?: boolean, issues?: {counts?: Record<string, number>, items?: unknown[]}, contract?: {release?: string} & Record<string, unknown>, baseline?: {blockingCount?: number, counts?: Record<string, number>, plan?: Record<string, unknown>, entries?: unknown[]}|null, coverage?: BriefCoverage|null, intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}|null, analysis?: {intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence}|null, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence, releaseTrain?: import('./release-train.mjs').ReleaseTrain|null, goalDiscovery?: {questions?: unknown[], status?: string, round?: number, recommendedCandidateId?: string|null, direction?: {hash?: string}|null}|null, goalCharter?: {status?: string, hash?: string, outcome?: string, primaryUser?: string, operatingBoundary?: string}|null, currentEvidenceSha?: string|null, contractHash?: string|null, integrity?: {ok?: boolean, level?: string, reason?: string, ledgerState?: string|null}|null, scopeWarning?: {outside?: string[], include?: string[]}|null}} PlainBriefInput
  * @typedef {{complete?: boolean, coveredPaths?: number, totalPaths?: number, uncoveredPaths?: unknown[]}} BriefCoverage
  * @typedef {{root?: string|null, ambiguous?: boolean, requested?: boolean, confidence?: string}} BriefWorkspace
  * @typedef {{baseVersion?: string|null, recommendedVersion?: string|null, confidence?: string|null}} BriefVersionEvidence
@@ -236,6 +236,30 @@ export function buildActionEnvelope(input = {}) {
     exactUserPhrase: policy.exactPhrase,
   };
   return { ...body, hash: hashObject(body) };
+}
+
+/**
+ * One bounded fact naming the acceptance criteria whose failure the engine reproduced on the
+ * locked baseline commit, so the brief says "the contract may be defective" without a model saying it.
+ * @param {PlainBriefInput} input
+ */
+function contractDefectFact(input) {
+  const items = /** @type {Array<Record<string, any>>} */ (Array.isArray(input.issues?.items) ? input.issues.items : []);
+  const criteria = items
+    .filter((issue) => (Array.isArray(issue?.diagnostics) ? issue.diagnostics : [])
+      .some((entry) => entry && typeof entry === 'object' && entry.code === 'CONTRACT_DEFECT_SUSPECTED'))
+    .map((issue) => String(issue.basisId ?? issue.id));
+  if (criteria.length === 0) return null;
+  return fact('CONTRACT_DEFECT_SUSPECTED', {
+    count: criteria.length,
+    criteria: criteria.slice(0, 3).map((value) => boundedTrainText(value, 60)),
+  }, ['issues.items[].diagnostics', 'evidence.results[].baselineReplay']);
+}
+
+/** @param {PlainBriefInput} input */
+function scopeWarningPaths(input) {
+  const outside = input.scopeWarning?.outside;
+  return Array.isArray(outside) ? outside.filter((value) => typeof value === 'string') : [];
 }
 
 /**
@@ -308,6 +332,15 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
       ok: input.integrity.ok === true,
       provenState: input.integrity.ledgerState ?? null,
     }, ['integrity.level', 'state.integrity.digest', 'ledger.jsonl']));
+  }
+  const defects = contractDefectFact(input);
+  if (defects) facts.push(defects);
+  const outsideScope = scopeWarningPaths(input);
+  if (outsideScope.length > 0) {
+    facts.push(fact('SCOPE_WARNING', {
+      outside: outsideScope.length,
+      paths: outsideScope.slice(0, 3).map((value) => boundedTrainText(value, 120)),
+    }, ['scopeWarning.outside', 'contract.scope.paths.include']));
   }
   if (input.goalDiscovery && ((input.goalDiscovery.questions?.length ?? 0) > 0 || state === 'READY_FOR_APPROVAL')) {
     facts.push(fact('GOAL_DISCOVERY', {

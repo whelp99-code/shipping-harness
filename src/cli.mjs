@@ -6,9 +6,10 @@ import { initializeContract, loadContract, lockContract, contractHash } from './
 import { assertContainedPath, exists, fileSize, readText } from './core/fs.mjs';
 import { findGitRoot, currentGitSha } from './core/git.mjs';
 import { runtimePaths } from './core/paths.mjs';
-import { abort, initializeState, pause, readState, resume, transitionState } from './core/state.mjs';
+import { abort, initializeState, pause, readState, recordLedger, resume, transitionState } from './core/state.mjs';
 import { addManualIssue } from './core/issues.mjs';
 import { beginFixCycle, closeRelease, releaseStatus, verifyRelease } from './core/gate.mjs';
+import { preflightWarnings, runAcceptancePreflight } from './core/contract-defect.mjs';
 import { coreDoctor } from './core/host.mjs';
 import { normalizeError, ShippingError } from './core/errors.mjs';
 import { collectAdapterArtifacts, listAdapters, probeAdapter, probeAllAdapters } from './adapters/registry.mjs';
@@ -63,9 +64,13 @@ async function contractCommand({ paths, positionals, json }) {
 }
 
 /** @param {CliContext} ctx */
-async function lockCommand({ root, json }) {
+async function lockCommand({ root, paths, options, json }) {
   const state = await readState(root);
   if (state.state !== 'DRAFT') throw new ShippingError('ERR_LOCK_STATE', `Contract can lock only from DRAFT, current state is ${state.state}`);
+  // Preflight runs before the lock, against the pre-implementation tree. It never blocks.
+  const preflight = booleanOption(options, 'skip-preflight')
+    ? null
+    : await runAcceptancePreflight(root, await loadContract(paths.contract));
   const sha = currentGitSha(root);
   const { contract, lock } = await lockContract(root, sha);
   const updated = await transitionState(root, 'LOCKED', {
@@ -73,9 +78,13 @@ async function lockCommand({ root, json }) {
     contractHash: lock.contractHash,
     baselineSha: lock.baselineSha,
   }, 'contract locked by operator');
-  const result = { root, contractHash: lock.contractHash, baselineSha: sha, state: updated.state };
+  await recordLedger(root, { type: 'lock.preflight', release: contract.release, baselineSha: sha, acceptancePreflight: preflight });
+  const result = { root, contractHash: lock.contractHash, baselineSha: sha, state: updated.state, acceptancePreflight: preflight };
   if (json) printJson(result);
-  else process.stdout.write(`Locked ${contract.project} ${contract.release}\nContract: ${lock.contractHash}\nBaseline: ${sha}\n`);
+  else {
+    process.stdout.write(`Locked ${contract.project} ${contract.release}\nContract: ${lock.contractHash}\nBaseline: ${sha}\n`);
+    for (const warning of preflightWarnings(preflight ?? [])) process.stdout.write(`WARNING: acceptance preflight: ${warning}\n`);
+  }
   return 0;
 }
 
@@ -205,8 +214,8 @@ async function hookCommand({ root, positionals, options, json }) {
 }
 
 /** @param {CliContext} ctx */
-async function verifyCommand({ root, json }) {
-  const result = await verifyRelease(root);
+async function verifyCommand({ root, options, json }) {
+  const result = await verifyRelease(root, { baselineReplay: booleanOption(options, 'baseline-replay', true) });
   if (json) printJson(result);
   else process.stdout.write(`Release decision: ${result.decision}\nPass: ${result.manifest.summary.passed}/${result.manifest.summary.total}\nBlockers: ${result.issues.counts.BLOCKER}\n`);
   return result.decision === 'SHIPPABLE' ? 0 : 2;
@@ -268,8 +277,8 @@ async function issueCommand({ root, positionals, options, json }) {
 }
 
 /** @param {CliContext} ctx */
-async function closeCommand({ root, json }) {
-  const result = await closeRelease(root);
+async function closeCommand({ root, options, json }) {
+  const result = await closeRelease(root, { allowUncommitted: booleanOption(options, 'allow-uncommitted') });
   const output = {
     release: result.receipt.release,
     state: result.state.state,

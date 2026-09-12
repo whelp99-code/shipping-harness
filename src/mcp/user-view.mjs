@@ -118,6 +118,7 @@ export function buildUserStatusView(status) {
     contractHash: status.state?.contractHash ?? status.contract?.hash ?? null,
     releaseTrain: status.releaseTrain ?? null,
     integrity: status.integrity ?? null,
+    scopeWarning: status.scopeWarning ?? null,
   });
   const summaryByState = {
     PLANNING: '이번 버전의 목표와 범위를 정하는 중입니다.',
@@ -155,6 +156,7 @@ export function buildUserStatusView(status) {
     goalCharter: status.goalCharter ?? null,
     goalCharterSummary: status.goalCharterSummary ?? null,
     integrity: status.integrity ?? null,
+    scopeWarning: status.scopeWarning ?? null,
     plainBriefError: compiled.error ?? null,
   };
 }

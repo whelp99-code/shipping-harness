@@ -77,6 +77,17 @@ export function changedPathsSince(root, baselineSha) {
   return [...new Set([...splitNul(tracked), ...splitNul(untracked)].map(normalizeGitPath))].sort();
 }
 
+/**
+ * Return staged, unstaged, and untracked paths relative to HEAD. These are the paths a
+ * commit would still have to capture, so a release receipt bound to HEAD cannot attest to them.
+ * @param {string} root
+ */
+export function uncommittedPaths(root) {
+  const tracked = runGit(root, ['diff', '--name-only', '-z', 'HEAD', '--']).stdout;
+  const untracked = runGit(root, ['ls-files', '--others', '--exclude-standard', '-z']).stdout;
+  return [...new Set([...splitNul(tracked), ...splitNul(untracked)].map(normalizeGitPath))].sort();
+}
+
 /** @param {string} root */
 export function gitStatus(root) {
   return {

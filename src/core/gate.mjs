@@ -1,8 +1,13 @@
 import path from 'node:path';
 import { assertLockedContract } from './contract.mjs';
-import { currentGitSha, changedPathsSince, gitStatus } from './git.mjs';
+import { currentGitSha, changedPathsSince, gitStatus, uncommittedPaths } from './git.mjs';
 import { analyzeScope } from './glob.mjs';
-import { runAcceptance, loadEvidence, assertFreshEvidence } from './evidence.mjs';
+import { runAcceptance, loadEvidence, assertFreshEvidence, recordBaselineReplays } from './evidence.mjs';
+import {
+  attachContractDefectDiagnostics,
+  replayFailedAcceptanceOnBaseline,
+  skippedBaselineReplay,
+} from './contract-defect.mjs';
 import {
   backlogFromIssues,
   countIssues,
@@ -13,13 +18,16 @@ import {
 } from './issues.mjs';
 import { exists, readJson, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { runtimePaths } from './paths.mjs';
-import { invariant } from './errors.mjs';
+import { invariant, ShippingError } from './errors.mjs';
 import { readState, readTrustedState, recordLedger, transitionState } from './state.mjs';
 import { goalStatusView } from './goals/status-view.mjs';
 import { assessStateIntegritySafe, stateIntegrityIssue } from './state-integrity.mjs';
 
-/** @param {string} root */
-export async function verifyRelease(root) {
+/**
+ * @param {string} root
+ * @param {{baselineReplay?: boolean}} [options] `baselineReplay: false` skips the contract-defect replay.
+ */
+export async function verifyRelease(root, options = {}) {
   const { contract, lock } = await assertLockedContract(root);
   let state = await readTrustedState(root);
   invariant(!state.humanStop, 'ERR_HUMAN_STOP', 'Verification is denied while human stop is active', { state: state.state });
@@ -29,15 +37,19 @@ export async function verifyRelease(root) {
   }
 
   const gitSha = currentGitSha(root);
-  const { manifest } = await runAcceptance(root, contract, lock, gitSha);
-  assertFreshEvidence(manifest, { contractHash: lock.contractHash, gitSha });
+  const { manifest: rawManifest } = await runAcceptance(root, contract, lock, gitSha);
+  assertFreshEvidence(rawManifest, { contractHash: lock.contractHash, gitSha });
 
   const changedPaths = changedPathsSince(root, lock.baselineSha);
   const scopeReport = analyzeScope(changedPaths, contract.scope.paths);
-  const generatedIssues = [
+  const baselineReplay = options.baselineReplay === false
+    ? skippedBaselineReplay()
+    : await replayFailedAcceptanceOnBaseline(root, { contract, lock, manifest: rawManifest, changedPaths, gitSha });
+  const manifest = await recordBaselineReplays(root, rawManifest, baselineReplay.replays);
+  const generatedIssues = attachContractDefectDiagnostics([
     ...issuesFromEvidence(manifest),
     ...issuesFromScope(scopeReport, manifest.runId),
-  ];
+  ], baselineReplay);
   const issueDocument = await replaceGeneratedIssues(root, generatedIssues);
   const counts = countIssues(issueDocument.issues);
   const statePatch = {
@@ -70,6 +82,7 @@ export async function verifyRelease(root) {
     contractHash: lock.contractHash,
     counts,
     scope: scopeReport,
+    baselineReplay,
   });
   return {
     decision,
@@ -77,6 +90,7 @@ export async function verifyRelease(root) {
     manifest,
     issues: issueDocument,
     scope: scopeReport,
+    baselineReplay,
   };
 }
 
@@ -117,8 +131,22 @@ export async function finishAgentRun(root, runResult) {
   }, 'agent run finished; verification required');
 }
 
-/** @param {string} root */
-export async function closeRelease(root) {
+/**
+ * In-scope paths that HEAD does not contain yet. The receipt binds `closedGitSha` to HEAD,
+ * so closing over these would attest to a tree that does not hold the implementation.
+ * `.shipping/` runtime files are excluded by `analyzeScope`.
+ * @param {string} root
+ * @param {Record<string, any>} contract
+ */
+function uncommittedInScopePaths(root, contract) {
+  return analyzeScope(uncommittedPaths(root), contract.scope.paths).allowed;
+}
+
+/**
+ * @param {string} root
+ * @param {{allowUncommitted?: boolean}} [options] `allowUncommitted: true` records the override in the receipt.
+ */
+export async function closeRelease(root, options = {}) {
   const paths = runtimePaths(root);
   const { contract, lock } = await assertLockedContract(root);
   const state = await readTrustedState(root);
@@ -138,6 +166,13 @@ export async function closeRelease(root) {
   const issues = await loadIssues(root);
   const counts = countIssues(issues.issues);
   invariant(counts.BLOCKER === 0, 'ERR_BLOCKERS_REMAIN', 'Release blockers remain', { counts });
+  const uncommitted = uncommittedInScopePaths(root, contract);
+  if (uncommitted.length > 0 && options.allowUncommitted !== true) {
+    throw new ShippingError('ERR_CLOSE_UNCOMMITTED', `In-scope work is not committed, so the release receipt cannot attest to HEAD: ${uncommitted.slice(0, 20).join(', ')}`, {
+      paths: uncommitted,
+      closedGitSha: gitSha,
+    });
+  }
 
   const integrations = (await exists(paths.integrations)) ? await readJson(paths.integrations) : null;
   const backlog = {
@@ -166,6 +201,7 @@ export async function closeRelease(root) {
     agentRuns: state.agentRuns,
     integrations,
     closedAt,
+    ...(uncommitted.length > 0 ? { uncommittedPaths: uncommitted } : {}),
   };
   const receiptPath = path.join(paths.releases, `${contract.release}.json`);
   const reportPath = path.join(paths.releases, `${contract.release}.md`);
@@ -178,6 +214,22 @@ export async function closeRelease(root) {
   }, `release ${contract.release} closed`);
   await recordLedger(root, { type: 'release.closed', receipt });
   return { state: updated, receipt, receiptPath, reportPath, backlog };
+}
+
+/**
+ * Advisory list of working-tree changes that fall outside `scope.paths.include`, so the
+ * operator can revert them before verification decides. Status never judges; verify does.
+ * @param {string} root
+ * @param {Record<string, any> | null} contract
+ * @param {string | null} baselineSha
+ */
+function scopeWarningFor(root, contract, baselineSha) {
+  if (!contract || !baselineSha) return null;
+  const analyzed = analyzeScope(changedPathsSince(root, baselineSha), contract.scope.paths);
+  return {
+    outside: analyzed.violations.map((violation) => violation.path),
+    include: contract.scope.paths.include,
+  };
 }
 
 /** @param {string} root */
@@ -230,6 +282,7 @@ export async function releaseStatus(root) {
     contractError,
     issues: { counts: countIssues(reportedIssues), items: reportedIssues },
     integrity,
+    scopeWarning: scopeWarningFor(root, contract, lock?.baselineSha ?? state.baselineSha ?? null),
     evidenceFresh: Boolean(state.currentEvidenceSha && state.currentEvidenceSha === git.sha && contractValid),
     closedDrift,
     goals,

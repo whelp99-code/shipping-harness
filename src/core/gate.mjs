@@ -13,6 +13,7 @@ import {
   countIssues,
   issuesFromEvidence,
   issuesFromScope,
+  issuesFromVerifyBudget,
   loadIssues,
   replaceGeneratedIssues,
 } from './issues.mjs';
@@ -22,6 +23,51 @@ import { invariant, ShippingError } from './errors.mjs';
 import { readState, readTrustedState, recordLedger, transitionState } from './state.mjs';
 import { goalStatusView } from './goals/status-view.mjs';
 import { assessStateIntegritySafe, stateIntegrityIssue } from './state-integrity.mjs';
+
+/**
+ * Per-criterion exit codes, sorted by criterion id, used to detect a verify run that
+ * reproduced the previous one with no new evidence.
+ * @param {Record<string, any>} manifest
+ */
+function acceptanceSignature(manifest) {
+  return manifest.results
+    .map((result) => `${result.criterionId}:${String(result.exitCode)}`)
+    .sort()
+    .join('|');
+}
+
+/**
+ * v1.10.0 Phase C: bound verify-run iteration that produces no new evidence. A run is
+ * "redundant" when it reproduces the previous verify's Git SHA and per-criterion exit
+ * codes exactly. `maxVerifyRuns` (default 10) counts consecutive redundant runs; once it
+ * is reached the decision becomes BLOCKED and the state machine itself then refuses any
+ * further `verify` call (BLOCKED is excluded at the top of this function), so the
+ * commands are never run again until the operator actually changes something.
+ * @param {string} root
+ * @param {Record<string, any>} contract
+ * @param {Record<string, any>} state
+ * @param {string} gitSha
+ * @param {Record<string, any>} manifest
+ */
+async function verifyBudgetOutcome(root, contract, state, gitSha, manifest) {
+  const maxVerifyRuns = contract.budgets.maxVerifyRuns ?? 10;
+  let redundant = false;
+  if (state.lastRunId && state.currentEvidenceSha === gitSha) {
+    try {
+      const previousManifest = await loadEvidence(root, state.lastRunId);
+      redundant = acceptanceSignature(previousManifest) === acceptanceSignature(manifest);
+    } catch {
+      redundant = false;
+    }
+  }
+  const redundantVerifyRuns = redundant ? (state.redundantVerifyRuns ?? 0) + 1 : 0;
+  return {
+    maxVerifyRuns,
+    redundantVerifyRuns,
+    verifyRuns: (state.verifyRuns ?? 0) + 1,
+    exhausted: redundantVerifyRuns >= maxVerifyRuns,
+  };
+}
 
 /**
  * @param {string} root
@@ -46,9 +92,11 @@ export async function verifyRelease(root, options = {}) {
     ? skippedBaselineReplay()
     : await replayFailedAcceptanceOnBaseline(root, { contract, lock, manifest: rawManifest, changedPaths, gitSha });
   const manifest = await recordBaselineReplays(root, rawManifest, baselineReplay.replays);
+  const budget = await verifyBudgetOutcome(root, contract, state, gitSha, manifest);
   const generatedIssues = attachContractDefectDiagnostics([
     ...issuesFromEvidence(manifest),
     ...issuesFromScope(scopeReport, manifest.runId),
+    ...(budget.exhausted ? issuesFromVerifyBudget(budget, manifest.runId) : []),
   ], baselineReplay);
   const issueDocument = await replaceGeneratedIssues(root, generatedIssues);
   const counts = countIssues(issueDocument.issues);
@@ -62,12 +110,16 @@ export async function verifyRelease(root, options = {}) {
     nextCount: counts.NEXT,
     ignoreCount: counts.IGNORE,
     unknownCount: counts.UNKNOWN,
+    verifyRuns: budget.verifyRuns,
+    redundantVerifyRuns: budget.redundantVerifyRuns,
     lastVerifiedAt: new Date().toISOString(),
   };
 
   let decision;
   if (counts.BLOCKER === 0) {
     decision = 'SHIPPABLE';
+  } else if (budget.exhausted) {
+    decision = 'BLOCKED';
   } else if (state.fixCycles >= contract.budgets.maxFixCycles) {
     decision = 'BLOCKED';
   } else {
@@ -83,6 +135,7 @@ export async function verifyRelease(root, options = {}) {
     counts,
     scope: scopeReport,
     baselineReplay,
+    verifyBudget: budget,
   });
   return {
     decision,
@@ -91,6 +144,7 @@ export async function verifyRelease(root, options = {}) {
     issues: issueDocument,
     scope: scopeReport,
     baselineReplay,
+    verifyBudget: budget,
   };
 }
 
@@ -98,7 +152,10 @@ export async function verifyRelease(root, options = {}) {
 export async function beginFixCycle(root) {
   const { contract } = await assertLockedContract(root);
   const state = await readTrustedState(root);
-  invariant(state.state === 'TRIAGE', 'ERR_FIX_STATE', 'A fix cycle can begin only from TRIAGE');
+  // BLOCKED is reachable both from an exhausted fix-cycle budget and from an exhausted
+  // verify-run budget (v1.10.0 Phase C); TRANSITIONS already allows BLOCKED -> FIXING as
+  // the recovery path once the operator has actually changed something.
+  invariant(['TRIAGE', 'BLOCKED'].includes(state.state), 'ERR_FIX_STATE', 'A fix cycle can begin only from TRIAGE or BLOCKED');
   if (state.fixCycles >= contract.budgets.maxFixCycles) {
     return transitionState(root, 'BLOCKED', {}, 'fix budget exhausted');
   }
@@ -121,13 +178,23 @@ export async function beginAgentRun(root, adapter) {
   }, `agent run started via ${adapter}`);
 }
 
-/** @param {string} root @param {Record<string, any>} runResult */
-export async function finishAgentRun(root, runResult) {
+/**
+ * v1.10.0 Phase C: `telemetry` is the adapter run's cost receipt (durationMs, exitCode,
+ * outputBytes, toolCalls, verifyRunsAtStart/End); it is stored on the transition (so the
+ * ledger event carries it) and aggregated into `state.telemetry.totalAgentDurationMs`.
+ * @param {string} root
+ * @param {Record<string, any>} runResult
+ * @param {Record<string, any> | null} [telemetry]
+ */
+export async function finishAgentRun(root, runResult, telemetry = null) {
   const state = await readTrustedState(root);
   invariant(state.state === 'RUNNING', 'ERR_RUN_STATE', 'No running agent execution to finish');
+  const totalAgentDurationMs = (state.telemetry?.totalAgentDurationMs ?? 0) + (telemetry?.durationMs ?? 0);
   return transitionState(root, 'VERIFYING', {
     lastAgentResult: runResult,
     lastAgentFinishedAt: new Date().toISOString(),
+    ...(telemetry ? { lastAgentTelemetry: telemetry } : {}),
+    telemetry: { totalAgentDurationMs },
   }, 'agent run finished; verification required');
 }
 
@@ -199,6 +266,8 @@ export async function closeRelease(root, options = {}) {
     backlogCount: backlog.items.length,
     fixCycles: state.fixCycles,
     agentRuns: state.agentRuns,
+    verifyRuns: state.verifyRuns ?? 0,
+    telemetry: { totalAgentDurationMs: state.telemetry?.totalAgentDurationMs ?? 0 },
     integrations,
     closedAt,
     ...(uncommitted.length > 0 ? { uncommittedPaths: uncommitted } : {}),
@@ -229,6 +298,22 @@ function scopeWarningFor(root, contract, baselineSha) {
   return {
     outside: analyzed.violations.map((violation) => violation.path),
     include: contract.scope.paths.include,
+  };
+}
+
+/**
+ * v1.10.0 Phase C: only surfaced once a redundant run has actually been recorded, so a
+ * healthy release never carries a noise line about a budget it is nowhere near.
+ * @param {Record<string, any>} state
+ * @param {Record<string, any> | null} contract
+ */
+function verifyBudgetFor(state, contract) {
+  const redundantVerifyRuns = state.redundantVerifyRuns ?? 0;
+  if (redundantVerifyRuns <= 0) return null;
+  return {
+    verifyRuns: state.verifyRuns ?? 0,
+    redundantVerifyRuns,
+    maxVerifyRuns: contract?.budgets?.maxVerifyRuns ?? 10,
   };
 }
 
@@ -283,6 +368,7 @@ export async function releaseStatus(root) {
     issues: { counts: countIssues(reportedIssues), items: reportedIssues },
     integrity,
     scopeWarning: scopeWarningFor(root, contract, lock?.baselineSha ?? state.baselineSha ?? null),
+    verifyBudget: verifyBudgetFor(state, contract),
     evidenceFresh: Boolean(state.currentEvidenceSha && state.currentEvidenceSha === git.sha && contractValid),
     closedDrift,
     goals,
@@ -315,7 +401,9 @@ function renderReleaseReport(receipt, manifest, issues, backlog) {
     `- Closed source Git SHA: \`${receipt.closedGitSha}\`\n` +
     `- Evidence run: \`${receipt.evidenceRunId}\`\n` +
     `- Fix cycles: ${receipt.fixCycles}\n` +
-    `- Agent runs: ${receipt.agentRuns}\n\n` +
+    `- Agent runs: ${receipt.agentRuns}\n` +
+    `- Verify runs: ${receipt.verifyRuns}\n` +
+    `- Total agent duration: ${receipt.telemetry.totalAgentDurationMs} ms\n\n` +
     `## Goal\n\n${receipt.goal}\n\n` +
     `## Acceptance evidence\n\n| Criterion | Requirement | Result | Exit | Duration |\n|---|---|---|---:|---:|\n${resultRows}\n\n` +
     `## Findings\n\n| ID | Class | Basis | Title |\n|---|---|---|---|\n${issueRows}\n\n` +

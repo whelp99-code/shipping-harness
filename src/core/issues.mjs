@@ -119,6 +119,26 @@ export function issuesFromScope(scopeReport, runId) {
   }));
 }
 
+/**
+ * v1.10.0 Phase C: the verify-run budget is exhausted (redundant runs with no new
+ * evidence reached `budgets.maxVerifyRuns`). Always a BLOCKER: both basisId and
+ * evidenceRef are set, so `normalizeIssue` never downgrades it.
+ * @param {{maxVerifyRuns: number, redundantVerifyRuns: number}} budget
+ * @param {string} runId
+ */
+export function issuesFromVerifyBudget(budget, runId) {
+  return [{
+    id: 'ISSUE-VERIFY-BUDGET',
+    title: 'Verify run budget exhausted',
+    description: `budgets.maxVerifyRuns (${budget.maxVerifyRuns}) reached after ${budget.redundantVerifyRuns} verify run(s) that reproduced the previous run's Git SHA and acceptance results with no new evidence.`,
+    classification: 'BLOCKER',
+    basisId: 'budget-exhausted',
+    evidenceRef: `runId:${runId}`,
+    source: 'verify-budget',
+    runId,
+  }];
+}
+
 /** @param {Array<Record<string, any>>} issues */
 export function backlogFromIssues(issues) {
   return issues

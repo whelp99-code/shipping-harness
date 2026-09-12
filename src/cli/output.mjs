@@ -38,6 +38,9 @@ export function renderStatus(status) {
   if (status.scopeWarning?.outside?.length) {
     lines.push('', `Scope warning: ${status.scopeWarning.outside.length} changed path(s) outside the approved scope: ${status.scopeWarning.outside.slice(0, 10).join(', ')}`);
   }
+  if (status.verifyBudget?.redundantVerifyRuns > 0) {
+    lines.push('', `Verify runs      ${status.verifyBudget.verifyRuns}/${status.verifyBudget.maxVerifyRuns}`);
+  }
   if (status.contractError) lines.push('', `Contract diagnostic: ${status.contractError}`);
   if (status.closedDrift?.violations?.length) {
     lines.push('', `Closed-version drift: ${status.closedDrift.violations.length} violation(s)`);

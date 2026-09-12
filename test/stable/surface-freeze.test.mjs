@@ -20,7 +20,11 @@ const repoRoot = path.resolve(__dirname, '..', '..');
 const EXPECTED = {
   tools: 'f4cf418cff5d25ea1c373021a9e3068a3851898a89b93fb55edf8e4a5cc0e8ab',
   help: 'cf161627cf9c2d578f77069fd5d19b4b7911eca119cfe19ed5caf643d282419c',
-  schemas: '563fa876d0c61f612c2f4fa8666d2ad7561d5ad1d29e04e8e1773b22d83923c8',
+  // v1.10.0: schemas/v1/state.schema.json gained the optional `integrity` object and the
+  // example was updated with it. Deliberate, additive, and recorded in section 6 of
+  // docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md.
+  // Previous (v1.8.2) hash: 563fa876d0c61f612c2f4fa8666d2ad7561d5ad1d29e04e8e1773b22d83923c8
+  schemas: 'd8303d3c7d52f650534a0ed65b4aa090098a82d5fb854c898e270a97cdc4ab36',
 };
 
 function sha256Hex(input) {
@@ -68,7 +72,7 @@ test('renderHelp() output is byte-identical to the v1.8.2 baseline', () => {
   assert.equal(hash, EXPECTED.help);
 });
 
-test('schemas/v1 contents are byte-identical to the v1.8.2 baseline', () => {
+test('schemas/v1 contents are byte-identical to the recorded baseline', () => {
   const hash = computeSchemasHash();
   assert.equal(hash, EXPECTED.schemas);
 });

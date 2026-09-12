@@ -96,6 +96,31 @@
       "type": "string",
       "maxLength": 8192,
       "format": "date-time"
+    },
+    "integrity": {
+      "type": "object",
+      "description": "Proof that this document was written by the engine and matches the ledger head named here. Optional: states written before v1.10 have none and read as UNVERIFIED_LEGACY.",
+      "required": [
+        "algorithm",
+        "ledgerHead",
+        "digest"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "type": "string"
+        },
+        "ledgerHead": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,

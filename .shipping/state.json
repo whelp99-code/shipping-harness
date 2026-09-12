@@ -1,20 +1,21 @@
 {
   "agentRuns": 0,
-  "baselineSha": null,
+  "baselineSha": "b0cea6aa59585629fb44bc43c589dec783e13248",
   "blockerCount": 0,
-  "contractHash": null,
+  "contractHash": "c30d0b806f640388605e886ae9207884026d0f6aae610816ec1e9f19fe9c418b",
   "createdAt": "2026-09-12T06:22:56.388Z",
-  "currentEvidenceSha": null,
+  "currentEvidenceSha": "b0cea6aa59585629fb44bc43c589dec783e13248",
   "fixCycles": 0,
   "humanStop": false,
   "ignoreCount": 0,
-  "lastRunId": null,
+  "lastRunId": "run-2026-09-12T13-27-23-163Z-e427e184",
+  "lastVerifiedAt": "2026-09-12T13:27:58.255Z",
   "nextCount": 0,
   "previousRelease": "1.8.2",
   "release": "1.9.0",
   "resumeState": null,
   "schema": "shipping-harness/state-v1",
-  "state": "DRAFT",
+  "state": "SHIPPABLE",
   "unknownCount": 0,
-  "updatedAt": "2026-09-12T06:22:56.388Z"
+  "updatedAt": "2026-09-12T13:27:58.256Z"
 }

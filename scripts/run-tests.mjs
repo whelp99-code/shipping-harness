@@ -1,8 +1,14 @@
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
-import { walkFiles, relative } from './shared.mjs';
+import { walkFiles } from './shared.mjs';
 
-const requested = process.argv[2] ?? 'all';
+// Line coverage threshold for `--coverage`: measured integer minus 2 percentage
+// points (recorded in docs/planning/33-V1.9.0-ENGINEERING-INFRASTRUCTURE-DEVELOPMENT-PLAN.md section 6).
+const COVERAGE_LINES_THRESHOLD = 84;
+
+const args = process.argv.slice(2);
+const withCoverage = args.includes('--coverage');
+const requested = args.find((value) => !value.startsWith('--')) ?? 'all';
 const valid = new Set(['all', 'unit', 'integration', 'adapter', 'mcp', 'adversarial']);
 if (!valid.has(requested)) {
   process.stderr.write(`Unknown test suite: ${requested}\n`);
@@ -21,7 +27,10 @@ if (files.length === 0) {
   process.exit(1);
 }
 
-const result = spawnSync(process.execPath, ['--test', '--test-reporter=spec', ...files], {
+const coverageArgs = withCoverage
+  ? ['--experimental-test-coverage', `--test-coverage-lines=${COVERAGE_LINES_THRESHOLD}`]
+  : [];
+const result = spawnSync(process.execPath, ['--test', '--test-reporter=spec', ...coverageArgs, ...files], {
   cwd: process.cwd(),
   encoding: 'utf8',
   timeout: 300000,

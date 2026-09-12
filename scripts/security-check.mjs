@@ -1,4 +1,4 @@
-import { lstat, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { walkFiles, relative } from './shared.mjs';
 import { assertContainedPath } from '../src/core/fs.mjs';
@@ -32,7 +32,27 @@ for (const filePath of sourceFiles) {
   }
 }
 
+// devDependencies (ESLint, tsc, etc.) are build/lint-time only; the shipped
+// bin/src/packages surfaces must never import them, or a clean `npm install
+// --omit=dev` (or --ignore-scripts) install would break at runtime.
+const devDependencyRuntimeFiles = [
+  ...await walkFiles(path.resolve('bin'), (file) => file.endsWith('.mjs')),
+  ...sourceFiles,
+  ...await walkFiles(path.resolve('packages'), (file) => file.endsWith('.mjs')),
+];
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
+const devDependencyNames = Object.keys(packageJson.devDependencies ?? {});
+const importSpecifierPattern = /(?:from\s+|import\()\s*['"]([^'"]+)['"]/gu;
+for (const filePath of new Set(devDependencyRuntimeFiles)) {
+  const content = await readFile(filePath, 'utf8');
+  for (const match of content.matchAll(importSpecifierPattern)) {
+    const specifier = match[1];
+    if (specifier.startsWith('.') || specifier.startsWith('node:') || specifier.startsWith('/')) continue;
+    const packageName = specifier.startsWith('@') ? specifier.split('/').slice(0, 2).join('/') : specifier.split('/')[0];
+    if (devDependencyNames.includes(packageName)) failures.push(`${relative(filePath)} imports devDependency ${packageName} from shipped runtime code`);
+  }
+}
+
 if (Object.keys(packageJson.dependencies ?? {}).length > 0) failures.push('runtime dependencies must remain empty for the current local-first release');
 if (packageJson.bin?.['shipping-harness-mcp'] !== './bin/shipping-harness-mcp.mjs') failures.push('shipping-harness-mcp package binary is missing or incorrect');
 if (packageJson.bin?.['shipping-harness-remote'] !== './bin/shipping-harness-remote.mjs') failures.push('shipping-harness-remote package binary is missing or incorrect');

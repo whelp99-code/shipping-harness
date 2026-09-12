@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "1.8.2",
+  "version": "1.9.0",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -37,9 +37,14 @@
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
-    "lint": "node scripts/lint.mjs",
-    "typecheck": "node scripts/typecheck.mjs",
+    "lint": "npm run lint:custom && npm run lint:eslint",
+    "lint:custom": "node scripts/lint.mjs",
+    "lint:eslint": "eslint .",
+    "typecheck": "npm run typecheck:custom && npm run typecheck:tsc",
+    "typecheck:custom": "node scripts/typecheck.mjs",
+    "typecheck:tsc": "tsc -p tsconfig.json",
     "test": "node scripts/run-tests.mjs all",
+    "test:coverage": "node scripts/run-tests.mjs all --coverage",
     "test:unit": "node scripts/run-tests.mjs unit",
     "test:integration": "node scripts/run-tests.mjs integration",
     "test:adapter": "node scripts/run-tests.mjs adapter",
@@ -80,5 +85,12 @@
     "test:goal-direction:field": "npm run test:goal-charter:field",
     "smoke:goal-direction:field": "npm run smoke:goal-charter:field"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.2",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
+    "typescript": "^5.9.3"
+  }
 }

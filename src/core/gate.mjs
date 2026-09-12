@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { assertLockedContract } from './contract.mjs';
-import { currentGitSha, changedPathsSince, gitStatus, uncommittedPaths } from './git.mjs';
+import { currentGitSha, changedPathsSince, gitStatus, treeFingerprint } from './git.mjs';
 import { analyzeScope } from './glob.mjs';
 import { runAcceptance, loadEvidence, assertFreshEvidence, recordBaselineReplays } from './evidence.mjs';
 import {
@@ -37,22 +37,29 @@ function acceptanceSignature(manifest) {
 }
 
 /**
- * v1.10.0 Phase C: bound verify-run iteration that produces no new evidence. A run is
- * "redundant" when it reproduces the previous verify's Git SHA and per-criterion exit
- * codes exactly. `maxVerifyRuns` (default 10) counts consecutive redundant runs; once it
- * is reached the decision becomes BLOCKED and the state machine itself then refuses any
- * further `verify` call (BLOCKED is excluded at the top of this function), so the
- * commands are never run again until the operator actually changes something.
+ * v1.10.0 Phase C: bound verify-run iteration. Two budgets apply.
+ *
+ * `budgets.maxRedundantVerifyRuns` (default 5) counts consecutive runs that reproduced the
+ * previous run's *tree fingerprint* and per-criterion exit codes, i.e. produced no new
+ * evidence. Comparing the fingerprint rather than the Git SHA is what makes the counter
+ * work on an uncommitted tree: toggling a file between runs used to reset it every time.
+ *
+ * `budgets.maxVerifyRuns` (default 25) is a hard cap on the TOTAL verify runs of a release,
+ * so alternating results cannot buy unlimited iterations.
+ *
+ * Either exhaustion decides BLOCKED, and the state machine then refuses the next `verify`
+ * call outright (BLOCKED is excluded at the top of `verifyRelease`).
  * @param {string} root
  * @param {Record<string, any>} contract
  * @param {Record<string, any>} state
- * @param {string} gitSha
+ * @param {{fingerprint: string}} tree
  * @param {Record<string, any>} manifest
  */
-async function verifyBudgetOutcome(root, contract, state, gitSha, manifest) {
-  const maxVerifyRuns = contract.budgets.maxVerifyRuns ?? 10;
+async function verifyBudgetOutcome(root, contract, state, tree, manifest) {
+  const maxVerifyRuns = contract.budgets.maxVerifyRuns ?? 25;
+  const maxRedundantVerifyRuns = contract.budgets.maxRedundantVerifyRuns ?? 5;
   let redundant = false;
-  if (state.lastRunId && state.currentEvidenceSha === gitSha) {
+  if (state.lastRunId && state.currentEvidenceFingerprint === tree.fingerprint) {
     try {
       const previousManifest = await loadEvidence(root, state.lastRunId);
       redundant = acceptanceSignature(previousManifest) === acceptanceSignature(manifest);
@@ -61,11 +68,16 @@ async function verifyBudgetOutcome(root, contract, state, gitSha, manifest) {
     }
   }
   const redundantVerifyRuns = redundant ? (state.redundantVerifyRuns ?? 0) + 1 : 0;
+  const verifyRuns = (state.verifyRuns ?? 0) + 1;
+  const redundantExhausted = redundantVerifyRuns >= maxRedundantVerifyRuns;
+  const totalExhausted = verifyRuns >= maxVerifyRuns;
   return {
     maxVerifyRuns,
+    maxRedundantVerifyRuns,
     redundantVerifyRuns,
-    verifyRuns: (state.verifyRuns ?? 0) + 1,
-    exhausted: redundantVerifyRuns >= maxVerifyRuns,
+    verifyRuns,
+    exhausted: redundantExhausted || totalExhausted,
+    exhaustedBudget: redundantExhausted ? 'maxRedundantVerifyRuns' : totalExhausted ? 'maxVerifyRuns' : null,
   };
 }
 
@@ -83,16 +95,19 @@ export async function verifyRelease(root, options = {}) {
   }
 
   const gitSha = currentGitSha(root);
-  const { manifest: rawManifest } = await runAcceptance(root, contract, lock, gitSha);
-  assertFreshEvidence(rawManifest, { contractHash: lock.contractHash, gitSha });
+  // Measured before the commands run, so acceptance side effects never change the identity
+  // of the tree the evidence is attributed to.
+  const tree = treeFingerprint(root, contract.scope.paths);
+  const { manifest: rawManifest } = await runAcceptance(root, contract, lock, gitSha, tree);
+  assertFreshEvidence(rawManifest, { contractHash: lock.contractHash, gitSha, treeFingerprint: tree.fingerprint });
 
   const changedPaths = changedPathsSince(root, lock.baselineSha);
   const scopeReport = analyzeScope(changedPaths, contract.scope.paths);
   const baselineReplay = options.baselineReplay === false
     ? skippedBaselineReplay()
-    : await replayFailedAcceptanceOnBaseline(root, { contract, lock, manifest: rawManifest, changedPaths, gitSha });
+    : await replayFailedAcceptanceOnBaseline(root, { contract, lock, manifest: rawManifest, changedPaths, gitSha, tree });
   const manifest = await recordBaselineReplays(root, rawManifest, baselineReplay.replays);
-  const budget = await verifyBudgetOutcome(root, contract, state, gitSha, manifest);
+  const budget = await verifyBudgetOutcome(root, contract, state, tree, manifest);
   const generatedIssues = attachContractDefectDiagnostics([
     ...issuesFromEvidence(manifest),
     ...issuesFromScope(scopeReport, manifest.runId),
@@ -105,6 +120,7 @@ export async function verifyRelease(root, options = {}) {
     contractHash: lock.contractHash,
     baselineSha: lock.baselineSha,
     currentEvidenceSha: gitSha,
+    currentEvidenceFingerprint: tree.fingerprint,
     lastRunId: manifest.runId,
     blockerCount: counts.BLOCKER,
     nextCount: counts.NEXT,
@@ -199,17 +215,6 @@ export async function finishAgentRun(root, runResult, telemetry = null) {
 }
 
 /**
- * In-scope paths that HEAD does not contain yet. The receipt binds `closedGitSha` to HEAD,
- * so closing over these would attest to a tree that does not hold the implementation.
- * `.shipping/` runtime files are excluded by `analyzeScope`.
- * @param {string} root
- * @param {Record<string, any>} contract
- */
-function uncommittedInScopePaths(root, contract) {
-  return analyzeScope(uncommittedPaths(root), contract.scope.paths).allowed;
-}
-
-/**
  * @param {string} root
  * @param {{allowUncommitted?: boolean}} [options] `allowUncommitted: true` records the override in the receipt.
  */
@@ -225,6 +230,11 @@ export async function closeRelease(root, options = {}) {
     gitSha,
   });
   invariant(typeof state.lastRunId === 'string' && state.lastRunId, 'ERR_EVIDENCE_MISSING', 'No accepted evidence run is recorded');
+  // Close deliberately does NOT compare the tree fingerprint: an out-of-scope dirty path
+  // must not refuse a close (fixed by test/adversarial/close-uncommitted-attacks), and the
+  // in-scope half is already refused below by ERR_CLOSE_UNCOMMITTED, with any commit of it
+  // moving HEAD and failing the evidence-SHA check above.
+  const tree = treeFingerprint(root, contract.scope.paths);
   const manifest = assertFreshEvidence(await loadEvidence(root, state.lastRunId), {
     contractHash: lock.contractHash,
     gitSha,
@@ -233,7 +243,9 @@ export async function closeRelease(root, options = {}) {
   const issues = await loadIssues(root);
   const counts = countIssues(issues.issues);
   invariant(counts.BLOCKER === 0, 'ERR_BLOCKERS_REMAIN', 'Release blockers remain', { counts });
-  const uncommitted = uncommittedInScopePaths(root, contract);
+  // In-scope paths HEAD does not contain yet: the receipt binds `closedGitSha` to HEAD, so
+  // closing over these would attest to a tree that does not hold the implementation.
+  const uncommitted = tree.inScopeDirtyPaths;
   if (uncommitted.length > 0 && options.allowUncommitted !== true) {
     throw new ShippingError('ERR_CLOSE_UNCOMMITTED', `In-scope work is not committed, so the release receipt cannot attest to HEAD: ${uncommitted.slice(0, 20).join(', ')}`, {
       paths: uncommitted,
@@ -302,18 +314,22 @@ function scopeWarningFor(root, contract, baselineSha) {
 }
 
 /**
- * v1.10.0 Phase C: only surfaced once a redundant run has actually been recorded, so a
- * healthy release never carries a noise line about a budget it is nowhere near.
+ * v1.10.0 Phase C: only surfaced once a redundant run has been recorded or the total cap
+ * has been reached, so a healthy release never carries a noise line about a budget it is
+ * nowhere near.
  * @param {Record<string, any>} state
  * @param {Record<string, any> | null} contract
  */
 function verifyBudgetFor(state, contract) {
   const redundantVerifyRuns = state.redundantVerifyRuns ?? 0;
-  if (redundantVerifyRuns <= 0) return null;
+  const verifyRuns = state.verifyRuns ?? 0;
+  const maxVerifyRuns = contract?.budgets?.maxVerifyRuns ?? 25;
+  if (redundantVerifyRuns <= 0 && verifyRuns < maxVerifyRuns) return null;
   return {
-    verifyRuns: state.verifyRuns ?? 0,
+    verifyRuns,
     redundantVerifyRuns,
-    maxVerifyRuns: contract?.budgets?.maxVerifyRuns ?? 10,
+    maxVerifyRuns,
+    maxRedundantVerifyRuns: contract?.budgets?.maxRedundantVerifyRuns ?? 5,
   };
 }
 
@@ -359,6 +375,7 @@ export async function releaseStatus(root) {
     };
   }
   const goals = await goalStatusView(root);
+  const tree = treeFingerprint(root, contract?.scope?.paths ?? null);
   return {
     state,
     git,
@@ -369,7 +386,12 @@ export async function releaseStatus(root) {
     integrity,
     scopeWarning: scopeWarningFor(root, contract, lock?.baselineSha ?? state.baselineSha ?? null),
     verifyBudget: verifyBudgetFor(state, contract),
-    evidenceFresh: Boolean(state.currentEvidenceSha && state.currentEvidenceSha === git.sha && contractValid),
+    // Evidence recorded against a dirty tree is only fresh while that tree is unchanged.
+    evidenceFresh: Boolean(state.currentEvidenceSha && state.currentEvidenceSha === git.sha && contractValid
+      && (!state.currentEvidenceFingerprint || state.currentEvidenceFingerprint === tree.fingerprint)),
+    evidenceDirty: tree.dirtyPaths.length > 0
+      ? { dirtyPaths: tree.dirtyPaths, inScope: tree.inScopeDirtyPaths, fingerprint: tree.fingerprint }
+      : null,
     closedDrift,
     goals,
     paths,

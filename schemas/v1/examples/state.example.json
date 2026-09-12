@@ -5,6 +5,7 @@
   "contractHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "baselineSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "currentEvidenceSha": null,
+  "currentEvidenceFingerprint": null,
   "lastRunId": null,
   "agentRuns": 1,
   "fixCycles": 0,

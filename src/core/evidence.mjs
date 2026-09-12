@@ -4,6 +4,7 @@ import { assertContainedPath, ensureDir, exists, readJson, writeAtomic, writeJso
 import { runtimePaths } from './paths.mjs';
 import { runBoundedCommand } from './process.mjs';
 import { runIsolatedAcceptance } from './isolated-verification.mjs';
+import { treeFingerprint } from './git.mjs';
 import { invariant, ShippingError } from './errors.mjs';
 
 /** @param {string} value */
@@ -16,8 +17,11 @@ function safeName(value) {
  * @param {Record<string, any>} contract
  * @param {Record<string, any>} lock
  * @param {string} gitSha
+ * @param {{fingerprint: string, dirtyPaths: string[]} | null} [tree] tree identity measured before the
+ * commands run; computed here when the caller does not supply it.
  */
-export async function runAcceptance(root, contract, lock, gitSha) {
+export async function runAcceptance(root, contract, lock, gitSha, tree = null) {
+  const measuredTree = tree ?? treeFingerprint(root, contract.scope.paths);
   const paths = runtimePaths(root);
   const runId = `run-${new Date().toISOString().replace(/[:.]/gu, '-')}-${randomUUID().slice(0, 8)}`;
   const runDirectory = path.join(paths.evidence, runId);
@@ -106,6 +110,8 @@ export async function runAcceptance(root, contract, lock, gitSha) {
     release: contract.release,
     contractHash: lock.contractHash,
     gitSha,
+    treeFingerprint: measuredTree.fingerprint,
+    dirtyPaths: measuredTree.dirtyPaths,
     baselineSha: lock.baselineSha,
     startedAt: results[0]?.startedAt ?? new Date().toISOString(),
     finishedAt: results.at(-1)?.finishedAt ?? new Date().toISOString(),
@@ -157,8 +163,12 @@ export async function loadEvidence(root, runId) {
 }
 
 /**
+ * Evidence is fresh only for the exact tree it ran against. The Git SHA alone is not that
+ * tree: uncommitted work changes what the commands tested without changing HEAD, so the
+ * tree fingerprint is compared whenever both sides carry one (manifests written before
+ * v1.10.0 have none and keep the old SHA-only contract).
  * @param {Record<string, any>} manifest
- * @param {{contractHash: string, gitSha: string}} expected
+ * @param {{contractHash: string, gitSha: string, treeFingerprint?: string | null}} expected
  */
 export function assertFreshEvidence(manifest, expected) {
   invariant(manifest.contractHash === expected.contractHash, 'ERR_EVIDENCE_STALE', 'Evidence belongs to a different contract', {
@@ -169,6 +179,13 @@ export function assertFreshEvidence(manifest, expected) {
     expected: expected.gitSha,
     actual: manifest.gitSha,
   });
+  if (typeof expected.treeFingerprint === 'string' && typeof manifest.treeFingerprint === 'string') {
+    invariant(manifest.treeFingerprint === expected.treeFingerprint, 'ERR_EVIDENCE_STALE', 'Evidence belongs to a different working tree', {
+      expected: expected.treeFingerprint,
+      actual: manifest.treeFingerprint,
+      dirtyPaths: Array.isArray(manifest.dirtyPaths) ? manifest.dirtyPaths.slice(0, 20) : [],
+    });
+  }
   invariant(Array.isArray(manifest.results), 'ERR_EVIDENCE_INVALID', 'Evidence results are invalid');
   return manifest;
 }

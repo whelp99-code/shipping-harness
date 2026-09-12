@@ -38,8 +38,13 @@ export function renderStatus(status) {
   if (status.scopeWarning?.outside?.length) {
     lines.push('', `Scope warning: ${status.scopeWarning.outside.length} changed path(s) outside the approved scope: ${status.scopeWarning.outside.slice(0, 10).join(', ')}`);
   }
-  if (status.verifyBudget?.redundantVerifyRuns > 0) {
-    lines.push('', `Verify runs      ${status.verifyBudget.verifyRuns}/${status.verifyBudget.maxVerifyRuns}`);
+  if (status.evidenceDirty?.dirtyPaths?.length) {
+    lines.push('', `evidence: dirty (${status.evidenceDirty.dirtyPaths.length} uncommitted paths)`,
+      `  ${status.evidenceDirty.dirtyPaths.slice(0, 10).join(', ')}`);
+  }
+  if (status.verifyBudget) {
+    lines.push('', `Verify runs      ${status.verifyBudget.verifyRuns}/${status.verifyBudget.maxVerifyRuns}`,
+      `Redundant runs   ${status.verifyBudget.redundantVerifyRuns}/${status.verifyBudget.maxRedundantVerifyRuns ?? 5}`);
   }
   if (status.contractError) lines.push('', `Contract diagnostic: ${status.contractError}`);
   if (status.closedDrift?.violations?.length) {

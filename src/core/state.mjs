@@ -44,6 +44,7 @@ export async function initializeState(root, overrides = {}) {
     contractHash: null,
     baselineSha: null,
     currentEvidenceSha: null,
+    currentEvidenceFingerprint: null,
     lastRunId: null,
     agentRuns: 0,
     fixCycles: 0,

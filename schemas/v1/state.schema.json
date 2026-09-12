@@ -52,6 +52,14 @@
     "currentEvidenceSha": {
       "type": "null"
     },
+    "currentEvidenceFingerprint": {
+      "description": "v1.10.0: tree fingerprint of the evidence run named by lastRunId (see the evidence schema). Evidence goes stale when the working tree no longer matches it, even at the same Git SHA. Optional; absent before v1.10.0 and while no evidence exists.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128
+    },
     "lastRunId": {
       "type": "null"
     },

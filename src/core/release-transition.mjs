@@ -74,6 +74,7 @@ export async function prepareNextRelease(root, input) {
     contractHash: null,
     baselineSha: null,
     currentEvidenceSha: null,
+    currentEvidenceFingerprint: null,
     lastRunId: null,
     agentRuns: 0,
     fixCycles: 0,

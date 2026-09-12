@@ -159,6 +159,7 @@ export function buildUserStatusView(status) {
     integrity: status.integrity ?? null,
     scopeWarning: status.scopeWarning ?? null,
     verifyBudget: status.verifyBudget ?? null,
+    evidenceDirty: status.evidenceDirty ?? null,
     plainBriefError: compiled.error ?? null,
   };
 }

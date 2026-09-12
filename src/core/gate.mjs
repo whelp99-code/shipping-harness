@@ -14,13 +14,14 @@ import {
 import { exists, readJson, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { runtimePaths } from './paths.mjs';
 import { invariant } from './errors.mjs';
-import { readState, recordLedger, transitionState } from './state.mjs';
+import { readState, readTrustedState, recordLedger, transitionState } from './state.mjs';
 import { goalStatusView } from './goals/status-view.mjs';
+import { assessStateIntegritySafe, stateIntegrityIssue } from './state-integrity.mjs';
 
 /** @param {string} root */
 export async function verifyRelease(root) {
   const { contract, lock } = await assertLockedContract(root);
-  let state = await readState(root);
+  let state = await readTrustedState(root);
   invariant(!state.humanStop, 'ERR_HUMAN_STOP', 'Verification is denied while human stop is active', { state: state.state });
   invariant(!['DRAFT', 'PAUSED', 'CLOSED', 'ABORTED', 'BLOCKED'].includes(state.state), 'ERR_STATE_VERIFY', `Cannot verify from ${state.state}`);
   if (state.state !== 'VERIFYING') {
@@ -82,7 +83,7 @@ export async function verifyRelease(root) {
 /** @param {string} root */
 export async function beginFixCycle(root) {
   const { contract } = await assertLockedContract(root);
-  const state = await readState(root);
+  const state = await readTrustedState(root);
   invariant(state.state === 'TRIAGE', 'ERR_FIX_STATE', 'A fix cycle can begin only from TRIAGE');
   if (state.fixCycles >= contract.budgets.maxFixCycles) {
     return transitionState(root, 'BLOCKED', {}, 'fix budget exhausted');
@@ -93,7 +94,7 @@ export async function beginFixCycle(root) {
 /** @param {string} root @param {string} adapter */
 export async function beginAgentRun(root, adapter) {
   const { contract } = await assertLockedContract(root);
-  const state = await readState(root);
+  const state = await readTrustedState(root);
   invariant(['LOCKED', 'FIXING'].includes(state.state), 'ERR_RUN_STATE', `Cannot start an agent run from ${state.state}`);
   invariant(!state.humanStop, 'ERR_HUMAN_STOP', 'Agent run denied by human stop');
   if (state.agentRuns >= contract.budgets.maxAgentRuns) {
@@ -108,7 +109,7 @@ export async function beginAgentRun(root, adapter) {
 
 /** @param {string} root @param {Record<string, any>} runResult */
 export async function finishAgentRun(root, runResult) {
-  const state = await readState(root);
+  const state = await readTrustedState(root);
   invariant(state.state === 'RUNNING', 'ERR_RUN_STATE', 'No running agent execution to finish');
   return transitionState(root, 'VERIFYING', {
     lastAgentResult: runResult,
@@ -120,7 +121,7 @@ export async function finishAgentRun(root, runResult) {
 export async function closeRelease(root) {
   const paths = runtimePaths(root);
   const { contract, lock } = await assertLockedContract(root);
-  const state = await readState(root);
+  const state = await readTrustedState(root);
   invariant(state.state === 'SHIPPABLE', 'ERR_NOT_SHIPPABLE', `Release cannot close from ${state.state}`);
   invariant(!state.humanStop, 'ERR_HUMAN_STOP', 'Release closure denied by human stop');
   const gitSha = currentGitSha(root);
@@ -182,9 +183,18 @@ export async function closeRelease(root) {
 /** @param {string} root */
 export async function releaseStatus(root) {
   const paths = runtimePaths(root);
-  const state = await readState(root);
+  const stored = await readState(root);
+  const integrity = await assessStateIntegritySafe(root);
+  // A tampered state file is never reported as authority: the last state the ledger proves is.
+  /** @type {Record<string, any>} */
+  const state = integrity.level === 'TAMPERED' && integrity.ledgerState
+    ? { ...stored, state: integrity.ledgerState }
+    : stored;
   const git = gitStatus(root);
   const issues = await loadIssues(root);
+  const reportedIssues = integrity.level === 'TAMPERED'
+    ? [stateIntegrityIssue(integrity), ...issues.issues]
+    : issues.issues;
   let contract = null;
   let lock = null;
   let contractValid = false;
@@ -218,7 +228,8 @@ export async function releaseStatus(root) {
     contract: contract ? { project: contract.project, release: contract.release, hash: lock.contractHash } : null,
     contractValid,
     contractError,
-    issues: { counts: countIssues(issues.issues), items: issues.issues },
+    issues: { counts: countIssues(reportedIssues), items: reportedIssues },
+    integrity,
     evidenceFresh: Boolean(state.currentEvidenceSha && state.currentEvidenceSha === git.sha && contractValid),
     closedDrift,
     goals,

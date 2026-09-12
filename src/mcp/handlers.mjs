@@ -29,7 +29,7 @@ import {
   setAutopilotHumanControl,
 } from '../core/autopilot.mjs';
 import { approveScopeProposal, createScopeProposal, findActiveScopeProposal, refineScopeProposal } from '../core/proposals.mjs';
-import { abort, pause, readState, resume } from '../core/state.mjs';
+import { abort, pause, readTrustedState, resume } from '../core/state.mjs';
 import { buildBlockerView, buildUserStatusView } from './user-view.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from '../core/goals/authority.mjs';
 import { ADAPTERS } from './constants.mjs';
@@ -387,7 +387,7 @@ async function approveWithContinuation(root, proposalId, proposalHash, args) {
   const policy = await loadAutopilotPolicy(root);
   const autopilotState = await loadAutopilotState(root);
   const previousTrainEnvelope = await loadApprovedReleaseTrain(root);
-  const shippingState = await readState(root);
+  const shippingState = await readTrustedState(root);
   const active = await findActiveScopeProposal(root);
   invariant(policy && autopilotState && previousTrainEnvelope?.train && active, 'ERR_AUTOPILOT_INACTIVE', 'Autopilot continuation requires an active policy, prior train, and current proposal');
   invariant(active.summary.proposalId === proposalId && active.summary.proposalHash === proposalHash, 'ERR_PROPOSAL_STALE', 'Autopilot continuation proposal identity is stale');
@@ -574,7 +574,7 @@ async function autoFixAfterVerify(root, result) {
     statePatch: { phase: 'FIXING_BLOCKERS', details: { blockers: result.issues.counts.BLOCKER } },
   });
   if (!evaluated.decision.allowed) {
-    return { decision: evaluated.decision, state: evaluated.recorded.state, blockers: result.issues.issues.filter((item) => item.classification === 'BLOCKER') };
+    return { decision: evaluated.decision, state: /** @type {Record<string, any>} */ (evaluated.recorded.state), blockers: result.issues.issues.filter((item) => item.classification === 'BLOCKER') };
   }
   const fixState = await beginFixCycle(root);
   if (fixState.state === 'BLOCKED') return null;

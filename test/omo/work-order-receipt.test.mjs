@@ -2,9 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { executePrivateOmoRuntime, loadOrCreateBridgeKey, validatePrivateOmoReceipt } from '../../packages/internal-omo-bridge/index.mjs';
 import { createPrivateOmoWorkOrder } from '../../packages/internal-omo-bridge/work-order.mjs';
-import { createOmoFixture } from './helpers.mjs';
+import { createOmoFixture, privateOmoRuntimeAvailability } from './helpers.mjs';
 
-test('signed work order and real OMO receipt bind contract, SHA, session, Goals, Tasks, acceptance, scope, and budgets', async () => {
+const runtime = privateOmoRuntimeAvailability();
+const skip = runtime.available ? {} : { skip: 'private OMO runtime is not installed at the pinned path' };
+
+test('signed work order and real OMO receipt bind contract, SHA, session, Goals, Tasks, acceptance, scope, and budgets', skip, async () => {
   const fixture = await createOmoFixture();
   try {
     const key = await loadOrCreateBridgeKey(fixture.root, fixture.config);
@@ -32,7 +35,7 @@ test('signed work order and real OMO receipt bind contract, SHA, session, Goals,
   }
 });
 
-test('tampered, stale, foreign-session, wrong-task, and over-budget receipts fail closed', async () => {
+test('tampered, stale, foreign-session, wrong-task, and over-budget receipts fail closed', skip, async () => {
   const fixture = await createOmoFixture();
   try {
     const key = await loadOrCreateBridgeKey(fixture.root, fixture.config);

@@ -1,9 +1,32 @@
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createFixtureRepo } from '../helpers/repo.mjs';
 
 const mainRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+/**
+ * Whether the private OMO runtime pinned by config/upstreams/omo-pin.json is actually
+ * installed on this machine. Tests that exercise the real runtime binary (not a fixture's
+ * deliberately-broken cliPath) must skip, not fail, when it is not: the pin is a real
+ * absolute path outside this repo and may not exist on every contributor's machine.
+ * @returns {{ available: boolean, reason: string }}
+ */
+export function privateOmoRuntimeAvailability() {
+  const pinPath = path.join(mainRoot, 'config', 'upstreams', 'omo-pin.json');
+  let pin;
+  try {
+    pin = JSON.parse(readFileSync(pinPath, 'utf8'));
+  } catch (error) {
+    return { available: false, reason: `omo-pin.json could not be read: ${error?.message ?? error}` };
+  }
+  const manifestPath = path.join(pin.runtimeRoot, 'runtime-manifest.json');
+  if (!existsSync(manifestPath)) {
+    return { available: false, reason: `private OMO runtime is not installed at the pinned path (missing ${manifestPath})` };
+  }
+  return { available: true, reason: '' };
+}
 
 export function v07Contract(contract) {
   return {

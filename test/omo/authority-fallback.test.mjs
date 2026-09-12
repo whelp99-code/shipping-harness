@@ -4,9 +4,12 @@ import { readFile } from 'node:fs/promises';
 import { executeShippingPrivateOmo, privateOmoFallbackDecision } from '../../packages/internal-omo-bridge/index.mjs';
 import { loadContract } from '../../src/core/contract.mjs';
 import { pause, readState } from '../../src/core/state.mjs';
-import { createOmoFixture } from './helpers.mjs';
+import { createOmoFixture, privateOmoRuntimeAvailability } from './helpers.mjs';
 
-test('runtime completion is only an execution claim until Shipping verification runs', async () => {
+const runtime = privateOmoRuntimeAvailability();
+const skip = runtime.available ? {} : { skip: 'private OMO runtime is not installed at the pinned path' };
+
+test('runtime completion is only an execution claim until Shipping verification runs', skip, async () => {
   const fixture = await createOmoFixture();
   try {
     const result = await executeShippingPrivateOmo(fixture.root, { mode: 'probe', verifyAfter: false });

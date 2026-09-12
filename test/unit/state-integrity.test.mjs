@@ -162,3 +162,65 @@ test('check (e): a SHIPPABLE state without its evidence manifest is TAMPERED', a
     await fixture.cleanup();
   }
 });
+
+test('a DRAFT left by a pre-v1.10 release prepare is UNVERIFIED_LEGACY, not TAMPERED', async () => {
+  const fixture = await createFixtureRepo();
+  try {
+    await fixture.lock();
+    await verifyRelease(fixture.root);
+    await closeRelease(fixture.root);
+    // Exactly what v1.9 `release prepare` left behind: a fresh DRAFT for the next release and
+    // a ledger whose last recorded state is the previous release's CLOSED.
+    const closedState = JSON.parse(await readFile(fixture.paths.state, 'utf8'));
+    await writeFile(fixture.paths.state, `${JSON.stringify({
+      schema: 'shipping-harness/state-v1',
+      state: 'DRAFT',
+      release: '0.2.0',
+      previousRelease: closedState.release,
+      contractHash: null,
+      baselineSha: null,
+      currentEvidenceSha: null,
+      lastRunId: null,
+      agentRuns: 0,
+      fixCycles: 0,
+      blockerCount: 0,
+      nextCount: 0,
+      ignoreCount: 0,
+      humanStop: false,
+      resumeState: null,
+      createdAt: closedState.createdAt,
+      updatedAt: new Date().toISOString(),
+    }, null, 2)}\n`, 'utf8');
+    const events = (await readLedger(fixture.paths.ledger)).map(({ prev: _prev, digest: _digest, stateWrite: _write, ...rest }) => rest);
+    await writeLedger(fixture.paths.ledger, events);
+
+    const assessed = await assessStateIntegrity(fixture.root);
+    assert.equal(assessed.level, 'UNVERIFIED_LEGACY');
+    assert.equal(assessed.ok, true);
+    assert.equal(assessed.ledgerState, 'DRAFT');
+    assert.equal((await readTrustedState(fixture.root)).state, 'DRAFT');
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('legacy leniency never extends upward to a SHIPPABLE or CLOSED claim', async () => {
+  const fixture = await createFixtureRepo();
+  try {
+    await fixture.lock();
+    await editState(fixture.paths.state, ({ integrity: _integrity, ...state }) => ({
+      ...state,
+      state: 'CLOSED',
+      previousRelease: '0.0.9',
+      release: '0.1.0',
+    }));
+    const events = (await readLedger(fixture.paths.ledger)).map(({ prev: _prev, digest: _digest, stateWrite: _write, ...rest }) => rest);
+    await writeLedger(fixture.paths.ledger, events);
+    const assessed = await assessStateIntegrity(fixture.root);
+    assert.equal(assessed.level, 'TAMPERED');
+    assert.equal(assessed.expected, 'LOCKED');
+    assert.equal(assessed.observed, 'CLOSED');
+  } finally {
+    await fixture.cleanup();
+  }
+});

@@ -10,6 +10,19 @@ import { parseCliJson, runCli } from '../helpers/cli.mjs';
 import { callShippingTool } from '../../src/mcp/tools.mjs';
 import { addManualIssue } from '../../src/core/issues.mjs';
 
+/**
+ * Remove every v1.10 signature so the fixture looks like it was written by v1.9.
+ * @param {{state: string, ledger: string}} paths
+ */
+async function stripSignatures(paths) {
+  const { integrity: _integrity, ...state } = JSON.parse(await readFile(paths.state, 'utf8'));
+  await writeFile(paths.state, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
+  const events = (await readFile(paths.ledger, 'utf8')).split('\n').filter(Boolean)
+    .map((line) => JSON.parse(line))
+    .map(({ prev: _prev, digest: _digest, stateWrite: _stateWrite, ...rest }) => rest);
+  await writeFile(paths.ledger, `${events.map((event) => JSON.stringify(event)).join('\n')}\n`, 'utf8');
+}
+
 /** @param {string} filePath @param {(state: Record<string, any>) => Record<string, any>} mutate */
 async function forgeState(filePath, mutate) {
   const state = JSON.parse(await readFile(filePath, 'utf8'));
@@ -125,6 +138,48 @@ test('deleting the receipt of a genuine close invalidates the CLOSED claim', asy
     assert.equal(after.integrity.ok, false);
     assert.match(after.integrity.reason, /no release receipt/u);
     const prepared = runCli(fixture.root, ['release', 'prepare', '--version', '0.2.0', '--goal', 'next release']);
+    assert.notEqual(prepared.exitCode, 0);
+    assert.match(prepared.stderr, /ERR_STATE_TAMPERED/u);
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('legacy leniency does not let an unsigned state forge CLOSED', async () => {
+  const fixture = await createFixtureRepo();
+  try {
+    await fixture.lock();
+    await stripSignatures(fixture.paths);
+    // The unsigned ledger ends at LOCKED; claiming CLOSED is an upward claim it cannot support.
+    await forgeState(fixture.paths.state, (state) => ({ ...state, state: 'CLOSED', closedGitSha: state.baselineSha }));
+    const document = parseCliJson(runCli(fixture.root, ['status', '--json']));
+    assert.equal(document.integrity.level, 'TAMPERED');
+    assert.equal(document.integrity.ledgerState, 'LOCKED');
+    assert.equal(document.state.state, 'LOCKED');
+    assert.ok(document.issues.items.some((item) => item.basisId === 'false-user-state'));
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('an unsigned CLOSED cannot be rolled forward to the next release without a receipt', async () => {
+  const fixture = await createFixtureRepo();
+  try {
+    assert.equal(runCli(fixture.root, ['lock', '--json']).exitCode, 0);
+    assert.equal(runCli(fixture.root, ['verify', '--json']).exitCode, 0);
+    assert.equal(runCli(fixture.root, ['close', '--json']).exitCode, 0);
+    await stripSignatures(fixture.paths);
+    // The ledger proves CLOSED for 0.1.0. Claiming CLOSED for 0.2.0 with no receipt is a forged
+    // close, not the legacy prepare shape: CLOSED is never granted by leniency.
+    await forgeState(fixture.paths.state, ({ releaseReceipt: _receipt, ...state }) => ({
+      ...state,
+      release: '0.2.0',
+      previousRelease: '0.1.0',
+    }));
+    const document = parseCliJson(runCli(fixture.root, ['status', '--json']));
+    assert.equal(document.integrity.level, 'TAMPERED');
+    assert.match(document.integrity.reason, /no release receipt/u);
+    const prepared = runCli(fixture.root, ['release', 'prepare', '--version', '0.3.0', '--goal', 'next release']);
     assert.notEqual(prepared.exitCode, 0);
     assert.match(prepared.stderr, /ERR_STATE_TAMPERED/u);
   } finally {

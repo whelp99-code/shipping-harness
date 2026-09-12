@@ -3,7 +3,7 @@ import { stableInvariant } from './errors.mjs';
 import { STABLE_SCHEMAS, stableSchemaDescriptor, validateStableArtifact } from './schema-registry.mjs';
 import { readJson, readJsonLines } from '../../src/core/fs.mjs';
 import { runtimePaths } from '../../src/core/paths.mjs';
-import { evaluateStateIntegrity, ledgerProvenState } from '../../src/core/state-integrity.mjs';
+import { evaluateStateIntegrity, legacyProvenState, ledgerProvenState } from '../../src/core/state-integrity.mjs';
 import { writeSignedState } from '../../src/core/state.mjs';
 
 export const SUPPORTED_RELEASES = Object.freeze(['0.6.0', '0.7.0', '0.8.0', '0.9.0', '1.0.0']);
@@ -88,7 +88,9 @@ export function deprecationNotice(schema) {
  * v1.9 → v1.10 `.shipping/` promotion: sign an existing state.json that has no `integrity`
  * field. The state is signed only when the ledger already proves the state it claims, so a
  * genuine legacy CLOSED becomes VERIFIED and an unprovable one stays UNVERIFIED_LEGACY.
- * The ledger is never rewritten; a single `state.migrated` event is appended.
+ * A DRAFT left by a pre-v1.10 `release prepare` is proven by its shape (see
+ * `legacyProvenState`) and gets the `release.prepared` state event that prepare never wrote,
+ * marked `reconstructed`. The ledger is never rewritten; exactly one event is appended.
  * @param {string} root
  * @returns {Promise<{changed: boolean, level: string, reason: string, from: string, to: string}>}
  */
@@ -101,11 +103,25 @@ export async function migrateStateIntegrity(root) {
   if (before.level !== 'UNVERIFIED_LEGACY') {
     return { changed: false, level: before.level, reason: before.reason, from: '1.9', to: '1.10' };
   }
-  if (ledgerProvenState(events) !== state.state) {
+  const recorded = ledgerProvenState(events);
+  const proven = legacyProvenState(state, recorded);
+  if (proven !== state.state) {
     return { changed: false, level: 'UNVERIFIED_LEGACY', reason: 'the ledger does not prove the recorded state; state left unsigned', from: '1.9', to: '1.10' };
   }
   const { integrity: _ignored, ...body } = state;
-  await writeSignedState(root, body, { type: 'state.migrated', to: body.state, from: body.state, reason: 'v1.9 to v1.10 state integrity promotion', fromRelease: '1.9', toRelease: '1.10' });
+  // A DRAFT proven only by the legacy `release prepare` shape needs the state event that
+  // pre-v1.10 prepare never wrote. Reconstruct it as an append; existing lines are untouched.
+  const event = proven === 'DRAFT' && recorded === 'CLOSED'
+    ? {
+        type: 'release.prepared',
+        to: 'DRAFT',
+        fromRelease: body.previousRelease ?? null,
+        release: body.release ?? null,
+        reconstructed: true,
+        reason: 'reconstructed from a pre-v1.10 release prepare that recorded no state event',
+      }
+    : { type: 'state.migrated', to: body.state, from: body.state, reason: 'v1.9 to v1.10 state integrity promotion' };
+  await writeSignedState(root, body, { ...event, fromRelease: event.fromRelease ?? '1.9', toRelease: '1.10' });
   const after = await evaluateStateIntegrity(root, await readJson(paths.state), await readJsonLines(paths.ledger));
   return { changed: true, level: after.level, reason: after.reason, from: '1.9', to: '1.10' };
 }

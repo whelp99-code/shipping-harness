@@ -92,6 +92,53 @@ export function verifyLedgerChain(events) {
   return { ok: true, reason: 'ledger chain verified', signedCount, firstSignedIndex };
 }
 
+/** States whose claim grants release authority and must always be backed by the ledger. */
+const UPWARD_CLAIM_STATES = new Set(['SHIPPABLE', 'CLOSED']);
+
+/**
+ * @param {unknown} value
+ * @returns {number[]|null}
+ */
+function semverParts(value) {
+  const match = /^(\d+)\.(\d+)\.(\d+)/u.exec(typeof value === 'string' ? value : '');
+  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
+}
+
+/**
+ * @param {unknown} candidate
+ * @param {unknown} previous
+ * @returns {boolean}
+ */
+function isLaterRelease(candidate, previous) {
+  const left = semverParts(candidate);
+  const right = semverParts(previous);
+  if (!left || !right) return false;
+  for (let index = 0; index < 3; index += 1) {
+    if (left[index] !== right[index]) return left[index] > right[index];
+  }
+  return false;
+}
+
+/**
+ * The state an unsigned (pre-v1.10) ledger proves.
+ *
+ * `release prepare` before v1.10 wrote a fresh DRAFT straight to state.json and recorded a
+ * `release.prepared` ledger event that carried no `to` field, so the ledger of a legitimately
+ * prepared repository still ends at the previous release's CLOSED. That exact shape — the
+ * ledger ends CLOSED, the state is not itself an authority claim, and the state names a
+ * `previousRelease` with a greater `release` — is the legacy prepare, and the state it proves
+ * is DRAFT. Every other disagreement is left to the caller to judge.
+ * @param {Record<string, any>} state
+ * @param {string|null} ledgerState
+ * @returns {string|null}
+ */
+export function legacyProvenState(state, ledgerState) {
+  if (ledgerState !== 'CLOSED') return ledgerState;
+  if (UPWARD_CLAIM_STATES.has(state.state)) return ledgerState;
+  if (typeof state.previousRelease !== 'string') return ledgerState;
+  return isLaterRelease(state.release, state.previousRelease) ? 'DRAFT' : ledgerState;
+}
+
 /**
  * The last state the ledger actually proves.
  * @param {Array<Record<string, any>>} events
@@ -119,13 +166,19 @@ function assessment(level, reason, ledgerState, expected = null, observed = null
 /**
  * Checks (c), (d) and (e): the state must agree with the ledger, a CLOSED state must be
  * backed by a matching receipt, and a SHIPPABLE state by an evidence manifest.
+ *
+ * An unsigned legacy state is judged only in the upward direction: a pre-v1.10 ledger is an
+ * incomplete record, so it can disprove a claim of SHIPPABLE or CLOSED but cannot disprove a
+ * claim that grants no authority. A signed state is judged in both directions.
  * @param {string} root
  * @param {Record<string, any>} state
  * @param {string|null} ledgerState
+ * @param {boolean} legacy
  * @returns {Promise<IntegrityAssessment|null>}
  */
-async function semanticChecks(root, state, ledgerState) {
-  if (ledgerState && state.state !== ledgerState) {
+async function semanticChecks(root, state, ledgerState, legacy) {
+  const divergent = Boolean(ledgerState) && state.state !== ledgerState;
+  if (divergent && (!legacy || UPWARD_CLAIM_STATES.has(state.state))) {
     return assessment('TAMPERED', 'state.json claims a state the ledger never recorded', ledgerState, ledgerState, String(state.state));
   }
   if (state.state === 'CLOSED') return closedChecks(root, state, ledgerState);
@@ -200,11 +253,12 @@ export async function evaluateStateIntegrity(root, state, events) {
     if (signedWrite) {
       return assessment('TAMPERED', 'state.json lost its integrity signature while the ledger is signed', ledgerState, 'integrity', 'missing');
     }
-    return (await semanticChecks(root, state, ledgerState))
-      ?? assessment('UNVERIFIED_LEGACY', 'state.json predates state integrity signing', ledgerState);
+    const proven = legacyProvenState(state, ledgerState);
+    return (await semanticChecks(root, state, proven, true))
+      ?? assessment('UNVERIFIED_LEGACY', 'state.json predates state integrity signing', proven);
   }
   return signatureChecks(state, events, ledgerState)
-    ?? (await semanticChecks(root, state, ledgerState))
+    ?? (await semanticChecks(root, state, ledgerState, false))
     ?? assessment('VERIFIED', 'state.json matches the ledger, receipt and evidence', ledgerState);
 }
 

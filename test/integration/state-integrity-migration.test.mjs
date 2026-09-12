@@ -105,3 +105,41 @@ test('release prepare succeeds on an UNVERIFIED_LEGACY closed release', async ()
     await fixture.cleanup();
   }
 });
+
+test('a DRAFT prepared by pre-v1.10 code migrates to VERIFIED by reconstructing its state event', async () => {
+  const fixture = await createFixtureRepo();
+  try {
+    assert.equal(runCli(fixture.root, ['lock', '--json']).exitCode, 0);
+    assert.equal(runCli(fixture.root, ['verify', '--json']).exitCode, 0);
+    assert.equal(runCli(fixture.root, ['close', '--json']).exitCode, 0);
+    await fixture.commit('chore: close the first release');
+    const prepared = runCli(fixture.root, ['release', 'prepare', '--version', '0.2.0', '--goal', 'the next release outcome']);
+    assert.equal(prepared.exitCode, 0, prepared.stderr);
+    // Downgrade to exactly the v1.9 shape: an unsigned DRAFT whose ledger still ends at the
+    // previous release's CLOSED, because pre-v1.10 prepare recorded no state event.
+    await downgradeToLegacy(fixture.paths);
+    const events = (await readFile(fixture.paths.ledger, 'utf8')).split('\n').filter(Boolean)
+      .map((line) => JSON.parse(line))
+      .map((event) => (event.type === 'release.prepared' ? (({ to: _to, ...rest }) => rest)(event) : event));
+    await writeFile(fixture.paths.ledger, `${events.map((event) => JSON.stringify(event)).join('\n')}\n`, 'utf8');
+
+    const legacy = await assessStateIntegrity(fixture.root);
+    assert.equal(legacy.level, 'UNVERIFIED_LEGACY');
+    assert.equal(legacy.ledgerState, 'DRAFT');
+    assert.equal(parseCliJson(runCli(fixture.root, ['status', '--json'])).state.state, 'DRAFT');
+
+    const migrated = await migrateStateIntegrity(fixture.root);
+    assert.equal(migrated.changed, true);
+    assert.equal(migrated.level, 'VERIFIED');
+    const after = (await readFile(fixture.paths.ledger, 'utf8')).split('\n').filter(Boolean).map((line) => JSON.parse(line));
+    assert.equal(after.at(-1).type, 'release.prepared');
+    assert.equal(after.at(-1).to, 'DRAFT');
+    assert.equal(after.at(-1).reconstructed, true);
+    assert.equal(after.at(-1).release, '0.2.0');
+    // The pre-existing lines are untouched.
+    assert.deepEqual(after.slice(0, -1), events);
+    assert.equal(JSON.parse(await readFile(fixture.paths.state, 'utf8')).state, 'DRAFT');
+  } finally {
+    await fixture.cleanup();
+  }
+});

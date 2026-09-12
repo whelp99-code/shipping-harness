@@ -8,7 +8,7 @@ import { createPluginInstallPlan } from './plan.mjs';
 import { pluginPaths, validateCodexHome } from './paths.mjs';
 
 /**
- * @param {{packageRoot: string, installRoot: string, host?: 'generic'|'codex', codexHome?: string|null, codexExecutable?: string, projectRoot?: string|null, dryRun?: boolean, replace?: boolean, run?: any, now?: string}} input
+ * @param {{packageRoot: string, installRoot: string, host?: string, codexHome?: string|null, codexExecutable?: string, projectRoot?: string|null, dryRun?: boolean, replace?: boolean, run?: any, now?: string}} input
  */
 export async function installShippingPlugin(input) {
   const plan = await createPluginInstallPlan(input);

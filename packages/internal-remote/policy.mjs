@@ -1,9 +1,16 @@
 import net from 'node:net';
 import path from 'node:path';
 
+/**
+ * @param {unknown} condition
+ * @param {string} code
+ * @param {string} message
+ * @param {Record<string, unknown>} [details]
+ * @returns {asserts condition}
+ */
 export function invariant(condition, code, message, details) {
   if (condition) return;
-  const error = new Error(message);
+  const error = /** @type {Error & {code?: string, details?: unknown}} */ (new Error(message));
   error.code = code;
   error.details = details;
   throw error;
@@ -108,10 +115,16 @@ export function boundedString(value, label, max = 4096) {
   return value;
 }
 
+/**
+ * @param {unknown} value
+ * @param {string} label
+ * @param {{min?: number, max?: number, fallback?: number}} [options]
+ * @returns {number}
+ */
 export function boundedInteger(value, label, { min = 1, max = Number.MAX_SAFE_INTEGER, fallback } = {}) {
-  const candidate = value ?? fallback;
-  invariant(Number.isInteger(candidate) && candidate >= min && candidate <= max, 'ERR_REMOTE_CONFIG', `${label} must be an integer between ${min} and ${max}`);
-  return candidate;
+  const candidate = /** @type {unknown} */ (value ?? fallback);
+  invariant(typeof candidate === 'number' && Number.isInteger(candidate) && candidate >= min && candidate <= max, 'ERR_REMOTE_CONFIG', `${label} must be an integer between ${min} and ${max}`);
+  return /** @type {number} */ (candidate);
 }
 
 export function pathWithin(parent, target) {

@@ -24,11 +24,6 @@ function boundedText(value, label, max = MAX_TEXT) {
   return normalized;
 }
 
-function nullableText(value, max = MAX_TEXT) {
-  if (value === undefined || value === null || value === '') return null;
-  return boundedText(value, 'optional charter text', max);
-}
-
 function boundedStrings(values, label, { min = 0, max = MAX_LIST_ITEMS } = {}) {
   const result = [...new Set((values ?? [])
     .filter((value) => typeof value === 'string' && value.trim())

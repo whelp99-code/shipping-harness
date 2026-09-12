@@ -45,7 +45,7 @@ export function matchesGlob(value, pattern) {
   return globToRegExp(pattern).test(normalizeRepositoryPath(value));
 }
 
-/** @param {string} value @param {string[]} patterns */
+/** @param {string} value @param {readonly string[]} patterns */
 export function matchesAnyGlob(value, patterns) {
   return patterns.some((pattern) => matchesGlob(value, pattern));
 }

@@ -39,13 +39,13 @@ export function assertTaskTransition(from, to) {
   return true;
 }
 
-/** @param {Record<string, any>} goal @param {string} nextState */
+/** @param {Record<string, any>} goal @param {string} nextState @returns {Record<string, any>} */
 export function transitionGoalRecord(goal, nextState) {
   assertGoalTransition(goal.state, nextState);
   return { ...goal, state: nextState };
 }
 
-/** @param {Record<string, any>} task @param {string} nextState */
+/** @param {Record<string, any>} task @param {string} nextState @returns {Record<string, any>} */
 export function transitionTaskRecord(task, nextState) {
   assertTaskTransition(task.state, nextState);
   return { ...task, state: nextState };

@@ -73,7 +73,7 @@ export async function main() {
   else if (command === 'rollback') {
     const value = input();
     if (!value.backupId) throw new Error('--backup-id is required for rollback');
-    result = await rollbackOmpMainHarness(value);
+    result = await rollbackOmpMainHarness({ ...value, backupId: value.backupId });
   } else if (command === 'field-smoke') {
     const { runFieldSmoke } = await import('./field-smoke.mjs');
     result = await runFieldSmoke({

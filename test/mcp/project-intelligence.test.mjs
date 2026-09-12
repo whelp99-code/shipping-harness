@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { hashObject } from '../../src/core/crypto.mjs';
@@ -13,10 +13,6 @@ async function put(root, relative, content) {
   const target = path.join(root, relative);
   await mkdir(path.dirname(target), { recursive: true });
   await writeFile(target, content, 'utf8');
-}
-
-function git(root, args) {
-  return runGit(root, args, { maxBuffer: 8 * 1024 * 1024 }).stdout.trim();
 }
 
 async function mixedRepo({ packageOnly = false } = {}) {

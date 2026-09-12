@@ -49,7 +49,7 @@ test('STDIO transport bounds malformed, deeply nested, and oversized messages', 
   try {
     const server = startStdioServer({ root: fixture.root, input, output, error });
     input.write('{not-json}\n');
-    let nested = {};
+    const nested = {};
     let cursor = nested;
     for (let index = 0; index < 30; index += 1) {
       cursor.next = {};

@@ -24,6 +24,7 @@ function preserveAuthority(before, after) {
   if (before.requires_shipping_verification === true) stableInvariant(after.requires_shipping_verification === true, 'ERR_MIGRATION_AUTHORITY', 'Migration cannot trust a runtime completion claim');
 }
 
+/** @param {Record<string, any>} value @param {{kind?: string}} [options] */
 export function migrateArtifact(value, { kind } = {}) {
   stableInvariant(value && typeof value === 'object' && !Array.isArray(value), 'ERR_MIGRATION_ARTIFACT', 'Migration input must be an object');
   const original = value.schema ?? value.rpc;

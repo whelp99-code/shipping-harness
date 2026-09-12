@@ -121,6 +121,7 @@ export function createMcpProtocol(root) {
     legacyInitialized: false,
     negotiatedVersion: null,
     cancelled: new Set(),
+    /** @type {Promise<any>} */
     toolChain: Promise.resolve(),
   };
 
@@ -141,7 +142,7 @@ export function createMcpProtocol(root) {
         request = validateMessage(rawMessage);
       } catch (error) {
         const normalized = error instanceof McpProtocolError ? error : new McpProtocolError(-32600, 'Invalid Request');
-        const id = rawMessage && typeof rawMessage === 'object' && !Array.isArray(rawMessage) ? rawMessage.id : null;
+        const id = rawMessage && typeof rawMessage === 'object' && !Array.isArray(rawMessage) ? /** @type {Record<string, any>} */ (rawMessage).id : null;
         return errorResponse(id, normalized.code, normalized.message, normalized.data);
       }
 

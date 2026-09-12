@@ -28,7 +28,7 @@ export function validateArtifactCandidate(candidate) {
   const segments = normalized.split('/').filter(Boolean);
   invariant(segments.length > 0 && !segments.includes('..'), 'ERR_ARTIFACT_PATH', 'Artifact path must remain inside the repository', { path: raw });
   invariant(!segments.some((segment) => BLOCKED_SEGMENTS.has(segment)), 'ERR_ARTIFACT_PATH', 'Artifact path targets protected runtime or credential state', { path: raw });
-  invariant(!BLOCKED_BASENAMES.has(segments.at(-1).toLowerCase()), 'ERR_ARTIFACT_PATH', 'Artifact path targets a credential-like file', { path: raw });
+  invariant(!BLOCKED_BASENAMES.has((segments.at(-1) ?? '').toLowerCase()), 'ERR_ARTIFACT_PATH', 'Artifact path targets a credential-like file', { path: raw });
   return normalized;
 }
 

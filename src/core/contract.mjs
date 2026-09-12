@@ -81,7 +81,7 @@ function requireStringArray(value, label) {
 
 /** @param {unknown} value @param {string} label @param {{min?: number, max?: number}} [range] */
 function requireInteger(value, label, range = {}) {
-  invariant(Number.isInteger(value), 'ERR_CONTRACT_INVALID', `${label} must be an integer`, { label, value });
+  invariant(typeof value === 'number' && Number.isInteger(value), 'ERR_CONTRACT_INVALID', `${label} must be an integer`, { label, value });
   if (range.min !== undefined) invariant(value >= range.min, 'ERR_CONTRACT_INVALID', `${label} must be >= ${range.min}`, { label, value });
   if (range.max !== undefined) invariant(value <= range.max, 'ERR_CONTRACT_INVALID', `${label} must be <= ${range.max}`, { label, value });
 }
@@ -107,8 +107,9 @@ export function validateContract(input) {
   invariant(Array.isArray(contract.acceptance) && contract.acceptance.length > 0, 'ERR_CONTRACT_INVALID', 'acceptance must contain at least one criterion');
   const ids = new Set();
   let requiredCount = 0;
-  for (const [index, criterion] of contract.acceptance.entries()) {
-    requireObject(criterion, `acceptance[${index}]`);
+  for (const [index, rawCriterion] of contract.acceptance.entries()) {
+    requireObject(rawCriterion, `acceptance[${index}]`);
+    const criterion = /** @type {Record<string, any>} */ (rawCriterion);
     requireString(criterion.id, `acceptance[${index}].id`);
     invariant(/^AC-[0-9A-Z_-]+$/u.test(criterion.id), 'ERR_CONTRACT_INVALID', `Invalid acceptance ID: ${criterion.id}`);
     invariant(!ids.has(criterion.id), 'ERR_CONTRACT_INVALID', `Duplicate acceptance ID: ${criterion.id}`);

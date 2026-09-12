@@ -107,7 +107,7 @@ async function readJson(filePath) {
   try {
     return JSON.parse(await readFile(filePath, 'utf8'));
   } catch (error) {
-    const failure = new Error(`Unable to read stable JSON document: ${filePath}`);
+    const failure = /** @type {Error & {code?: string}} */ (new Error(`Unable to read stable JSON document: ${filePath}`));
     failure.code = error?.code === 'ENOENT' ? 'ERR_STABLE_SCHEMA_MISSING' : 'ERR_STABLE_SCHEMA_JSON';
     failure.cause = error;
     throw failure;

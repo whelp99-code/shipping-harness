@@ -15,9 +15,16 @@ import {
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 
+/**
+ * @param {unknown} condition
+ * @param {string} code
+ * @param {string} message
+ * @param {Record<string, unknown>} [details]
+ * @returns {asserts condition}
+ */
 export function invariant(condition, code, message, details = undefined) {
   if (condition) return;
-  const error = new Error(message);
+  const error = /** @type {Error & {code?: string, details?: unknown}} */ (new Error(message));
   error.code = code;
   if (details !== undefined) error.details = details;
   throw error;
@@ -53,7 +60,8 @@ export function assertInside(root, target, label = 'path') {
 
 export async function assertRegularFile(target, label) {
   const info = await lstat(target).catch(() => null);
-  invariant(info?.isFile() && !info.isSymbolicLink(), 'ERR_OMP_FILE', `${label} must be a regular file: ${target}`);
+  invariant(info, 'ERR_OMP_FILE', `${label} must be a regular file: ${target}`);
+  invariant(info.isFile() && !info.isSymbolicLink(), 'ERR_OMP_FILE', `${label} must be a regular file: ${target}`);
   return info;
 }
 
@@ -79,6 +87,7 @@ export async function writeJsonAtomic(target, value, mode = 0o600) {
   await writeTextAtomic(target, `${JSON.stringify(value, null, 2)}\n`, mode);
 }
 
+/** @param {string} target @param {unknown} [fallback] */
 export async function readJson(target, fallback = undefined) {
   try {
     return JSON.parse(await readFile(target, 'utf8'));
@@ -153,6 +162,7 @@ export async function fileReceipt(target) {
   };
 }
 
+/** @param {string} source @param {string} target @param {number} [mode] */
 export async function copyFileAtomic(source, target, mode = undefined) {
   await assertRegularFile(source, 'backup file');
   await mkdir(path.dirname(target), { recursive: true, mode: 0o700 });

@@ -532,7 +532,7 @@ export async function callShippingTool(root, name, rawArguments) {
     invariant(args.autopilotContinuation === undefined || typeof args.autopilotContinuation === 'boolean', 'ERR_MCP_ARGUMENTS', 'autopilotContinuation must be boolean');
 
     let result;
-    let activation = null;
+    let activation;
     let continuationDecision = null;
     if (continuation) {
       invariant(args.confirm !== true, 'ERR_AUTOPILOT_ADVANCE', 'Autopilot continuation cannot masquerade as a new human approval');

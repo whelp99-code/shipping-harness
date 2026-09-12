@@ -44,6 +44,7 @@ export async function runBoundedCommand(request) {
   invariant(Number.isInteger(request.maxOutputBytes) && request.maxOutputBytes >= 1024, 'ERR_COMMAND_INVALID', 'maxOutputBytes must be >= 1024');
 
   const startedAt = new Date();
+  /** @type {{stdout: Buffer[], stderr: Buffer[]}} */
   const chunks = { stdout: [], stderr: [] };
   let capturedBytes = 0;
   let outputLimitExceeded = false;

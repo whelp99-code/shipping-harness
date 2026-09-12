@@ -17,7 +17,9 @@ export async function doctorOmpMainHarness(input = {}) {
   const omp = resolveOnPath(input.ompCommand ?? 'omp');
   const packageManifest = JSON.parse(await readFile(path.join(packageRoot(), 'package.json'), 'utf8'));
   const expectedVersion = input.expectedVersion ?? packageManifest.version;
+  /** @type {Record<string, boolean>} */
   const checks = {};
+  /** @type {Record<string, unknown>} */
   const details = {};
 
   const shippingVersion = installedShippingVersion(prefix.root);

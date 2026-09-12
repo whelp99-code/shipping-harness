@@ -299,6 +299,7 @@ export function decideAutopilot(policyInput, requestInput) {
 }
 
 /** @param {Record<string,any>} decision */
+/** @param {Record<string, any> | null | undefined} decision */
 export function validateAutopilotDecision(decision) {
   invariant(decision?.schema === 'shipping-harness/autopilot-decision-v1', 'ERR_AUTOPILOT_DECISION_SCHEMA', 'Unsupported autopilot decision schema');
   invariant(AUTOPILOT_DECISIONS.includes(decision.decision), 'ERR_AUTOPILOT_DECISION', `Unsupported decision: ${String(decision.decision)}`);

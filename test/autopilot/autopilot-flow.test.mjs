@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { access, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { callShippingTool } from '../../src/mcp/tools.mjs';
-import { autopilotStatus, loadAutopilotPolicy, loadAutopilotState } from '../../src/core/autopilot.mjs';
+import { loadAutopilotPolicy, loadAutopilotState } from '../../src/core/autopilot.mjs';
 import { currentGitSha } from '../../src/core/git.mjs';
 import { createFixtureRepo } from '../helpers/repo.mjs';
 

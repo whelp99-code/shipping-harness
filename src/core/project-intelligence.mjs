@@ -53,6 +53,7 @@ function buildComponentGraph(files, analysis) {
   const selectedRoot = analysis.workspace?.root ?? '.';
   const components = [];
   const seen = new Set();
+  /** @param {string} root @param {string[]} [knownStacks] @param {string | null} [name] */
   const add = (root, knownStacks = [], name = null) => {
     const normalizedRoot = normalized(root);
     if (seen.has(normalizedRoot)) return;

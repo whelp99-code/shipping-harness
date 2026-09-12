@@ -9,7 +9,6 @@ import { goalStatusView } from '../../src/core/goals/status-view.mjs';
 import { goalRuntimePaths } from '../../src/core/goals/paths.mjs';
 import {
   initializeGoalRuntime,
-  readGoalRuntime,
   transitionStoredGoal,
   transitionStoredTask,
 } from '../../src/core/goals/store.mjs';

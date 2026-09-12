@@ -45,7 +45,7 @@ function allowedShipping(relative) {
 
 async function walk(base, current = '', output = []) {
   const directory = path.join(base, current);
-  let entries = [];
+  let entries;
   try {
     entries = await readdir(directory, { withFileTypes: true });
   } catch (error) {
@@ -68,6 +68,9 @@ async function walk(base, current = '', output = []) {
   return output;
 }
 
+/**
+ * @param {{projectId: string, projectRoot: string, serverSecret: string, outputPath: string, extraEvidenceFiles?: Array<{source: string, logicalPath: string}>}} options
+ */
 export async function createBackup({
   projectId,
   projectRoot,
@@ -177,7 +180,9 @@ export async function restoreBackup({ projectId, projectRoot, serverSecret, bund
   let currentState = null;
   try {
     currentState = JSON.parse(await readFile(path.join(shippingRoot, 'state.json'), 'utf8')).state;
-  } catch {}
+  } catch {
+    // Missing or unreadable state.json is treated as "no active state" — restore proceeds.
+  }
   invariant(!ACTIVE_STATES.has(currentState), 'ERR_BACKUP_ACTIVE', 'Pause or stop active work before restore');
 
   const stage = path.join(path.dirname(shippingRoot), `.shipping-restore-${bundle.backupId}`);
@@ -202,7 +207,9 @@ export async function restoreBackup({ projectId, projectRoot, serverSecret, bund
   try {
     await rename(stage, shippingRoot);
   } catch (error) {
-    try { await rename(previous, shippingRoot); } catch {}
+    try { await rename(previous, shippingRoot); } catch {
+      // Best-effort rollback of the partially-applied restore; the original rename error wins below.
+    }
     throw error;
   }
   return {

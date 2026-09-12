@@ -25,6 +25,7 @@ function eventHash(event) {
   return hashObject(body);
 }
 
+/** @param {unknown} value @param {string} label @param {number} [max] @param {boolean} [nullable] */
 function bounded(value, label, max = 2000, nullable = false) {
   if ((value === undefined || value === null || value === '') && nullable) return null;
   const result = typeof value === 'string' ? value.trim().replace(/\s+/gu, ' ') : '';
@@ -32,9 +33,10 @@ function bounded(value, label, max = 2000, nullable = false) {
   return result;
 }
 
+/** @param {unknown} value @param {string} label @param {number} length */
 function exactHash(value, label, length) {
   const text = bounded(value, label, length);
-  invariant(new RegExp(`^[a-f0-9]{${length}}$`, 'u').test(text), 'ERR_DECISION_LEDGER', `${label} must be lowercase hexadecimal`);
+  invariant(typeof text === 'string' && new RegExp(`^[a-f0-9]{${length}}$`, 'u').test(text), 'ERR_DECISION_LEDGER', `${label} must be lowercase hexadecimal`);
   return text;
 }
 
@@ -51,6 +53,7 @@ function eventKey(input) {
   });
 }
 
+/** @param {Record<string, any>} event @param {Record<string, any> | null} [previous] */
 export function validateDecisionLedgerEvent(event, previous = null) {
   invariant(event?.schema === SCHEMA, 'ERR_DECISION_LEDGER_SCHEMA', 'Unsupported decision-ledger event schema');
   invariant(Number.isInteger(event.sequence) && event.sequence >= 1, 'ERR_DECISION_LEDGER_SEQUENCE', 'Decision-ledger sequence must be a positive integer');

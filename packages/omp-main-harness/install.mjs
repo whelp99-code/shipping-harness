@@ -10,7 +10,6 @@ import {
   parseOmpVersion,
   resolveOnPath,
   runCommand,
-  sha256,
   writeJsonAtomic,
 } from './io.mjs';
 import {
@@ -95,7 +94,7 @@ export async function installOmpMainHarness(input = {}) {
     ompVersion: ompHost.version,
   });
 
-  let rollbackResult = null;
+  let rollbackResult;
   try {
     let installed = {
       version: currentVersion,
@@ -214,12 +213,12 @@ export async function installOmpMainHarness(input = {}) {
         dryRun: false,
       });
     } catch (rollbackError) {
-      const wrapped = new Error(`OMP main-harness install failed and automatic rollback also failed: ${rollbackError instanceof Error ? rollbackError.message : String(rollbackError)}`);
+      const wrapped = /** @type {Error & {code?: string, rollback?: unknown}} */ (new Error(`OMP main-harness install failed and automatic rollback also failed: ${rollbackError instanceof Error ? rollbackError.message : String(rollbackError)}`));
       wrapped.code = 'ERR_OMP_INSTALL_ROLLBACK_FAILED';
       wrapped.cause = error;
       throw wrapped;
     }
-    const wrapped = new Error(`OMP main-harness install failed; previous package and configuration were restored: ${error instanceof Error ? error.message : String(error)}`);
+    const wrapped = /** @type {Error & {code?: string, rollback?: unknown}} */ (new Error(`OMP main-harness install failed; previous package and configuration were restored: ${error instanceof Error ? error.message : String(error)}`));
     wrapped.code = 'ERR_OMP_INSTALL_ROLLED_BACK';
     wrapped.cause = error;
     wrapped.rollback = rollbackResult;

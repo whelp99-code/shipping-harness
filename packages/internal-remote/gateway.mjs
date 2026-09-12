@@ -70,6 +70,9 @@ function notificationFor(result) {
 }
 
 export class InternalRemoteGateway {
+  /**
+   * @param {{config: Record<string, any>, replayStore: any, adapter: any, notifications: any, backupRoot: string, rateLimiter?: any}} options
+   */
   constructor({ config, replayStore, adapter, notifications, backupRoot, rateLimiter }) {
     invariant(config && replayStore && adapter && notifications, 'ERR_REMOTE_CONFIG', 'Gateway dependencies are required');
     this.config = config;

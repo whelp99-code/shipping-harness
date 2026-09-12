@@ -20,7 +20,6 @@ import {
   deriveProposalState,
   isTerminalProposalState,
   proposalAuthorityStatus,
-  proposalNextAction,
   proposalFingerprint,
   proposalSummary,
 } from './proposal-state.mjs';
@@ -242,6 +241,7 @@ function authorityFingerprint(input) {
 
 /** @param {unknown} value @param {string} fallback */
 function safeProjectName(value, fallback) {
+  // eslint-disable-next-line no-control-regex -- intentionally strips control characters from untrusted project names
   const normalized = typeof value === 'string' ? value.replace(/[\u0000-\u001F\u007F]/gu, '').trim().slice(0, 120) : '';
   return normalized || fallback.slice(0, 120) || 'project';
 }
@@ -326,7 +326,7 @@ async function supersedeProposal(root, proposal, supersededBy) {
 /**
  * Create a reviewable, Git-bound release proposal without locking a release.
  * @param {string} root
- * @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, proposerId?: string | null}} input
+ * @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, proposerId?: string | null, workspaceCandidateId?: string | null}} input
  */
 export async function createScopeProposal(root, input) {
   invariant(typeof input.goal === 'string' && input.goal.trim().length >= 5, 'ERR_PROPOSAL_GOAL', 'A concrete goal of at least 5 characters is required');
@@ -474,7 +474,7 @@ function boundedRefinementText(value, max = 1000) {
   return value.trim();
 }
 
-/** @param {Array<Record<string, any>>} questions @param {Array<Record<string, any>>} answers */
+/** @param {string} root @param {Record<string, any>} proposal @param {string} type @param {Array<Record<string, any>>} [resolutions] */
 async function recordGoalDiscoveryEvents(root, proposal, type, resolutions = []) {
   const discovery = proposal.goalDiscovery;
   if (!discovery) return null;
@@ -647,6 +647,7 @@ export async function refineScopeProposal(root, input) {
     const contract = compileDecisionContract(base, decision);
     const baseline = evidence.baseline;
     const sourceChanges = baseline.blockingPaths;
+    /** @type {Record<string, any>} */
     let intelligence = evidence.intelligence;
     let proposalAnalysis = analysis;
     if (baselinePreservation && proposal.intelligence) {

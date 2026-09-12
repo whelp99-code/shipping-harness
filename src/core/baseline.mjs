@@ -169,7 +169,7 @@ function splitNul(value) {
  * stages, resets, stashes, or discards anything.
  * @param {string} root
  * @param {Record<string, any>} baseline
- * @param {{baselinePlanHash:string, baselineCommit:string, baselineAuthorizedByUser:boolean}} input
+ * @param {{baselinePlanHash?: string | null, baselineCommit?: string | null, baselineAuthorizedByUser?: boolean}} input
  */
 export function verifyBaselinePreservation(root, baseline, input) {
   invariant(baseline?.plan?.hash, 'ERR_BASELINE_PLAN', 'The active proposal has no baseline plan');

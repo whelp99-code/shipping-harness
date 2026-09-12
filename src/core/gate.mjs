@@ -13,8 +13,8 @@ import {
 } from './issues.mjs';
 import { exists, readJson, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { runtimePaths } from './paths.mjs';
-import { invariant, ShippingError } from './errors.mjs';
-import { patchState, readState, recordLedger, transitionState } from './state.mjs';
+import { invariant } from './errors.mjs';
+import { readState, recordLedger, transitionState } from './state.mjs';
 import { goalStatusView } from './goals/status-view.mjs';
 
 /** @param {string} root */

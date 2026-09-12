@@ -8,6 +8,7 @@ import { loadOrCreateBridgeKey } from './key.mjs';
 import { createPrivateOmoWorkOrder } from './work-order.mjs';
 import { validatePrivateOmoReceipt } from './receipt.mjs';
 
+/** @param {Record<string, any>} config @param {string[]} argv @param {{key?: string, timeoutMs?: number}} [options] */
 function runJson(config, argv, { key, timeoutMs = 120_000 } = {}) {
   const result = spawnSync(config.nodePath, [config.cliPath, ...argv, '--json'], {
     encoding: 'utf8',
@@ -45,7 +46,7 @@ export async function privateOmoDoctor(root) {
 
 /**
  * @param {string} root
- * @param {Parameters<typeof createPrivateOmoWorkOrder>[1] & {timeoutMs?: number}} options
+ * @param {Omit<Parameters<typeof createPrivateOmoWorkOrder>[1], 'hmacKey'> & {timeoutMs?: number}} options
  */
 export async function executePrivateOmoRuntime(root, options = {}) {
   const health = await privateOmoDoctor(root);

@@ -19,6 +19,7 @@ export class ShippingError extends Error {
  * @param {string} code
  * @param {string} message
  * @param {Record<string, unknown>} [details]
+ * @returns {asserts condition}
  */
 export function invariant(condition, code, message, details = {}) {
   if (!condition) {

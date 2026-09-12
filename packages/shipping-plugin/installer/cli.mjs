@@ -23,6 +23,9 @@ function help() {
   return `Shipping Harness Plugin ${process.env.npm_package_version ?? ''}\n\nUsage:\n  shipping-harness-plugin plan --install-root <path> [--host generic|codex] [--codex-home <path>] [--project-root <path>]\n  shipping-harness-plugin install --install-root <path> [--host generic|codex] [--codex-home <path>] [--project-root <path>] [--apply] [--replace]\n  shipping-harness-plugin doctor --install-root <path> [--project-root <path>]\n  shipping-harness-plugin repair --install-root <path> [--host generic|codex] [--codex-home <path>] [--project-root <path>] [--apply]\n  shipping-harness-plugin upgrade --install-root <path> [--host generic|codex] [--codex-home <path>] [--project-root <path>] [--apply]\n  shipping-harness-plugin rollback --install-root <path> [--backup-id <id>] [--apply]\n  shipping-harness-plugin uninstall --install-root <path> [--apply]\n\nNormal safety:\n  Without --apply, install and uninstall are dry-runs. Codex apply requires an explicit --codex-home.\n`;
 }
 
+/**
+ * @returns {{packageRoot: string, installRoot: string, host: string, codexHome: string|null, codexExecutable: string, projectRoot: string|null, dryRun: boolean, replace: boolean, backupId: string|null}}
+ */
 function input() {
   return {
     packageRoot,
@@ -43,6 +46,7 @@ export async function main() {
     process.stdout.write(help());
     return;
   }
+  /** @type {any} */
   let result;
   if (command === 'plan') result = await createPluginInstallPlan(input());
   else if (command === 'install') result = await installShippingPlugin(input());

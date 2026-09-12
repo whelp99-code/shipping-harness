@@ -4,7 +4,7 @@ import path from 'node:path';
 import { assertLockedContract } from './contract.mjs';
 import { hashObject } from './crypto.mjs';
 import { invariant } from './errors.mjs';
-import { assertContainedPath, exists, readJson, readText, writeAtomic, writeJsonAtomic } from './fs.mjs';
+import { assertContainedPath, exists, readJson, readText, writeJsonAtomic } from './fs.mjs';
 import { currentGitSha } from './git.mjs';
 import { runtimePaths } from './paths.mjs';
 import { loadApprovedReleaseTrain, validateReleaseTrain } from './release-train.mjs';
@@ -132,6 +132,7 @@ function createEvent(state, input) {
   return { ...body, hash: hashObject(body) };
 }
 
+/** @param {Record<string, any>} event @param {Record<string, any> | null} [previous] */
 function validateAutopilotEvent(event, previous = null) {
   invariant(event?.schema === AUTOPILOT_EVENT_SCHEMA, 'ERR_AUTOPILOT_EVENT_SCHEMA', 'Unsupported autopilot event schema');
   invariant(event.sequence === (previous ? previous.sequence + 1 : 1), 'ERR_AUTOPILOT_SEQUENCE', 'Autopilot ledger sequence is not contiguous');
@@ -346,6 +347,7 @@ export async function evaluateAutopilotAction(root, input) {
   return { ...binding, decision, recorded };
 }
 
+/** @param {string} root @param {string} action @param {string | null} [reason] */
 export async function setAutopilotHumanControl(root, action, reason = null) {
   const policy = await loadAutopilotPolicy(root);
   const state = await loadAutopilotState(root);
@@ -539,6 +541,7 @@ export async function completeManualAutopilotClosure(root, closeResult) {
   if (!policy || !state) return null;
   return withAutopilotLock(root, async () => {
     const current = await loadAutopilotState(root);
+    invariant(current, 'ERR_AUTOPILOT_STATE_MISSING', 'Autopilot state disappeared while awaiting the lock');
     if (current.phase === 'RELEASE_CLOSED' && current.currentRelease === closeResult.receipt.release) return { state: current, duplicate: true };
     const now = new Date().toISOString();
     const event = createEvent(current, {
@@ -574,6 +577,7 @@ export async function completeManualAutopilotClosure(root, closeResult) {
 export async function createAutopilotMutationReceipt(root, input) {
   const binding = await assertAutopilotBindingCurrent(root);
   invariant(binding.current, 'ERR_AUTOPILOT_POLICY_BINDING', `Autopilot policy binding is not current: ${binding.reason}`);
+  invariant(binding.policy && binding.contract, 'ERR_AUTOPILOT_POLICY_BINDING', 'Autopilot policy binding is missing its policy or contract');
   const action = boundedText(input.action, 'mutation action', 80).toUpperCase();
   invariant(['PRESERVE_BASELINE', 'LOCAL_COMMIT'].includes(action), 'ERR_AUTOPILOT_MUTATION', 'Only exact local baseline or commit receipts are supported');
   const paths = [...new Set((input.paths ?? []).map((entry) => String(entry).trim()).filter(Boolean))].sort();

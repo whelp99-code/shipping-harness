@@ -9,7 +9,7 @@ export async function inspectProjectRoot(projectRoot) {
   if (!projectRoot) return { configured: false, healthy: true, checks: [], projectRoot: null };
   const root = path.resolve(projectRoot);
   const checks = [];
-  let gitRoot = null;
+  let gitRoot;
   try {
     gitRoot = findGitRoot(root);
     checks.push({ id: 'git-root', ok: gitRoot === root, detail: gitRoot });

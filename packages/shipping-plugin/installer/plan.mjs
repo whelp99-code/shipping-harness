@@ -31,7 +31,7 @@ async function packageMetadata(packageRoot) {
 }
 
 /**
- * @param {{packageRoot: string, installRoot: string, host?: 'generic'|'codex', codexHome?: string|null, codexExecutable?: string, projectRoot?: string|null}} input
+ * @param {{packageRoot: string, installRoot: string, host?: string, codexHome?: string|null, codexExecutable?: string, projectRoot?: string|null}} input
  */
 export async function createPluginInstallPlan(input) {
   const host = input.host ?? 'generic';

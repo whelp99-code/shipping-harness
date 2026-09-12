@@ -11,7 +11,7 @@ async function history(paths) {
   return await exists(paths.upgradeHistory) ? readJson(paths.upgradeHistory) : { schema: 'shipping-plugin/upgrade-history-v1', items: [] };
 }
 
-/** @param {{packageRoot: string, installRoot: string, host?: 'generic'|'codex', codexHome?: string|null, codexExecutable?: string, projectRoot?: string|null, dryRun?: boolean, run?: any, now?: string}} input */
+/** @param {{packageRoot: string, installRoot: string, host?: string, codexHome?: string|null, codexExecutable?: string, projectRoot?: string|null, dryRun?: boolean, run?: any, now?: string}} input */
 export async function upgradeShippingPlugin(input) {
   const paths = pluginPaths(input.installRoot);
   const current = await exists(paths.receipt) ? JSON.parse(await readFile(paths.receipt, 'utf8')) : null;

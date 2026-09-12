@@ -24,6 +24,7 @@ export class StableEventLog {
   constructor(file) {
     stableInvariant(typeof file === 'string' && file.length > 0, 'ERR_STABLE_EVENT_PATH', 'Stable event path is required');
     this.file = path.resolve(file);
+    /** @type {Promise<any>} */
     this.chain = Promise.resolve();
   }
 

@@ -59,7 +59,7 @@ export class McpLineClient {
 
   async close() {
     this.child.stdin.end();
-    await new Promise((resolve) => {
+    await /** @type {Promise<void>} */ (new Promise((resolve) => {
       const timer = setTimeout(() => {
         this.child.kill('SIGTERM');
         resolve();
@@ -68,7 +68,7 @@ export class McpLineClient {
         clearTimeout(timer);
         resolve();
       });
-    });
+    }));
   }
 }
 

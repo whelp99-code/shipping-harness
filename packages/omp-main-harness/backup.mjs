@@ -4,7 +4,6 @@ import { MANAGED_RELATIVE_PATHS, OMP_BACKUP_SCHEMA, OMP_ROLLBACK_SCHEMA } from '
 import {
   assertInside,
   copyFileAtomic,
-  exists,
   fileReceipt,
   invariant,
   readJson,
@@ -43,7 +42,7 @@ export async function createOmpBackup(paths, input) {
     const receipt = await fileReceipt(source);
     const backupRelativePath = receipt.existed ? path.join('files', relativePath).replaceAll('\\', '/') : null;
     if (receipt.existed) {
-      const destination = assertInside(directory, path.join(directory, backupRelativePath), 'managed OMP backup');
+      const destination = assertInside(directory, path.join(directory, /** @type {string} */ (backupRelativePath)), 'managed OMP backup');
       await copyFileAtomic(source, destination, receipt.mode ?? 0o600);
     }
     files.push({ relativePath, backupRelativePath, ...receipt });

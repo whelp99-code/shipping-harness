@@ -35,6 +35,24 @@
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 60
+    },
+    {
+      "id": "AC-11005",
+      "description": "Contract-defect replay, lock preflight, scope warning, and uncommitted-close refusal behave as specified.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/integration/contract-defect.test.mjs test/unit/lock-preflight.test.mjs test/unit/scope-warning.test.mjs test/adversarial/close-uncommitted-attacks.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-11006",
+      "description": "Redundant verify runs are bounded by budgets.maxVerifyRuns and adapter runs carry cost telemetry.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/unit/verify-budget.test.mjs test/integration/verify-budget-flow.test.mjs test/unit/cost-telemetry.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
     }
   ],
   "adapters": {

@@ -26,14 +26,17 @@ const EXPECTED = {
   // docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md.
   // Previous (v1.8.2) hash: cf161627cf9c2d578f77069fd5d19b4b7911eca119cfe19ed5caf643d282419c
   help: 'be5c0995563e66b8cf936cd7074b1279388e7b608aa42e061612f429b7332396',
-  // v1.10.0 Phase C: schemas/v1/contract.schema.json gained the optional
-  // `budgets.maxVerifyRuns` integer, and schemas/v1/state.schema.json gained the optional
-  // `verifyRuns`, `redundantVerifyRuns` and `telemetry` fields (all additive); both
-  // examples were updated with them. Recorded in section 6 of
+  // v1.10.0 dirty-tree fix pass: schemas/v1/evidence.schema.json gained the optional
+  // `treeFingerprint` and `dirtyPaths` fields, schemas/v1/state.schema.json gained the
+  // optional `currentEvidenceFingerprint`, and schemas/v1/contract.schema.json gained the
+  // optional `budgets.maxRedundantVerifyRuns` (with `budgets.maxVerifyRuns` redefined as
+  // the total cap, range widened to 1..200). All additive, `additionalProperties: false`
+  // kept, and the three examples updated. Recorded in section 6 of
   // docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md.
+  // Previous (v1.10.0 Phase C) hash: 6d34415223f226331ab66e916b1424eb672dbd00324c750f2d18123a6af14893
   // Previous (v1.10.0 Phase A/B) hash: d8303d3c7d52f650534a0ed65b4aa090098a82d5fb854c898e270a97cdc4ab36
   // Previous (v1.8.2) hash: 563fa876d0c61f612c2f4fa8666d2ad7561d5ad1d29e04e8e1773b22d83923c8
-  schemas: '6d34415223f226331ab66e916b1424eb672dbd00324c750f2d18123a6af14893',
+  schemas: '163a44c39f77bd0db7c050a38696caef95ba0714977d495bb0908fc3ce9f05d7',
 };
 
 function sha256Hex(input) {

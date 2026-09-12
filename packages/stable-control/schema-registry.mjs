@@ -158,12 +158,14 @@ function validateNode(schema, value, location) {
 
   if (Array.isArray(schema.allOf)) for (const branch of schema.allOf) validateNode(branch, value, location);
   if (Array.isArray(schema.anyOf)) {
+    // A branch rejection is expected control flow for this combinator, not a bug; only the aggregate count matters.
     const successes = schema.anyOf.filter((branch) => {
       try { validateNode(branch, value, location); return true; } catch { return false; }
     });
     stableInvariant(successes.length > 0, 'ERR_STABLE_DOCUMENT', `${location} does not match any allowed shape`);
   }
   if (Array.isArray(schema.oneOf)) {
+    // Same combinator pattern as anyOf above: branch rejections are data, the exact match count is what is validated.
     const successes = schema.oneOf.filter((branch) => {
       try { validateNode(branch, value, location); return true; } catch { return false; }
     });

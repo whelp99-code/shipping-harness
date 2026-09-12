@@ -160,6 +160,7 @@ async function workspaceTopLevel(root, workspaceRoot) {
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(0, 200);
   } catch {
+    // Best-effort listing for the human-readable analysis; an unreadable directory yields an empty list, not a failed scan.
     return [];
   }
 }

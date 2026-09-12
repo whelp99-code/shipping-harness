@@ -21,6 +21,7 @@ export async function exists(target) {
     await access(target);
     return true;
   } catch {
+    // Existence probe: absence and any other access error (permissions, ENOTDIR) both mean "not present" to callers.
     return false;
   }
 }

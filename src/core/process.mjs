@@ -19,6 +19,7 @@ function terminate(child) {
     if (process.platform !== 'win32') process.kill(-child.pid, 'SIGTERM');
     else child.kill('SIGTERM');
   } catch {
+    // Killing the process group can fail if it was never created (e.g. detached: false); fall back to the direct child kill.
     child.kill('SIGTERM');
   }
   setTimeout(() => {
@@ -27,6 +28,7 @@ function terminate(child) {
         if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, 'SIGKILL');
         else child.kill('SIGKILL');
       } catch {
+        // Same process-group fallback as above, for the final forced kill.
         child.kill('SIGKILL');
       }
     }

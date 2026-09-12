@@ -39,6 +39,7 @@ export async function exists(target) {
     await access(target, fsConstants.F_OK);
     return true;
   } catch {
+    // Existence probe: absence and any other access error both mean "not present" to callers.
     return false;
   }
 }
@@ -70,6 +71,7 @@ export async function assertExecutable(target, label) {
   try {
     await access(target, fsConstants.X_OK);
   } catch {
+    // The X_OK access error itself is redundant with the message; the target path is the useful diagnostic.
     invariant(false, 'ERR_OMP_EXECUTABLE', `${label} is not executable: ${target}`);
   }
   return target;

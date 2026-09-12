@@ -268,6 +268,7 @@ export async function assertAutopilotBindingCurrent(root) {
   try {
     locked = await assertLockedContract(root);
   } catch {
+    // No locked contract (DRAFT/CLOSED) is a normal state here, not a failure; report it through the reason field.
     return { current: false, reason: 'NO_CURRENT_LOCKED_CONTRACT', policy, state, train: trainEnvelope.train };
   }
   const current = policy.binding.contractHash === locked.lock.contractHash

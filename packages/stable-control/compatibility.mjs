@@ -67,6 +67,7 @@ export function compatibilityReport(input = {}) {
     try {
       gitVersion = execFileSync('git', ['--version'], { encoding: 'utf8', timeout: 5000 }).trim().replace(/^git version\s+/u, '');
     } catch {
+      // git missing or unresponsive is a reportable compatibility fact, not a crash; the 'unavailable' value surfaces it.
       gitVersion = 'unavailable';
     }
   }

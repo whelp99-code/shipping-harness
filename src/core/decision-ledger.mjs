@@ -92,6 +92,7 @@ async function snapshot(root) {
     try {
       return JSON.parse(line);
     } catch {
+      // A corrupted ledger line must fail closed rather than be silently skipped, since the ledger is append-only evidence.
       throw Object.assign(new Error('Decision ledger contains invalid JSON'), { code: 'ERR_DECISION_LEDGER_PARSE' });
     }
   });

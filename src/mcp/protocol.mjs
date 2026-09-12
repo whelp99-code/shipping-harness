@@ -264,6 +264,7 @@ export function parseMcpLine(line) {
   try {
     return JSON.parse(line);
   } catch {
+    // JSON.parse's own message may echo attacker-controlled input; JSON-RPC only needs the standard Parse error code.
     throw new McpProtocolError(-32700, 'Parse error: Invalid JSON');
   }
 }

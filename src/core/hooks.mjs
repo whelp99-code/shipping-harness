@@ -43,8 +43,9 @@ function validatePayloadBudget(payload) {
   let serialized;
   try {
     serialized = JSON.stringify(payload ?? null);
-  } catch {
-    invariant(false, 'ERR_HOOK_PAYLOAD', 'Hook payload must be JSON-serializable');
+  } catch (error) {
+    // Circular structures or BigInt values throw from JSON.stringify; surface that as a ShippingError with the cause.
+    invariant(false, 'ERR_HOOK_PAYLOAD', 'Hook payload must be JSON-serializable', { reason: String(error?.message ?? error) });
   }
   invariant(Buffer.byteLength(serialized, 'utf8') <= 64 * 1024, 'ERR_HOOK_PAYLOAD_TOO_LARGE', 'Hook payload exceeds 64 KiB');
 }

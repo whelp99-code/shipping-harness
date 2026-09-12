@@ -25,6 +25,7 @@ function runJson(config, argv, { key, timeoutMs = 120_000 } = {}) {
   let parsed;
   try { parsed = JSON.parse(String(result.stdout || '').trim()); }
   catch {
+    // Non-JSON stdout from the private runtime is a contract violation; surface stderr instead of the raw parse error.
     throw new ShippingError('ERR_OMO_RUNTIME_OUTPUT', 'Private OMO runtime did not return bounded JSON', {
       exitCode: result.status ?? 1,
       stderr: String(result.stderr || '').trim().slice(0, 4000),

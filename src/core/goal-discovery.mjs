@@ -266,8 +266,17 @@ function directionFor(evidence, selected, critic, questions) {
 }
 
 /**
- * @param {*} input
- * @returns {*}
+ * @typedef {{id: string, category: string, prompt: string, recommendedChoice: string}} DiscoveryQuestion
+ * @typedef {{id: string, type: string, value: string, confidence: string, modelAuthority: boolean, commandAuthority: boolean}} DirectionCandidate
+ * @typedef {{status: string, blockerCount: number, findings: unknown[], modelAuthority: boolean}} DirectionCritic
+ * @typedef {{id: string, outcome: string, primaryUser: string, operatingBoundary: string, nonGoals: string[], successCriteria: string[], replanTriggers: string[], hash: string, modelAuthority: boolean, commandAuthority: boolean, approvalAuthority: boolean, closureAuthority: boolean, released: boolean}} AcceptedDirection
+ * @typedef {{questionId: string, category: string|null, choice: string, recommendedChoice: string|null, usedRecommendedChoice: boolean, authority: string}} DiscoveryResolution
+ * @typedef {{schema: string, evidenceHash: string, gitSha: string, explicitGoal: string, round: number, maxRounds: number, status: string, questions: DiscoveryQuestion[], resolutions: DiscoveryResolution[], candidates: DirectionCandidate[], recommendedCandidateId: string|null, critic: DirectionCritic, direction: AcceptedDirection|null, nextAction: string, questionPolicy: string, modelAuthority: boolean, hash: string}} GoalDiscovery
+ */
+
+/**
+ * @param {GoalDiscovery} input
+ * @returns {GoalDiscovery}
  */
 export function validateGoalDiscovery(input) {
   invariant(input?.schema === GOAL_DISCOVERY.schema, 'ERR_GOAL_DISCOVERY_SCHEMA', 'Unsupported goal discovery schema');
@@ -294,16 +303,16 @@ export function validateGoalDiscovery(input) {
 }
 
 /**
- * @param {*} evidence
- * @param {*} options
- * @returns {*}
+ * @param {Record<string, any>} evidence
+ * @param {{resolutions?: Array<Record<string, any>>, round?: number}} [options]
+ * @returns {GoalDiscovery}
  */
 export function compileGoalDiscovery(evidence, options = {}) {
   invariant(evidence && typeof evidence === 'object' && /^[a-f0-9]{64}$/u.test(evidence.hash ?? '')
     && /^[a-f0-9]{40}$/u.test(evidence.gitSha ?? '') && typeof evidence.goal === 'string',
   'ERR_GOAL_DISCOVERY_EVIDENCE', 'Goal discovery requires current decision evidence');
   const resolutions = resolutionMap(options.resolutions ?? []);
-  const round = Math.min(GOAL_DISCOVERY.maxRounds, Math.max(1, Number.isInteger(options.round) ? options.round : 1));
+  const round = Math.min(GOAL_DISCOVERY.maxRounds, Math.max(1, Number.isInteger(options.round) ? /** @type {number} */ (options.round) : 1));
   const questions = buildQuestions(evidence, resolutions);
   const candidates = candidatesFor(evidence, resolutions);
   const selected = selectCandidate(candidates, evidence);
@@ -338,10 +347,10 @@ export function compileGoalDiscovery(evidence, options = {}) {
 }
 
 /**
- * @param {*} decision
- * @param {*} discovery
- * @param {*} limit
- * @returns {*}
+ * @param {{questions?: DiscoveryQuestion[]}} decision
+ * @param {GoalDiscovery} discovery
+ * @param {number} [limit]
+ * @returns {DiscoveryQuestion[]}
  */
 export function mergeGoalDiscoveryQuestions(decision, discovery, limit = GOAL_DISCOVERY.maxQuestions) {
   const existing = Array.isArray(decision.questions) ? decision.questions : [];
@@ -355,8 +364,8 @@ export function mergeGoalDiscoveryQuestions(decision, discovery, limit = GOAL_DI
 }
 
 /**
- * @param {*} discovery
- * @returns {*}
+ * @param {GoalDiscovery} discovery
+ * @returns {{status: string, round: number, questions: DiscoveryQuestion[], candidates: Array<{id: string, type: string, value: string, confidence: string}>, recommendedCandidateId: string|null, critic: {status: string, blockerCount: number, findings: unknown[]}, direction: {id: string, outcome: string, primaryUser: string, operatingBoundary: string, nonGoals: string[], successCriteria: string[], replanTriggers: string[], hash: string}|null, nextAction: string, modelAuthority: boolean, hash: string}}
  */
 export function goalDiscoverySummary(discovery) {
   validateGoalDiscovery(discovery);

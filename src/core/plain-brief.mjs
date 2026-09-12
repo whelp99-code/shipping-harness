@@ -193,8 +193,24 @@ function actionPolicyFor(state, blockerCount) {
 }
 
 /**
- * @param {*} input
- * @returns {*}
+ * The loose status bag every plain-brief entry point accepts. Callers pass whichever of these
+ * documents they already hold; every field is optional and read defensively.
+ * `state` carries the release state object, or the state name when a caller already flattened it.
+ * @typedef {{canonicalState?: string, proposalState?: string, coreState?: string, state?: string & {state?: string, release?: string, blockerCount?: number, unknownCount?: number}, blockerCount?: number, unknownCount?: number, release?: string|null, evidenceFresh?: boolean, issues?: {counts?: Record<string, number>, items?: unknown[]}, contract?: {release?: string} & Record<string, unknown>, baseline?: {blockingCount?: number, counts?: Record<string, number>, plan?: Record<string, unknown>, entries?: unknown[]}|null, coverage?: BriefCoverage|null, intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}|null, analysis?: {intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence}|null, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence, releaseTrain?: import('./release-train.mjs').ReleaseTrain|null, goalDiscovery?: {questions?: unknown[], status?: string, round?: number, recommendedCandidateId?: string|null, direction?: {hash?: string}|null}|null, goalCharter?: {status?: string, hash?: string, outcome?: string, primaryUser?: string, operatingBoundary?: string}|null, currentEvidenceSha?: string|null, contractHash?: string|null}} PlainBriefInput
+ * @typedef {{complete?: boolean, coveredPaths?: number, totalPaths?: number, uncoveredPaths?: unknown[]}} BriefCoverage
+ * @typedef {{root?: string|null, ambiguous?: boolean, requested?: boolean, confidence?: string}} BriefWorkspace
+ * @typedef {{baseVersion?: string|null, recommendedVersion?: string|null, confidence?: string|null}} BriefVersionEvidence
+ * @typedef {{schema: string, currentState: string, allowedNow: string[], forbiddenNow: string[], requiresHumanApproval: boolean, nextAction: string, userActionLabel: string, exactUserPhrase: string, hash: string}} ActionEnvelope
+ * @typedef {{code: string, authority: string, confidence: string, value: unknown, evidenceRefs: string[]}} BriefFact
+ * @typedef {{schema: string, state: string, release: string|null, facts: BriefFact[], hash: string}} BriefFactGraph
+ * @typedef {{code: string, text: string, evidenceRefs: string[]}} BriefItem
+ * @typedef {{schema: string, language: string, state: string, release: string|null, releaseTrain: {currentRelease: string|null, totalReleases: number, modelAuthority: boolean, steps: Array<{version: string, current: boolean, value: string}>}|null, headline: string, problems: BriefItem[], improvements: BriefItem[], nextPlan: BriefItem[], summary: BriefItem, userAction: {code: string, label: string, exactPhrase: string, requiresHumanApproval: boolean}, details: {available: boolean, evidenceRefs: string[], exactPathsInDefaultText: boolean}, actionEnvelope: ActionEnvelope, factGraph: BriefFactGraph, advisory: unknown, modelAuthority: boolean, hash: string, renderedText?: string, textHash?: string, quality?: PlainBriefQuality}} PlainBrief
+ * @typedef {{schema: string, healthy: boolean, checks: Record<string, boolean>, renderedBytes: number, structuredBytes: number, maxBytes: number}} PlainBriefQuality
+ */
+
+/**
+ * @param {PlainBriefInput} [input]
+ * @returns {ActionEnvelope}
  */
 export function buildActionEnvelope(input = {}) {
   const state = normalizedState(input);
@@ -223,9 +239,9 @@ export function buildActionEnvelope(input = {}) {
 }
 
 /**
- * @param {*} input
- * @param {*} actionEnvelope
- * @returns {*}
+ * @param {PlainBriefInput} [input]
+ * @param {ActionEnvelope} [actionEnvelope]
+ * @returns {BriefFactGraph}
  */
 export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnvelope(input)) {
   const state = normalizedState(input);
@@ -267,14 +283,16 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
     }, ['intelligence.acceptanceCoverage']));
   }
   if (input.workspace ?? input.analysis?.workspace) {
-    const workspace = input.workspace ?? input.analysis.workspace;
+    // The enclosing guard already proved one of the two workspace documents is present.
+    const workspace = /** @type {BriefWorkspace} */ (input.workspace ?? input.analysis?.workspace);
     const root = workspace.root ?? null;
     if (root && (root !== '.' || workspace.ambiguous === true || workspace.requested === true)) {
       facts.push(fact('SELECTED_WORKSPACE', root, ['workspace.root', 'workspace.confidence']));
     }
   }
   if (input.versionEvidence ?? input.analysis?.versionEvidence) {
-    const version = input.versionEvidence ?? input.analysis.versionEvidence;
+    // The enclosing guard already proved one of the two version documents is present.
+    const version = /** @type {BriefVersionEvidence} */ (input.versionEvidence ?? input.analysis?.versionEvidence);
     facts.push(fact('VERSION_EVIDENCE', {
       baseVersion: version.baseVersion ?? null,
       recommendedVersion: version.recommendedVersion ?? null,
@@ -479,8 +497,8 @@ function uniqueTexts(items) {
 }
 
 /**
- * @param {*} brief
- * @returns {*}
+ * @param {PlainBrief} brief
+ * @returns {PlainBriefQuality}
  */
 export function auditPlainBrief(brief) {
   const sections = [brief.problems, brief.improvements, brief.nextPlan];
@@ -535,8 +553,8 @@ function renderReleaseTrain(train) {
 }
 
 /**
- * @param {*} brief
- * @returns {*}
+ * @param {PlainBrief} brief
+ * @returns {string}
  */
 export function renderPlainBrief(brief) {
   const action = brief.userAction?.exactPhrase
@@ -571,8 +589,8 @@ export function renderPlainBrief(brief) {
 }
 
 /**
- * @param {*} input
- * @returns {*}
+ * @param {PlainBriefInput} [input]
+ * @returns {PlainBrief}
  */
 export function compilePlainBrief(input = {}) {
   const state = normalizedState(input);
@@ -627,9 +645,9 @@ export function compilePlainBrief(input = {}) {
 }
 
 /**
- * @param {*} input
- * @param {*} compiler
- * @returns {*}
+ * @param {PlainBriefInput} [input]
+ * @param {(input: PlainBriefInput) => PlainBrief} [compiler]
+ * @returns {{plainBrief: PlainBrief|null, error: {code: string, message: string, quality?: PlainBriefQuality|null}|null}}
  */
 export function compilePlainBriefSafe(input = {}, compiler = compilePlainBrief) {
   try {

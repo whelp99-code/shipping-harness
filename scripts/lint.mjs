@@ -12,7 +12,7 @@ const FUNCTION_LENGTH_ALLOWLIST = [
   { file: 'src/core/decision-package.mjs', startLine: 165, reason: 'composeDefaultDecision assembles one decision object field-by-field from evidence; splitting would pass many correlated intermediates between helpers with no gain in clarity' },
   { file: 'src/core/evidence.mjs', startLine: 20, reason: 'runAcceptance runs the locked contract acceptance commands in one audited sequence with shared budget/evidence accounting' },
   { file: 'src/core/hooks.mjs', startLine: 54, reason: 'decideStop is a single bounded lifecycle-decision table; the branches are mutually exclusive and share request/adapter context' },
-  { file: 'src/core/plain-brief.mjs', startLine: 230, reason: 'buildBriefFactGraph constructs one bounded fact-graph object with many literal fields required by the plain-brief schema' },
+  { file: 'src/core/plain-brief.mjs', startLine: 246, reason: 'buildBriefFactGraph constructs one bounded fact-graph object with many literal fields required by the plain-brief schema' },
   { file: 'src/core/process.mjs', startLine: 43, reason: 'runBoundedCommand is a single atomic spawn/timeout/output-cap/cleanup sequence; splitting it risks separating cleanup from the failure paths it must always run on' },
   { file: 'src/core/project-analysis.mjs', startLine: 244, reason: 'inspectWorkspace performs one filesystem inspection pass and assembles a single report object from it' },
   { file: 'src/mcp/protocol.mjs', startLine: 119, reason: 'createMcpProtocol is a small factory whose only real body is the handle() method (also allow-listed below)' },

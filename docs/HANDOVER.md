@@ -1,5 +1,7 @@
 # Shipping Harness v1 Internal Handover
 
+**Current version:** 1.9.0
+
 ## Product promise
 
 The user states the desired outcome. Shipping Harness analyzes the repository, proposes the smallest releasable scope, asks only for exceptional high-risk decisions, requires one exact approval, controls bounded execution, independently verifies evidence, and closes the release only when blockers are zero.

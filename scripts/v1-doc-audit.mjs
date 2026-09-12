@@ -105,7 +105,33 @@ for (const file of markdown) {
   }
 }
 
+/**
+ * (c) README's "**Version:** X.Y.Z" line, HANDOVER's "**Current version:** X.Y.Z" line, and
+ * CHANGELOG's topmost "## [X.Y.Z]" entry must all equal package.json version. This checks
+ * one designated line per file, not every historical "vX.Y.Z ..." heading those documents
+ * also contain.
+ * @param {string[]} failures
+ * @param {string} version
+ */
+function auditVersionMentions(failures, version) {
+  const readme = readFileSync(path.join(root, 'README.md'), 'utf8');
+  const readmeMatch = readme.match(/^\*\*Version:\*\*\s*(\S+)/mu);
+  if (!readmeMatch) failures.push('README.md has no "**Version:** X.Y.Z" line');
+  else if (readmeMatch[1] !== version) failures.push(`README.md version line is ${readmeMatch[1]}, package.json is ${version}`);
+
+  const handover = readFileSync(path.join(root, 'docs', 'HANDOVER.md'), 'utf8');
+  const handoverMatch = handover.match(/^\*\*Current version:\*\*\s*(\S+)/mu);
+  if (!handoverMatch) failures.push('docs/HANDOVER.md has no "**Current version:** X.Y.Z" line');
+  else if (handoverMatch[1] !== version) failures.push(`docs/HANDOVER.md current-version line is ${handoverMatch[1]}, package.json is ${version}`);
+
+  const changelog = readFileSync(path.join(root, 'CHANGELOG.md'), 'utf8');
+  const changelogMatch = changelog.match(/^##\s*\[([^\]]+)\]/mu);
+  if (!changelogMatch) failures.push('CHANGELOG.md has no topmost "## [X.Y.Z]" entry');
+  else if (changelogMatch[1] !== version) failures.push(`CHANGELOG.md topmost version is ${changelogMatch[1]}, package.json is ${version}`);
+}
+
 const packageJson = JSON.parse(readFileSync(path.join(root, 'package.json'), 'utf8'));
+auditVersionMentions(failures, packageJson.version);
 const dependencyNames = Object.keys({
   ...(packageJson.dependencies ?? {}),
   ...(packageJson.optionalDependencies ?? {}),

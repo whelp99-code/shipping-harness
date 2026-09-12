@@ -66,6 +66,44 @@ Rules that follow from this:
 - `docs/reports/*.json` are field-evidence records; they are excluded from `dist/` and must not be regenerated casually.
 - Backlog items in `BACKLOG.md` are deliberately not blockers; do not pull them into a locked scope.
 
+## Version cycle walkthrough
+
+The exact command sequence for closing one version end to end, in order, with the file to inspect after each step:
+
+1. `node bin/shipping-harness.mjs release prepare --version X.Y.Z --goal "…"` → inspect `.shipping/state.json` (now `DRAFT`, release `X.Y.Z`) and `.shipping/releases/<previous>.json` (the archived closed contract).
+2. Add `docs/planning/NN-VX.Y.Z-….md` (next sequential number) → inspect that it exists and that `npm run verify:docs` still passes (planning numbering must stay gap-free).
+3. Bump `package.json` `version` to `X.Y.Z` → inspect `src/version.mjs` reads it (`node bin/shipping-harness.mjs version`).
+4. Edit `.shipping/contract.yaml` acceptance criteria (`AC-<version digits><nn>`) → inspect `.shipping/contract.yaml` diff matches the plan doc's acceptance list.
+5. Commit the draft (`docs: prepare shipping-harness X.Y.Z …`) → inspect `git log -1` and `git status` clean.
+6. `shipping-harness lock` → inspect `.shipping/contract.lock` (hash) and `.shipping/state.json` (now `LOCKED`).
+7. Implement the scope → inspect the acceptance commands from the contract pass locally.
+8. `shipping-harness verify` → inspect `.shipping/evidence/` output and `.shipping/state.json` (`SHIPPABLE`, or `BLOCKED`/`TRIAGE` with cited blockers).
+9. Fix any blockers and re-run `shipping-harness verify` until `SHIPPABLE` → inspect `.shipping/ledger.jsonl` for the transition history.
+10. `shipping-harness close` → inspect `.shipping/state.json` (`CLOSED`) and the generated release receipt/report/backlog under `.shipping/releases/` and `BACKLOG.md`.
+11. Commit the receipt (`chore: close shipping-harness X.Y.Z`) → inspect `git status` clean.
+12. `git tag -a vX.Y.Z -m "…"` → inspect `git tag -l vX.Y.Z` and that it points at the close commit.
+
+### Gotcha: `release prepare` vs. post-close commits
+
+`release prepare` diffs the current working tree against `state.closedGitSha` for everything **outside** `.shipping/` and refuses to run if that tree has drifted (`ERR_RELEASE_DRIFT`). A commit made *after* `close` that touches non-`.shipping/` files (for example, a docs cleanup commit landed after `chore: close …`) therefore blocks the next `release prepare` even though it is unrelated to the closed release's scope.
+
+Workaround used in this session: check out the close commit into a detached worktree, run `release prepare` there (where the tree exactly matches `closedGitSha`), then copy the resulting `.shipping/` directory back onto the branch tip before committing.
+
+```bash
+git worktree add /tmp/prepare-at-close <close-commit-sha>
+cd /tmp/prepare-at-close && node bin/shipping-harness.mjs release prepare --version X.Y.Z --goal "…"
+cp -r .shipping /path/to/main/checkout/.shipping
+cd /path/to/main/checkout && git worktree remove /tmp/prepare-at-close
+```
+
+Prefer running `release prepare` immediately after the close commit, before any further commit touches non-`.shipping/` files, so this workaround is not needed.
+
+## Language rule
+
+- Code comments, JSON Schemas, and CLI/MCP output text: English.
+- `docs/planning/`: Korean (matches how this repo's planning has always been written).
+- `README.md`, `docs/MCP.md`, `docs/HANDOVER.md`: English. `docs/BEGINNER-QUICKSTART-KO.md` is the Korean-language entry point for non-developer users; it is not a translation target for the other documents above.
+
 ## Code conventions enforced by scripts
 
 - ESM only, `node:` prefixed builtins, JSDoc `@param` types (typecheck relies on import resolution, not tsc).

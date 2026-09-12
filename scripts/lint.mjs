@@ -9,24 +9,24 @@ const FUNCTION_LENGTH_LIMIT = 80;
 // further, each with a one-line reason. Keep this empty whenever possible; see
 // docs/planning/33-....md section 6 Phase B for the full audit that produced it.
 const FUNCTION_LENGTH_ALLOWLIST = [
-  { file: 'src/core/decision-package.mjs', startLine: 165, reason: 'composeDefaultDecision assembles one decision object field-by-field from evidence; splitting would pass many correlated intermediates between helpers with no gain in clarity' },
-  { file: 'src/core/evidence.mjs', startLine: 20, reason: 'runAcceptance runs the locked contract acceptance commands in one audited sequence with shared budget/evidence accounting' },
-  { file: 'src/core/hooks.mjs', startLine: 54, reason: 'decideStop is a single bounded lifecycle-decision table; the branches are mutually exclusive and share request/adapter context' },
-  { file: 'src/core/plain-brief.mjs', startLine: 246, reason: 'buildBriefFactGraph constructs one bounded fact-graph object with many literal fields required by the plain-brief schema' },
-  { file: 'src/core/process.mjs', startLine: 43, reason: 'runBoundedCommand is a single atomic spawn/timeout/output-cap/cleanup sequence; splitting it risks separating cleanup from the failure paths it must always run on' },
-  { file: 'src/core/project-analysis.mjs', startLine: 244, reason: 'inspectWorkspace performs one filesystem inspection pass and assembles a single report object from it' },
-  { file: 'src/mcp/protocol.mjs', startLine: 119, reason: 'createMcpProtocol is a small factory whose only real body is the handle() method (also allow-listed below)' },
-  { file: 'src/mcp/protocol.mjs', startLine: 138, reason: 'handle() is the JSON-RPC method dispatch table for the nine shipping_* tools plus protocol methods; splitting it would fragment one already-linear dispatch' },
-  { file: 'src/mcp/stdio.mjs', startLine: 7, reason: 'startStdioServer wires up the bounded queue/backpressure state machine over stdin/stdout in one place by design (see src/mcp/stdio.mjs module comment)' },
-  { file: 'src/mcp/user-view.mjs', startLine: 33, reason: 'buildUserStatusView assembles one bounded user-facing view object from status fields' },
-  { file: 'packages/internal-omo-bridge/bridge.mjs', startLine: 47, reason: 'executeShippingPrivateOmo is one sequential probe/promote/fallback authority decision flow that must stay auditable as a single sequence' },
-  { file: 'packages/omp-main-harness/doctor.mjs', startLine: 14, reason: 'doctorOmpMainHarness aggregates one sequential set of independent doctor checks into a single report' },
-  { file: 'packages/omp-main-harness/install.mjs', startLine: 80, reason: 'installOmpMainHarness is one sequential validate/stage/verify/activate pipeline with rollback-on-failure state that must not be separated from the steps it guards' },
+  { file: 'src/core/decision-package.mjs', label: 'method \'composeDefaultDecision\'', reason: 'composeDefaultDecision assembles one decision object field-by-field from evidence; splitting would pass many correlated intermediates between helpers with no gain in clarity' },
+  { file: 'src/core/evidence.mjs', label: 'method \'runAcceptance\'', reason: 'runAcceptance runs the locked contract acceptance commands in one audited sequence with shared budget/evidence accounting' },
+  { file: 'src/core/hooks.mjs', label: 'method \'decideStop\'', reason: 'decideStop is a single bounded lifecycle-decision table; the branches are mutually exclusive and share request/adapter context' },
+  { file: 'src/core/plain-brief.mjs', label: 'method \'buildBriefFactGraph\'', reason: 'buildBriefFactGraph constructs one bounded fact-graph object with many literal fields required by the plain-brief schema' },
+  { file: 'src/core/process.mjs', label: 'method \'runBoundedCommand\'', reason: 'runBoundedCommand is a single atomic spawn/timeout/output-cap/cleanup sequence; splitting it risks separating cleanup from the failure paths it must always run on' },
+  { file: 'src/core/project-analysis.mjs', label: 'method \'inspectWorkspace\'', reason: 'inspectWorkspace performs one filesystem inspection pass and assembles a single report object from it' },
+  { file: 'src/mcp/protocol.mjs', label: 'method \'createMcpProtocol\'', reason: 'createMcpProtocol is a small factory whose only real body is the handle() method (also allow-listed below)' },
+  { file: 'src/mcp/protocol.mjs', label: 'method \'handle\'', reason: 'handle() is the JSON-RPC method dispatch table for the nine shipping_* tools plus protocol methods; splitting it would fragment one already-linear dispatch' },
+  { file: 'src/mcp/stdio.mjs', label: 'method \'startStdioServer\'', reason: 'startStdioServer wires up the bounded queue/backpressure state machine over stdin/stdout in one place by design (see src/mcp/stdio.mjs module comment)' },
+  { file: 'src/mcp/user-view.mjs', label: 'method \'buildUserStatusView\'', reason: 'buildUserStatusView assembles one bounded user-facing view object from status fields' },
+  { file: 'packages/internal-omo-bridge/bridge.mjs', label: 'method \'executeShippingPrivateOmo\'', reason: 'executeShippingPrivateOmo is one sequential probe/promote/fallback authority decision flow that must stay auditable as a single sequence' },
+  { file: 'packages/omp-main-harness/doctor.mjs', label: 'method \'doctorOmpMainHarness\'', reason: 'doctorOmpMainHarness aggregates one sequential set of independent doctor checks into a single report' },
+  { file: 'packages/omp-main-harness/install.mjs', label: 'method \'installOmpMainHarness\'', reason: 'installOmpMainHarness is one sequential validate/stage/verify/activate pipeline with rollback-on-failure state that must not be separated from the steps it guards' },
 ];
 
-/** @param {string} file @param {number} startLine */
-function isAllowlisted(file, startLine) {
-  return FUNCTION_LENGTH_ALLOWLIST.some((entry) => entry.file === file && entry.startLine === startLine);
+/** @param {string} file @param {string} label */
+function isAllowlisted(file, label) {
+  return FUNCTION_LENGTH_ALLOWLIST.some((entry) => entry.file === file && entry.label === label);
 }
 
 const roots = ['src', 'bin', 'scripts', 'test'];
@@ -61,7 +61,7 @@ for (const filePath of lengthCheckFiles) {
   const content = await text(filePath);
   const relPath = relative(filePath);
   for (const violation of findLongFunctions(content, FUNCTION_LENGTH_LIMIT)) {
-    if (isAllowlisted(relPath, violation.startLine)) continue;
+    if (isAllowlisted(relPath, violation.label)) continue;
     failures.push(`${relPath}:${violation.startLine}: ${violation.label} spans ${violation.length} lines (limit ${FUNCTION_LENGTH_LIMIT}), ending at line ${violation.endLine}`);
   }
 }

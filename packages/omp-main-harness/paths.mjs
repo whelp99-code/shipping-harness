@@ -4,10 +4,17 @@ import { assertInside, validateAbsoluteRoot } from './io.mjs';
 
 const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
+/**
+ * @returns {*}
+ */
 export function packageRoot() {
   return PACKAGE_ROOT;
 }
 
+/**
+ * @param {*} input
+ * @returns {*}
+ */
 export function ompMainPaths(input = {}) {
   const home = validateAbsoluteRoot(input.home ?? process.env.HOME, 'home');
   const agentDir = validateAbsoluteRoot(input.agentDir ?? path.join(home, '.omp', 'agent'), 'agentDir');
@@ -28,6 +35,10 @@ export function ompMainPaths(input = {}) {
   });
 }
 
+/**
+ * @param {*} input
+ * @returns {*}
+ */
 export function packageCommands(input = {}) {
   const root = packageRoot();
   return Object.freeze({

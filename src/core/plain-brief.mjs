@@ -192,6 +192,10 @@ function actionPolicyFor(state, blockerCount) {
   return ACTION_POLICY[state] ?? ACTION_POLICY.PLANNING;
 }
 
+/**
+ * @param {*} input
+ * @returns {*}
+ */
 export function buildActionEnvelope(input = {}) {
   const state = normalizedState(input);
   const blockerCount = normalizedCount(input.blockerCount ?? input.issues?.counts?.BLOCKER ?? input.state?.blockerCount);
@@ -218,6 +222,11 @@ export function buildActionEnvelope(input = {}) {
   return { ...body, hash: hashObject(body) };
 }
 
+/**
+ * @param {*} input
+ * @param {*} actionEnvelope
+ * @returns {*}
+ */
 export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnvelope(input)) {
   const state = normalizedState(input);
   const blockerCount = normalizedCount(input.blockerCount ?? input.issues?.counts?.BLOCKER ?? input.state?.blockerCount);
@@ -469,6 +478,10 @@ function uniqueTexts(items) {
   return new Set(texts).size === texts.length;
 }
 
+/**
+ * @param {*} brief
+ * @returns {*}
+ */
 export function auditPlainBrief(brief) {
   const sections = [brief.problems, brief.improvements, brief.nextPlan];
   const allItems = [...sections.flat(), brief.summary].filter(Boolean);
@@ -521,6 +534,10 @@ function renderReleaseTrain(train) {
   ];
 }
 
+/**
+ * @param {*} brief
+ * @returns {*}
+ */
 export function renderPlainBrief(brief) {
   const action = brief.userAction?.exactPhrase
     ? `> **${brief.userAction.exactPhrase}**`
@@ -553,6 +570,10 @@ export function renderPlainBrief(brief) {
   ].join('\n').trim();
 }
 
+/**
+ * @param {*} input
+ * @returns {*}
+ */
 export function compilePlainBrief(input = {}) {
   const state = normalizedState(input);
   const blockerCount = normalizedCount(input.blockerCount ?? input.issues?.counts?.BLOCKER ?? input.state?.blockerCount);
@@ -605,6 +626,11 @@ export function compilePlainBrief(input = {}) {
   return { ...withText, quality };
 }
 
+/**
+ * @param {*} input
+ * @param {*} compiler
+ * @returns {*}
+ */
 export function compilePlainBriefSafe(input = {}, compiler = compilePlainBrief) {
   try {
     const plainBrief = compiler(input);

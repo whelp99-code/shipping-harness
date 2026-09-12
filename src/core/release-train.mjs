@@ -395,6 +395,10 @@ export function validateReleaseTrain(train, options = {}) {
   return train;
 }
 
+/**
+ * @param {*} train
+ * @returns {*}
+ */
 export function releaseTrainSummary(train) {
   if (!train) return null;
   validateReleaseTrain(train);
@@ -419,6 +423,11 @@ export function releaseTrainSummary(train) {
   };
 }
 
+/**
+ * @param {*} train
+ * @param {*} binding
+ * @returns {*}
+ */
 export function bindApprovedReleaseTrain(train, binding) {
   validateReleaseTrain(train);
   const body = {
@@ -441,6 +450,12 @@ export function bindApprovedReleaseTrain(train, binding) {
   return { ...body, hash: hashObject(body) };
 }
 
+/**
+ * @param {*} root
+ * @param {*} train
+ * @param {*} binding
+ * @returns {Promise<*>}
+ */
 export async function persistApprovedReleaseTrain(root, train, binding) {
   const target = runtimePaths(root).releaseTrain;
   await assertContainedPath(root, target);
@@ -449,6 +464,10 @@ export async function persistApprovedReleaseTrain(root, train, binding) {
   return { path: target, envelope };
 }
 
+/**
+ * @param {*} root
+ * @returns {Promise<*>}
+ */
 export async function loadApprovedReleaseTrain(root) {
   const target = runtimePaths(root).releaseTrain;
   if (!(await exists(target))) return null;

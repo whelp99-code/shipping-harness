@@ -93,10 +93,17 @@ const REQUIRED_FIELDS = Object.freeze({
   goalCharter: ['id', 'status', 'project', 'release', 'proposalId', 'proposalRevision', 'proposalHash', 'gitSha', 'discoveryHash', 'directionHash', 'candidateHash', 'criticHash', 'outcome', 'primaryUser', 'operatingBoundary', 'value', 'include', 'nonGoals', 'successCriteria', 'assumptions', 'rollback', 'replanTriggers', 'evidenceRefs', 'binding', 'commandAuthority', 'approvalAuthority', 'closureAuthority', 'deploymentAuthority', 'modelAuthority', 'released', 'hash'],
 });
 
+/**
+ * @returns {*}
+ */
 export function stableSchemaNames() {
   return Object.keys(STABLE_SCHEMA_DESCRIPTORS);
 }
 
+/**
+ * @param {*} nameOrId
+ * @returns {*}
+ */
 export function stableSchemaDescriptor(nameOrId) {
   const descriptor = STABLE_SCHEMA_DESCRIPTORS[nameOrId] ?? BY_ID.get(nameOrId);
   stableInvariant(descriptor, 'ERR_STABLE_SCHEMA', `Unsupported stable schema: ${String(nameOrId)}`);
@@ -114,6 +121,10 @@ async function readJson(filePath) {
   }
 }
 
+/**
+ * @param {*} nameOrId
+ * @returns {Promise<*>}
+ */
 export async function loadStableSchema(nameOrId) {
   const descriptor = stableSchemaDescriptor(nameOrId);
   const schema = await readJson(descriptor.schemaPath);
@@ -124,11 +135,20 @@ export async function loadStableSchema(nameOrId) {
 // Compatibility alias used by the initial v1 tests and downstream internal tooling.
 export const loadSchema = loadStableSchema;
 
+/**
+ * @param {*} nameOrId
+ * @returns {Promise<*>}
+ */
 export async function loadStableExample(nameOrId) {
   const descriptor = stableSchemaDescriptor(nameOrId);
   return readJson(descriptor.examplePath);
 }
 
+/**
+ * @param {*} descriptorOrName
+ * @param {*} schema
+ * @returns {*}
+ */
 export function validateStableSchemaDefinition(descriptorOrName, schema) {
   const descriptor = typeof descriptorOrName === 'string'
     ? stableSchemaDescriptor(descriptorOrName)
@@ -223,6 +243,11 @@ function validateNode(schema, value, location) {
   }
 }
 
+/**
+ * @param {*} nameOrId
+ * @param {*} value
+ * @returns {*}
+ */
 export function validateStableArtifact(nameOrId, value) {
   const descriptor = stableSchemaDescriptor(nameOrId);
   stableInvariant(value && typeof value === 'object' && !Array.isArray(value), 'ERR_STABLE_ARTIFACT', `${descriptor.name} artifact must be an object`);
@@ -233,6 +258,11 @@ export function validateStableArtifact(nameOrId, value) {
   return value;
 }
 
+/**
+ * @param {*} nameOrId
+ * @param {*} value
+ * @returns {Promise<*>}
+ */
 export async function validateStableDocument(nameOrId, value) {
   const descriptor = stableSchemaDescriptor(nameOrId);
   const schema = await loadStableSchema(descriptor.name);
@@ -241,6 +271,9 @@ export async function validateStableDocument(nameOrId, value) {
   return value;
 }
 
+/**
+ * @returns {Promise<*>}
+ */
 export async function validateAllStableExamples() {
   const results = [];
   for (const name of stableSchemaNames()) {

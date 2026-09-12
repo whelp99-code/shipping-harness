@@ -188,6 +188,10 @@ export async function executeShippingPrivateOmo(root, options = {}) {
   }
 }
 
+/**
+ * @param {*} contract
+ * @returns {*}
+ */
 export function privateOmoFallbackDecision(contract) {
   const fallback = configuredFallback(contract);
   return fallback

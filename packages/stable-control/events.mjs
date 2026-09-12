@@ -20,6 +20,9 @@ function redact(value, depth = 0) {
   return value;
 }
 
+/**
+ * StableEventLog.
+ */
 export class StableEventLog {
   constructor(file) {
     stableInvariant(typeof file === 'string' && file.length > 0, 'ERR_STABLE_EVENT_PATH', 'Stable event path is required');

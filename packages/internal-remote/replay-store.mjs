@@ -8,6 +8,9 @@ function expiration(value) {
   return Number(value?.expiresAt ?? 0);
 }
 
+/**
+ * ReplayStore.
+ */
 export class ReplayStore {
   constructor(file, { ttlMs = 600000, maxEntries = 10000 } = {}) {
     this.file = path.resolve(file);

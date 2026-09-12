@@ -15,6 +15,9 @@ export function verifySignature(value, signature, key) {
   return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(signature, 'hex'));
 }
 
+/**
+ * @returns {*}
+ */
 export function generateHmacKey() {
   return randomBytes(48).toString('hex');
 }

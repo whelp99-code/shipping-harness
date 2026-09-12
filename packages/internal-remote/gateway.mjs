@@ -18,6 +18,9 @@ const ACTION_PARAMS = Object.freeze({
   'evidence/summary': [],
 });
 
+/**
+ * RateLimiter.
+ */
 export class RateLimiter {
   constructor(limit = 30, windowMs = 60000) {
     this.limit = boundedInteger(limit, 'rate limit', { min: 1, max: 10000 });
@@ -69,6 +72,9 @@ function notificationFor(result) {
   return null;
 }
 
+/**
+ * InternalRemoteGateway.
+ */
 export class InternalRemoteGateway {
   /**
    * @param {{config: Record<string, any>, replayStore: any, adapter: any, notifications: any, backupRoot: string, rateLimiter?: any}} options
@@ -237,6 +243,11 @@ export class InternalRemoteGateway {
   }
 }
 
+/**
+ * @param {*} requestId
+ * @param {*} error
+ * @returns {*}
+ */
 export function remoteError(requestId, error) {
   return {
     schema: 'shipping-remote/response-v1',

@@ -32,6 +32,9 @@ export function renderStatus(status) {
   return `${lines.join('\n')}\n`;
 }
 
+/**
+ * @returns {*}
+ */
 export function renderHelp() {
   return `Shipping Harness\n\n` +
     `Usage: shipping-harness <command> [options]\n\n` +

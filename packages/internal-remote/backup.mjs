@@ -132,6 +132,11 @@ export async function createBackup({
   };
 }
 
+/**
+ * @param {*} bundle
+ * @param {*} options
+ * @returns {*}
+ */
 export function validateBackup(bundle, { projectId, serverSecret }) {
   invariant(bundle?.schema === 'shipping-harness/backup-v1' && bundle.projectId === projectId, 'ERR_BACKUP_SCHEMA', 'Backup project or schema mismatch');
   const unsigned = { ...bundle };
@@ -174,6 +179,10 @@ async function pauseRestoredNonTerminal(stage) {
   return { paused: true, restoredState };
 }
 
+/**
+ * @param {*} options
+ * @returns {Promise<*>}
+ */
 export async function restoreBackup({ projectId, projectRoot, serverSecret, bundlePath }) {
   const bundle = validateBackup(JSON.parse(await readFile(bundlePath, 'utf8')), { projectId, serverSecret });
   const shippingRoot = path.join(path.resolve(projectRoot), '.shipping');
@@ -222,6 +231,10 @@ export async function restoreBackup({ projectId, projectRoot, serverSecret, bund
   };
 }
 
+/**
+ * @param {*} bundle
+ * @returns {*}
+ */
 export function migrateBackup(bundle) {
   invariant(bundle?.schema === 'shipping-harness/backup-v1', 'ERR_BACKUP_MIGRATION', 'Unsupported backup schema');
   return bundle;

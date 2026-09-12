@@ -79,6 +79,11 @@ function normalizedKey(key) {
   return String(key).replace(/[-_\s]/gu, '').toLowerCase();
 }
 
+/**
+ * @param {*} value
+ * @param {*} depth
+ * @returns {*}
+ */
 export function rejectArbitraryExecution(value, depth = 0) {
   invariant(depth <= 16, 'ERR_REMOTE_DEPTH', 'Remote input nesting is too deep');
   if (Array.isArray(value)) {
@@ -95,6 +100,10 @@ export function rejectArbitraryExecution(value, depth = 0) {
   }
 }
 
+/**
+ * @param {*} host
+ * @returns {*}
+ */
 export function privateListenHost(host) {
   if (host === 'localhost' || host === '::1') return true;
   if (net.isIP(host) !== 4) return false;
@@ -105,11 +114,21 @@ export function privateListenHost(host) {
     || (parts[0] === 192 && parts[1] === 168);
 }
 
+/**
+ * @param {*} host
+ * @returns {*}
+ */
 export function validateListen(host) {
   invariant(privateListenHost(host), 'ERR_REMOTE_LISTEN', 'Gateway listen host must be loopback or private IPv4; public and unspecified listeners are forbidden');
   return host;
 }
 
+/**
+ * @param {*} value
+ * @param {*} label
+ * @param {*} max
+ * @returns {*}
+ */
 export function boundedString(value, label, max = 4096) {
   invariant(typeof value === 'string' && value.length > 0 && Buffer.byteLength(value, 'utf8') <= max, 'ERR_REMOTE_ARGUMENT', `${label} is required and bounded`);
   return value;
@@ -127,11 +146,22 @@ export function boundedInteger(value, label, { min = 1, max = Number.MAX_SAFE_IN
   return /** @type {number} */ (candidate);
 }
 
+/**
+ * @param {*} parent
+ * @param {*} target
+ * @returns {*}
+ */
 export function pathWithin(parent, target) {
   const relative = path.relative(path.resolve(parent), path.resolve(target));
   return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
 }
 
+/**
+ * @param {*} parent
+ * @param {*} target
+ * @param {*} code
+ * @returns {*}
+ */
 export function assertPathWithin(parent, target, code = 'ERR_REMOTE_PATH') {
   invariant(pathWithin(parent, target), code, 'Path is outside the configured internal root', { parent: path.resolve(parent), target: path.resolve(target) });
   return path.resolve(target);

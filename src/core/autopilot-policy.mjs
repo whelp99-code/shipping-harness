@@ -313,6 +313,10 @@ export function validateAutopilotDecision(decision) {
   return decision;
 }
 
+/**
+ * @param {*} policy
+ * @returns {*}
+ */
 export function autopilotPolicySummary(policy) {
   if (!policy) return null;
   validateAutopilotPolicy(policy);
@@ -330,6 +334,11 @@ export function autopilotPolicySummary(policy) {
   };
 }
 
+/**
+ * @param {*} left
+ * @param {*} right
+ * @returns {*}
+ */
 export function policiesEquivalent(left, right) {
   validateAutopilotPolicy(left);
   validateAutopilotPolicy(right);

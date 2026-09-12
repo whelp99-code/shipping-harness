@@ -23,6 +23,9 @@ function validateBindingValue(value, label, maximum = 256) {
   return value;
 }
 
+/**
+ * @returns {*}
+ */
 export function issueApprovalReceipt({
   requestId,
   actorId,
@@ -62,6 +65,11 @@ export function issueApprovalReceipt({
   return { ...body, signature: hmac(body, serverCredential) };
 }
 
+/**
+ * @param {*} receipt
+ * @param {*} expected
+ * @returns {*}
+ */
 export function validateApprovalReceipt(receipt, expected) {
   invariant(receipt && typeof receipt === 'object' && !Array.isArray(receipt), 'ERR_REMOTE_APPROVAL', 'Approval receipt is missing or invalid');
   for (const key of Object.keys(receipt)) {

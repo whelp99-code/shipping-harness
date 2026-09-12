@@ -44,6 +44,9 @@ function optionalEvidencePath(value, roots, label) {
   return resolved;
 }
 
+/**
+ * @returns {*}
+ */
 export function validateRemoteConfig(raw, {
   env = process.env,
   allowInlineCredentials = false,
@@ -123,6 +126,11 @@ export function validateRemoteConfig(raw, {
   });
 }
 
+/**
+ * @param {*} config
+ * @param {*} options
+ * @returns {*}
+ */
 export function authorize(config, { actorId, projectId, action }) {
   const actor = config.actors[actorId];
   invariant(actor && !actor.disabled, 'ERR_REMOTE_IDENTITY', 'Unknown or disabled actor');

@@ -1,3 +1,6 @@
+/**
+ * ShippingError.
+ */
 export class ShippingError extends Error {
   /**
    * @param {string} code

@@ -14,6 +14,9 @@ async function commit(root, message) {
   runCommand('git', ['commit', '-q', '-m', message], { cwd: root, timeoutMs: 30000 });
 }
 
+/**
+ * @returns {Promise<*>}
+ */
 export async function createProtocolFixture() {
   const root = await mkdtemp(path.join(os.tmpdir(), 'shipping-omp-protocol-'));
   await initializeGit(root);
@@ -44,6 +47,10 @@ async function addRuntime(root, name, version) {
   ].join('\n'), 'utf8');
 }
 
+/**
+ * @param {*} names
+ * @returns {Promise<*>}
+ */
 export async function createNestedPilotFixture(names = ['alpha-runtime-v1.1.0', 'beta-runtime-v1.1.0']) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'shipping-omp-nested-'));
   await initializeGit(root);

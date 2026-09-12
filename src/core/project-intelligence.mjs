@@ -99,6 +99,10 @@ function buildComponentGraph(files, analysis) {
   };
 }
 
+/**
+ * @param {*} command
+ * @returns {*}
+ */
 export function acceptanceCommandMetadata(command) {
   const text = String(command ?? '').trim().toLowerCase();
   if (/\b(?:deploy|publish|release-to|terraform apply|kubectl apply)\b/u.test(text)) {
@@ -116,6 +120,10 @@ export function acceptanceCommandMetadata(command) {
   return { sideEffect: 'none-or-test-output', isolationRequired: false, deterministicOutputRequired: false, automaticallyRunnable: true };
 }
 
+/**
+ * @param {*} commands
+ * @returns {*}
+ */
 export function annotateAcceptanceCommands(commands = []) {
   return commands.map((entry) => ({ ...entry, ...acceptanceCommandMetadata(entry.command) }));
 }
@@ -231,6 +239,10 @@ export function buildProjectIntelligence(root, analysis, baseline, explicitGoal)
   return { ...result, hash: hashObject(result) };
 }
 
+/**
+ * @param {*} proposal
+ * @returns {*}
+ */
 export function buildOneScreenApproval(proposal) {
   const brief = proposal.approvalBrief ?? {};
   const intelligence = proposal.intelligence ?? proposal.analysis?.intelligence ?? null;

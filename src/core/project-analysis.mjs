@@ -383,6 +383,11 @@ function selectWorkspace(candidates, requestedId) {
   };
 }
 
+/**
+ * @param {*} root
+ * @param {*} options
+ * @returns {Promise<*>}
+ */
 export async function analyzeRepository(root, options = {}) {
   const files = trackedFiles(root);
   const roots = workspaceRoots(files);
@@ -453,6 +458,11 @@ export async function analyzeRepository(root, options = {}) {
   };
 }
 
+/**
+ * @param {*} analysis
+ * @param {*} goal
+ * @returns {*}
+ */
 export function buildMinimalScope(analysis, goal) {
   const includePaths = new Set([
     ...analysis.sourceRoots.map((root) => `${root}/**`),
@@ -485,6 +495,10 @@ export function buildMinimalScope(analysis, goal) {
   };
 }
 
+/**
+ * @param {*} analysis
+ * @returns {*}
+ */
 export function buildAcceptanceCriteria(analysis) {
   return analysis.candidateCommands.map((candidate, index) => ({
     id: `AC-${String(index + 1).padStart(3, '0')}`,
@@ -501,6 +515,11 @@ export function buildAcceptanceCriteria(analysis) {
   }));
 }
 
+/**
+ * @param {*} analysis
+ * @param {*} acceptance
+ * @returns {*}
+ */
 export function buildShortPlan(analysis, acceptance) {
   return [
     { id: 'PLAN-001', title: 'Confirm the smallest release', detail: `Review workspace ${analysis.workspace?.root ?? '.'}, detected facts, exclusions, version evidence, and acceptance commands before approval.`, acceptance: [] },

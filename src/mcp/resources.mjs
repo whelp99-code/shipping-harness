@@ -15,6 +15,9 @@ export const SHIPPING_RESOURCES = Object.freeze([
   { uri: 'shipping://current/backlog', name: 'Deferred backlog', description: 'Items deferred to a later version.', mimeType: 'application/json' },
 ]);
 
+/**
+ * @returns {*}
+ */
 export function listShippingResources() {
   return SHIPPING_RESOURCES.map((entry) => ({ ...entry }));
 }

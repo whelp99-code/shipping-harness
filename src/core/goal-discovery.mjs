@@ -265,6 +265,10 @@ function directionFor(evidence, selected, critic, questions) {
   return { ...body, hash: hashObject(body) };
 }
 
+/**
+ * @param {*} input
+ * @returns {*}
+ */
 export function validateGoalDiscovery(input) {
   invariant(input?.schema === GOAL_DISCOVERY.schema, 'ERR_GOAL_DISCOVERY_SCHEMA', 'Unsupported goal discovery schema');
   invariant(['READY', 'NEEDS_INPUT', 'STOP'].includes(input.status), 'ERR_GOAL_DISCOVERY_STATUS', `Unsupported goal discovery status: ${String(input?.status)}`);
@@ -289,6 +293,11 @@ export function validateGoalDiscovery(input) {
   return input;
 }
 
+/**
+ * @param {*} evidence
+ * @param {*} options
+ * @returns {*}
+ */
 export function compileGoalDiscovery(evidence, options = {}) {
   invariant(evidence && typeof evidence === 'object' && /^[a-f0-9]{64}$/u.test(evidence.hash ?? '')
     && /^[a-f0-9]{40}$/u.test(evidence.gitSha ?? '') && typeof evidence.goal === 'string',
@@ -328,6 +337,12 @@ export function compileGoalDiscovery(evidence, options = {}) {
   return validateGoalDiscovery({ ...body, hash: hashObject(body) });
 }
 
+/**
+ * @param {*} decision
+ * @param {*} discovery
+ * @param {*} limit
+ * @returns {*}
+ */
 export function mergeGoalDiscoveryQuestions(decision, discovery, limit = GOAL_DISCOVERY.maxQuestions) {
   const existing = Array.isArray(decision.questions) ? decision.questions : [];
   const ids = new Set(existing.map((entry) => entry.id));
@@ -339,6 +354,10 @@ export function mergeGoalDiscoveryQuestions(decision, discovery, limit = GOAL_DI
   return merged;
 }
 
+/**
+ * @param {*} discovery
+ * @returns {*}
+ */
 export function goalDiscoverySummary(discovery) {
   validateGoalDiscovery(discovery);
   return {

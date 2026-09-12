@@ -160,6 +160,10 @@ async function readAutopilotLedgerSnapshot(root) {
   return { events, bytes };
 }
 
+/**
+ * @param {*} root
+ * @returns {Promise<*>}
+ */
 export async function readAutopilotLedger(root) {
   return (await readAutopilotLedgerSnapshot(root)).events;
 }
@@ -181,6 +185,10 @@ async function writeState(root, body) {
   return state;
 }
 
+/**
+ * @param {*} root
+ * @returns {Promise<*>}
+ */
 export async function loadAutopilotPolicy(root) {
   const target = runtimePaths(root).autopilotPolicy;
   if (!(await exists(target))) return null;
@@ -188,6 +196,10 @@ export async function loadAutopilotPolicy(root) {
   return validateAutopilotPolicy(await readJson(target));
 }
 
+/**
+ * @param {*} root
+ * @returns {Promise<*>}
+ */
 export async function loadAutopilotState(root) {
   const target = runtimePaths(root).autopilotState;
   if (!(await exists(target))) return null;
@@ -258,6 +270,10 @@ export async function activateAutopilot(root, input) {
   });
 }
 
+/**
+ * @param {*} root
+ * @returns {Promise<*>}
+ */
 export async function assertAutopilotBindingCurrent(root) {
   const policy = await loadAutopilotPolicy(root);
   const state = await loadAutopilotState(root);
@@ -288,6 +304,12 @@ export async function assertAutopilotBindingCurrent(root) {
   };
 }
 
+/**
+ * @param {*} root
+ * @param {*} decisionInput
+ * @param {*} patch
+ * @returns {Promise<*>}
+ */
 export async function recordAutopilotDecision(root, decisionInput, patch = {}) {
   return withAutopilotLock(root, async () => {
     const decision = validateAutopilotDecision(decisionInput);
@@ -331,6 +353,11 @@ export async function recordAutopilotDecision(root, decisionInput, patch = {}) {
   });
 }
 
+/**
+ * @param {*} root
+ * @param {*} input
+ * @returns {Promise<*>}
+ */
 export async function evaluateAutopilotAction(root, input) {
   const binding = await assertAutopilotBindingCurrent(root);
   invariant(binding.policy && binding.state, 'ERR_AUTOPILOT_INACTIVE', 'No autopilot policy is active');
@@ -406,6 +433,10 @@ function criterionProven(criterion, context) {
   return false;
 }
 
+/**
+ * @param {*} input
+ * @returns {*}
+ */
 export function deriveAutopilotClosureFacts(input) {
   const { policy, train, verification } = input;
   validateAutopilotPolicy(policy);
@@ -448,6 +479,12 @@ export function deriveAutopilotClosureFacts(input) {
   };
 }
 
+/**
+ * @param {*} root
+ * @param {*} closeResult
+ * @param {*} decision
+ * @returns {Promise<*>}
+ */
 export async function completeAutopilotClosure(root, closeResult, decision) {
   validateAutopilotDecision(decision);
   return recordAutopilotDecision(root, decision, {
@@ -463,6 +500,11 @@ export async function completeAutopilotClosure(root, closeResult, decision) {
   });
 }
 
+/**
+ * @param {*} root
+ * @param {*} input
+ * @returns {Promise<*>}
+ */
 export async function rotateAutopilotPolicy(root, input) {
   return withAutopilotLock(root, async () => {
     const currentPolicy = await loadAutopilotPolicy(root);
@@ -536,6 +578,11 @@ export async function rotateAutopilotPolicy(root, input) {
   });
 }
 
+/**
+ * @param {*} root
+ * @param {*} closeResult
+ * @returns {Promise<*>}
+ */
 export async function completeManualAutopilotClosure(root, closeResult) {
   const policy = await loadAutopilotPolicy(root);
   const state = await loadAutopilotState(root);
@@ -575,6 +622,11 @@ export async function completeManualAutopilotClosure(root, closeResult) {
   });
 }
 
+/**
+ * @param {*} root
+ * @param {*} input
+ * @returns {Promise<*>}
+ */
 export async function createAutopilotMutationReceipt(root, input) {
   const binding = await assertAutopilotBindingCurrent(root);
   invariant(binding.current, 'ERR_AUTOPILOT_POLICY_BINDING', `Autopilot policy binding is not current: ${binding.reason}`);
@@ -617,6 +669,11 @@ export async function createAutopilotMutationReceipt(root, input) {
   return { receipt, decision };
 }
 
+/**
+ * @param {*} receipt
+ * @param {*} input
+ * @returns {*}
+ */
 export function verifyAutopilotMutationReceipt(receipt, input) {
   invariant(receipt?.schema === AUTOPILOT_MUTATION_SCHEMA, 'ERR_AUTOPILOT_MUTATION_SCHEMA', 'Unsupported mutation receipt schema');
   invariant(receipt.hash === mutationHash(receipt), 'ERR_AUTOPILOT_MUTATION_HASH', 'Mutation receipt hash does not match its content');
@@ -629,6 +686,10 @@ export function verifyAutopilotMutationReceipt(receipt, input) {
   return { valid: true, action: receipt.action, paths, receiptHash: receipt.hash };
 }
 
+/**
+ * @param {*} root
+ * @returns {Promise<*>}
+ */
 export async function autopilotStatus(root) {
   const policy = await loadAutopilotPolicy(root);
   const state = await loadAutopilotState(root);

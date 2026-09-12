@@ -9,6 +9,11 @@ const LEGACY_SCHEMA_MAP = Object.freeze({
   'shipping-harness/mcp-result-v1': STABLE_SCHEMAS.mcpSurface,
 });
 
+/**
+ * @param {*} from
+ * @param {*} to
+ * @returns {*}
+ */
 export function assertSupportedUpgrade(from, to = '1.0.0') {
   stableInvariant(SUPPORTED_RELEASES.includes(from), 'ERR_MIGRATION_VERSION', `Unsupported source release: ${from}`);
   stableInvariant(to === '1.0.0', 'ERR_MIGRATION_VERSION', `Unsupported target release: ${to}`);
@@ -41,6 +46,10 @@ export function migrateArtifact(value, { kind } = {}) {
   return Object.freeze({ artifact: migrated, fromSchema: original, toSchema: target, changed: original !== target });
 }
 
+/**
+ * @param {*} options
+ * @returns {*}
+ */
 export function migrationReceipt({ fromRelease, toRelease = '1.0.0', sourceState, targetState, artifacts }) {
   assertSupportedUpgrade(fromRelease, toRelease);
   stableInvariant(Array.isArray(artifacts) && artifacts.length > 0 && artifacts.length <= 256, 'ERR_MIGRATION_RECEIPT', 'Migration artifacts are required and bounded');
@@ -58,6 +67,10 @@ export function migrationReceipt({ fromRelease, toRelease = '1.0.0', sourceState
   });
 }
 
+/**
+ * @param {*} schema
+ * @returns {*}
+ */
 export function deprecationNotice(schema) {
   if (LEGACY_SCHEMA_MAP[schema]) return Object.freeze({ deprecated: true, replacement: LEGACY_SCHEMA_MAP[schema], removal: '2.0.0' });
   return Object.freeze({ deprecated: false, replacement: null, removal: null });

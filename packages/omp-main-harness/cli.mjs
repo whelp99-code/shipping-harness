@@ -59,6 +59,9 @@ function render(command, result) {
   ].join('\n') + '\n';
 }
 
+/**
+ * @returns {Promise<*>}
+ */
 export async function main() {
   const command = process.argv[2] ?? 'help';
   if (['help', '--help', '-h'].includes(command)) {

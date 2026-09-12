@@ -30,10 +30,18 @@ export function invariant(condition, code, message, details = undefined) {
   throw error;
 }
 
+/**
+ * @param {*} value
+ * @returns {*}
+ */
 export function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+/**
+ * @param {*} target
+ * @returns {Promise<*>}
+ */
 export async function exists(target) {
   try {
     await access(target, fsConstants.F_OK);
@@ -44,6 +52,11 @@ export async function exists(target) {
   }
 }
 
+/**
+ * @param {*} value
+ * @param {*} label
+ * @returns {*}
+ */
 export function validateAbsoluteRoot(value, label) {
   invariant(typeof value === 'string' && value.trim(), 'ERR_OMP_PATH', `${label} is required`);
   invariant(!value.includes('\0'), 'ERR_OMP_PATH', `${label} contains a null byte`);
@@ -52,6 +65,12 @@ export function validateAbsoluteRoot(value, label) {
   return resolved;
 }
 
+/**
+ * @param {*} root
+ * @param {*} target
+ * @param {*} label
+ * @returns {*}
+ */
 export function assertInside(root, target, label = 'path') {
   const resolvedRoot = path.resolve(root);
   const resolved = path.resolve(target);
@@ -59,6 +78,11 @@ export function assertInside(root, target, label = 'path') {
   return resolved;
 }
 
+/**
+ * @param {*} target
+ * @param {*} label
+ * @returns {Promise<*>}
+ */
 export async function assertRegularFile(target, label) {
   const info = await lstat(target).catch(() => null);
   invariant(info, 'ERR_OMP_FILE', `${label} must be a regular file: ${target}`);
@@ -66,6 +90,11 @@ export async function assertRegularFile(target, label) {
   return info;
 }
 
+/**
+ * @param {*} target
+ * @param {*} label
+ * @returns {Promise<*>}
+ */
 export async function assertExecutable(target, label) {
   await assertRegularFile(target, label);
   try {
@@ -77,6 +106,12 @@ export async function assertExecutable(target, label) {
   return target;
 }
 
+/**
+ * @param {*} target
+ * @param {*} text
+ * @param {*} mode
+ * @returns {Promise<*>}
+ */
 export async function writeTextAtomic(target, text, mode = 0o600) {
   await mkdir(path.dirname(target), { recursive: true, mode: 0o700 });
   const temporary = `${target}.tmp-${process.pid}-${randomUUID()}`;
@@ -85,6 +120,12 @@ export async function writeTextAtomic(target, text, mode = 0o600) {
   await chmod(target, mode);
 }
 
+/**
+ * @param {*} target
+ * @param {*} value
+ * @param {*} mode
+ * @returns {Promise<*>}
+ */
 export async function writeJsonAtomic(target, value, mode = 0o600) {
   await writeTextAtomic(target, `${JSON.stringify(value, null, 2)}\n`, mode);
 }
@@ -99,6 +140,12 @@ export async function readJson(target, fallback = undefined) {
   }
 }
 
+/**
+ * @param {*} command
+ * @param {*} args
+ * @param {*} options
+ * @returns {*}
+ */
 export function runCommand(command, args = [], options = {}) {
   invariant(typeof command === 'string' && command.trim(), 'ERR_OMP_COMMAND', 'Command is required');
   invariant(Array.isArray(args) && args.every((entry) => typeof entry === 'string'), 'ERR_OMP_COMMAND', 'Command arguments must be strings');
@@ -123,6 +170,11 @@ export function runCommand(command, args = [], options = {}) {
   };
 }
 
+/**
+ * @param {*} output
+ * @param {*} label
+ * @returns {*}
+ */
 export function parseJsonOutput(output, label) {
   try {
     return JSON.parse(output);
@@ -131,12 +183,21 @@ export function parseJsonOutput(output, label) {
   }
 }
 
+/**
+ * @param {*} output
+ * @returns {*}
+ */
 export function parseOmpVersion(output) {
   const match = /(?:^|\s)(?:omp\/)?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)(?:\s|$)/u.exec(String(output).trim());
   invariant(match, 'ERR_OMP_VERSION', `Could not parse OMP version from: ${String(output).trim()}`);
   return match[1];
 }
 
+/**
+ * @param {*} command
+ * @param {*} env
+ * @returns {*}
+ */
 export function resolveOnPath(command, env = process.env) {
   if (path.isAbsolute(command) || command.includes(path.sep)) return path.resolve(command);
   const pathValue = env.PATH ?? '';
@@ -152,6 +213,10 @@ export function resolveOnPath(command, env = process.env) {
   return command;
 }
 
+/**
+ * @param {*} target
+ * @returns {Promise<*>}
+ */
 export async function fileReceipt(target) {
   if (!(await exists(target))) return { existed: false, sha256: null, mode: null, bytes: 0 };
   const info = await assertRegularFile(target, 'managed OMP file');
@@ -175,6 +240,10 @@ export async function copyFileAtomic(source, target, mode = undefined) {
   await rename(temporary, target);
 }
 
+/**
+ * @param {*} target
+ * @returns {Promise<*>}
+ */
 export async function removeKnownFile(target) {
   const info = await lstat(target).catch(() => null);
   if (!info) return;

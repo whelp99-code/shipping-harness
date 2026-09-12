@@ -40,6 +40,9 @@ function input() {
   };
 }
 
+/**
+ * @returns {Promise<*>}
+ */
 export async function main() {
   const command = process.argv[2] ?? 'help';
   if (command === 'help' || command === '--help' || command === '-h') {

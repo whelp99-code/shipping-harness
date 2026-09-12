@@ -58,6 +58,10 @@ function major(version) {
   return Number.isFinite(value) ? value : null;
 }
 
+/**
+ * @param {*} input
+ * @returns {*}
+ */
 export function compatibilityReport(input = {}) {
   const nodeVersion = input.nodeVersion ?? process.versions.node;
   const platform = input.platform ?? process.platform;

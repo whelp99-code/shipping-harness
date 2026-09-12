@@ -35,6 +35,9 @@ export function redactSecrets(value) {
   return redacted;
 }
 
+/**
+ * @returns {*}
+ */
 export function redactionRuleNames() {
   return REDACTION_RULES.map((rule) => rule.name);
 }

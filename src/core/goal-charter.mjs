@@ -122,6 +122,10 @@ function charterBodyFromProposal(proposal) {
   };
 }
 
+/**
+ * @param {*} input
+ * @returns {*}
+ */
 export function validateGoalCharter(input) {
   invariant(input && typeof input === 'object' && !Array.isArray(input), 'ERR_GOAL_CHARTER', 'Goal Charter must be an object');
   invariant(input.schema === CHARTER_SCHEMA, 'ERR_GOAL_CHARTER_SCHEMA', 'Unsupported Goal Charter schema');
@@ -171,11 +175,20 @@ export function validateGoalCharter(input) {
   return input;
 }
 
+/**
+ * @param {*} proposal
+ * @returns {*}
+ */
 export function compileGoalCharterPreview(proposal) {
   const body = charterBodyFromProposal(proposal);
   return validateGoalCharter({ ...body, hash: hashObject(body) });
 }
 
+/**
+ * @param {*} preview
+ * @param {*} binding
+ * @returns {*}
+ */
 export function acceptGoalCharter(preview, binding) {
   validateGoalCharter(preview);
   invariant(preview.status === 'PROPOSED', 'ERR_GOAL_CHARTER_STATUS', 'Only a proposed Goal Charter can be accepted');
@@ -231,6 +244,11 @@ async function archiveClosedGoalCharter(root, charter) {
   return archivePath;
 }
 
+/**
+ * @param {*} root
+ * @param {*} charter
+ * @returns {Promise<*>}
+ */
 export async function persistAcceptedGoalCharter(root, charter) {
   validateGoalCharter(charter);
   invariant(charter.status === 'ACCEPTED', 'ERR_GOAL_CHARTER_STATUS', 'Only an accepted Goal Charter may be persisted');
@@ -251,6 +269,11 @@ export async function persistAcceptedGoalCharter(root, charter) {
   return { path: target, charter, duplicate: false, archivedPath };
 }
 
+/**
+ * @param {*} root
+ * @param {*} release
+ * @returns {Promise<*>}
+ */
 export async function loadArchivedGoalCharter(root, release) {
   const target = archivedGoalCharterPath(root, release);
   if (!(await exists(target))) return null;
@@ -260,6 +283,10 @@ export async function loadArchivedGoalCharter(root, release) {
   return charter;
 }
 
+/**
+ * @param {*} root
+ * @returns {Promise<*>}
+ */
 export async function auditGoalCharterHistory(root) {
   const paths = runtimePaths(root);
   if (!(await exists(paths.releases))) {
@@ -292,6 +319,10 @@ export async function auditGoalCharterHistory(root) {
   return { ...body, hash: hashObject(body) };
 }
 
+/**
+ * @param {*} root
+ * @returns {Promise<*>}
+ */
 export async function loadGoalCharter(root) {
   const target = runtimePaths(root).goalCharter;
   if (!(await exists(target))) return null;
@@ -299,6 +330,11 @@ export async function loadGoalCharter(root) {
   return validateGoalCharter(await readJson(target));
 }
 
+/**
+ * @param {*} charter
+ * @param {*} expected
+ * @returns {*}
+ */
 export function assertGoalCharterBinding(charter, expected) {
   validateGoalCharter(charter);
   invariant(charter.status === 'ACCEPTED', 'ERR_GOAL_CHARTER_STATUS', 'Accepted Goal Charter is required');
@@ -312,6 +348,10 @@ export function assertGoalCharterBinding(charter, expected) {
   return charter;
 }
 
+/**
+ * @param {*} charter
+ * @returns {*}
+ */
 export function goalCharterSummary(charter) {
   if (!charter) return null;
   validateGoalCharter(charter);

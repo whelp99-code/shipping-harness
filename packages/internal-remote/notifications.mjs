@@ -42,6 +42,9 @@ function normalizeEvent(event) {
   return { ...body, dedupeKey: dedupeKey({ ...event, ...body }) };
 }
 
+/**
+ * NotificationStore.
+ */
 export class NotificationStore {
   constructor(file, { maxEntries = 1000, dedupeWindowMs = 24 * 60 * 60 * 1000 } = {}) {
     this.file = path.resolve(file);

@@ -107,6 +107,10 @@ async function snapshot(root) {
   return { events, bytes };
 }
 
+/**
+ * @param {*} root
+ * @returns {Promise<*>}
+ */
 export async function readDecisionLedger(root) {
   return (await snapshot(root)).events;
 }
@@ -135,6 +139,11 @@ async function withLedgerLock(root, operation) {
   }
 }
 
+/**
+ * @param {*} root
+ * @param {*} input
+ * @returns {Promise<*>}
+ */
 export async function appendDecisionLedgerEvent(root, input) {
   return withLedgerLock(root, async () => {
     invariant(EVENT_TYPES.has(input.type), 'ERR_DECISION_LEDGER_TYPE', `Unsupported decision-ledger event type: ${String(input.type)}`);
@@ -176,6 +185,11 @@ export async function appendDecisionLedgerEvent(root, input) {
   });
 }
 
+/**
+ * @param {*} root
+ * @param {*} proposalId
+ * @returns {Promise<*>}
+ */
 export async function decisionLedgerSummary(root, proposalId = null) {
   const events = await readDecisionLedger(root);
   const filtered = proposalId ? events.filter((entry) => entry.proposalId === proposalId) : events;

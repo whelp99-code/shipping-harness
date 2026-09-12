@@ -20,10 +20,21 @@ const REQUEST_FIELDS = new Set([
   'signature',
 ]);
 
+/**
+ * @param {*} unsigned
+ * @param {*} credential
+ * @returns {*}
+ */
 export function signRemoteRequest(unsigned, credential) {
   return { ...unsigned, signature: hmac(unsigned, credential) };
 }
 
+/**
+ * @param {*} request
+ * @param {*} config
+ * @param {*} options
+ * @returns {*}
+ */
 export function validateRemoteRequest(request, config, { now = Date.now() } = {}) {
   invariant(request && typeof request === 'object' && !Array.isArray(request), 'ERR_REMOTE_REQUEST', 'Request must be an object');
   for (const key of Object.keys(request)) {

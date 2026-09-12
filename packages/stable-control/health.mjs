@@ -4,6 +4,10 @@ const SHIPPING_HEALTHY = new Set(['DRAFT', 'LOCKED', 'RUNNING', 'VERIFYING', 'TR
 const OMO_HEALTHY = new Set(['live', 'UNAVAILABLE', 'DISABLED']);
 const REMOTE_HEALTHY = new Set(['healthy', 'DISABLED']);
 
+/**
+ * @param {*} options
+ * @returns {*}
+ */
 export function stableHealth({ shippingStatus, pluginDoctor, omoProbe, remoteHealth }) {
   const checks = {
     shipping: shippingStatus?.state?.state ?? shippingStatus?.state ?? 'UNKNOWN',

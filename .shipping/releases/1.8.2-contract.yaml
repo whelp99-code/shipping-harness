@@ -1,40 +1,40 @@
 {
   "acceptance": [
     {
+      "id": "AC-18201",
+      "description": "Plain Brief unit, adversarial, and Orca-JARVIS-shaped budget regression tests pass.",
+      "type": "command",
       "command": "node --test --test-reporter=spec test/mcp/plain-brief.test.mjs test/integration/plain-brief-budget.test.mjs test/adversarial/plain-brief-attacks.test.mjs",
       "cwd": ".",
-      "description": "Plain Brief unit, adversarial, and Orca-JARVIS-shaped budget regression tests pass.",
-      "id": "AC-18201",
       "required": true,
-      "timeoutSeconds": 300,
-      "type": "command"
+      "timeoutSeconds": 300
     },
     {
+      "id": "AC-18202",
+      "description": "Dirty nested field pilot keeps a healthy bounded beginner report and does not mutate the target project.",
+      "type": "command",
       "command": "npm run smoke:autopilot:field",
       "cwd": ".",
-      "description": "Dirty nested field pilot keeps a healthy bounded beginner report and does not mutate the target project.",
-      "id": "AC-18202",
       "required": true,
-      "timeoutSeconds": 600,
-      "type": "command"
+      "timeoutSeconds": 600
     },
     {
+      "id": "AC-18203",
+      "description": "Full regression, security, license, documentation, train, autopilot, discovery, charter, and field gates pass.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full regression, security, license, documentation, train, autopilot, discovery, charter, and field gates pass.",
-      "id": "AC-18203",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
+      "id": "AC-18204",
+      "description": "No whitespace or conflict-marker errors remain.",
+      "type": "command",
       "command": "git diff --check",
       "cwd": ".",
-      "description": "No whitespace or conflict-marker errors remain.",
-      "id": "AC-18204",
       "required": true,
-      "timeoutSeconds": 60,
-      "type": "command"
+      "timeoutSeconds": 60
     }
   ],
   "adapters": {
@@ -171,9 +171,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Repeatable engineering infrastructure: CI, static analysis, coverage, documentation restructure, and maintainability refactors without changing Shipping authority, MCP surface, or schemas",
+  "goal": "Keep deterministic beginner reports below the fixed 8 KiB limit for legacy and goal-discovery dirty proposals by removing redundant plain-brief projections without weakening Shipping authority, evidence, or action policy.",
   "project": "shipping-harness",
-  "release": "1.9.0",
+  "release": "1.8.2",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -190,13 +190,6 @@
   ],
   "schema": "shipping-harness/v1",
   "scope": {
-    "exclude": [
-      "Increasing the 8192-byte product limit or weakening the quality gate.",
-      "Removing the Action Envelope, forbidden action set, evidence references, or Shipping authority checks.",
-      "Changing Goal Discovery, Goal Charter, Release Train, Autopilot, OMO runtime, model routing, or approval behavior.",
-      "Publishing, deployment, customer contact, purchase, credential changes, or external writes.",
-      "Mutating Orca-JARVIS product files or accepting its current baseline."
-    ],
     "include": [
       "Remove only plain-brief fact projections that are zero-valued or mechanically derivable from canonical state, action envelope, or the separate Release Train summary.",
       "Preserve the full Action Envelope, exact next action, forbidden actions, mechanical evidence binding, fixed Korean sections, and modelAuthority=false.",
@@ -204,7 +197,21 @@
       "Require the real-world-shaped beginner report to remain healthy at no more than 7680 structured bytes while the hard product limit remains 8192 bytes.",
       "Keep the existing nine-tool MCP surface, OMP 18.0.10 compatibility, CLOSED != RELEASED, and all external-consequence boundaries."
     ],
+    "exclude": [
+      "Increasing the 8192-byte product limit or weakening the quality gate.",
+      "Removing the Action Envelope, forbidden action set, evidence references, or Shipping authority checks.",
+      "Changing Goal Discovery, Goal Charter, Release Train, Autopilot, OMO runtime, model routing, or approval behavior.",
+      "Publishing, deployment, customer contact, purchase, credential changes, or external writes.",
+      "Mutating Orca-JARVIS product files or accepting its current baseline."
+    ],
     "paths": {
+      "include": [
+        "package.json",
+        "src/core/plain-brief.mjs",
+        "test/mcp/plain-brief.test.mjs",
+        "test/integration/plain-brief-budget.test.mjs",
+        "docs/planning/32-V1.8.2-PLAIN-BRIEF-BUDGET-HOTFIX.md"
+      ],
       "exclude": [
         ".shipping/contract.yaml",
         ".shipping/contract.lock",
@@ -212,20 +219,13 @@
         "node_modules/**",
         "dist/**",
         "coverage/**"
-      ],
-      "include": [
-        "package.json",
-        "src/core/plain-brief.mjs",
-        "test/mcp/plain-brief.test.mjs",
-        "test/integration/plain-brief-budget.test.mjs",
-        "docs/planning/32-V1.8.2-PLAIN-BRIEF-BUDGET-HOTFIX.md"
       ]
     }
   },
   "stopPolicy": {
+    "humanInterruptWins": true,
     "autoContinueAfterInterrupt": false,
-    "closeWhenRequiredGatesPass": true,
-    "humanInterruptWins": true
+    "closeWhenRequiredGatesPass": true
   },
   "worker": "shipping-harness"
 }

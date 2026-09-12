@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shipping-harness.local/schemas/v1/intent-gate.schema.json",
+  "x-shipping-version": "1.0.0",
+  "title": "Shipping Harness workflow intent gate",
+  "description": "A deterministic workflow-boundary classifier that completes read-only analysis first and cannot grant command, approval, closure, deployment, or model authority.",
+  "type": "object",
+  "required": [
+    "schema",
+    "requestText",
+    "status",
+    "defaultMode",
+    "inferredMode",
+    "selectedMode",
+    "effectiveMode",
+    "inferenceReason",
+    "confirmationSource",
+    "question",
+    "analysisComplete",
+    "planningAllowed",
+    "implementationAllowed",
+    "autopilotAllowed",
+    "modelAuthority",
+    "commandAuthority",
+    "approvalAuthority",
+    "closureAuthority",
+    "hash"
+  ],
+  "properties": {
+    "schema": { "const": "https://shipping-harness.local/schemas/v1/intent-gate.schema.json" },
+    "requestText": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "status": { "enum": ["CONFIRMATION_REQUIRED", "CONFIRMED"] },
+    "defaultMode": { "const": "ANALYZE_ONLY" },
+    "inferredMode": { "$ref": "#/$defs/mode" },
+    "selectedMode": {
+      "type": ["string", "null"],
+      "enum": ["ANALYZE_ONLY", "PLAN_ONLY", "IMPLEMENT", "AUTOPILOT", null]
+    },
+    "effectiveMode": { "$ref": "#/$defs/mode" },
+    "inferenceReason": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "confirmationSource": {
+      "type": ["string", "null"],
+      "maxLength": 160
+    },
+    "question": {
+      "oneOf": [
+        { "$ref": "#/$defs/question" },
+        { "type": "null" }
+      ]
+    },
+    "analysisComplete": { "const": true },
+    "planningAllowed": { "type": "boolean" },
+    "implementationAllowed": { "type": "boolean" },
+    "autopilotAllowed": { "type": "boolean" },
+    "modelAuthority": { "const": false },
+    "commandAuthority": { "const": false },
+    "approvalAuthority": { "const": false },
+    "closureAuthority": { "const": false },
+    "hash": { "$ref": "#/$defs/hash" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "mode": {
+      "enum": ["ANALYZE_ONLY", "PLAN_ONLY", "IMPLEMENT", "AUTOPILOT"]
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "question": {
+      "type": "object",
+      "required": ["id", "category", "prompt", "recommendedChoice", "choices", "riskIds", "evidenceRefs", "authority"],
+      "properties": {
+        "id": { "const": "Q-INTENT-001" },
+        "category": { "const": "workflow-boundary" },
+        "prompt": { "type": "string", "minLength": 1, "maxLength": 1500 },
+        "recommendedChoice": { "const": "ANALYZE_ONLY" },
+        "choices": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": ["mode", "label"],
+            "properties": {
+              "mode": { "$ref": "#/$defs/mode" },
+              "label": { "type": "string", "minLength": 1, "maxLength": 500 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "riskIds": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+        },
+        "authority": { "const": "mechanical-question" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

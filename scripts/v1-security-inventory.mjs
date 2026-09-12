@@ -101,6 +101,8 @@ export function inventory() {
       decisionLedger: digest('src/core/decision-ledger.mjs'),
       goalCharter: digest('src/core/goal-charter.mjs'),
       goalDirectionField: digest('scripts/goal-charter-field-pilot.mjs'),
+      intentGate: digest('src/core/intent-gate.mjs'),
+      intentGateField: digest('scripts/intent-gate-pilot.mjs'),
     },
     requiredRecords: [
       'THIRD_PARTY.md',
@@ -127,6 +129,8 @@ export function inventory() {
       'npm run test:goal-charter',
       'npm run test:goal-charter:field',
       'npm run smoke:goal-charter:field',
+      'npm run test:intent-gate',
+      'npm run smoke:intent-gate',
     ],
   };
 }

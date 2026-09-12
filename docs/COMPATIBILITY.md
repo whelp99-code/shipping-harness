@@ -80,6 +80,8 @@ This matrix does not authorize public package publication, public SaaS, customer
 
 v1.7.0 extends the structured output of `shipping_start`, `shipping_refine`, and `shipping_status` with bounded `goalDiscovery`, accepted-direction, and Decision Ledger projections. It reuses the existing refinement tool and preserves the exact nine-tool protocol inventory, MCP protocol `2025-03-26`, OMP 18.0.10 primary lane, OMP 15.10.12 compatibility lane, approval map, plain brief, Release Train, Autopilot, pause/abort, and `CLOSED != RELEASED` semantics. Older stored proposals are projected without gaining discovery authority. No model, Paperthin runtime, Team/DAG mode, raw command, public listener, background worker, or automatic deployment is introduced.
 
+v1.8.3 adds the structured `intentGate` projection and proposal states `INTENT_CONFIRMATION_REQUIRED`, `ANALYSIS_COMPLETE`, and `PLAN_COMPLETE`. It does not change the MCP protocol or nine-tool inventory. Existing explicit delivery prompts using verbs such as ship, deliver, finish, complete, make, package, verify, deploy, or their established Korean equivalents continue into the prior approval-gated implementation flow. Only terse or materially ambiguous analysis requests receive the new single workflow-boundary question. Historical proposals are projected with the same deterministic classifier and cannot acquire new approval or execution authority.
+
 ## v1.8.1 compatibility
 
 v1.8.1 preserves MCP protocol 2025-03-26, exactly nine tools, OMP 18.0.10 primary support, the OMP 15.10.12 compatibility lane, stored v1 proposals, and CLOSED != RELEASED. Goal Direction field artifacts add no command surface and older projects can be analyzed without mutation.

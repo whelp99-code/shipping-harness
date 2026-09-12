@@ -54,7 +54,7 @@
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",
     "license:check": "node scripts/license-check.mjs",
-    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs && npm run smoke:release-train && npm run smoke:autopilot && npm run smoke:autopilot:field && npm run smoke:goal-discovery && npm run smoke:goal-charter && npm run test:goal-charter:field && npm run smoke:goal-charter:field",
+    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs && npm run smoke:release-train && npm run smoke:autopilot && npm run smoke:autopilot:field && npm run smoke:goal-discovery && npm run smoke:goal-charter && npm run test:goal-charter:field && npm run smoke:goal-charter:field && npm run test:intent-gate && npm run smoke:intent-gate",
     "test:omo-bridge": "node --test --test-reporter=spec test/omo/*.test.mjs",
     "test:remote": "node --test --test-reporter=spec test/remote/*.test.mjs test/adversarial/remote-attacks.test.mjs",
     "smoke:remote": "node scripts/remote-gateway-smoke.mjs --check",
@@ -78,7 +78,9 @@
     "test:goal-charter:field": "node --test --test-reporter=spec test/integration/goal-direction-field.test.mjs test/adversarial/goal-direction-field-attacks.test.mjs test/integration/goal-direction-field-performance.test.mjs test/integration/goal-charter-field.test.mjs test/adversarial/goal-charter-field-attacks.test.mjs test/integration/goal-charter-field-performance.test.mjs",
     "smoke:goal-charter:field": "node scripts/goal-charter-field-pilot.mjs --check",
     "test:goal-direction:field": "npm run test:goal-charter:field",
-    "smoke:goal-direction:field": "npm run smoke:goal-charter:field"
+    "smoke:goal-direction:field": "npm run smoke:goal-charter:field",
+    "test:intent-gate": "node --test --test-reporter=spec test/unit/intent-gate.test.mjs test/mcp/intent-gate.test.mjs test/adversarial/intent-gate-attacks.test.mjs",
+    "smoke:intent-gate": "node scripts/intent-gate-pilot.mjs --check"
   },
   "license": "MIT"
 }

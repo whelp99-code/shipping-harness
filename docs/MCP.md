@@ -239,3 +239,11 @@ The Decision Ledger is append-only JSONL under `.shipping/decision-ledger.jsonl`
 ## v1.8.1 Goal Direction field boundary
 
 The existing nine tools project bounded Goal Discovery, Direction Critic, Decision Ledger, immutable Goal Charter, Release Train, and Autopilot as one authority chain. Host-model prose cannot change canonical state, hashes, next action, approval readiness, acceptance, close, deployment, or RELEASED. The field report must retain nine tools and zero false authority or target mutation counters.
+
+## v1.8.3 Intent Gate and Analysis Mode
+
+`shipping_start` always completes bounded read-only analysis before deciding what workflow is allowed. A terse or ambiguous analysis request returns `intentGate.status=CONFIRMATION_REQUIRED`, exactly one `Q-INTENT-001` question, and the default `ANALYZE_ONLY`. The four stable choices are `ANALYZE_ONLY`, `PLAN_ONLY`, `IMPLEMENT`, and `AUTOPILOT`; the answer is recorded through the existing `shipping_refine` tool.
+
+Before intent confirmation, `goalDiscovery`, `goalCharter`, and `releaseTrain` are null, `readyForApproval=false`, and approval, execution, verification commands, baseline mutation, and close remain forbidden. `ANALYSIS_COMPLETE` is a read-only terminal proposal state. `PLAN_COMPLETE` may expose a proposed Goal Charter and bounded Release Train but cannot be passed to `shipping_approve_scope`. Only confirmed `IMPLEMENT` or `AUTOPILOT` intent can reach the existing `READY_FOR_APPROVAL` state.
+
+Intent confirmation precedes `DIRTY_BASELINE` in the proposal projection so a dirty repository cannot hide the user's workflow choice. The dirty baseline remains visible evidence and still blocks implementation after intent and product direction are resolved. The classifier is deterministic local code with no model or network call, no raw command field, and no additional MCP tool.

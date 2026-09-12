@@ -36,8 +36,8 @@ const emptyObjectSchema = Object.freeze({ type: 'object', properties: {}, additi
 export const SHIPPING_TOOLS = Object.freeze([
   {
     name: 'shipping_start',
-    title: 'Start a small shippable release',
-    description: 'Analyze the current Git repository without executing project code, then propose the smallest release scope, acceptance checks, and short plan. This does not approve or lock the release.',
+    title: 'Analyze a project and start a bounded workflow',
+    description: 'Analyze the current Git repository without executing project code. Terse or ambiguous requests default to read-only analysis and ask one workflow-boundary question before planning, implementation, or Autopilot. This never approves or locks a release.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -364,6 +364,7 @@ export async function callShippingTool(root, name, rawArguments) {
       versionEvidence: proposal.versionEvidence,
       baseline: proposal.baseline,
       intelligence: proposal.intelligence,
+      intentGate: proposal.intentGate,
       oneScreenApproval: proposal.oneScreenApproval,
       briefFactGraph: proposal.briefFactGraph,
       actionEnvelope: proposal.actionEnvelope,
@@ -383,7 +384,7 @@ export async function callShippingTool(root, name, rawArguments) {
       detected: proposal.analysis,
       diagnostics: proposal.diagnostics,
       proposalPath,
-      approvalRequired: true,
+      approvalRequired: proposal.intentGate?.implementationAllowed === true,
       userView: {
         schema: 'shipping-harness/approval-user-view-v1',
         userState: proposal.readyForApproval ? 'AWAITING_APPROVAL' : proposal.canonicalState,
@@ -395,9 +396,16 @@ export async function callShippingTool(root, name, rawArguments) {
         risks: proposal.approvalBrief.risks,
         questions: proposal.approvalBrief.questions,
         limits: proposal.approvalBrief.limits,
+        intentGate: proposal.intentGate,
         releaseTrain: proposal.releaseTrainSummary,
         actions: proposal.readyForApproval
           ? ['approve', 'edit-scope', 'stop']
+          : proposal.canonicalState === 'INTENT_CONFIRMATION_REQUIRED'
+            ? ['confirm-intent', 'review-analysis', 'stop']
+            : proposal.canonicalState === 'ANALYSIS_COMPLETE'
+              ? ['review-analysis', 'confirm-intent', 'stop']
+              : proposal.canonicalState === 'PLAN_COMPLETE'
+                ? ['review-plan', 'confirm-intent', 'stop']
           : proposal.canonicalState === 'DIRTY_BASELINE'
             ? ['preserve-baseline', 'inspect-changes', 'stop']
             : proposal.canonicalState === 'NEEDS_ACCEPTANCE'
@@ -407,6 +415,12 @@ export async function callShippingTool(root, name, rawArguments) {
     };
     const next = proposal.readyForApproval
       ? 'Review the one-screen approval brief, then call shipping_approve_scope with the exact proposal ID and hash.'
+      : proposal.canonicalState === 'INTENT_CONFIRMATION_REQUIRED'
+        ? 'Read-only analysis is complete. Confirm ANALYZE_ONLY, PLAN_ONLY, IMPLEMENT, or AUTOPILOT before continuing.'
+        : proposal.canonicalState === 'ANALYSIS_COMPLETE'
+          ? 'Read-only analysis is complete; no planning, mutation, verification execution, or closure was requested.'
+          : proposal.canonicalState === 'PLAN_COMPLETE'
+            ? 'The version plan is complete; implementation requires a separately confirmed IMPLEMENT or AUTOPILOT intent.'
       : proposal.canonicalState === 'DIRTY_BASELINE'
         ? 'Review the exact baseline preservation plan before approval.'
         : proposal.canonicalState === 'NEEDS_ACCEPTANCE'
@@ -470,6 +484,7 @@ export async function callShippingTool(root, name, rawArguments) {
       versionEvidence: proposal.versionEvidence,
       baseline: proposal.baseline,
       intelligence: proposal.intelligence,
+      intentGate: proposal.intentGate,
       oneScreenApproval: proposal.oneScreenApproval,
       briefFactGraph: proposal.briefFactGraph,
       actionEnvelope: proposal.actionEnvelope,
@@ -498,6 +513,7 @@ export async function callShippingTool(root, name, rawArguments) {
         versionEvidence: proposal.versionEvidence,
         baseline: proposal.baseline,
         intelligence: proposal.intelligence,
+        intentGate: proposal.intentGate,
         oneScreenApproval: proposal.oneScreenApproval,
         briefFactGraph: proposal.briefFactGraph,
         actionEnvelope: proposal.actionEnvelope,

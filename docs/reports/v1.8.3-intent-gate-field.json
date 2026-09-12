@@ -1,0 +1,142 @@
+{
+  "schema": "shipping-harness/intent-gate-field-v1",
+  "release": "1.8.3",
+  "sourceVersion": "1.8.2",
+  "status": "PASS",
+  "durationMs": 75.465,
+  "modelCalls": 0,
+  "networkCalls": 0,
+  "mcp": {
+    "protocol": "2025-03-26",
+    "tools": 9,
+    "toolNames": [
+      "shipping_start",
+      "shipping_refine",
+      "shipping_approve_scope",
+      "shipping_execute",
+      "shipping_status",
+      "shipping_verify",
+      "shipping_fix_blockers",
+      "shipping_pause",
+      "shipping_close"
+    ]
+  },
+  "cases": {
+    "terseAnalysis": {
+      "requestHash": "4e22c0befefd0532e7d6a891af41be12daceb5944b8c556b770d63ea30da445c",
+      "status": "CONFIRMATION_REQUIRED",
+      "defaultMode": "ANALYZE_ONLY",
+      "effectiveMode": "ANALYZE_ONLY",
+      "questionCount": 1,
+      "analysisComplete": true,
+      "planningAllowed": false,
+      "implementationAllowed": false,
+      "autopilotAllowed": false,
+      "modelAuthority": false,
+      "hash": "a55a0d148a87e379bed70de3aa67a5af68ea5daffe7e0ea208d9861049b83573"
+    },
+    "analysisOnly": {
+      "requestHash": "541f33e9d827496a694d3061b7b933776cab3eeb39bd556c601c2a81ebb91903",
+      "status": "CONFIRMED",
+      "defaultMode": "ANALYZE_ONLY",
+      "effectiveMode": "ANALYZE_ONLY",
+      "questionCount": 0,
+      "analysisComplete": true,
+      "planningAllowed": false,
+      "implementationAllowed": false,
+      "autopilotAllowed": false,
+      "modelAuthority": false,
+      "hash": "f5ec8d6fe792fab8181e2fbe795b46d895fdfc298f2c353c98aac96825ea49d6"
+    },
+    "planOnly": {
+      "requestHash": "7c7d72b4bdf7715c248f560bc970a6421a01277a5a9067ed08980e2b125e04f7",
+      "status": "CONFIRMED",
+      "defaultMode": "ANALYZE_ONLY",
+      "effectiveMode": "PLAN_ONLY",
+      "questionCount": 0,
+      "analysisComplete": true,
+      "planningAllowed": true,
+      "implementationAllowed": false,
+      "autopilotAllowed": false,
+      "modelAuthority": false,
+      "hash": "8d182feee047d1d413b8e9f4fed6a24387bedddccc8f89544020dcd984b17cb3"
+    },
+    "implement": {
+      "requestHash": "145034d83484e6b69e82a53677d2d1a81a3a6146e6aab02676e8441f548a507d",
+      "status": "CONFIRMED",
+      "defaultMode": "ANALYZE_ONLY",
+      "effectiveMode": "IMPLEMENT",
+      "questionCount": 0,
+      "analysisComplete": true,
+      "planningAllowed": true,
+      "implementationAllowed": true,
+      "autopilotAllowed": false,
+      "modelAuthority": false,
+      "hash": "0e3002da3451b5b1eff76159a7075a9c67557fac8be2dd193c1c7f72b8a22cdd"
+    },
+    "autopilot": {
+      "requestHash": "3c5ac0d5661bc897cdc7ae7a73976ed250b5d2f679cef0a1e737ab2ea7306214",
+      "status": "CONFIRMED",
+      "defaultMode": "ANALYZE_ONLY",
+      "effectiveMode": "AUTOPILOT",
+      "questionCount": 0,
+      "analysisComplete": true,
+      "planningAllowed": true,
+      "implementationAllowed": true,
+      "autopilotAllowed": true,
+      "modelAuthority": false,
+      "hash": "2426a74b0686156a524da89e3e60be34b0c64e42530e1243de7eee6894e92adc"
+    },
+    "selectedPlan": {
+      "requestHash": "4e22c0befefd0532e7d6a891af41be12daceb5944b8c556b770d63ea30da445c",
+      "status": "CONFIRMED",
+      "defaultMode": "ANALYZE_ONLY",
+      "effectiveMode": "PLAN_ONLY",
+      "questionCount": 0,
+      "analysisComplete": true,
+      "planningAllowed": true,
+      "implementationAllowed": false,
+      "autopilotAllowed": false,
+      "modelAuthority": false,
+      "hash": "98d039d95ef5550be92c8713c66103bd422e8bc1501850e911b9fc90e84a6202"
+    }
+  },
+  "realProject": {
+    "available": true,
+    "path": "/home/jm/orca/projects/Orca-JARVIS",
+    "unchanged": true,
+    "head": "57dec90f40f9f280eff88700106aed433518e265",
+    "dirtyEntries": 6,
+    "trackedFiles": 287,
+    "projectName": "orca-jarvis-shadow",
+    "workspace": ".",
+    "recommendedVersion": "0.1.1",
+    "intentStatus": "CONFIRMATION_REQUIRED",
+    "intentDefault": "ANALYZE_ONLY",
+    "questionCount": 1,
+    "planningAllowed": false,
+    "implementationAllowed": false,
+    "targetMutation": 0
+  },
+  "safety": {
+    "falsePlanningBeforeIntent": 0,
+    "falseImplementationBeforeIntent": 0,
+    "falseAutopilotBeforeIntent": 0,
+    "wrongDefaultMode": 0,
+    "wrongIntentQuestionCount": 0,
+    "modelAuthorityLeak": 0,
+    "newMcpTools": 0,
+    "targetMutation": 0
+  },
+  "boundaries": {
+    "readOnlyAnalysisFirst": true,
+    "oneIntentQuestion": true,
+    "defaultAnalyzeOnly": true,
+    "goalDiscoveryAfterIntent": true,
+    "goalCharterAfterDirection": true,
+    "releaseTrainAfterDirection": true,
+    "implementationApprovalSeparate": true,
+    "automaticReleased": false,
+    "modelAuthority": false
+  }
+}

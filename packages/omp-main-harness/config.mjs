@@ -80,6 +80,8 @@ export function mergeMcpConfiguration(input, shippingMcp) {
 
 function managedAgentBlock() {
   const presentation = [
+    '13a. `intentGate`가 `CONFIRMATION_REQUIRED`이면 읽기 전용 분석 결과와 하나의 진행 범위 질문을 그대로 보여준다. 기본값은 `ANALYZE_ONLY`이며 답변 전에 Goal Charter, releaseTrain, 구현, 커밋, 검증 실행, 승인, CLOSED를 만들거나 암시하지 않는다.',
+    '13b. `ANALYSIS_COMPLETE`와 `PLAN_COMPLETE`는 승인 가능 상태가 아니다. 오직 확인된 `IMPLEMENT` 또는 `AUTOPILOT`만 기존 범위 승인 흐름으로 진행한다.',
     '14. Shipping 결과에 `plainBrief`가 있으면 `현재 상태 → 문제점 → 개선안 → 다음 진행 플랜 → 요약 → 지금 할 일` 순서의 `plainBriefText`를 기본 보고서로 그대로 표시한다.',
     '15. 모델은 Shipping이 만든 상태, 승인 가능 여부, 문제점, 다음 행동, 정확한 사용자 문장을 다시 해석하거나 바꾸지 않는다. 기술 근거는 기본 보고서 뒤의 상세 영역에 둔다.',
     '16. 추가 의견이 꼭 필요하면 `AI 참고 의견`으로 분리하고 비권위 정보임을 명시한다. 이 의견은 계약, 승인, 완료조건, BLOCKER, SHIPPABLE, CLOSED를 바꿀 수 없다.',

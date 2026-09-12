@@ -98,7 +98,9 @@ Use Shipping Harness to finish this project as version 0.1.0.
 Keep only the smallest useful scope and show me the scope before approving it.
 ```
 
-The agent calls `shipping_start`, presents detected project facts, scope, exclusions, acceptance checks, and a four-step plan. It may call `shipping_approve_scope` only after explicit user approval with the exact proposal hash. After approval, the host agent implements the locked goal and uses `shipping_verify`, `shipping_fix_blockers`, and `shipping_close`.
+The agent calls `shipping_start` once. Shipping always completes bounded read-only repository analysis first. A terse or ambiguous request such as `Analyze this project with Shipping Harness` produces exactly one workflow-boundary question and defaults to `ANALYZE_ONLY`; it does not create Goal Discovery, a Goal Charter, a Release Train, implementation authority, or closure authority before that intent is confirmed. Explicit planning requests may produce a non-executing plan, while only explicit `IMPLEMENT` or `AUTOPILOT` requests can enter the existing scope-approval flow. After approval, the host agent implements the locked goal and uses `shipping_verify`, `shipping_fix_blockers`, and `shipping_close`.
+
+The stable intent modes are `ANALYZE_ONLY`, `PLAN_ONLY`, `IMPLEMENT`, and `AUTOPILOT`. Intent confirmation reuses `shipping_refine`; the MCP surface remains exactly nine tools. A dirty baseline remains visible evidence but cannot hide the intent question or trigger a baseline commit before the requested workflow boundary is known.
 
 The local MCP server validates the explicit confirmation field and proposal hash, but the MCP client must be configured to ask the user before mutating tools are invoked. A dedicated approval-card plugin UI remains outside v0.3.0.
 

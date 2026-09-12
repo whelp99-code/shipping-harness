@@ -9,7 +9,7 @@ import {
   pathWithin,
 } from './policy.mjs';
 
-const PERMISSIONS = new Set(Object.values(ACTION_PERMISSION));
+const PERMISSIONS = /** @type {Set<string>} */ (new Set(Object.values(ACTION_PERMISSION)));
 
 function resolveCredential({ inline, envName, env, label, minimum, allowInlineCredentials }) {
   if (inline !== undefined) {
@@ -45,7 +45,23 @@ function optionalEvidencePath(value, roots, label) {
 }
 
 /**
- * @returns {*}
+ * Shapes of the raw (untrusted, pre-validation) remote config document.
+ * @typedef {{id?: unknown, credential?: string, credentialEnv?: string, permissions?: string[], projects?: string[], disabled?: unknown}} RawRemoteActor
+ * @typedef {{id?: unknown, root?: unknown, omoRuntimeManifest?: unknown, runtimePinFiles?: unknown[]}} RawRemoteProject
+ * @typedef {{schema?: string, allowedRoots?: unknown[], actors?: RawRemoteActor[], projects?: RawRemoteProject[], serverCredential?: string, serverCredentialEnv?: string, maxClockSkewMs?: unknown, maxBodyBytes?: unknown, maxConcurrent?: unknown, ratePerMinute?: unknown, replayTtlMs?: unknown, approvalTtlMs?: unknown, notificationLimit?: unknown}} RawRemoteConfig
+ */
+
+/**
+ * Validated remote configuration.
+ * @typedef {{id: string, credential: string, permissions: string[], projects: string[], disabled: boolean}} RemoteActor
+ * @typedef {{id: string, root: string, omoRuntimeManifest: string|null, runtimePinFiles: (string|null)[]}} RemoteProject
+ * @typedef {Readonly<{schema: string, allowedRoots: string[], actors: Record<string, RemoteActor>, projects: Record<string, RemoteProject>, serverCredential: string, maxClockSkewMs: number, maxBodyBytes: number, maxConcurrent: number, ratePerMinute: number, replayTtlMs: number, approvalTtlMs: number, notificationLimit: number}>} RemoteConfig
+ */
+
+/**
+ * @param {RawRemoteConfig} raw
+ * @param {{env?: NodeJS.ProcessEnv, allowInlineCredentials?: boolean}} [options]
+ * @returns {RemoteConfig}
  */
 export function validateRemoteConfig(raw, {
   env = process.env,
@@ -57,6 +73,7 @@ export function validateRemoteConfig(raw, {
   invariant(Array.isArray(raw.allowedRoots) && raw.allowedRoots.length > 0 && raw.allowedRoots.length <= 16, 'ERR_REMOTE_CONFIG', 'At least one bounded internal root is required');
   const allowedRoots = [...new Set(raw.allowedRoots.map((entry, index) => realDirectory(entry, `allowedRoots[${index}]`)))];
 
+  /** @type {Record<string, RemoteActor>} */
   const actors = {};
   for (const item of raw.actors ?? []) {
     invariant(item && typeof item === 'object' && !Array.isArray(item), 'ERR_REMOTE_CONFIG', 'Actor configuration must be an object');
@@ -87,6 +104,7 @@ export function validateRemoteConfig(raw, {
     allowInlineCredentials,
   });
 
+  /** @type {Record<string, RemoteProject>} */
   const projects = {};
   const seenRoots = new Set();
   for (const item of raw.projects ?? []) {
@@ -127,9 +145,9 @@ export function validateRemoteConfig(raw, {
 }
 
 /**
- * @param {*} config
- * @param {*} options
- * @returns {*}
+ * @param {RemoteConfig} config
+ * @param {{actorId: string, projectId: string, action: string}} request
+ * @returns {{actor: RemoteActor, project: RemoteProject, permission: string}}
  */
 export function authorize(config, { actorId, projectId, action }) {
   const actor = config.actors[actorId];
@@ -137,7 +155,9 @@ export function authorize(config, { actorId, projectId, action }) {
   invariant(actor.projects.includes(projectId), 'ERR_REMOTE_PROJECT', 'Actor is not allowed to access this project');
   const project = config.projects[projectId];
   invariant(project, 'ERR_REMOTE_PROJECT', 'Unknown project');
-  assertPathWithin(config.allowedRoots.find((root) => pathWithin(root, project.root)), project.root, 'ERR_REMOTE_PROJECT');
+  // validateRemoteConfig already proved every project root sits inside an allowed root, so find() cannot miss here.
+  const allowedRoot = /** @type {string} */ (config.allowedRoots.find((root) => pathWithin(root, project.root)));
+  assertPathWithin(allowedRoot, project.root, 'ERR_REMOTE_PROJECT');
   const permission = ACTION_PERMISSION[action];
   invariant(permission && actor.permissions.includes(permission), 'ERR_REMOTE_PERMISSION', `Actor lacks ${permission ?? 'unknown'} permission`);
   return { actor, project, permission };

@@ -19,7 +19,7 @@ const FUNCTION_LENGTH_ALLOWLIST = [
   { file: 'src/mcp/protocol.mjs', startLine: 138, reason: 'handle() is the JSON-RPC method dispatch table for the nine shipping_* tools plus protocol methods; splitting it would fragment one already-linear dispatch' },
   { file: 'src/mcp/stdio.mjs', startLine: 7, reason: 'startStdioServer wires up the bounded queue/backpressure state machine over stdin/stdout in one place by design (see src/mcp/stdio.mjs module comment)' },
   { file: 'src/mcp/user-view.mjs', startLine: 33, reason: 'buildUserStatusView assembles one bounded user-facing view object from status fields' },
-  { file: 'packages/internal-omo-bridge/bridge.mjs', startLine: 43, reason: 'executeShippingPrivateOmo is one sequential probe/promote/fallback authority decision flow that must stay auditable as a single sequence' },
+  { file: 'packages/internal-omo-bridge/bridge.mjs', startLine: 47, reason: 'executeShippingPrivateOmo is one sequential probe/promote/fallback authority decision flow that must stay auditable as a single sequence' },
   { file: 'packages/omp-main-harness/doctor.mjs', startLine: 14, reason: 'doctorOmpMainHarness aggregates one sequential set of independent doctor checks into a single report' },
   { file: 'packages/omp-main-harness/install.mjs', startLine: 80, reason: 'installOmpMainHarness is one sequential validate/stage/verify/activate pipeline with rollback-on-failure state that must not be separated from the steps it guards' },
 ];

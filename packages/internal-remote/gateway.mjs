@@ -77,7 +77,7 @@ function notificationFor(result) {
  */
 export class InternalRemoteGateway {
   /**
-   * @param {{config: Record<string, any>, replayStore: any, adapter: any, notifications: any, backupRoot: string, rateLimiter?: any}} options
+   * @param {{config: import('./identity.mjs').RemoteConfig, replayStore: any, adapter: any, notifications: any, backupRoot: string, rateLimiter?: any}} options
    */
   constructor({ config, replayStore, adapter, notifications, backupRoot, rateLimiter }) {
     invariant(config && replayStore && adapter && notifications, 'ERR_REMOTE_CONFIG', 'Gateway dependencies are required');
@@ -244,9 +244,9 @@ export class InternalRemoteGateway {
 }
 
 /**
- * @param {*} requestId
- * @param {*} error
- * @returns {*}
+ * @param {unknown} requestId
+ * @param {(Error & {code?: string})|null|undefined} error
+ * @returns {{schema: string, requestId: string, ok: false, error: {code: string, message: string}}}
  */
 export function remoteError(requestId, error) {
   return {

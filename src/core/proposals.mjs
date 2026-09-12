@@ -323,6 +323,151 @@ async function supersedeProposal(root, proposal, supersededBy) {
   return projected;
 }
 
+/** @param {string} root @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, workspaceCandidateId?: string | null}} input */
+async function loadProposalContext(root, input) {
+  const context = await currentReleaseContext(root);
+  if (context.state) {
+    invariant(['DRAFT', 'CLOSED'].includes(context.state.state), 'ERR_PROPOSAL_ACTIVE_RELEASE', `Cannot propose a new scope while release state is ${context.state.state}`);
+  }
+  const evidence = await buildDecisionEvidence(root, {
+    goal: input.goal.trim(),
+    mode: input.mode ?? undefined,
+    workspaceCandidateId: input.workspaceCandidateId ?? null,
+  });
+  const analysis = evidence.analysis;
+  const release = input.release?.trim()
+    || (context.state?.state === 'DRAFT'
+      ? (context.state.release || context.contract?.release || '0.1.0')
+      : context.contract
+        ? nextMinor(context.contract.release)
+        : (analysis.versionEvidence?.recommendedVersion ?? '0.1.0'));
+  invariant(SEMVER.test(release), 'ERR_RELEASE_VERSION', `Invalid semantic version: ${release}`);
+  const goal = input.goal.trim();
+  const projectName = safeProjectName(input.projectName, safeProjectName(analysis.projectName, path.basename(root)));
+  const fingerprint = proposalFingerprint({
+    projectRoot: path.resolve(root),
+    gitSha: evidence.gitSha,
+    goal,
+    release,
+    mode: evidence.mode,
+    projectName,
+  });
+  return { context, evidence, analysis, release, goal, projectName, fingerprint };
+}
+
+/** @param {string} root @param {Record<string, any>} ctx */
+async function reuseMatchingProposal(root, ctx) {
+  const active = await findActiveScopeProposal(root);
+  if (active && !isTerminalProposalState(active.summary.state)) {
+    invariant(active.proposal.mode === ctx.evidence.mode, 'ERR_PROPOSAL_MODE_CHANGE', `Active proposal mode is ${active.proposal.mode}; create or refine it without silently switching mode`);
+    if (active.proposal.fingerprint === ctx.fingerprint) {
+      return {
+        active,
+        reused: {
+          proposal: active.projectedProposal,
+          proposalPath: path.join(runtimePaths(root).proposals, `${active.proposal.id}.json`),
+          reused: true,
+          supersededProposalId: null,
+        },
+      };
+    }
+  }
+  return { active, reused: null };
+}
+
+/** @param {Record<string, any>} base @param {Record<string, any>} ctx @param {Record<string, any>} input */
+function composeProposalDecision(base, ctx, input) {
+  let decision = composeDefaultDecision(ctx.evidence, {
+    release: ctx.release,
+    projectName: ctx.projectName,
+    proposerId: typeof input.proposerId === 'string' && input.proposerId.trim() ? input.proposerId.trim().slice(0, 160) : undefined,
+  });
+  decision = applyDecisionPolicy(ctx.evidence, decision, { budgets: base.budgets });
+  const goalDiscovery = compileGoalDiscovery(ctx.evidence);
+  decision.questions = mergeGoalDiscoveryQuestions(decision, goalDiscovery, ctx.evidence.questionBudget);
+  decision.approvalStatus = decision.questions.length > 0 ? 'NEEDS_INPUT' : 'APPROVABLE';
+  decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
+  decision = validateDecisionPackage(ctx.evidence, decision);
+  const approvalBrief = buildApprovalBrief(decision);
+  const contract = compileDecisionContract(base, decision);
+  return { decision, goalDiscovery, approvalBrief, contract };
+}
+
+/** @param {Record<string, any>} analysis @param {Record<string, any>} decision @param {Record<string, any>} acceptanceStrength @param {string[]} inheritedCommands @param {string[]} sourceChanges */
+function buildProposalDiagnostics(analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges) {
+  return [
+    ...analysis.diagnostics,
+    ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
+    ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
+    ...(acceptanceStrength.sufficient ? [] : [acceptanceStrength.level === 'UNCOVERED' ? `Acceptance does not cover: ${(acceptanceStrength.uncoveredPaths ?? []).join(', ')}` : 'A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
+    ...(inheritedCommands.length > 0 ? [`Existing adapter commands were removed from the generated proposal: ${inheritedCommands.join(', ')}.`] : []),
+  ];
+}
+
+/** @param {string} root @param {Record<string, any>} ctx @param {Record<string, any>} decisionBundle @param {Record<string, any> | null} active @param {string[]} inheritedCommands @param {Record<string, any>} input */
+function assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, input) {
+  const { decision, goalDiscovery, approvalBrief, contract } = decisionBundle;
+  const acceptance = contract.acceptance;
+  const now = new Date();
+  const baseline = ctx.evidence.baseline;
+  const sourceChanges = baseline.blockingPaths;
+  const acceptanceStrength = classifyAcceptanceStrength(ctx.analysis);
+  const id = `proposal-${now.toISOString().replace(/[:.]/gu, '-')}-${randomUUID().slice(0, 8)}`;
+  return {
+    schema: 'shipping-harness/proposal-v1',
+    id,
+    revision: 1,
+    fingerprint: ctx.fingerprint,
+    projectRoot: path.resolve(root),
+    gitSha: ctx.evidence.gitSha,
+    release: ctx.release,
+    releaseSelection: {
+      explicit: typeof input.release === 'string' && input.release.trim().length > 0,
+      recommended: ctx.analysis.versionEvidence?.recommendedVersion ?? null,
+      evidence: ctx.analysis.versionEvidence ?? null,
+    },
+    goal: ctx.goal,
+    createdAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + PROPOSAL_TTL_MS).toISOString(),
+    mode: decision.mode,
+    lifecycle: { state: 'PLANNING', supersedes: active?.proposal?.id ?? null },
+    sourceChanges,
+    baseline,
+    intelligence: ctx.evidence.intelligence,
+    goalDiscovery,
+    acceptanceStrength,
+    workspace: ctx.analysis.workspace,
+    workspaceCandidates: ctx.analysis.workspaceCandidates,
+    versionEvidence: ctx.analysis.versionEvidence,
+    analysis: ctx.analysis,
+    evidence: ctx.evidence,
+    decision,
+    approvalBrief,
+    contract,
+    plan: buildShortPlan(ctx.analysis, acceptance),
+    diagnostics: buildProposalDiagnostics(ctx.analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges),
+  };
+}
+
+/** @param {string} root @param {Record<string, any>} proposal @param {Record<string, any> | null} active */
+async function persistProposal(root, proposal, active) {
+  const projectedProposal = projectProposalAuthority(proposal);
+  projectedProposal.hash = proposalHash(projectedProposal);
+  const proposalPath = path.join(runtimePaths(root).proposals, `${projectedProposal.id}.json`);
+  await assertContainedPath(root, proposalPath);
+  const supersedesActive = active && !isTerminalProposalState(active.summary.state);
+  if (supersedesActive) await supersedeProposal(root, active.proposal, proposal.id);
+  await writeJsonAtomic(proposalPath, projectedProposal);
+  await writeActiveProposalIndex(root, projectedProposal);
+  await recordGoalDiscoveryEvents(root, projectedProposal, 'discovery.created', []);
+  return {
+    proposal: projectedProposal,
+    proposalPath,
+    reused: false,
+    supersededProposalId: supersedesActive ? active.proposal.id : null,
+  };
+}
+
 /**
  * Create a reviewable, Git-bound release proposal without locking a release.
  * @param {string} root
@@ -332,123 +477,17 @@ export async function createScopeProposal(root, input) {
   invariant(typeof input.goal === 'string' && input.goal.trim().length >= 5, 'ERR_PROPOSAL_GOAL', 'A concrete goal of at least 5 characters is required');
   invariant(input.goal.length <= 4000, 'ERR_PROPOSAL_GOAL', 'Goal exceeds 4000 characters');
   return withProposalLock(root, async () => {
-    const context = await currentReleaseContext(root);
-    if (context.state) {
-      invariant(['DRAFT', 'CLOSED'].includes(context.state.state), 'ERR_PROPOSAL_ACTIVE_RELEASE', `Cannot propose a new scope while release state is ${context.state.state}`);
-    }
-    const evidence = await buildDecisionEvidence(root, {
-      goal: input.goal.trim(),
-      mode: input.mode ?? undefined,
-      workspaceCandidateId: input.workspaceCandidateId ?? null,
-    });
-    const analysis = evidence.analysis;
-    const release = input.release?.trim()
-      || (context.state?.state === 'DRAFT'
-        ? (context.state.release || context.contract?.release || '0.1.0')
-        : context.contract
-          ? nextMinor(context.contract.release)
-          : (analysis.versionEvidence?.recommendedVersion ?? '0.1.0'));
-    invariant(SEMVER.test(release), 'ERR_RELEASE_VERSION', `Invalid semantic version: ${release}`);
-    const goal = input.goal.trim();
-    const projectName = safeProjectName(input.projectName, safeProjectName(analysis.projectName, path.basename(root)));
-    const fingerprint = proposalFingerprint({
-      projectRoot: path.resolve(root),
-      gitSha: evidence.gitSha,
-      goal,
-      release,
-      mode: evidence.mode,
-      projectName,
-    });
-    const active = await findActiveScopeProposal(root);
-    if (active && !isTerminalProposalState(active.summary.state)) {
-      invariant(active.proposal.mode === evidence.mode, 'ERR_PROPOSAL_MODE_CHANGE', `Active proposal mode is ${active.proposal.mode}; create or refine it without silently switching mode`);
-      if (active.proposal.fingerprint === fingerprint) {
-        return {
-          proposal: active.projectedProposal,
-          proposalPath: path.join(runtimePaths(root).proposals, `${active.proposal.id}.json`),
-          reused: true,
-          supersededProposalId: null,
-        };
-      }
-    }
+    const ctx = await loadProposalContext(root, input);
+    const { active, reused } = await reuseMatchingProposal(root, ctx);
+    if (reused) return reused;
 
-    const base = context.contract ? structuredClone(context.contract) : createDefaultContract(projectName);
+    const base = ctx.context.contract ? structuredClone(ctx.context.contract) : createDefaultContract(ctx.projectName);
     const inheritedCommands = Object.entries(base.adapters ?? {})
       .filter(([, config]) => typeof config?.command === 'string' && config.command.trim())
       .map(([name]) => name);
-    let decision = composeDefaultDecision(evidence, {
-      release,
-      projectName,
-      proposerId: typeof input.proposerId === 'string' && input.proposerId.trim() ? input.proposerId.trim().slice(0, 160) : undefined,
-    });
-    decision = applyDecisionPolicy(evidence, decision, { budgets: base.budgets });
-    const goalDiscovery = compileGoalDiscovery(evidence);
-    decision.questions = mergeGoalDiscoveryQuestions(decision, goalDiscovery, evidence.questionBudget);
-    decision.approvalStatus = decision.questions.length > 0 ? 'NEEDS_INPUT' : 'APPROVABLE';
-    decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
-    decision = validateDecisionPackage(evidence, decision);
-    const approvalBrief = buildApprovalBrief(decision);
-    const contract = compileDecisionContract(base, decision);
-    const acceptance = contract.acceptance;
-    const now = new Date();
-    const baseline = evidence.baseline;
-    const sourceChanges = baseline.blockingPaths;
-    const acceptanceStrength = classifyAcceptanceStrength(analysis);
-    const id = `proposal-${now.toISOString().replace(/[:.]/gu, '-')}-${randomUUID().slice(0, 8)}`;
-    const proposal = {
-      schema: 'shipping-harness/proposal-v1',
-      id,
-      revision: 1,
-      fingerprint,
-      projectRoot: path.resolve(root),
-      gitSha: evidence.gitSha,
-      release,
-      releaseSelection: {
-        explicit: typeof input.release === 'string' && input.release.trim().length > 0,
-        recommended: analysis.versionEvidence?.recommendedVersion ?? null,
-        evidence: analysis.versionEvidence ?? null,
-      },
-      goal,
-      createdAt: now.toISOString(),
-      expiresAt: new Date(now.getTime() + PROPOSAL_TTL_MS).toISOString(),
-      mode: decision.mode,
-      lifecycle: { state: 'PLANNING', supersedes: active?.proposal?.id ?? null },
-      sourceChanges,
-      baseline,
-      intelligence: evidence.intelligence,
-      goalDiscovery,
-      acceptanceStrength,
-      workspace: analysis.workspace,
-      workspaceCandidates: analysis.workspaceCandidates,
-      versionEvidence: analysis.versionEvidence,
-      analysis,
-      evidence,
-      decision,
-      approvalBrief,
-      contract,
-      plan: buildShortPlan(analysis, acceptance),
-      diagnostics: [
-        ...analysis.diagnostics,
-        ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
-        ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
-        ...(acceptanceStrength.sufficient ? [] : [acceptanceStrength.level === 'UNCOVERED' ? `Acceptance does not cover: ${(acceptanceStrength.uncoveredPaths ?? []).join(', ')}` : 'A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
-        ...(inheritedCommands.length > 0 ? [`Existing adapter commands were removed from the generated proposal: ${inheritedCommands.join(', ')}.`] : []),
-      ],
-    };
-    const projectedProposal = projectProposalAuthority(proposal);
-    projectedProposal.hash = proposalHash(projectedProposal);
-    const proposalPath = path.join(runtimePaths(root).proposals, `${projectedProposal.id}.json`);
-    await assertContainedPath(root, proposalPath);
-    if (active && !isTerminalProposalState(active.summary.state)) await supersedeProposal(root, active.proposal, proposal.id);
-    await writeJsonAtomic(proposalPath, projectedProposal);
-    await writeActiveProposalIndex(root, projectedProposal);
-    await recordGoalDiscoveryEvents(root, projectedProposal, 'discovery.created', []);
-    return {
-      proposal: projectedProposal,
-      proposalPath,
-      reused: false,
-      supersededProposalId: active && !isTerminalProposalState(active.summary.state) ? active.proposal.id : null,
-    };
+    const decisionBundle = composeProposalDecision(base, ctx, input);
+    const proposal = assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, input);
+    return persistProposal(root, proposal, active);
   });
 }
 
@@ -551,6 +590,234 @@ function resolveDecisionQuestions(questions, answers) {
   };
 }
 
+/** @param {string} root @param {Record<string, any>} input */
+async function validateRefineRequest(root, input) {
+  const index = await readActiveProposalIndex(root);
+  invariant(index, 'ERR_PROPOSAL_ACTIVE', 'No active proposal is available to refine');
+  invariant(input.proposalId === index.proposalId, 'ERR_PROPOSAL_ACTIVE', 'Only the active proposal may be refined');
+  const { proposal, proposalPath, summary } = await loadScopeProposal(root, input.proposalId);
+  invariant(input.proposalHash === proposal.hash && input.proposalHash === index.proposalHash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match the active revision');
+  invariant(!isTerminalProposalState(summary.state), 'ERR_PROPOSAL_REFINE_STATE', `Proposal cannot be refined from ${summary.state}`);
+
+  const requestedMode = input.mode ?? proposal.mode;
+  invariant(['AUTO', 'SAFE', 'INTERVIEW'].includes(requestedMode), 'ERR_DECISION_MODE', `Unsupported decision mode: ${String(requestedMode)}`);
+  if (requestedMode !== proposal.mode) {
+    invariant(input.modeAuthorizedByUser === true, 'ERR_PROPOSAL_MODE_AUTHORIZATION', 'Changing proposal mode requires explicit user authorization');
+  } else {
+    invariant(input.modeAuthorizedByUser !== true || input.mode !== undefined, 'ERR_PROPOSAL_MODE_AUTHORIZATION', 'Mode authorization cannot be supplied without a requested mode');
+  }
+
+  const workspaceCandidateId = input.workspaceCandidateId ?? (proposal.workspace?.requested === true ? proposal.workspace.id : null);
+  if (input.workspaceCandidateId !== undefined && input.workspaceCandidateId !== null) {
+    boundedRefinementText(input.workspaceCandidateId, 100);
+    invariant((proposal.workspaceCandidates ?? []).some((candidate) => candidate.id === input.workspaceCandidateId), 'ERR_WORKSPACE_CANDIDATE', `Unknown workspace candidate: ${input.workspaceCandidateId}`);
+  }
+  let answers = [...(input.answers ?? [])];
+  invariant(Array.isArray(answers), 'ERR_PROPOSAL_REFINE', 'Refinement answers must be an array');
+  if (input.acceptRecommendedDiscoveryDefaults === true) {
+    const delegated = (proposal.goalDiscovery?.questions ?? []).map((question) => ({ questionId: question.id, choice: 'recommended' }));
+    const supplied = new Set(answers.map((entry) => entry?.questionId));
+    answers = [...answers, ...delegated.filter((entry) => !supplied.has(entry.questionId))];
+  }
+  invariant(answers.length <= 3, 'ERR_PROPOSAL_REFINE', 'Refinement accepts at most three grouped answers');
+  invariant(answers.length > 0 || input.workspaceCandidateId || requestedMode !== proposal.mode || input.rescan === true, 'ERR_PROPOSAL_REFINE', 'Refinement must include an answer, workspace selection, authorized mode change, or rescan');
+  if (input.baselinePlanHash !== undefined) invariant(/^[a-f0-9]{64}$/u.test(input.baselinePlanHash), 'ERR_BASELINE_PLAN', 'baselinePlanHash must be a SHA-256 hex digest');
+  if (input.baselineCommit !== undefined) invariant(/^[a-f0-9]{40}$/u.test(input.baselineCommit), 'ERR_BASELINE_COMMIT', 'baselineCommit must be a full Git SHA');
+  invariant(input.baselineAuthorizedByUser !== true || (input.baselinePlanHash && input.baselineCommit), 'ERR_BASELINE_APPROVAL', 'Baseline authorization requires the reviewed plan hash and commit SHA');
+
+  return { index, proposal, proposalPath, summary, requestedMode, workspaceCandidateId, answers };
+}
+
+/** @param {string} root @param {Record<string, any>} proposal @param {Record<string, any>} summary @param {string} requestedMode @param {string | null} workspaceCandidateId @param {Record<string, any>} input */
+async function buildRefineEvidence(root, proposal, summary, requestedMode, workspaceCandidateId, input) {
+  const evidence = await buildDecisionEvidence(root, {
+    goal: proposal.goal,
+    mode: requestedMode,
+    workspaceCandidateId,
+  });
+  const analysis = evidence.analysis;
+  let baselinePreservation = proposal.baselinePreservation ?? null;
+  const baselineChanged = proposal.baseline?.plan?.fileSetHash !== evidence.baseline?.plan?.fileSetHash
+    || proposal.gitSha !== evidence.gitSha;
+  if (summary.state === 'DIRTY_BASELINE' && baselineChanged) {
+    invariant(proposal.gitSha !== evidence.gitSha, 'ERR_BASELINE_UNAUTHORIZED', 'Dirty baseline changed without a reviewed preservation commit');
+    baselinePreservation = verifyBaselinePreservation(root, proposal.baseline, input);
+  }
+  const release = proposal.releaseSelection?.explicit
+    ? proposal.release
+    : (analysis.versionEvidence?.recommendedVersion ?? proposal.release);
+  const context = await currentReleaseContext(root);
+  const projectName = safeProjectName(analysis.projectName, proposal.decision?.projectName ?? path.basename(root));
+  const base = context.contract ? structuredClone(context.contract) : createDefaultContract(projectName);
+  return { evidence, analysis, baselinePreservation, release, projectName, base };
+}
+
+/** @param {Record<string, any>} evidenceCtx @param {Record<string, any>} proposal @param {Array<{questionId:string,choice:string}>} answers */
+function composeRefineDecision(evidenceCtx, proposal, answers) {
+  const { evidence, base, release, projectName } = evidenceCtx;
+  let decision = composeDefaultDecision(evidence, {
+    release,
+    projectName,
+    proposerId: proposal.decision?.proposer?.id ?? 'mcp-host-agent',
+  });
+  decision = applyDecisionPolicy(evidence, decision, { budgets: base.budgets });
+  const priorResolutions = proposal.decision?.resolutions ?? [];
+  const answeredDiscovery = answers.some((entry) => String(entry?.questionId ?? '').startsWith('Q-GOAL-'));
+  const discoveryRound = Math.min(2, (proposal.goalDiscovery?.round ?? 1) + (answeredDiscovery ? 1 : 0));
+  let goalDiscovery = compileGoalDiscovery(evidence, { resolutions: priorResolutions, round: discoveryRound });
+  decision.questions = mergeGoalDiscoveryQuestions(decision, goalDiscovery, evidence.questionBudget);
+  const availableQuestions = new Map([
+    ...(proposal.decision?.questions ?? []).map((question) => [question.id, question]),
+    ...(goalDiscovery.questions ?? []).map((question) => [question.id, question]),
+    ...(decision.questions ?? []).map((question) => [question.id, question]),
+  ]);
+  const previouslyResolvedIds = new Set(priorResolutions.map((entry) => entry.questionId));
+  decision.questions = decision.questions.filter((question) => !previouslyResolvedIds.has(question.id));
+  const resolved = resolveDecisionQuestions([...availableQuestions.values()], answers);
+  const answeredIds = new Set(resolved.resolutions.map((entry) => entry.questionId));
+  decision.questions = decision.questions.filter((question) => !answeredIds.has(question.id));
+  decision.resolutions = [
+    ...(proposal.decision?.resolutions ?? []),
+    ...resolved.resolutions,
+  ].slice(-20);
+  goalDiscovery = compileGoalDiscovery(evidence, { resolutions: decision.resolutions, round: discoveryRound });
+  decision.questions = mergeGoalDiscoveryQuestions({
+    ...decision,
+    questions: decision.questions.filter((question) => !question.id.startsWith('Q-GOAL-')),
+  }, goalDiscovery, evidence.questionBudget);
+  decision.approvalStatus = decision.questions.length > 0 ? 'NEEDS_INPUT' : 'APPROVABLE';
+  decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
+  decision = validateDecisionPackage(evidence, decision);
+  const approvalBrief = buildApprovalBrief(decision);
+  const contract = compileDecisionContract(base, decision);
+  return { decision, goalDiscovery, resolved, approvalBrief, contract };
+}
+
+/** @param {Record<string, any>} evidenceCtx @param {Record<string, any>} proposal @param {Record<string, any> | null} baselinePreservation */
+function mergeRefineIntelligence(evidenceCtx, proposal, baselinePreservation) {
+  const { evidence, analysis } = evidenceCtx;
+  let intelligence = evidence.intelligence;
+  let proposalAnalysis = analysis;
+  if (baselinePreservation && proposal.intelligence) {
+    intelligence = {
+      ...intelligence,
+      workThemes: proposal.intelligence.workThemes,
+      goalRecommendation: proposal.intelligence.goalRecommendation,
+      acceptanceCoverage: proposal.intelligence.acceptanceCoverage,
+      preservedBaseline: {
+        planHash: proposal.baseline?.plan?.hash ?? null,
+        commit: baselinePreservation.commit,
+      },
+    };
+    proposalAnalysis = { ...analysis, intelligence };
+  }
+  return { intelligence, proposalAnalysis };
+}
+
+/** @param {string} root @param {Record<string, any>} proposal @param {Record<string, any>} evidenceCtx @param {Record<string, any>} decisionBundle @param {string} requestedMode */
+function buildRefineCandidate(root, proposal, evidenceCtx, decisionBundle, requestedMode) {
+  const { evidence, analysis, baselinePreservation, release, projectName } = evidenceCtx;
+  const { decision, goalDiscovery, approvalBrief, contract } = decisionBundle;
+  const baseline = evidence.baseline;
+  const sourceChanges = baseline.blockingPaths;
+  const { intelligence, proposalAnalysis } = mergeRefineIntelligence(evidenceCtx, proposal, baselinePreservation);
+  const acceptanceStrength = classifyAcceptanceStrength(proposalAnalysis);
+  const now = new Date();
+  /** @type {Record<string, any>} */
+  const candidate = {
+    ...proposal,
+    revision: proposal.revision ?? 1,
+    previousHash: proposal.previousHash,
+    gitSha: evidence.gitSha,
+    release,
+    releaseSelection: {
+      explicit: proposal.releaseSelection?.explicit === true,
+      recommended: analysis.versionEvidence?.recommendedVersion ?? null,
+      evidence: analysis.versionEvidence ?? null,
+    },
+    mode: decision.mode,
+    modeAuthorization: requestedMode !== proposal.mode
+      ? { userConfirmed: true, from: proposal.mode, to: requestedMode, recordedAt: now.toISOString() }
+      : proposal.modeAuthorization ?? null,
+    fingerprint: proposalFingerprint({
+      projectRoot: path.resolve(root),
+      gitSha: evidence.gitSha,
+      goal: proposal.goal,
+      release,
+      mode: decision.mode,
+      projectName,
+    }),
+    refinedAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + PROPOSAL_TTL_MS).toISOString(),
+    lifecycle: { state: 'PLANNING', supersedes: proposal.lifecycle?.supersedes ?? null },
+    sourceChanges,
+    baseline,
+    baselinePreservation,
+    intelligence,
+    goalDiscovery,
+    acceptanceStrength,
+    workspace: proposalAnalysis.workspace,
+    workspaceCandidates: proposalAnalysis.workspaceCandidates,
+    versionEvidence: proposalAnalysis.versionEvidence,
+    analysis: proposalAnalysis,
+    evidence,
+    decision,
+    approvalBrief,
+    contract,
+    plan: buildShortPlan(proposalAnalysis, contract.acceptance),
+    diagnostics: [
+      ...proposalAnalysis.diagnostics,
+      ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
+      ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
+      ...(acceptanceStrength.sufficient ? [] : [acceptanceStrength.level === 'UNCOVERED' ? `Acceptance does not cover: ${(acceptanceStrength.uncoveredPaths ?? []).join(', ')}` : 'A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
+    ],
+  };
+  delete candidate.approval;
+  return candidate;
+}
+
+/** @param {string} root @param {Record<string, any>} proposal @param {Record<string, any>} candidate @param {string} proposalPath @param {{resolutions: Array<Record<string, any>>}} resolved */
+async function persistRefinedProposal(root, proposal, candidate, proposalPath, resolved) {
+  const projectedCandidate = projectProposalAuthority(candidate);
+  const projectedCurrent = projectProposalAuthority(proposal);
+  if (authorityFingerprint(projectedCandidate) === authorityFingerprint(projectedCurrent)) {
+    return {
+      proposal: projectedCurrent,
+      proposalPath,
+      archivedRevisionPath: null,
+      resolutions: [],
+      changed: false,
+    };
+  }
+
+  const revision = (proposal.revision ?? 1) + 1;
+  const archivePath = path.join(runtimePaths(root).proposals, `${proposal.id}.r${proposal.revision ?? 1}.json`);
+  await assertContainedPath(root, archivePath);
+  if (await exists(archivePath)) {
+    const archived = await readJson(archivePath);
+    invariant(archived.hash === proposal.hash, 'ERR_PROPOSAL_REVISION', 'Archived proposal revision does not match the active revision');
+  } else {
+    await writeJsonAtomic(archivePath, proposal);
+  }
+
+  const updated = projectProposalAuthority({
+    ...projectedCandidate,
+    revision,
+    previousHash: proposal.hash,
+  });
+  updated.hash = proposalHash(updated);
+  await writeJsonAtomic(proposalPath, updated);
+  await writeActiveProposalIndex(root, updated);
+  await recordGoalDiscoveryEvents(root, updated, 'discovery.refined', resolved.resolutions);
+  return {
+    proposal: updated,
+    proposalPath,
+    archivedRevisionPath: path.relative(root, archivePath).replaceAll('\\', '/'),
+    resolutions: resolved.resolutions,
+    changed: true,
+  };
+}
+
 /**
  * Refine one active proposal identity using bounded structured user decisions.
  * @param {string} root
@@ -558,209 +825,16 @@ function resolveDecisionQuestions(questions, answers) {
  */
 export async function refineScopeProposal(root, input) {
   return withProposalLock(root, async () => {
-    const index = await readActiveProposalIndex(root);
-    invariant(index, 'ERR_PROPOSAL_ACTIVE', 'No active proposal is available to refine');
-    invariant(input.proposalId === index.proposalId, 'ERR_PROPOSAL_ACTIVE', 'Only the active proposal may be refined');
-    const { proposal, proposalPath, summary } = await loadScopeProposal(root, input.proposalId);
-    invariant(input.proposalHash === proposal.hash && input.proposalHash === index.proposalHash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match the active revision');
-    invariant(!isTerminalProposalState(summary.state), 'ERR_PROPOSAL_REFINE_STATE', `Proposal cannot be refined from ${summary.state}`);
-
-    const requestedMode = input.mode ?? proposal.mode;
-    invariant(['AUTO', 'SAFE', 'INTERVIEW'].includes(requestedMode), 'ERR_DECISION_MODE', `Unsupported decision mode: ${String(requestedMode)}`);
-    if (requestedMode !== proposal.mode) {
-      invariant(input.modeAuthorizedByUser === true, 'ERR_PROPOSAL_MODE_AUTHORIZATION', 'Changing proposal mode requires explicit user authorization');
-    } else {
-      invariant(input.modeAuthorizedByUser !== true || input.mode !== undefined, 'ERR_PROPOSAL_MODE_AUTHORIZATION', 'Mode authorization cannot be supplied without a requested mode');
-    }
-
-    const workspaceCandidateId = input.workspaceCandidateId ?? (proposal.workspace?.requested === true ? proposal.workspace.id : null);
-    if (input.workspaceCandidateId !== undefined && input.workspaceCandidateId !== null) {
-      boundedRefinementText(input.workspaceCandidateId, 100);
-      invariant((proposal.workspaceCandidates ?? []).some((candidate) => candidate.id === input.workspaceCandidateId), 'ERR_WORKSPACE_CANDIDATE', `Unknown workspace candidate: ${input.workspaceCandidateId}`);
-    }
-    let answers = [...(input.answers ?? [])];
-    invariant(Array.isArray(answers), 'ERR_PROPOSAL_REFINE', 'Refinement answers must be an array');
-    if (input.acceptRecommendedDiscoveryDefaults === true) {
-      const delegated = (proposal.goalDiscovery?.questions ?? []).map((question) => ({ questionId: question.id, choice: 'recommended' }));
-      const supplied = new Set(answers.map((entry) => entry?.questionId));
-      answers = [...answers, ...delegated.filter((entry) => !supplied.has(entry.questionId))];
-    }
-    invariant(answers.length <= 3, 'ERR_PROPOSAL_REFINE', 'Refinement accepts at most three grouped answers');
-    invariant(answers.length > 0 || input.workspaceCandidateId || requestedMode !== proposal.mode || input.rescan === true, 'ERR_PROPOSAL_REFINE', 'Refinement must include an answer, workspace selection, authorized mode change, or rescan');
-    if (input.baselinePlanHash !== undefined) invariant(/^[a-f0-9]{64}$/u.test(input.baselinePlanHash), 'ERR_BASELINE_PLAN', 'baselinePlanHash must be a SHA-256 hex digest');
-    if (input.baselineCommit !== undefined) invariant(/^[a-f0-9]{40}$/u.test(input.baselineCommit), 'ERR_BASELINE_COMMIT', 'baselineCommit must be a full Git SHA');
-    invariant(input.baselineAuthorizedByUser !== true || (input.baselinePlanHash && input.baselineCommit), 'ERR_BASELINE_APPROVAL', 'Baseline authorization requires the reviewed plan hash and commit SHA');
-
-    const evidence = await buildDecisionEvidence(root, {
-      goal: proposal.goal,
-      mode: requestedMode,
-      workspaceCandidateId,
-    });
-    const analysis = evidence.analysis;
-    let baselinePreservation = proposal.baselinePreservation ?? null;
-    const baselineChanged = proposal.baseline?.plan?.fileSetHash !== evidence.baseline?.plan?.fileSetHash
-      || proposal.gitSha !== evidence.gitSha;
-    if (summary.state === 'DIRTY_BASELINE' && baselineChanged) {
-      invariant(proposal.gitSha !== evidence.gitSha, 'ERR_BASELINE_UNAUTHORIZED', 'Dirty baseline changed without a reviewed preservation commit');
-      baselinePreservation = verifyBaselinePreservation(root, proposal.baseline, input);
-    }
-    const release = proposal.releaseSelection?.explicit
-      ? proposal.release
-      : (analysis.versionEvidence?.recommendedVersion ?? proposal.release);
-    const context = await currentReleaseContext(root);
-    const projectName = safeProjectName(analysis.projectName, proposal.decision?.projectName ?? path.basename(root));
-    const base = context.contract ? structuredClone(context.contract) : createDefaultContract(projectName);
-    let decision = composeDefaultDecision(evidence, {
-      release,
-      projectName,
-      proposerId: proposal.decision?.proposer?.id ?? 'mcp-host-agent',
-    });
-    decision = applyDecisionPolicy(evidence, decision, { budgets: base.budgets });
-    const priorResolutions = proposal.decision?.resolutions ?? [];
-    const answeredDiscovery = answers.some((entry) => String(entry?.questionId ?? '').startsWith('Q-GOAL-'));
-    const discoveryRound = Math.min(2, (proposal.goalDiscovery?.round ?? 1) + (answeredDiscovery ? 1 : 0));
-    let goalDiscovery = compileGoalDiscovery(evidence, { resolutions: priorResolutions, round: discoveryRound });
-    decision.questions = mergeGoalDiscoveryQuestions(decision, goalDiscovery, evidence.questionBudget);
-    const availableQuestions = new Map([
-      ...(proposal.decision?.questions ?? []).map((question) => [question.id, question]),
-      ...(goalDiscovery.questions ?? []).map((question) => [question.id, question]),
-      ...(decision.questions ?? []).map((question) => [question.id, question]),
-    ]);
-    const previouslyResolvedIds = new Set(priorResolutions.map((entry) => entry.questionId));
-    decision.questions = decision.questions.filter((question) => !previouslyResolvedIds.has(question.id));
-    const resolved = resolveDecisionQuestions([...availableQuestions.values()], answers);
-    const answeredIds = new Set(resolved.resolutions.map((entry) => entry.questionId));
-    decision.questions = decision.questions.filter((question) => !answeredIds.has(question.id));
-    decision.resolutions = [
-      ...(proposal.decision?.resolutions ?? []),
-      ...resolved.resolutions,
-    ].slice(-20);
-    goalDiscovery = compileGoalDiscovery(evidence, { resolutions: decision.resolutions, round: discoveryRound });
-    decision.questions = mergeGoalDiscoveryQuestions({
-      ...decision,
-      questions: decision.questions.filter((question) => !question.id.startsWith('Q-GOAL-')),
-    }, goalDiscovery, evidence.questionBudget);
-    decision.approvalStatus = decision.questions.length > 0 ? 'NEEDS_INPUT' : 'APPROVABLE';
-    decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
-    decision = validateDecisionPackage(evidence, decision);
-    const approvalBrief = buildApprovalBrief(decision);
-    const contract = compileDecisionContract(base, decision);
-    const baseline = evidence.baseline;
-    const sourceChanges = baseline.blockingPaths;
-    /** @type {Record<string, any>} */
-    let intelligence = evidence.intelligence;
-    let proposalAnalysis = analysis;
-    if (baselinePreservation && proposal.intelligence) {
-      intelligence = {
-        ...intelligence,
-        workThemes: proposal.intelligence.workThemes,
-        goalRecommendation: proposal.intelligence.goalRecommendation,
-        acceptanceCoverage: proposal.intelligence.acceptanceCoverage,
-        preservedBaseline: {
-          planHash: proposal.baseline?.plan?.hash ?? null,
-          commit: baselinePreservation.commit,
-        },
-      };
-      proposalAnalysis = { ...analysis, intelligence };
-    }
-    const acceptanceStrength = classifyAcceptanceStrength(proposalAnalysis);
-    const now = new Date();
-    const candidate = {
-      ...proposal,
-      revision: proposal.revision ?? 1,
-      previousHash: proposal.previousHash,
-      gitSha: evidence.gitSha,
-      release,
-      releaseSelection: {
-        explicit: proposal.releaseSelection?.explicit === true,
-        recommended: analysis.versionEvidence?.recommendedVersion ?? null,
-        evidence: analysis.versionEvidence ?? null,
-      },
-      mode: decision.mode,
-      modeAuthorization: requestedMode !== proposal.mode
-        ? { userConfirmed: true, from: proposal.mode, to: requestedMode, recordedAt: now.toISOString() }
-        : proposal.modeAuthorization ?? null,
-      fingerprint: proposalFingerprint({
-        projectRoot: path.resolve(root),
-        gitSha: evidence.gitSha,
-        goal: proposal.goal,
-        release,
-        mode: decision.mode,
-        projectName,
-      }),
-      refinedAt: now.toISOString(),
-      expiresAt: new Date(now.getTime() + PROPOSAL_TTL_MS).toISOString(),
-      lifecycle: { state: 'PLANNING', supersedes: proposal.lifecycle?.supersedes ?? null },
-      sourceChanges,
-      baseline,
-      baselinePreservation,
-      intelligence,
-      goalDiscovery,
-      acceptanceStrength,
-      workspace: proposalAnalysis.workspace,
-      workspaceCandidates: proposalAnalysis.workspaceCandidates,
-      versionEvidence: proposalAnalysis.versionEvidence,
-      analysis: proposalAnalysis,
-      evidence,
-      decision,
-      approvalBrief,
-      contract,
-      plan: buildShortPlan(proposalAnalysis, contract.acceptance),
-      diagnostics: [
-        ...proposalAnalysis.diagnostics,
-        ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
-        ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
-        ...(acceptanceStrength.sufficient ? [] : [acceptanceStrength.level === 'UNCOVERED' ? `Acceptance does not cover: ${(acceptanceStrength.uncoveredPaths ?? []).join(', ')}` : 'A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
-      ],
-    };
-    delete candidate.approval;
-    const projectedCandidate = projectProposalAuthority(candidate);
-    const projectedCurrent = projectProposalAuthority(proposal);
-    if (authorityFingerprint(projectedCandidate) === authorityFingerprint(projectedCurrent)) {
-      return {
-        proposal: projectedCurrent,
-        proposalPath,
-        archivedRevisionPath: null,
-        resolutions: [],
-        changed: false,
-      };
-    }
-
-    const revision = (proposal.revision ?? 1) + 1;
-    const archivePath = path.join(runtimePaths(root).proposals, `${proposal.id}.r${proposal.revision ?? 1}.json`);
-    await assertContainedPath(root, archivePath);
-    if (await exists(archivePath)) {
-      const archived = await readJson(archivePath);
-      invariant(archived.hash === proposal.hash, 'ERR_PROPOSAL_REVISION', 'Archived proposal revision does not match the active revision');
-    } else {
-      await writeJsonAtomic(archivePath, proposal);
-    }
-
-    const updated = projectProposalAuthority({
-      ...projectedCandidate,
-      revision,
-      previousHash: proposal.hash,
-    });
-    updated.hash = proposalHash(updated);
-    await writeJsonAtomic(proposalPath, updated);
-    await writeActiveProposalIndex(root, updated);
-    await recordGoalDiscoveryEvents(root, updated, 'discovery.refined', resolved.resolutions);
-    return {
-      proposal: updated,
-      proposalPath,
-      archivedRevisionPath: path.relative(root, archivePath).replaceAll('\\', '/'),
-      resolutions: resolved.resolutions,
-      changed: true,
-    };
+    const { proposal, proposalPath, summary, requestedMode, workspaceCandidateId, answers } = await validateRefineRequest(root, input);
+    const evidenceCtx = await buildRefineEvidence(root, proposal, summary, requestedMode, workspaceCandidateId, input);
+    const decisionBundle = composeRefineDecision(evidenceCtx, proposal, answers);
+    const candidate = buildRefineCandidate(root, proposal, evidenceCtx, decisionBundle, requestedMode);
+    return persistRefinedProposal(root, proposal, candidate, proposalPath, decisionBundle.resolved);
   });
 }
 
-/**
- * Approve a proposal and atomically move the release into LOCKED state.
- * @param {string} root
- * @param {{proposalId: string, proposalHash: string, confirm: boolean, approverType?: string, approverId?: string, policyAuthorization?: Record<string,any>|null}} input
- */
-export async function approveScopeProposal(root, input) {
+/** @param {string} root @param {Record<string, any>} input */
+async function authorizeApproval(root, input) {
   const approverType = input.approverType ?? 'human';
   const approverId = typeof input.approverId === 'string' && input.approverId.trim() ? input.approverId.trim().slice(0, 160) : 'local-user';
   if (approverType === 'human') {
@@ -772,6 +846,11 @@ export async function approveScopeProposal(root, input) {
     invariant(policy && authorization.policyHash === policy.hash, 'ERR_AUTOPILOT_POLICY_BINDING', 'Autopilot approval belongs to a different policy');
     invariant(authorization.action === 'ADVANCE_RELEASE' && authorization.allowed === true && ['AUTO', 'NOTIFY'].includes(authorization.decision), 'ERR_AUTOPILOT_ADVANCE', 'Autopilot policy did not authorize the next release');
   }
+  return { approverType, approverId };
+}
+
+/** @param {string} root @param {Record<string, any>} input @param {string} approverType @param {string} approverId */
+async function validateApprovableProposal(root, input, approverType, approverId) {
   const existingPaths = runtimePaths(root);
   if (await exists(existingPaths.state)) {
     const existingState = await readState(root);
@@ -790,7 +869,11 @@ export async function approveScopeProposal(root, input) {
   const baseline = currentBaseline(root);
   const sourceChanges = baseline.blockingPaths;
   invariant(sourceChanges.length === 0, 'ERR_PROPOSAL_DIRTY', 'Review and preserve blocking baseline changes before approval', { sourceChanges, baseline });
+  return { proposal, projectedProposal, proposalPath };
+}
 
+/** @param {string} root @param {Record<string, any>} proposal */
+async function lockApprovedContract(root, proposal) {
   const paths = runtimePaths(root);
   await assertContainedPath(root, paths.directory);
   await assertContainedPath(root, paths.contract);
@@ -806,7 +889,11 @@ export async function approveScopeProposal(root, input) {
   await writeAtomic(paths.contract, stableStringify(validateContract(proposal.contract)));
   invariant(currentGitSha(root) === proposal.gitSha && currentBaseline(root).blockingPaths.length === 0, 'ERR_PROPOSAL_STALE', 'Repository changed during proposal approval');
   const sha = currentGitSha(root);
-  const { contract, lock } = await lockContract(root, sha);
+  return lockContract(root, sha);
+}
+
+/** @param {string} root @param {Record<string, any>} proposal @param {Record<string, any>} projectedProposal @param {Record<string, any>} lock @param {string} approverType @param {string} approverId */
+async function persistApprovalArtifacts(root, proposal, projectedProposal, lock, approverType, approverId) {
   const approvedAt = new Date().toISOString();
   const acceptedGoalCharter = acceptGoalCharter(projectedProposal.goalCharter, {
     proposalHash: proposal.hash,
@@ -826,6 +913,12 @@ export async function approveScopeProposal(root, input) {
     approvedAt,
   });
   const persistedCharter = await persistAcceptedGoalCharter(root, acceptedGoalCharter);
+  return { approvedAt, acceptedGoalCharter, persistedTrain, persistedCharter };
+}
+
+/** @param {string} root @param {Record<string, any>} proposal @param {Record<string, any>} projectedProposal @param {Record<string, any>} contract @param {Record<string, any>} lock @param {Record<string, any>} artifacts @param {string} approverType @param {string} approverId */
+async function recordApprovalState(root, proposal, projectedProposal, contract, lock, artifacts, approverType, approverId) {
+  const { approvedAt, acceptedGoalCharter, persistedTrain, persistedCharter } = artifacts;
   const locked = await transitionState(root, 'LOCKED', {
     release: contract.release,
     contractHash: lock.contractHash,
@@ -837,6 +930,7 @@ export async function approveScopeProposal(root, input) {
     goalCharterHash: acceptedGoalCharter.hash,
     goalCharterPath: path.relative(root, persistedCharter.path).replaceAll('\\', '/'),
   }, approverType === 'autopilot-policy' ? 'scope proposal approved by pre-authorized autopilot policy' : 'scope proposal explicitly approved');
+  /** @type {Record<string, any>} */
   const approved = {
     ...proposal,
     releaseTrain: projectedProposal.releaseTrain,
@@ -851,8 +945,11 @@ export async function approveScopeProposal(root, input) {
       baselineSha: lock.baselineSha,
     },
   };
-  await writeJsonAtomic(proposalPath, approved);
-  await writeActiveProposalIndex(root, approved);
+  return { locked, approved };
+}
+
+/** @param {string} root @param {Record<string, any>} proposal @param {Record<string, any>} projectedProposal @param {Record<string, any>} approved @param {Record<string, any>} contract @param {Record<string, any>} lock @param {string} approverType @param {string} approverId @param {Record<string, any>} input */
+async function recordApprovalLedger(root, proposal, projectedProposal, approved, contract, lock, approverType, approverId, input) {
   await appendDecisionLedgerEvent(root, {
     type: 'direction.accepted',
     proposalId: proposal.id,
@@ -863,7 +960,7 @@ export async function approveScopeProposal(root, input) {
     directionHash: projectedProposal.goalDiscovery.direction.hash,
     provenance: approverType === 'autopilot-policy' ? 'policy-authorized-continuation' : 'explicit-human-approval',
     evidenceRefs: ['proposal.goalDiscovery.direction', 'proposal.goalCharter', 'proposal.approval'],
-    details: { approverType, approverId, contractHash: lock.contractHash, goalCharterHash: acceptedGoalCharter.hash },
+    details: { approverType, approverId, contractHash: lock.contractHash, goalCharterHash: approved.goalCharter.hash },
   });
   await recordLedger(root, {
     type: 'proposal.approved',
@@ -873,9 +970,25 @@ export async function approveScopeProposal(root, input) {
     contractHash: lock.contractHash,
     baselineSha: lock.baselineSha,
     releaseTrainHash: projectedProposal.releaseTrain.hash,
-    goalCharterHash: acceptedGoalCharter.hash,
+    goalCharterHash: approved.goalCharter.hash,
     approverType,
     policyAuthorizationHash: input.policyAuthorization?.hash ?? null,
   });
-  return { proposal: approved, contract, lock, state: locked, releaseTrain: persistedTrain.envelope, goalCharter: acceptedGoalCharter };
+}
+
+/**
+ * Approve a proposal and atomically move the release into LOCKED state.
+ * @param {string} root
+ * @param {{proposalId: string, proposalHash: string, confirm: boolean, approverType?: string, approverId?: string, policyAuthorization?: Record<string,any>|null}} input
+ */
+export async function approveScopeProposal(root, input) {
+  const { approverType, approverId } = await authorizeApproval(root, input);
+  const { proposal, projectedProposal, proposalPath } = await validateApprovableProposal(root, input, approverType, approverId);
+  const { contract, lock } = await lockApprovedContract(root, proposal);
+  const artifacts = await persistApprovalArtifacts(root, proposal, projectedProposal, lock, approverType, approverId);
+  const { locked, approved } = await recordApprovalState(root, proposal, projectedProposal, contract, lock, artifacts, approverType, approverId);
+  await writeJsonAtomic(proposalPath, approved);
+  await writeActiveProposalIndex(root, approved);
+  await recordApprovalLedger(root, proposal, projectedProposal, approved, contract, lock, approverType, approverId, input);
+  return { proposal: approved, contract, lock, state: locked, releaseTrain: artifacts.persistedTrain.envelope, goalCharter: artifacts.acceptedGoalCharter };
 }

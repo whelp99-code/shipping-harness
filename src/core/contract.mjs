@@ -135,7 +135,8 @@ export function validateContract(input) {
   requireInteger(contract.budgets.maxAgentRuns, 'budgets.maxAgentRuns', { min: 0, max: 1000 });
   requireInteger(contract.budgets.maxCommandSeconds, 'budgets.maxCommandSeconds', { min: 1, max: 86400 });
   requireInteger(contract.budgets.maxOutputBytes, 'budgets.maxOutputBytes', { min: 1024, max: 100 * 1024 * 1024 });
-  if (contract.budgets.maxVerifyRuns !== undefined) requireInteger(contract.budgets.maxVerifyRuns, 'budgets.maxVerifyRuns', { min: 1, max: 100 });
+  if (contract.budgets.maxVerifyRuns !== undefined) requireInteger(contract.budgets.maxVerifyRuns, 'budgets.maxVerifyRuns', { min: 1, max: 200 });
+  if (contract.budgets.maxRedundantVerifyRuns !== undefined) requireInteger(contract.budgets.maxRedundantVerifyRuns, 'budgets.maxRedundantVerifyRuns', { min: 1, max: 100 });
 
   requireObject(contract.stopPolicy, 'stopPolicy');
   invariant(contract.stopPolicy.humanInterruptWins === true, 'ERR_CONTRACT_INVALID', 'stopPolicy.humanInterruptWins must be true');

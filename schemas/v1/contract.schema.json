@@ -186,7 +186,13 @@
           "maximum": 9007199254740991
         },
         "maxVerifyRuns": {
-          "description": "v1.10.0 Phase C: caps consecutive verify runs that reproduce the previous run's Git SHA and per-criterion exit codes (no new evidence). Optional; defaults to 10 when absent.",
+          "description": "v1.10.0 Phase C: hard cap on the total verify runs recorded for one release, regardless of whether they produced new evidence. Optional; defaults to 25 when absent.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "maxRedundantVerifyRuns": {
+          "description": "v1.10.0 Phase C: caps consecutive verify runs that reproduce the previous run's working-tree fingerprint and per-criterion exit codes (no new evidence). Optional; defaults to 5 when absent.",
           "type": "integer",
           "minimum": 1,
           "maximum": 100

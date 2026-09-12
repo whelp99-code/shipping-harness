@@ -342,7 +342,7 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
       paths: outsideScope.slice(0, 3).map((value) => boundedTrainText(value, 120)),
     }, ['scopeWarning.outside', 'contract.scope.paths.include']));
   }
-  if ((input.verifyBudget?.redundantVerifyRuns ?? 0) > 0) {
+  if (input.verifyBudget) {
     const verifyBudget = /** @type {NonNullable<PlainBriefInput['verifyBudget']>} */ (input.verifyBudget);
     facts.push(fact('VERIFY_BUDGET', {
       verifyRuns: normalizedCount(verifyBudget.verifyRuns),

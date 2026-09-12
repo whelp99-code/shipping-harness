@@ -1,5 +1,5 @@
 // v1.10.0 Phase C.1: end-to-end verify-budget flow through the real CLI. A wrong
-// implementation run through `verify` three times with `maxVerifyRuns: 2` exhausts the
+// implementation run through `verify` three times with `maxRedundantVerifyRuns: 2` exhausts the
 // budget on the third (redundant) call; `hook decision` must deny continuation on the
 // resulting BLOCKED state, not report CONTINUE. Fixing the implementation and re-entering
 // through the legal BLOCKED -> FIXING -> VERIFYING path (per TRANSITIONS) reaches SHIPPABLE.
@@ -13,7 +13,7 @@ import { runCli, parseCliJson } from '../helpers/cli.mjs';
 test('verify budget exhaustion blocks, fix cycle recovers, and hook decision denies continuation', async () => {
   const fixture = await createFixtureRepo({
     testScript: 'node ./src/check.mjs',
-    contract: (contract) => ({ ...contract, budgets: { ...contract.budgets, maxVerifyRuns: 2 } }),
+    contract: (contract) => ({ ...contract, budgets: { ...contract.budgets, maxRedundantVerifyRuns: 2 } }),
   });
   try {
     await mkdir(path.join(fixture.root, 'src'), { recursive: true });

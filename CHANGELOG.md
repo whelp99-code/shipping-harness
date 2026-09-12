@@ -2,7 +2,11 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.9.0] - Unreleased
+## [1.10.0] - Unreleased
+
+In progress. See `docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md`: state integrity digest, hash-chained ledger, receipt cross-check, tamper reporting, contract-defect signalling, verify-run budget.
+
+## [1.9.0] - 2026-09-12
 
 Engineering infrastructure and maintainability. Behavior (permission policy, the nine MCP tools, schemas, state machine, output formats) is unchanged; only tooling, code structure, documentation, and CI change. Status: in progress — a `DRAFT` contract on `.shipping/`, not yet locked or closed. See `docs/planning/33-V1.9.0-ENGINEERING-INFRASTRUCTURE-DEVELOPMENT-PLAN.md` for the full plan and execution record.
 

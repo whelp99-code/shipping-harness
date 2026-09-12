@@ -1,40 +1,58 @@
 {
   "acceptance": [
     {
-      "id": "AC-11001",
-      "description": "State forgery, ledger truncation, and receipt removal are detected and reported; release prepare and hook decisions refuse tampered state.",
-      "type": "command",
-      "command": "node --test --test-reporter=spec test/adversarial/state-forgery-attacks.test.mjs test/unit/state-integrity.test.mjs",
+      "command": "npm run check",
       "cwd": ".",
+      "description": "Full local gate: lint (custom + eslint), typecheck (custom + tsc), build, and the full test suite pass.",
+      "id": "AC-19001",
       "required": true,
-      "timeoutSeconds": 300
+      "timeoutSeconds": 300,
+      "type": "command"
     },
     {
-      "id": "AC-11002",
-      "description": "Legacy (unsigned) state migrates to UNVERIFIED_LEGACY and the normal release cycle still closes.",
-      "type": "command",
-      "command": "node --test --test-reporter=spec test/stable/*.test.mjs test/integration/state-integrity-migration.test.mjs",
+      "command": "npm run lint:eslint",
       "cwd": ".",
+      "description": "ESLint reports zero errors across src/, bin/, scripts/, test/, and packages/.",
+      "id": "AC-19002",
       "required": true,
-      "timeoutSeconds": 300
+      "timeoutSeconds": 120,
+      "type": "command"
     },
     {
-      "id": "AC-11003",
-      "description": "Full regression and release gates pass.",
-      "type": "command",
+      "command": "npm run typecheck:tsc",
+      "cwd": ".",
+      "description": "tsc (JSDoc-based typecheck) reports zero errors under tsconfig.json.",
+      "id": "AC-19003",
+      "required": true,
+      "timeoutSeconds": 120,
+      "type": "command"
+    },
+    {
+      "command": "npm run test:coverage",
+      "cwd": ".",
+      "description": "Full test suite runs under --experimental-test-coverage and line coverage stays at or above the recorded threshold.",
+      "id": "AC-19004",
+      "required": true,
+      "timeoutSeconds": 300,
+      "type": "command"
+    },
+    {
       "command": "npm run release:verify",
       "cwd": ".",
+      "description": "Full release verification chain (regression, security, license, docs, train, autopilot, discovery, charter, field gates) passes.",
+      "id": "AC-19005",
       "required": true,
-      "timeoutSeconds": 900
+      "timeoutSeconds": 900,
+      "type": "command"
     },
     {
-      "id": "AC-11004",
-      "description": "No whitespace or conflict-marker errors remain.",
-      "type": "command",
       "command": "git diff --check",
       "cwd": ".",
+      "description": "No whitespace or conflict-marker errors remain.",
+      "id": "AC-19006",
       "required": true,
-      "timeoutSeconds": 60
+      "timeoutSeconds": 60,
+      "type": "command"
     }
   ],
   "adapters": {
@@ -171,9 +189,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Make CLOSED and SHIPPABLE trustworthy: state.json integrity digest, hash-chained ledger, receipt cross-check, tamper reporting across CLI/MCP/hook, contract-defect signalling, verify-run budget, and migration for legacy state",
+  "goal": "Repeatable engineering infrastructure: CI, static analysis, coverage, documentation restructure, and maintainability refactors without changing Shipping authority, MCP surface, or schemas",
   "project": "shipping-harness",
-  "release": "1.10.0",
+  "release": "1.9.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

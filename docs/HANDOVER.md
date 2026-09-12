@@ -18,6 +18,8 @@ The user is the approver, not the technical interviewer.
 
 No model, OMO task, remote client, or recovery routine can outrank the first four levels.
 
+A state whose integrity is `TAMPERED` blocks every command until an operator restores it from trusted history. `.shipping/state.json` carries an `integrity` digest bound to the head of the append-only `.shipping/ledger.jsonl` hash chain, and a `CLOSED` or `SHIPPABLE` state is additionally checked against the release receipt and the evidence manifest on disk. `verify`, `close`, `release prepare`, and hook ingestion refuse with `ERR_STATE_TAMPERED`; a Stop hook decision returns `DENY_CONTINUATION` with reason code `STATE_INTEGRITY_TAMPERED`. `status` and MCP `shipping_status` never throw: they report `integrity`, report the last state the ledger proves rather than the claim in the file, and add a derived `false-user-state` BLOCKER that is never persisted into `issues.json`. A state file written before v1.10 has no signature and reads as `UNVERIFIED_LEGACY`; that is reported but does not block.
+
 ## Components
 
 - `shipping-harness`: deterministic CLI engine.

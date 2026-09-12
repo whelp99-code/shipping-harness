@@ -1,28 +1,46 @@
 {
   "acceptance": [
     {
-      "command": "node --test --test-reporter=spec test/mcp/plain-brief.test.mjs test/integration/plain-brief-budget.test.mjs test/adversarial/plain-brief-attacks.test.mjs",
+      "command": "npm run check",
       "cwd": ".",
-      "description": "Plain Brief unit, adversarial, and Orca-JARVIS-shaped budget regression tests pass.",
-      "id": "AC-18201",
+      "description": "Full local gate: lint (custom + eslint), typecheck (custom + tsc), build, and the full test suite pass.",
+      "id": "AC-19001",
       "required": true,
       "timeoutSeconds": 300,
       "type": "command"
     },
     {
-      "command": "npm run smoke:autopilot:field",
+      "command": "npm run lint:eslint",
       "cwd": ".",
-      "description": "Dirty nested field pilot keeps a healthy bounded beginner report and does not mutate the target project.",
-      "id": "AC-18202",
+      "description": "ESLint reports zero errors across src/, bin/, scripts/, test/, and packages/.",
+      "id": "AC-19002",
       "required": true,
-      "timeoutSeconds": 600,
+      "timeoutSeconds": 120,
+      "type": "command"
+    },
+    {
+      "command": "npm run typecheck:tsc",
+      "cwd": ".",
+      "description": "tsc (JSDoc-based typecheck) reports zero errors under tsconfig.json.",
+      "id": "AC-19003",
+      "required": true,
+      "timeoutSeconds": 120,
+      "type": "command"
+    },
+    {
+      "command": "npm run test:coverage",
+      "cwd": ".",
+      "description": "Full test suite runs under --experimental-test-coverage and line coverage stays at or above the recorded threshold.",
+      "id": "AC-19004",
+      "required": true,
+      "timeoutSeconds": 300,
       "type": "command"
     },
     {
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full regression, security, license, documentation, train, autopilot, discovery, charter, and field gates pass.",
-      "id": "AC-18203",
+      "description": "Full release verification chain (regression, security, license, docs, train, autopilot, discovery, charter, field gates) passes.",
+      "id": "AC-19005",
       "required": true,
       "timeoutSeconds": 900,
       "type": "command"
@@ -31,7 +49,7 @@
       "command": "git diff --check",
       "cwd": ".",
       "description": "No whitespace or conflict-marker errors remain.",
-      "id": "AC-18204",
+      "id": "AC-19006",
       "required": true,
       "timeoutSeconds": 60,
       "type": "command"

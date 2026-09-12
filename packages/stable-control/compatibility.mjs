@@ -2,6 +2,11 @@ import { execFileSync } from 'node:child_process';
 import { STABLE_SCHEMAS } from './schema-registry.mjs';
 import { SUPPORTED_RELEASES } from './migration.mjs';
 
+/**
+ * @template T
+ * @param {T} value
+ * @returns {T}
+ */
 function deepFreeze(value) {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
   for (const nested of Object.values(value)) deepFreeze(nested);
@@ -59,8 +64,8 @@ function major(version) {
 }
 
 /**
- * @param {*} input
- * @returns {*}
+ * @param {{nodeVersion?: string, platform?: string, arch?: string, gitVersion?: string|null}} [input]
+ * @returns {typeof COMPATIBILITY & {observed: {nodeVersion: string, platform: string, arch: string, gitVersion: string}, supported: boolean, diagnostics: string[]}}
  */
 export function compatibilityReport(input = {}) {
   const nodeVersion = input.nodeVersion ?? process.versions.node;

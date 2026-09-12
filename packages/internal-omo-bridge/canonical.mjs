@@ -16,7 +16,7 @@ export function verifySignature(value, signature, key) {
 }
 
 /**
- * @returns {*}
+ * @returns {string}
  */
 export function generateHmacKey() {
   return randomBytes(48).toString('hex');

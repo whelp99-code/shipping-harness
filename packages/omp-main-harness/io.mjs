@@ -31,16 +31,16 @@ export function invariant(condition, code, message, details = undefined) {
 }
 
 /**
- * @param {*} value
- * @returns {*}
+ * @param {import('node:crypto').BinaryLike} value
+ * @returns {string}
  */
 export function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
 
 /**
- * @param {*} target
- * @returns {Promise<*>}
+ * @param {import('node:fs').PathLike} target
+ * @returns {Promise<boolean>}
  */
 export async function exists(target) {
   try {
@@ -53,9 +53,9 @@ export async function exists(target) {
 }
 
 /**
- * @param {*} value
- * @param {*} label
- * @returns {*}
+ * @param {unknown} value
+ * @param {string} label
+ * @returns {string}
  */
 export function validateAbsoluteRoot(value, label) {
   invariant(typeof value === 'string' && value.trim(), 'ERR_OMP_PATH', `${label} is required`);
@@ -66,10 +66,10 @@ export function validateAbsoluteRoot(value, label) {
 }
 
 /**
- * @param {*} root
- * @param {*} target
- * @param {*} label
- * @returns {*}
+ * @param {string} root
+ * @param {string} target
+ * @param {string} [label]
+ * @returns {string}
  */
 export function assertInside(root, target, label = 'path') {
   const resolvedRoot = path.resolve(root);
@@ -79,9 +79,9 @@ export function assertInside(root, target, label = 'path') {
 }
 
 /**
- * @param {*} target
- * @param {*} label
- * @returns {Promise<*>}
+ * @param {string} target
+ * @param {string} label
+ * @returns {Promise<import('node:fs').Stats>}
  */
 export async function assertRegularFile(target, label) {
   const info = await lstat(target).catch(() => null);
@@ -91,9 +91,9 @@ export async function assertRegularFile(target, label) {
 }
 
 /**
- * @param {*} target
- * @param {*} label
- * @returns {Promise<*>}
+ * @param {string} target
+ * @param {string} label
+ * @returns {Promise<string>}
  */
 export async function assertExecutable(target, label) {
   await assertRegularFile(target, label);
@@ -107,10 +107,10 @@ export async function assertExecutable(target, label) {
 }
 
 /**
- * @param {*} target
- * @param {*} text
- * @param {*} mode
- * @returns {Promise<*>}
+ * @param {string} target
+ * @param {string} text
+ * @param {number} [mode]
+ * @returns {Promise<void>}
  */
 export async function writeTextAtomic(target, text, mode = 0o600) {
   await mkdir(path.dirname(target), { recursive: true, mode: 0o700 });
@@ -121,10 +121,10 @@ export async function writeTextAtomic(target, text, mode = 0o600) {
 }
 
 /**
- * @param {*} target
- * @param {*} value
- * @param {*} mode
- * @returns {Promise<*>}
+ * @param {string} target
+ * @param {unknown} value
+ * @param {number} [mode]
+ * @returns {Promise<void>}
  */
 export async function writeJsonAtomic(target, value, mode = 0o600) {
   await writeTextAtomic(target, `${JSON.stringify(value, null, 2)}\n`, mode);
@@ -141,10 +141,14 @@ export async function readJson(target, fallback = undefined) {
 }
 
 /**
- * @param {*} command
- * @param {*} args
- * @param {*} options
- * @returns {*}
+ * @typedef {{cwd?: string, env?: NodeJS.ProcessEnv, timeoutMs?: number, maxBuffer?: number}} RunCommandOptions
+ */
+
+/**
+ * @param {string} command
+ * @param {string[]} [args]
+ * @param {RunCommandOptions} [options]
+ * @returns {{stdout: string, stderr: string, status: number}}
  */
 export function runCommand(command, args = [], options = {}) {
   invariant(typeof command === 'string' && command.trim(), 'ERR_OMP_COMMAND', 'Command is required');
@@ -171,9 +175,9 @@ export function runCommand(command, args = [], options = {}) {
 }
 
 /**
- * @param {*} output
- * @param {*} label
- * @returns {*}
+ * @param {string} output
+ * @param {string} label
+ * @returns {unknown}
  */
 export function parseJsonOutput(output, label) {
   try {
@@ -184,8 +188,8 @@ export function parseJsonOutput(output, label) {
 }
 
 /**
- * @param {*} output
- * @returns {*}
+ * @param {string} output
+ * @returns {string}
  */
 export function parseOmpVersion(output) {
   const match = /(?:^|\s)(?:omp\/)?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)(?:\s|$)/u.exec(String(output).trim());
@@ -194,9 +198,9 @@ export function parseOmpVersion(output) {
 }
 
 /**
- * @param {*} command
- * @param {*} env
- * @returns {*}
+ * @param {string} command
+ * @param {NodeJS.ProcessEnv} [env]
+ * @returns {string}
  */
 export function resolveOnPath(command, env = process.env) {
   if (path.isAbsolute(command) || command.includes(path.sep)) return path.resolve(command);
@@ -214,8 +218,12 @@ export function resolveOnPath(command, env = process.env) {
 }
 
 /**
- * @param {*} target
- * @returns {Promise<*>}
+ * @typedef {{existed: boolean, sha256: string|null, mode: number|null, bytes: number}} FileReceipt
+ */
+
+/**
+ * @param {string} target
+ * @returns {Promise<FileReceipt>}
  */
 export async function fileReceipt(target) {
   if (!(await exists(target))) return { existed: false, sha256: null, mode: null, bytes: 0 };
@@ -241,8 +249,8 @@ export async function copyFileAtomic(source, target, mode = undefined) {
 }
 
 /**
- * @param {*} target
- * @returns {Promise<*>}
+ * @param {string} target
+ * @returns {Promise<void>}
  */
 export async function removeKnownFile(target) {
   const info = await lstat(target).catch(() => null);

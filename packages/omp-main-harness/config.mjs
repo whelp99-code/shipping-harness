@@ -42,7 +42,7 @@ export function readOmpConfigValue(command, key, paths, fallback = undefined) {
       env: ompCommandEnvironment(paths),
       timeoutMs: 60000,
     });
-    const parsed = parseJsonOutput(result.stdout, `OMP config get ${key}`);
+    const parsed = /** @type {Record<string, unknown>} */ (parseJsonOutput(result.stdout, `OMP config get ${key}`));
     return Object.hasOwn(parsed, 'value') ? parsed.value : fallback;
   } catch (error) {
     if (fallback !== undefined) return fallback;

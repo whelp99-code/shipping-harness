@@ -15,7 +15,11 @@ async function commit(root, message) {
 }
 
 /**
- * @returns {Promise<*>}
+ * @typedef {{root: string, cleanup: () => Promise<void>}} FieldFixture
+ */
+
+/**
+ * @returns {Promise<FieldFixture>}
  */
 export async function createProtocolFixture() {
   const root = await mkdtemp(path.join(os.tmpdir(), 'shipping-omp-protocol-'));
@@ -48,8 +52,8 @@ async function addRuntime(root, name, version) {
 }
 
 /**
- * @param {*} names
- * @returns {Promise<*>}
+ * @param {string[]} [names]
+ * @returns {Promise<FieldFixture>}
  */
 export async function createNestedPilotFixture(names = ['alpha-runtime-v1.1.0', 'beta-runtime-v1.1.0']) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'shipping-omp-nested-'));

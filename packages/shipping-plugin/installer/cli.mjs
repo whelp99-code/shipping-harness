@@ -41,7 +41,7 @@ function input() {
 }
 
 /**
- * @returns {Promise<*>}
+ * @returns {Promise<void>}
  */
 export async function main() {
   const command = process.argv[2] ?? 'help';

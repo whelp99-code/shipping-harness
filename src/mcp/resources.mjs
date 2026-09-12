@@ -16,7 +16,7 @@ export const SHIPPING_RESOURCES = Object.freeze([
 ]);
 
 /**
- * @returns {*}
+ * @returns {{uri: string, name: string, description: string, mimeType: string}[]}
  */
 export function listShippingResources() {
   return SHIPPING_RESOURCES.map((entry) => ({ ...entry }));

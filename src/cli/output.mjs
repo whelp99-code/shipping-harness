@@ -33,7 +33,7 @@ export function renderStatus(status) {
 }
 
 /**
- * @returns {*}
+ * @returns {string}
  */
 export function renderHelp() {
   return `Shipping Harness\n\n` +

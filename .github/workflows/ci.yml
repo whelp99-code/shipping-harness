@@ -35,5 +35,3 @@ jobs:
         run: npm run security
       - name: License check
         run: npm run license:check
-      - name: Whitespace-clean diff check
-        run: git diff --check

@@ -25,6 +25,7 @@ export const genericAdapter = Object.freeze({
         execute: true,
         cancel: true,
         artifactCollection: Array.isArray(config.artifactPaths) && config.artifactPaths.length > 0,
+        costTelemetry: true,
       }),
       diagnostics: command ? [] : ['No default command is configured; pass --command at execution time.'],
       metadata: {

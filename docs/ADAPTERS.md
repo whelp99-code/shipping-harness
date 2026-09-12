@@ -21,7 +21,7 @@ Every probe returns `shipping-harness/adapter-capabilities-v1` with adapter iden
 | `durableGoals` | Repository evidence proves a durable goal file is present. |
 | `durableLedger` | Repository evidence proves a durable ledger file is present. |
 | `artifactCollection` | Safe repository-local candidate paths are configured. |
-| `costTelemetry` | A stable cost receipt was proven. |
+| `costTelemetry` | A stable cost receipt was proven. True for every built-in adapter: `adapter run` always executes through the shared runner, whose run receipt carries `telemetry.durationMs` and `telemetry.exitCode`; `telemetry.toolCalls` stays `null` unless the host reports it. |
 
 Executable presence alone does not prove authentication, provider health, quota, supported model access, or task completion.
 

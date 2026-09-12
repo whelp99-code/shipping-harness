@@ -36,6 +36,7 @@ export const gajaeAdapter = Object.freeze({
         durableGoals: goals,
         durableLedger: ledger,
         artifactCollection: presence.candidates.length > 0,
+        costTelemetry: true,
       }),
       diagnostics: [
         ...(!discovered ? ['gjc executable was not found on PATH.'] : []),

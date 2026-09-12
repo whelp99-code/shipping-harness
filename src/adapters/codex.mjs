@@ -31,6 +31,7 @@ export const codexAdapter = Object.freeze({
         execute: Boolean(discovered || command),
         cancel: Boolean(discovered || command),
         artifactCollection: Array.isArray(config.artifactPaths) && config.artifactPaths.length > 0,
+        costTelemetry: true,
       }),
       diagnostics: [
         ...(!discovered ? ['Codex executable was not found on PATH.'] : []),

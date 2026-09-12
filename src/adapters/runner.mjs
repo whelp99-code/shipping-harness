@@ -7,14 +7,27 @@ import { runBoundedCommand } from '../core/process.mjs';
 import { beginAgentRun, finishAgentRun } from '../core/gate.mjs';
 import { invariant } from '../core/errors.mjs';
 import { sha256 } from '../core/crypto.mjs';
+import { sanitizeHookPayload } from '../core/hooks.mjs';
 import { adapterConfiguration, configuredCommand } from './sdk.mjs';
 import { collectAdapterArtifacts, probeAdapter, resolveAdapter } from './registry.mjs';
+
+/**
+ * v1.10.0 Phase C: `toolCalls` is host-reported, optional cost telemetry. Run through the
+ * same sanitizer as any other hook-adjacent payload, then require a non-negative integer.
+ * @param {unknown} value
+ */
+function normalizeToolCalls(value) {
+  if (value === undefined || value === null) return null;
+  const sanitized = sanitizeHookPayload(value);
+  invariant(Number.isInteger(sanitized) && sanitized >= 0, 'ERR_TOOL_CALLS_INVALID', 'toolCalls must be a non-negative integer', { value });
+  return sanitized;
+}
 
 /**
  * Execute an explicit operator command through a registered adapter boundary.
  * Adapter discovery never implies authorization to invent a third-party command.
  * @param {string} root
- * @param {{adapter: string, command?: string | null, cwd?: string}} request
+ * @param {{adapter: string, command?: string | null, cwd?: string, toolCalls?: number | null}} request
  */
 export async function executeAdapter(root, request) {
   const { contract, lock } = await assertLockedContract(root);
@@ -24,7 +37,9 @@ export async function executeAdapter(root, request) {
   invariant(typeof command === 'string' && command.trim(), 'ERR_ADAPTER_COMMAND_REQUIRED', `No execution command configured for ${adapter.name}`);
   const cwd = path.resolve(root, request.cwd ?? '.');
   await assertContainedPath(root, cwd);
-  await beginAgentRun(root, adapter.name);
+  const toolCalls = normalizeToolCalls(request.toolCalls);
+  const runningState = await beginAgentRun(root, adapter.name);
+  const verifyRunsAtStart = runningState.verifyRuns ?? 0;
 
   const runId = `agent-${new Date().toISOString().replace(/[:.]/gu, '-')}-${randomUUID().slice(0, 8)}`;
   const runDirectory = path.join(runtimePaths(root).evidence, runId);
@@ -60,6 +75,16 @@ export async function executeAdapter(root, request) {
 
   const report = probeAdapter(adapter.name, { contract, root });
   const artifacts = await collectAdapterArtifacts(adapter.name, { contract, root });
+  // v1.10.0 Phase C cost telemetry: verifyRunsAtStart/End bracket this single synchronous
+  // run, during which no `verify` call can interleave, so both equal the same snapshot.
+  const telemetry = {
+    durationMs: result.durationMs,
+    exitCode: result.exitCode,
+    outputBytes: result.capturedBytes,
+    toolCalls,
+    verifyRunsAtStart,
+    verifyRunsAtEnd: verifyRunsAtStart,
+  };
   const manifest = {
     schema: 'shipping-harness/agent-run-v1',
     runId,
@@ -69,6 +94,7 @@ export async function executeAdapter(root, request) {
     contractHash: lock.contractHash,
     commandDigest,
     cwd: path.relative(root, cwd).replaceAll('\\', '/') || '.',
+    telemetry,
     result: {
       ...result,
       stdout: undefined,
@@ -77,6 +103,6 @@ export async function executeAdapter(root, request) {
     },
   };
   await writeJsonAtomic(path.join(runDirectory, 'manifest.json'), manifest);
-  await finishAgentRun(root, manifest.result);
+  await finishAgentRun(root, manifest.result, telemetry);
   return manifest;
 }

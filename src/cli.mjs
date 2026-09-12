@@ -287,6 +287,7 @@ async function statusCommand({ root, json }) {
   const result = await releaseStatus(root);
   if (json) printJson(result);
   else process.stdout.write(renderStatus(result));
+  if (result.integrity?.ok === false) return 2;
   return result.state.state === 'BLOCKED' || result.state.blockerCount > 0 ? 2 : 0;
 }
 

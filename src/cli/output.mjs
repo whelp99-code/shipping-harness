@@ -15,6 +15,7 @@ export function renderStatus(status) {
     `Git SHA           ${status.git.sha.slice(0, 12)}`,
     `Git clean         ${status.git.clean ? 'YES' : 'NO'}`,
     `Contract valid    ${status.contractValid ? 'YES' : 'NO'}`,
+    `State integrity   ${status.integrity?.level ?? 'UNKNOWN'}`,
     `Evidence fresh    ${status.evidenceFresh ? 'YES' : 'NO'}`,
     `Agent runs        ${status.state.agentRuns}`,
     `Fix cycles        ${status.state.fixCycles}`,
@@ -25,6 +26,9 @@ export function renderStatus(status) {
     `  IGNORE          ${counts.IGNORE}`,
     `  UNKNOWN         ${counts.UNKNOWN}`,
   ];
+  if (status.integrity && status.integrity.ok === false) {
+    lines.push('', `State integrity BROKEN: ${status.integrity.reason}`, `Proven state from ledger: ${status.integrity.ledgerState ?? 'unknown'}`);
+  }
   if (status.contractError) lines.push('', `Contract diagnostic: ${status.contractError}`);
   if (status.closedDrift?.violations?.length) {
     lines.push('', `Closed-version drift: ${status.closedDrift.violations.length} violation(s)`);

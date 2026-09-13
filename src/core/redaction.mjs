@@ -6,7 +6,7 @@ const REDACTION_RULES = Object.freeze([
   },
   {
     name: 'bearer-token',
-    pattern: /\b(Bearer\s+)[A-Za-z0-9._~+\/-]+=*/giu,
+    pattern: /\b(Bearer\s+)[A-Za-z0-9._~+/-]+=*/giu,
     replacement: '$1[REDACTED]',
   },
   {
@@ -35,6 +35,9 @@ export function redactSecrets(value) {
   return redacted;
 }
 
+/**
+ * @returns {string[]}
+ */
 export function redactionRuleNames() {
   return REDACTION_RULES.map((rule) => rule.name);
 }

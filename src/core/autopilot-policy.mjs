@@ -298,7 +298,7 @@ export function decideAutopilot(policyInput, requestInput) {
   return { ...body, hash: hashObject(body) };
 }
 
-/** @param {Record<string,any>} decision */
+/** @param {Record<string, any> | null | undefined} decision */
 export function validateAutopilotDecision(decision) {
   invariant(decision?.schema === 'shipping-harness/autopilot-decision-v1', 'ERR_AUTOPILOT_DECISION_SCHEMA', 'Unsupported autopilot decision schema');
   invariant(AUTOPILOT_DECISIONS.includes(decision.decision), 'ERR_AUTOPILOT_DECISION', `Unsupported decision: ${String(decision.decision)}`);
@@ -312,6 +312,15 @@ export function validateAutopilotDecision(decision) {
   return decision;
 }
 
+/**
+ * A compiled, validated autopilot policy as produced by compileAutopilotPolicy().
+ * @typedef {{schema: string, id: string, profile: string, enabled: boolean, modelAuthority: boolean, defaultDecision: string, permissions: Record<string, string>, consequencePolicy: Record<string, unknown>, closureRequirements: Record<string, unknown>, limits: {maxFixCycles: number, maxAgentRuns: number, maxReleases: number, maxCommandSeconds: number}, binding: {proposalId: string, proposalHash: string, contractHash: string, baselineSha: string, releaseTrainHash: string, approvedAt: string}, hash: string}} AutopilotPolicy
+ */
+
+/**
+ * @param {AutopilotPolicy|null|undefined} policy
+ * @returns {{schema: string, id: string, hash: string, profile: string, enabled: boolean, modelAuthority: boolean, automaticReleased: boolean, allowsLocalImplementation: boolean, allowsAutomaticClose: boolean, externalEffectsRequireHuman: boolean}|null}
+ */
 export function autopilotPolicySummary(policy) {
   if (!policy) return null;
   validateAutopilotPolicy(policy);
@@ -329,6 +338,11 @@ export function autopilotPolicySummary(policy) {
   };
 }
 
+/**
+ * @param {AutopilotPolicy} left
+ * @param {AutopilotPolicy} right
+ * @returns {boolean}
+ */
 export function policiesEquivalent(left, right) {
   validateAutopilotPolicy(left);
   validateAutopilotPolicy(right);

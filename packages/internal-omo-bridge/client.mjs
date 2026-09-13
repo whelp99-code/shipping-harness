@@ -8,6 +8,7 @@ import { loadOrCreateBridgeKey } from './key.mjs';
 import { createPrivateOmoWorkOrder } from './work-order.mjs';
 import { validatePrivateOmoReceipt } from './receipt.mjs';
 
+/** @param {Record<string, any>} config @param {string[]} argv @param {{key?: string, timeoutMs?: number}} [options] */
 function runJson(config, argv, { key, timeoutMs = 120_000 } = {}) {
   const result = spawnSync(config.nodePath, [config.cliPath, ...argv, '--json'], {
     encoding: 'utf8',
@@ -24,6 +25,7 @@ function runJson(config, argv, { key, timeoutMs = 120_000 } = {}) {
   let parsed;
   try { parsed = JSON.parse(String(result.stdout || '').trim()); }
   catch {
+    // Non-JSON stdout from the private runtime is a contract violation; surface stderr instead of the raw parse error.
     throw new ShippingError('ERR_OMO_RUNTIME_OUTPUT', 'Private OMO runtime did not return bounded JSON', {
       exitCode: result.status ?? 1,
       stderr: String(result.stderr || '').trim().slice(0, 4000),
@@ -45,7 +47,7 @@ export async function privateOmoDoctor(root) {
 
 /**
  * @param {string} root
- * @param {Parameters<typeof createPrivateOmoWorkOrder>[1] & {timeoutMs?: number}} options
+ * @param {Omit<Parameters<typeof createPrivateOmoWorkOrder>[1], 'hmacKey'> & {timeoutMs?: number}} options
  */
 export async function executePrivateOmoRuntime(root, options = {}) {
   const health = await privateOmoDoctor(root);

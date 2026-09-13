@@ -8,7 +8,7 @@ export function nodeMajor(version) {
 }
 
 /**
- * @param {{nodeVersion?: string, gitExecutable?: string, codexExecutable?: string, host?: 'generic'|'codex', run?: typeof spawnSync}} [options]
+ * @param {{nodeVersion?: string, gitExecutable?: string, codexExecutable?: string, host?: string, run?: typeof spawnSync}} [options]
  */
 export function checkPluginCompatibility(options = {}) {
   const run = options.run ?? spawnSync;

@@ -1,0 +1,32 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 6,
+    "requiredFailed": 0,
+    "total": 6
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "2c182e5c5dc0768a21cde32709d8a2964c82f3e3",
+  "closedAt": "2026-09-13T02:55:43.636Z",
+  "closedGitSha": "f6a5c509afe5b44c29fe24567c945f5f5f708021",
+  "contractHash": "7d2dfa65f7e92df12d109a57aa90cd0c3ea1e63e555c1b120d1a10a5b228ce79",
+  "evidenceRunId": "run-2026-09-13T02-55-05-519Z-09405d9d",
+  "fixCycles": 0,
+  "goal": "Make CLOSED and SHIPPABLE trustworthy: state.json integrity digest, hash-chained ledger, receipt cross-check, tamper reporting across CLI/MCP/hook, contract-defect signalling, verify-run budget, and migration for legacy state",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.10.0",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

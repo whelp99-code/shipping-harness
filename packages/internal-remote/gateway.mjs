@@ -18,6 +18,9 @@ const ACTION_PARAMS = Object.freeze({
   'evidence/summary': [],
 });
 
+/**
+ * RateLimiter.
+ */
 export class RateLimiter {
   constructor(limit = 30, windowMs = 60000) {
     this.limit = boundedInteger(limit, 'rate limit', { min: 1, max: 10000 });
@@ -69,7 +72,13 @@ function notificationFor(result) {
   return null;
 }
 
+/**
+ * InternalRemoteGateway.
+ */
 export class InternalRemoteGateway {
+  /**
+   * @param {{config: import('./identity.mjs').RemoteConfig, replayStore: any, adapter: any, notifications: any, backupRoot: string, rateLimiter?: any}} options
+   */
   constructor({ config, replayStore, adapter, notifications, backupRoot, rateLimiter }) {
     invariant(config && replayStore && adapter && notifications, 'ERR_REMOTE_CONFIG', 'Gateway dependencies are required');
     this.config = config;
@@ -234,6 +243,11 @@ export class InternalRemoteGateway {
   }
 }
 
+/**
+ * @param {unknown} requestId
+ * @param {(Error & {code?: string})|null|undefined} error
+ * @returns {{schema: string, requestId: string, ok: false, error: {code: string, message: string}}}
+ */
 export function remoteError(requestId, error) {
   return {
     schema: 'shipping-remote/response-v1',

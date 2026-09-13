@@ -25,6 +25,7 @@ function eventHash(event) {
   return hashObject(body);
 }
 
+/** @param {unknown} value @param {string} label @param {number} [max] @param {boolean} [nullable] */
 function bounded(value, label, max = 2000, nullable = false) {
   if ((value === undefined || value === null || value === '') && nullable) return null;
   const result = typeof value === 'string' ? value.trim().replace(/\s+/gu, ' ') : '';
@@ -32,9 +33,10 @@ function bounded(value, label, max = 2000, nullable = false) {
   return result;
 }
 
+/** @param {unknown} value @param {string} label @param {number} length */
 function exactHash(value, label, length) {
   const text = bounded(value, label, length);
-  invariant(new RegExp(`^[a-f0-9]{${length}}$`, 'u').test(text), 'ERR_DECISION_LEDGER', `${label} must be lowercase hexadecimal`);
+  invariant(typeof text === 'string' && new RegExp(`^[a-f0-9]{${length}}$`, 'u').test(text), 'ERR_DECISION_LEDGER', `${label} must be lowercase hexadecimal`);
   return text;
 }
 
@@ -51,6 +53,7 @@ function eventKey(input) {
   });
 }
 
+/** @param {Record<string, any>} event @param {Record<string, any> | null} [previous] */
 export function validateDecisionLedgerEvent(event, previous = null) {
   invariant(event?.schema === SCHEMA, 'ERR_DECISION_LEDGER_SCHEMA', 'Unsupported decision-ledger event schema');
   invariant(Number.isInteger(event.sequence) && event.sequence >= 1, 'ERR_DECISION_LEDGER_SEQUENCE', 'Decision-ledger sequence must be a positive integer');
@@ -89,6 +92,7 @@ async function snapshot(root) {
     try {
       return JSON.parse(line);
     } catch {
+      // A corrupted ledger line must fail closed rather than be silently skipped, since the ledger is append-only evidence.
       throw Object.assign(new Error('Decision ledger contains invalid JSON'), { code: 'ERR_DECISION_LEDGER_PARSE' });
     }
   });
@@ -103,6 +107,14 @@ async function snapshot(root) {
   return { events, bytes };
 }
 
+/**
+ * @typedef {{schema: string, sequence: number, occurredAt: string, proposalId: string, proposalRevision: number, proposalHash: string, gitSha: string, type: string, questionId: string|null, directionHash: string|null, discoveryHash: string, choice: string|null, provenance: string, evidenceRefs: string[], details: Record<string, unknown>, eventKey: string, previousHash: string|null, modelAuthority: boolean, released: boolean, hash: string}} DecisionLedgerEvent
+ */
+
+/**
+ * @param {string} root
+ * @returns {Promise<DecisionLedgerEvent[]>}
+ */
 export async function readDecisionLedger(root) {
   return (await snapshot(root)).events;
 }
@@ -131,6 +143,11 @@ async function withLedgerLock(root, operation) {
   }
 }
 
+/**
+ * @param {string} root
+ * @param {{type: string, occurredAt?: Date, proposalId: string, proposalRevision: number, proposalHash: string, gitSha: string, questionId?: string|null, directionHash?: string|null, discoveryHash: string, choice?: string|null, provenance?: string, evidenceRefs?: string[], details?: Record<string, unknown>}} input
+ * @returns {Promise<{event: DecisionLedgerEvent, duplicate: boolean}>}
+ */
 export async function appendDecisionLedgerEvent(root, input) {
   return withLedgerLock(root, async () => {
     invariant(EVENT_TYPES.has(input.type), 'ERR_DECISION_LEDGER_TYPE', `Unsupported decision-ledger event type: ${String(input.type)}`);
@@ -172,6 +189,11 @@ export async function appendDecisionLedgerEvent(root, input) {
   });
 }
 
+/**
+ * @param {string} root
+ * @param {string|null} [proposalId]
+ * @returns {Promise<{schema: string, eventCount: number, lastSequence: number, lastHash: string|null, lastType: string|null, acceptedDirectionHash: string|null, modelAuthority: boolean, released: boolean, bounded: {maxEvents: number, maxBytes: number}}>}
+ */
 export async function decisionLedgerSummary(root, proposalId = null) {
   const events = await readDecisionLedger(root);
   const filtered = proposalId ? events.filter((entry) => entry.proposalId === proposalId) : events;

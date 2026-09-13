@@ -3,6 +3,9 @@ import readline from 'node:readline';
 import { OMP_MCP_PROTOCOL, SHIPPING_TOOL_NAMES } from './constants.mjs';
 import { invariant } from './io.mjs';
 
+/**
+ * McpLineClient.
+ */
 export class McpLineClient {
   /** @param {{command: string, args?: string[], cwd: string, env?: Record<string, string>, timeoutMs?: number}} input */
   constructor(input) {
@@ -59,7 +62,7 @@ export class McpLineClient {
 
   async close() {
     this.child.stdin.end();
-    await new Promise((resolve) => {
+    await /** @type {Promise<void>} */ (new Promise((resolve) => {
       const timer = setTimeout(() => {
         this.child.kill('SIGTERM');
         resolve();
@@ -68,7 +71,7 @@ export class McpLineClient {
         clearTimeout(timer);
         resolve();
       });
-    });
+    }));
   }
 }
 

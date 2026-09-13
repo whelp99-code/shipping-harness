@@ -17,7 +17,9 @@ export async function doctorOmpMainHarness(input = {}) {
   const omp = resolveOnPath(input.ompCommand ?? 'omp');
   const packageManifest = JSON.parse(await readFile(path.join(packageRoot(), 'package.json'), 'utf8'));
   const expectedVersion = input.expectedVersion ?? packageManifest.version;
+  /** @type {Record<string, boolean>} */
   const checks = {};
+  /** @type {Record<string, unknown>} */
   const details = {};
 
   const shippingVersion = installedShippingVersion(prefix.root);
@@ -117,6 +119,7 @@ function runExecutableCheck(command) {
     runCommand('/usr/bin/test', ['-x', command], { timeoutMs: 5000 });
     return true;
   } catch {
+    // A non-zero exit from /usr/bin/test (or the test binary being missing) both mean "not executable" for this doctor check.
     return false;
   }
 }

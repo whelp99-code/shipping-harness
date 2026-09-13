@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "1.8.2",
+  "version": "1.11.0",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -37,9 +37,14 @@
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
-    "lint": "node scripts/lint.mjs",
-    "typecheck": "node scripts/typecheck.mjs",
+    "lint": "npm run lint:custom && npm run lint:eslint",
+    "lint:custom": "node scripts/lint.mjs",
+    "lint:eslint": "eslint .",
+    "typecheck": "npm run typecheck:custom && npm run typecheck:tsc",
+    "typecheck:custom": "node scripts/typecheck.mjs",
+    "typecheck:tsc": "tsc -p tsconfig.json",
     "test": "node scripts/run-tests.mjs all",
+    "test:coverage": "node scripts/run-tests.mjs all --coverage",
     "test:unit": "node scripts/run-tests.mjs unit",
     "test:integration": "node scripts/run-tests.mjs integration",
     "test:adapter": "node scripts/run-tests.mjs adapter",
@@ -54,7 +59,7 @@
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",
     "license:check": "node scripts/license-check.mjs",
-    "release:verify": "npm run check && npm run test:plugin && npm run test:omo-bridge && npm run test:remote && npm run test:stable && npm run security && npm run security:inventory && npm run license:check && npm run verify:docs && npm run smoke:release-train && npm run smoke:autopilot && npm run smoke:autopilot:field && npm run smoke:goal-discovery && npm run smoke:goal-charter && npm run test:goal-charter:field && npm run smoke:goal-charter:field && npm run test:intent-gate && npm run smoke:intent-gate",
+    "release:verify": "node scripts/release-verify.mjs",
     "test:omo-bridge": "node --test --test-reporter=spec test/omo/*.test.mjs",
     "test:remote": "node --test --test-reporter=spec test/remote/*.test.mjs test/adversarial/remote-attacks.test.mjs",
     "smoke:remote": "node scripts/remote-gateway-smoke.mjs --check",
@@ -82,5 +87,12 @@
     "test:intent-gate": "node --test --test-reporter=spec test/unit/intent-gate.test.mjs test/mcp/intent-gate.test.mjs test/adversarial/intent-gate-attacks.test.mjs",
     "smoke:intent-gate": "node scripts/intent-gate-pilot.mjs --check"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.2",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
+    "typescript": "^5.9.3"
+  }
 }

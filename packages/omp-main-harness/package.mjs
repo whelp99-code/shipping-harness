@@ -41,6 +41,7 @@ export function installedShippingVersion(prefix) {
   try {
     return runCommand(paths.cli, ['version'], { timeoutMs: 30000 }).stdout.trim();
   } catch {
+    // A doctor/status probe: an unreadable or failing binary means "no usable installed version", not a hard error.
     return null;
   }
 }
@@ -51,6 +52,7 @@ function existsSyncExecutable(target) {
     const result = runCommand('/usr/bin/test', ['-x', target], { timeoutMs: 5000 });
     return result.status === 0;
   } catch {
+    // /usr/bin/test itself being unavailable means the executability check cannot be confirmed; treat as "not executable".
     return false;
   }
 }

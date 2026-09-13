@@ -1,6 +1,13 @@
+/**
+ * @param {unknown} condition
+ * @param {string} code
+ * @param {string} message
+ * @param {Record<string, unknown>} [details]
+ * @returns {asserts condition}
+ */
 export function stableInvariant(condition, code, message, details) {
   if (condition) return;
-  const error = new Error(message);
+  const error = /** @type {Error & {code?: string, details?: unknown}} */ (new Error(message));
   error.code = code;
   error.details = details;
   throw error;

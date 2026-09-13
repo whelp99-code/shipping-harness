@@ -12,8 +12,12 @@ import { executeAdapter } from '../../src/adapters/runner.mjs';
 import { normalizeError } from '../../src/core/errors.mjs';
 import { executePrivateOmoRuntime, privateOmoDoctor } from './client.mjs';
 
+/**
+ * @param {Record<string, unknown>} contract
+ * @returns {'codex'|'generic'|null}
+ */
 function configuredFallback(contract) {
-  for (const adapter of ['codex', 'generic']) {
+  for (const adapter of /** @type {const} */ (['codex', 'generic'])) {
     if (configuredCommand(adapterConfiguration(contract, adapter))) return adapter;
   }
   return null;
@@ -188,6 +192,10 @@ export async function executeShippingPrivateOmo(root, options = {}) {
   }
 }
 
+/**
+ * @param {Record<string, unknown>} contract
+ * @returns {{mode: 'approved-fallback'|'blocked', adapter: 'codex'|'generic'|null}}
+ */
 export function privateOmoFallbackDecision(contract) {
   const fallback = configuredFallback(contract);
   return fallback

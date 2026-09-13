@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['22', '24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+      - name: Lint and typecheck and build and test (npm run check)
+        run: npm run check
+      - name: ESLint
+        run: npm run lint:eslint
+      - name: TypeScript typecheck
+        run: npm run typecheck:tsc
+      - name: Coverage-gated test run
+        run: npm run test:coverage
+      - name: Security check
+        run: npm run security
+      - name: License check
+        run: npm run license:check

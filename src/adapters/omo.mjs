@@ -34,6 +34,7 @@ export const omoAdapter = Object.freeze({
         cancel: Boolean(discovered || command),
         hooks: true,
         artifactCollection: presence.candidates.length > 0,
+        costTelemetry: true,
       }),
       diagnostics: [
         ...(!discovered ? ['omo executable was not found on PATH.'] : []),

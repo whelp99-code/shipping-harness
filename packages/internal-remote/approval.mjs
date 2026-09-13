@@ -23,6 +23,14 @@ function validateBindingValue(value, label, maximum = 256) {
   return value;
 }
 
+/**
+ * @typedef {{schema: string, receiptId: string, requestId: string, actorId: string, projectId: string, release: string, proposalId: string, proposalHash: string, gitSha: string, nonce: string, issuedAt: string, expiresAt: string, oneTime: boolean, signature: string}} ApprovalReceipt
+ */
+
+/**
+ * @param {{requestId: string, actorId: string, projectId: string, release: string, proposalId: string, proposalHash: string, gitSha: string, requestNonce: string, serverCredential: string, now?: number, ttlMs?: number}} options
+ * @returns {ApprovalReceipt}
+ */
 export function issueApprovalReceipt({
   requestId,
   actorId,
@@ -62,6 +70,11 @@ export function issueApprovalReceipt({
   return { ...body, signature: hmac(body, serverCredential) };
 }
 
+/**
+ * @param {ApprovalReceipt} receipt
+ * @param {{serverCredential: string, now?: number, requestId?: string, actorId?: string, projectId?: string, release?: string, proposalId?: string, proposalHash?: string, gitSha?: string}} expected
+ * @returns {ApprovalReceipt}
+ */
 export function validateApprovalReceipt(receipt, expected) {
   invariant(receipt && typeof receipt === 'object' && !Array.isArray(receipt), 'ERR_REMOTE_APPROVAL', 'Approval receipt is missing or invalid');
   for (const key of Object.keys(receipt)) {
@@ -69,6 +82,7 @@ export function validateApprovalReceipt(receipt, expected) {
   }
   invariant(receipt.schema === 'shipping-remote-approval/v1', 'ERR_REMOTE_APPROVAL', 'Approval receipt schema is invalid');
   invariant(receipt.oneTime === true, 'ERR_REMOTE_APPROVAL', 'Approval receipt must be one-time');
+  /** @type {Partial<ApprovalReceipt>} */
   const unsigned = { ...receipt };
   delete unsigned.signature;
   invariant(safeHex(hmac(unsigned, expected.serverCredential), receipt.signature), 'ERR_REMOTE_APPROVAL', 'Approval receipt signature is invalid');

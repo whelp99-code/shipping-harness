@@ -27,6 +27,9 @@ function structured(result) {
   return result?.structuredContent?.data ?? result?.structuredContent ?? result;
 }
 
+/**
+ * ShippingRemoteAdapter.
+ */
 export class ShippingRemoteAdapter {
   constructor(projects) {
     this.projects = projects;

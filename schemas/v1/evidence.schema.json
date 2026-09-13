@@ -43,6 +43,20 @@
       "type": "string",
       "maxLength": 8192
     },
+    "treeFingerprint": {
+      "description": "v1.10.0: sha256 over the HEAD sha plus every working-tree deviation from it (path and working-copy blob sha, .shipping/ excluded). Identifies the tree the commands actually ran against. Optional; manifests written before v1.10.0 have none.",
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "dirtyPaths": {
+      "description": "v1.10.0: paths changed relative to HEAD when the commands ran (staged, unstaged, untracked; .shipping/ excluded). Non-empty means the evidence is not attributable to the commit alone. Optional.",
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "string",
+        "maxLength": 4096
+      }
+    },
     "baselineSha": {
       "type": "string",
       "maxLength": 8192

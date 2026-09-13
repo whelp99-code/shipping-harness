@@ -42,6 +42,9 @@ function normalizeEvent(event) {
   return { ...body, dedupeKey: dedupeKey({ ...event, ...body }) };
 }
 
+/**
+ * NotificationStore.
+ */
 export class NotificationStore {
   constructor(file, { maxEntries = 1000, dedupeWindowMs = 24 * 60 * 60 * 1000 } = {}) {
     this.file = path.resolve(file);
@@ -51,7 +54,7 @@ export class NotificationStore {
   }
 
   async #read() {
-    let text = '';
+    let text;
     try {
       text = await readFile(this.file, 'utf8');
     } catch (error) {
@@ -65,7 +68,7 @@ export class NotificationStore {
         try {
           return JSON.parse(line);
         } catch (error) {
-          const failure = new Error(`Invalid notification JSONL at line ${index + 1}`);
+          const failure = /** @type {Error & {code?: string}} */ (new Error(`Invalid notification JSONL at line ${index + 1}`));
           failure.code = 'ERR_NOTIFICATION_CORRUPT';
           failure.cause = error;
           throw failure;
@@ -114,6 +117,7 @@ export class NotificationStore {
     return next;
   }
 
+  /** @param {{projectId?: string, afterId?: string, limit?: number}} [options] */
   async list({ projectId, afterId, limit = 50 } = {}) {
     await this.chain;
     const boundedLimit = boundedInteger(limit, 'notification list limit', { min: 1, max: 100 });

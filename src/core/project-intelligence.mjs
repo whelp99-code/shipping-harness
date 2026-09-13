@@ -53,6 +53,7 @@ function buildComponentGraph(files, analysis) {
   const selectedRoot = analysis.workspace?.root ?? '.';
   const components = [];
   const seen = new Set();
+  /** @param {string} root @param {string[]} [knownStacks] @param {string | null} [name] */
   const add = (root, knownStacks = [], name = null) => {
     const normalizedRoot = normalized(root);
     if (seen.has(normalizedRoot)) return;
@@ -98,6 +99,14 @@ function buildComponentGraph(files, analysis) {
   };
 }
 
+/**
+ * @typedef {{sideEffect: string, isolationRequired: boolean, deterministicOutputRequired: boolean, automaticallyRunnable: boolean}} AcceptanceCommandMetadata
+ */
+
+/**
+ * @param {string|null|undefined} command
+ * @returns {AcceptanceCommandMetadata}
+ */
 export function acceptanceCommandMetadata(command) {
   const text = String(command ?? '').trim().toLowerCase();
   if (/\b(?:deploy|publish|release-to|terraform apply|kubectl apply)\b/u.test(text)) {
@@ -115,6 +124,10 @@ export function acceptanceCommandMetadata(command) {
   return { sideEffect: 'none-or-test-output', isolationRequired: false, deterministicOutputRequired: false, automaticallyRunnable: true };
 }
 
+/**
+ * @param {import('./project-analysis.mjs').CandidateCommand[]} [commands]
+ * @returns {import('./project-analysis.mjs').CandidateCommand[]}
+ */
 export function annotateAcceptanceCommands(commands = []) {
   return commands.map((entry) => ({ ...entry, ...acceptanceCommandMetadata(entry.command) }));
 }
@@ -230,6 +243,10 @@ export function buildProjectIntelligence(root, analysis, baseline, explicitGoal)
   return { ...result, hash: hashObject(result) };
 }
 
+/**
+ * @param {Record<string, any>} proposal
+ * @returns {{schema: string, release: string, state: string, goal: string, recommendedGoal: string|null, recommendationIsAuthority: boolean, included: unknown[], excluded: unknown[], checks: Array<{id: string, command: string, cwd: string, sideEffect: string, isolated: boolean}>, workThemes: Array<{id: string, title: string, pathCount: number}>, coverage: {complete: boolean, coveredPaths: number, totalPaths: number, uncoveredPaths: string[]}|null, readyForApproval: boolean, detailsAvailable: boolean, boundedBytes: number}}
+ */
 export function buildOneScreenApproval(proposal) {
   const brief = proposal.approvalBrief ?? {};
   const intelligence = proposal.intelligence ?? proposal.analysis?.intelligence ?? null;

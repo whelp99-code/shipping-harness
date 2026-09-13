@@ -4,6 +4,8 @@
   "release": "1.0.0",
   "contractHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "gitSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "treeFingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "dirtyPaths": [],
   "baselineSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "startedAt": "2026-08-28T00:00:00.000Z",
   "finishedAt": "2026-08-28T00:00:01.000Z",

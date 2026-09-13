@@ -5,10 +5,12 @@ import { readGoalRuntime } from './store.mjs';
 
 /** @param {Array<Record<string, any>>} records */
 function countStates(records) {
-  return Object.fromEntries([...records.reduce((counts, record) => {
+  /** @type {Map<string, number>} */
+  const counts = new Map();
+  for (const record of records) {
     counts.set(record.state, (counts.get(record.state) ?? 0) + 1);
-    return counts;
-  }, new Map())].sort(([left], [right]) => left.localeCompare(right)));
+  }
+  return Object.fromEntries([...counts].sort(([left], [right]) => left.localeCompare(right)));
 }
 
 /** @param {string} root */

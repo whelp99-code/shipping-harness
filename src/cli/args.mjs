@@ -3,7 +3,9 @@
  * @param {string[]} argv
  */
 export function parseArgs(argv) {
+  /** @type {string[]} */
   const positionals = [];
+  /** @type {Record<string, unknown>} */
   const options = {};
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
@@ -36,8 +38,14 @@ export function parseArgs(argv) {
   return { positionals, options };
 }
 
-/** @param {Record<string, unknown>} options @param {string} key @param {string | null} [fallback] */
-export function stringOption(options, key, fallback = null) {
+/**
+ * @template {string | null} [T=null]
+ * @param {Record<string, unknown>} options
+ * @param {string} key
+ * @param {T} [fallback]
+ * @returns {string | T}
+ */
+export function stringOption(options, key, fallback = /** @type {T} */ (null)) {
   const value = options[key];
   if (value === undefined) return fallback;
   if (typeof value === 'string') return value;

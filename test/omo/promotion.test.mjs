@@ -3,10 +3,13 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { verifyPrivateOmoPromotion, privateOmoDoctor } from '../../packages/internal-omo-bridge/index.mjs';
+import { privateOmoRuntimeAvailability } from './helpers.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const runtime = privateOmoRuntimeAvailability();
+const skip = runtime.available ? {} : { skip: 'private OMO runtime is not installed at the pinned path' };
 
-test('promoted private OMO runtime is pinned, internal-only, installed, canaried, and rollback-proven', async () => {
+test('promoted private OMO runtime is pinned, internal-only, installed, canaried, and rollback-proven', skip, async () => {
   const report = await verifyPrivateOmoPromotion(root);
   assert.equal(report.healthy, true);
   assert.equal(report.internalOnly, true);
@@ -24,7 +27,7 @@ test('promoted private OMO runtime is pinned, internal-only, installed, canaried
   assert.ok(report.selectedTests.every((entry) => entry.status === 0));
 });
 
-test('real private OMO doctor preserves the Shipping authority boundary', async () => {
+test('real private OMO doctor preserves the Shipping authority boundary', skip, async () => {
   const health = await privateOmoDoctor(root);
   assert.equal(health.doctor.healthy, true);
   assert.equal(health.doctor.internalOnly, true);

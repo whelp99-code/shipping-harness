@@ -4,7 +4,7 @@ import path from 'node:path';
 import { assertLockedContract } from './contract.mjs';
 import { hashObject } from './crypto.mjs';
 import { invariant } from './errors.mjs';
-import { assertContainedPath, exists, readJson, readText, writeAtomic, writeJsonAtomic } from './fs.mjs';
+import { assertContainedPath, exists, readJson, readText, writeJsonAtomic } from './fs.mjs';
 import { currentGitSha } from './git.mjs';
 import { runtimePaths } from './paths.mjs';
 import { loadApprovedReleaseTrain, validateReleaseTrain } from './release-train.mjs';
@@ -132,6 +132,7 @@ function createEvent(state, input) {
   return { ...body, hash: hashObject(body) };
 }
 
+/** @param {Record<string, any>} event @param {Record<string, any> | null} [previous] */
 function validateAutopilotEvent(event, previous = null) {
   invariant(event?.schema === AUTOPILOT_EVENT_SCHEMA, 'ERR_AUTOPILOT_EVENT_SCHEMA', 'Unsupported autopilot event schema');
   invariant(event.sequence === (previous ? previous.sequence + 1 : 1), 'ERR_AUTOPILOT_SEQUENCE', 'Autopilot ledger sequence is not contiguous');
@@ -159,6 +160,19 @@ async function readAutopilotLedgerSnapshot(root) {
   return { events, bytes };
 }
 
+/**
+ * @typedef {import('./autopilot-policy.mjs').AutopilotPolicy} AutopilotPolicy
+ * @typedef {import('./release-train.mjs').ReleaseTrain} ReleaseTrain
+ * @typedef {{schema: string, enabled: boolean, profile: string, modelAuthority: boolean, policyHash: string, releaseTrainHash: string, currentRelease: string, currentIndex: number, phase: string, resumePhase: string|null, sequence: number, lastEventHash: string|null, lastDecisionHash: string|null, lastAction: string|null, lastDecision: string|null, replanRequired: boolean, released: boolean, baselineSha: string, startedAt: string, updatedAt: string, hash: string}} AutopilotState
+ * @typedef {{schema: string, sequence: number, previousHash: string|null, occurredAt: string, type: string, policyHash: string, releaseTrainHash: string, release: string, action: string|null, decision: string|null, decisionHash: string|null, phase: string, details: Record<string, unknown>, released: boolean, hash: string}} AutopilotEvent
+ * @typedef {{schema: string, policyId: string, policyHash: string, action: string, decision: string, code: string, allowed: boolean, requiresHuman: boolean, stopsAutomation: boolean, effects: string[], reasons: string[], nextState: string, released: boolean, message: string, inputFingerprint: string, hash: string}} AutopilotDecision
+ * @typedef {{state: AutopilotState, duplicate: boolean, event: AutopilotEvent|null, preservedHumanPause?: boolean}} AutopilotRecordResult
+ */
+
+/**
+ * @param {string} root
+ * @returns {Promise<AutopilotEvent[]>}
+ */
 export async function readAutopilotLedger(root) {
   return (await readAutopilotLedgerSnapshot(root)).events;
 }
@@ -180,18 +194,26 @@ async function writeState(root, body) {
   return state;
 }
 
+/**
+ * @param {string} root
+ * @returns {Promise<AutopilotPolicy|null>}
+ */
 export async function loadAutopilotPolicy(root) {
   const target = runtimePaths(root).autopilotPolicy;
   if (!(await exists(target))) return null;
   await assertContainedPath(root, target);
-  return validateAutopilotPolicy(await readJson(target));
+  return /** @type {AutopilotPolicy} */ (validateAutopilotPolicy(await readJson(target)));
 }
 
+/**
+ * @param {string} root
+ * @returns {Promise<AutopilotState|null>}
+ */
 export async function loadAutopilotState(root) {
   const target = runtimePaths(root).autopilotState;
   if (!(await exists(target))) return null;
   await assertContainedPath(root, target);
-  return validateAutopilotState(await readJson(target));
+  return /** @type {AutopilotState} */ (validateAutopilotState(await readJson(target)));
 }
 
 /**
@@ -257,6 +279,10 @@ export async function activateAutopilot(root, input) {
   });
 }
 
+/**
+ * @param {string} root
+ * @returns {Promise<{current: boolean, reason: string, policy: AutopilotPolicy|null, state: AutopilotState|null, train: ReleaseTrain|null, contract?: Record<string, any>, lock?: Record<string, any>}>}
+ */
 export async function assertAutopilotBindingCurrent(root) {
   const policy = await loadAutopilotPolicy(root);
   const state = await loadAutopilotState(root);
@@ -267,6 +293,7 @@ export async function assertAutopilotBindingCurrent(root) {
   try {
     locked = await assertLockedContract(root);
   } catch {
+    // No locked contract (DRAFT/CLOSED) is a normal state here, not a failure; report it through the reason field.
     return { current: false, reason: 'NO_CURRENT_LOCKED_CONTRACT', policy, state, train: trainEnvelope.train };
   }
   const current = policy.binding.contractHash === locked.lock.contractHash
@@ -286,6 +313,12 @@ export async function assertAutopilotBindingCurrent(root) {
   };
 }
 
+/**
+ * @param {string} root
+ * @param {AutopilotDecision} decisionInput
+ * @param {{type?: string, phase?: string, currentRelease?: string, currentIndex?: number, resumePhase?: string|null, replanRequired?: boolean, details?: Record<string, unknown>}} [patch]
+ * @returns {Promise<AutopilotRecordResult>}
+ */
 export async function recordAutopilotDecision(root, decisionInput, patch = {}) {
   return withAutopilotLock(root, async () => {
     const decision = validateAutopilotDecision(decisionInput);
@@ -329,6 +362,11 @@ export async function recordAutopilotDecision(root, decisionInput, patch = {}) {
   });
 }
 
+/**
+ * @param {string} root
+ * @param {{action: string, effects?: string[], humanStop?: boolean, fixCycles?: number, maxFixCycles?: number, statePatch?: Record<string, unknown>} & Record<string, any>} input
+ * @returns {Promise<{current: boolean, reason: string, policy: AutopilotPolicy|null, state: AutopilotState|null, train: ReleaseTrain|null, decision: AutopilotDecision, recorded: AutopilotRecordResult}>}
+ */
 export async function evaluateAutopilotAction(root, input) {
   const binding = await assertAutopilotBindingCurrent(root);
   invariant(binding.policy && binding.state, 'ERR_AUTOPILOT_INACTIVE', 'No autopilot policy is active');
@@ -346,6 +384,7 @@ export async function evaluateAutopilotAction(root, input) {
   return { ...binding, decision, recorded };
 }
 
+/** @param {string} root @param {string} action @param {string | null} [reason] */
 export async function setAutopilotHumanControl(root, action, reason = null) {
   const policy = await loadAutopilotPolicy(root);
   const state = await loadAutopilotState(root);
@@ -403,6 +442,10 @@ function criterionProven(criterion, context) {
   return false;
 }
 
+/**
+ * @param {{policy: AutopilotPolicy, train: ReleaseTrain, verification?: Record<string, any>}} input
+ * @returns {{action: string, effects: string[], localOnly: boolean, exactScope: boolean, rollbackAvailable: boolean, valueGateProven: boolean, valueEvidence: Array<{code: string, proofClass: string, proven: boolean}>, acceptancePassed: boolean, evidenceFresh: boolean, blockerCount: number, unknownCount: number, scopeDrift: number, releaseState: string|null}}
+ */
 export function deriveAutopilotClosureFacts(input) {
   const { policy, train, verification } = input;
   validateAutopilotPolicy(policy);
@@ -445,6 +488,16 @@ export function deriveAutopilotClosureFacts(input) {
   };
 }
 
+/**
+ * @typedef {{receipt: {release: string, closedGitSha: string}, receiptPath: string}} CloseResult
+ */
+
+/**
+ * @param {string} root
+ * @param {CloseResult} closeResult
+ * @param {AutopilotDecision} decision
+ * @returns {Promise<AutopilotRecordResult>}
+ */
 export async function completeAutopilotClosure(root, closeResult, decision) {
   validateAutopilotDecision(decision);
   return recordAutopilotDecision(root, decision, {
@@ -460,6 +513,11 @@ export async function completeAutopilotClosure(root, closeResult, decision) {
   });
 }
 
+/**
+ * @param {string} root
+ * @param {{authorization: AutopilotDecision, previousTrain: ReleaseTrain, releaseTrain: ReleaseTrain, proposalId: string, proposalHash: string, contractHash: string, baselineSha: string, approvedAt: string}} input
+ * @returns {Promise<{policy: AutopilotPolicy, state: AutopilotState, archive: Record<string, any>}>}
+ */
 export async function rotateAutopilotPolicy(root, input) {
   return withAutopilotLock(root, async () => {
     const currentPolicy = await loadAutopilotPolicy(root);
@@ -533,12 +591,18 @@ export async function rotateAutopilotPolicy(root, input) {
   });
 }
 
+/**
+ * @param {string} root
+ * @param {CloseResult} closeResult
+ * @returns {Promise<AutopilotRecordResult|null>}
+ */
 export async function completeManualAutopilotClosure(root, closeResult) {
   const policy = await loadAutopilotPolicy(root);
   const state = await loadAutopilotState(root);
   if (!policy || !state) return null;
   return withAutopilotLock(root, async () => {
     const current = await loadAutopilotState(root);
+    invariant(current, 'ERR_AUTOPILOT_STATE_MISSING', 'Autopilot state disappeared while awaiting the lock');
     if (current.phase === 'RELEASE_CLOSED' && current.currentRelease === closeResult.receipt.release) return { state: current, duplicate: true };
     const now = new Date().toISOString();
     const event = createEvent(current, {
@@ -571,9 +635,19 @@ export async function completeManualAutopilotClosure(root, closeResult) {
   });
 }
 
+/**
+ * @typedef {{schema: string, action: string, policyHash: string, releaseTrainHash: string, release: string, baseGitSha: string, paths: string[], fileSetHash: string, purpose: string, rollbackRef: string, decisionHash: string, createdAt: string, expiresAt: string, applied: boolean, released: boolean, hash: string}} AutopilotMutationReceipt
+ */
+
+/**
+ * @param {string} root
+ * @param {{action: string, paths?: string[], baseGitSha?: string, purpose: string, rollbackRef: string}} input
+ * @returns {Promise<{receipt: AutopilotMutationReceipt, decision: AutopilotDecision}>}
+ */
 export async function createAutopilotMutationReceipt(root, input) {
   const binding = await assertAutopilotBindingCurrent(root);
   invariant(binding.current, 'ERR_AUTOPILOT_POLICY_BINDING', `Autopilot policy binding is not current: ${binding.reason}`);
+  invariant(binding.policy && binding.contract, 'ERR_AUTOPILOT_POLICY_BINDING', 'Autopilot policy binding is missing its policy or contract');
   const action = boundedText(input.action, 'mutation action', 80).toUpperCase();
   invariant(['PRESERVE_BASELINE', 'LOCAL_COMMIT'].includes(action), 'ERR_AUTOPILOT_MUTATION', 'Only exact local baseline or commit receipts are supported');
   const paths = [...new Set((input.paths ?? []).map((entry) => String(entry).trim()).filter(Boolean))].sort();
@@ -594,7 +668,8 @@ export async function createAutopilotMutationReceipt(root, input) {
     schema: AUTOPILOT_MUTATION_SCHEMA,
     action,
     policyHash: binding.policy.hash,
-    releaseTrainHash: binding.train.hash,
+    // binding.current proved above that an approved release train envelope was loaded.
+    releaseTrainHash: /** @type {ReleaseTrain} */ (binding.train).hash,
     release: binding.contract.release,
     baseGitSha,
     paths,
@@ -612,6 +687,11 @@ export async function createAutopilotMutationReceipt(root, input) {
   return { receipt, decision };
 }
 
+/**
+ * @param {AutopilotMutationReceipt} receipt
+ * @param {{paths?: string[], baseGitSha: string, policyHash: string}} input
+ * @returns {{valid: true, action: string, paths: string[], receiptHash: string}}
+ */
 export function verifyAutopilotMutationReceipt(receipt, input) {
   invariant(receipt?.schema === AUTOPILOT_MUTATION_SCHEMA, 'ERR_AUTOPILOT_MUTATION_SCHEMA', 'Unsupported mutation receipt schema');
   invariant(receipt.hash === mutationHash(receipt), 'ERR_AUTOPILOT_MUTATION_HASH', 'Mutation receipt hash does not match its content');
@@ -624,6 +704,10 @@ export function verifyAutopilotMutationReceipt(receipt, input) {
   return { valid: true, action: receipt.action, paths, receiptHash: receipt.hash };
 }
 
+/**
+ * @param {string} root
+ * @returns {Promise<{schema: string, enabled: boolean, policy: ReturnType<typeof autopilotPolicySummary>, state: AutopilotState, bindingCurrent: boolean, bindingReason: string, eventCount: number, released: boolean}|null>}
+ */
 export async function autopilotStatus(root) {
   const policy = await loadAutopilotPolicy(root);
   const state = await loadAutopilotState(root);

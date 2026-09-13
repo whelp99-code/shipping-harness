@@ -6,7 +6,7 @@ import { changedPathsSince } from './git.mjs';
 import { exists, readText, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { runtimePaths } from './paths.mjs';
 import { invariant } from './errors.mjs';
-import { readState, recordLedger } from './state.mjs';
+import { readTrustedState, writeSignedState } from './state.mjs';
 
 /** @param {string} value */
 function parseSemver(value) {
@@ -40,7 +40,7 @@ export function compareSemver(left, right) {
  */
 export async function prepareNextRelease(root, input) {
   const paths = runtimePaths(root);
-  const state = await readState(root);
+  const state = await readTrustedState(root);
   invariant(state.state === 'CLOSED', 'ERR_RELEASE_PREPARE_STATE', `Next release can be prepared only from CLOSED, current state is ${state.state}`);
   const current = await loadContract(paths.contract);
   invariant(compareSemver(input.release, current.release) > 0, 'ERR_RELEASE_VERSION', 'Next release must be greater than the closed release', {
@@ -66,7 +66,7 @@ export async function prepareNextRelease(root, input) {
   await writeAtomic(paths.contract, stableStringify(next));
   await rm(paths.lock, { force: true });
   const now = new Date().toISOString();
-  await writeJsonAtomic(paths.state, {
+  const draft = {
     schema: 'shipping-harness/state-v1',
     state: 'DRAFT',
     release: input.release,
@@ -74,6 +74,7 @@ export async function prepareNextRelease(root, input) {
     contractHash: null,
     baselineSha: null,
     currentEvidenceSha: null,
+    currentEvidenceFingerprint: null,
     lastRunId: null,
     agentRuns: 0,
     fixCycles: 0,
@@ -81,19 +82,22 @@ export async function prepareNextRelease(root, input) {
     nextCount: 0,
     ignoreCount: 0,
     unknownCount: 0,
+    verifyRuns: 0,
+    redundantVerifyRuns: 0,
     humanStop: false,
     resumeState: null,
     createdAt: now,
     updatedAt: now,
-  });
+  };
   await writeJsonAtomic(paths.issues, {
     schema: 'shipping-harness/issues-v1',
     issues: [],
     counts: { BLOCKER: 0, NEXT: 0, IGNORE: 0, UNKNOWN: 0 },
     updatedAt: now,
   });
-  await recordLedger(root, {
+  await writeSignedState(root, draft, {
     type: 'release.prepared',
+    to: 'DRAFT',
     fromRelease: current.release,
     release: input.release,
     archivedContract: path.relative(root, archivedContract).replaceAll('\\', '/'),

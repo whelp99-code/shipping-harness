@@ -1,6 +1,6 @@
 # [High] 검증 후 미커밋 변경으로 테스트가 실패해도 release close가 CLOSED를 허용함
 
-Status: OPEN
+Status: FIXED in v1.10.0 (dirty-tree evidence fix pass; evidence is bound to a tree fingerprint and goes stale on an uncommitted edit — see docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md section 6.10)
 Reported: 2026-09-12
 Type: Correctness / completion integrity
 Scope: core verification and closure

@@ -16,6 +16,7 @@ function gitSnapshot(root) {
       diff: runCommand('git', ['diff', '--name-only', 'HEAD'], { cwd: root, timeoutMs: 30000 }).stdout,
     };
   } catch {
+    // Not a Git repository (or git unavailable): report no baseline instead of failing the smoke check.
     return null;
   }
 }

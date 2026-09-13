@@ -45,7 +45,7 @@ function allowedShipping(relative) {
 
 async function walk(base, current = '', output = []) {
   const directory = path.join(base, current);
-  let entries = [];
+  let entries;
   try {
     entries = await readdir(directory, { withFileTypes: true });
   } catch (error) {
@@ -68,6 +68,9 @@ async function walk(base, current = '', output = []) {
   return output;
 }
 
+/**
+ * @param {{projectId: string, projectRoot: string, serverSecret: string, outputPath: string, extraEvidenceFiles?: Array<{source: string|null, logicalPath: string}>}} options
+ */
 export async function createBackup({
   projectId,
   projectRoot,
@@ -129,8 +132,19 @@ export async function createBackup({
   };
 }
 
+/**
+ * @typedef {{path: string, bytes: string, size: number, sha256: string, restore: boolean}} BackupFile
+ * @typedef {{schema: string, backupId: string, projectId: string, createdAt: string, files: BackupFile[], totalBytes: number, signature: string}} BackupBundle
+ */
+
+/**
+ * @param {BackupBundle} bundle
+ * @param {{projectId: string, serverSecret: string}} options
+ * @returns {BackupBundle}
+ */
 export function validateBackup(bundle, { projectId, serverSecret }) {
   invariant(bundle?.schema === 'shipping-harness/backup-v1' && bundle.projectId === projectId, 'ERR_BACKUP_SCHEMA', 'Backup project or schema mismatch');
+  /** @type {Partial<BackupBundle>} */
   const unsigned = { ...bundle };
   delete unsigned.signature;
   invariant(safeHex(hmac(unsigned, serverSecret), bundle.signature), 'ERR_BACKUP_SIGNATURE', 'Backup signature is invalid');
@@ -171,13 +185,19 @@ async function pauseRestoredNonTerminal(stage) {
   return { paused: true, restoredState };
 }
 
+/**
+ * @param {{projectId: string, projectRoot: string, serverSecret: string, bundlePath: string}} options
+ * @returns {Promise<{restored: true, backupId: string, previousPath: string, fileCount: number, restoredOriginalState: string|null, pausedAfterRestore: boolean}>}
+ */
 export async function restoreBackup({ projectId, projectRoot, serverSecret, bundlePath }) {
   const bundle = validateBackup(JSON.parse(await readFile(bundlePath, 'utf8')), { projectId, serverSecret });
   const shippingRoot = path.join(path.resolve(projectRoot), '.shipping');
   let currentState = null;
   try {
     currentState = JSON.parse(await readFile(path.join(shippingRoot, 'state.json'), 'utf8')).state;
-  } catch {}
+  } catch {
+    // Missing or unreadable state.json is treated as "no active state" — restore proceeds.
+  }
   invariant(!ACTIVE_STATES.has(currentState), 'ERR_BACKUP_ACTIVE', 'Pause or stop active work before restore');
 
   const stage = path.join(path.dirname(shippingRoot), `.shipping-restore-${bundle.backupId}`);
@@ -202,7 +222,9 @@ export async function restoreBackup({ projectId, projectRoot, serverSecret, bund
   try {
     await rename(stage, shippingRoot);
   } catch (error) {
-    try { await rename(previous, shippingRoot); } catch {}
+    try { await rename(previous, shippingRoot); } catch {
+      // Best-effort rollback of the partially-applied restore; the original rename error wins below.
+    }
     throw error;
   }
   return {
@@ -215,6 +237,10 @@ export async function restoreBackup({ projectId, projectRoot, serverSecret, bund
   };
 }
 
+/**
+ * @param {BackupBundle} bundle
+ * @returns {BackupBundle}
+ */
 export function migrateBackup(bundle) {
   invariant(bundle?.schema === 'shipping-harness/backup-v1', 'ERR_BACKUP_MIGRATION', 'Unsupported backup schema');
   return bundle;

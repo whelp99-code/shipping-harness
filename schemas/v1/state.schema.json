@@ -52,6 +52,14 @@
     "currentEvidenceSha": {
       "type": "null"
     },
+    "currentEvidenceFingerprint": {
+      "description": "v1.10.0: tree fingerprint of the evidence run named by lastRunId (see the evidence schema). Evidence goes stale when the working tree no longer matches it, even at the same Git SHA. Optional; absent before v1.10.0 and while no evidence exists.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128
+    },
     "lastRunId": {
       "type": "null"
     },
@@ -96,6 +104,58 @@
       "type": "string",
       "maxLength": 8192,
       "format": "date-time"
+    },
+    "integrity": {
+      "type": "object",
+      "description": "Proof that this document was written by the engine and matches the ledger head named here. Optional: states written before v1.10 have none and read as UNVERIFIED_LEGACY.",
+      "required": [
+        "algorithm",
+        "ledgerHead",
+        "digest"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "type": "string"
+        },
+        "ledgerHead": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "verifyRuns": {
+      "description": "v1.10.0 Phase C: total verify runs recorded for the current release. Optional; states written before v1.10 have none and are treated as 0.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "redundantVerifyRuns": {
+      "description": "v1.10.0 Phase C: consecutive verify runs that reproduced the previous run's Git SHA and per-criterion exit codes (no new evidence). Resets on any change. Optional; absent reads as 0.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "telemetry": {
+      "description": "v1.10.0 Phase C: aggregated adapter-run cost telemetry. Optional; absent reads as no recorded agent-run duration.",
+      "type": "object",
+      "required": [
+        "totalAgentDurationMs"
+      ],
+      "properties": {
+        "totalAgentDurationMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,

@@ -35,6 +35,7 @@ export const ouroborosAdapter = Object.freeze({
         cancel: Boolean(discovered || command),
         durableLedger: ledger,
         artifactCollection: presence.candidates.length > 0,
+        costTelemetry: true,
       }),
       diagnostics: [
         ...(!discovered ? ['Neither ooo nor ouroboros was found on PATH.'] : []),

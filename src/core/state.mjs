@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
-import { appendJsonLine, exists, readJson, writeJsonAtomic } from './fs.mjs';
+import { appendJsonLine, exists, readJson, readJsonLines, writeJsonAtomic } from './fs.mjs';
 import { invariant, ShippingError } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
+import { assessStateIntegrity, buildStateIntegrity, ledgerEventDigest } from './state-integrity.mjs';
 
 export const STATES = Object.freeze([
   'DRAFT',
@@ -36,27 +37,29 @@ export async function initializeState(root, overrides = {}) {
   const paths = runtimePaths(root);
   if (await exists(paths.state)) return readJson(paths.state);
   const now = new Date().toISOString();
-  const state = {
+  const base = {
     schema: 'shipping-harness/state-v1',
     state: 'DRAFT',
     release: null,
     contractHash: null,
     baselineSha: null,
     currentEvidenceSha: null,
+    currentEvidenceFingerprint: null,
     lastRunId: null,
     agentRuns: 0,
     fixCycles: 0,
     blockerCount: 0,
     nextCount: 0,
     ignoreCount: 0,
+    verifyRuns: 0,
+    redundantVerifyRuns: 0,
     resumeState: null,
     humanStop: false,
     createdAt: now,
     updatedAt: now,
     ...overrides,
   };
-  await writeJsonAtomic(paths.state, state);
-  await recordLedger(root, { type: 'state.initialized', to: state.state, state });
+  const state = await writeSignedState(root, base, { type: 'state.initialized', to: base.state, state: base });
   return state;
 }
 
@@ -67,13 +70,41 @@ export async function readState(root) {
   return state;
 }
 
-/** @param {string} root @param {Record<string, unknown>} event */
+/**
+ * Append one signed event to the release ledger and return it.
+ * Every event carries `prev` (the previous event's digest, or null) and its own `digest`,
+ * so a deleted or rewritten line is detectable by `verifyLedgerChain`.
+ * @param {string} root
+ * @param {Record<string, unknown>} event
+ * @returns {Promise<Record<string, any>>}
+ */
 export async function recordLedger(root, event) {
-  await appendJsonLine(runtimePaths(root).ledger, {
+  const paths = runtimePaths(root);
+  const previous = (await readJsonLines(paths.ledger)).at(-1) ?? null;
+  const body = {
     id: randomUUID(),
     at: new Date().toISOString(),
     ...event,
-  });
+    prev: previous?.digest ?? null,
+  };
+  const signed = { ...body, digest: ledgerEventDigest(body) };
+  await appendJsonLine(paths.ledger, signed);
+  return signed;
+}
+
+/**
+ * Record the state-write ledger event first, then write state.json bound to that event.
+ * The order matters: the integrity digest names the ledger head that proves the write.
+ * @param {string} root
+ * @param {Record<string, any>} state
+ * @param {Record<string, unknown>} event
+ * @returns {Promise<Record<string, any>>}
+ */
+export async function writeSignedState(root, state, event) {
+  const recorded = await recordLedger(root, { ...event, stateWrite: true });
+  const signed = { ...state, integrity: buildStateIntegrity(state, recorded.id) };
+  await writeJsonAtomic(runtimePaths(root).state, signed);
+  return signed;
 }
 
 /**
@@ -89,24 +120,43 @@ export async function transitionState(root, next, patch = {}, reason = 'unspecif
     from: current.state,
     to: next,
   });
+  const { integrity: _previousIntegrity, ...carried } = current;
   const updated = {
-    ...current,
+    ...carried,
     ...patch,
     state: next,
     updatedAt: new Date().toISOString(),
   };
-  await writeJsonAtomic(runtimePaths(root).state, updated);
-  await recordLedger(root, { type: 'state.transition', from: current.state, to: next, reason, patch });
-  return updated;
+  return writeSignedState(root, updated, { type: 'state.transition', from: current.state, to: next, reason, patch });
 }
 
 /** @param {string} root @param {Record<string, unknown>} patch @param {string} reason */
 export async function patchState(root, patch, reason) {
   const current = await readState(root);
-  const updated = { ...current, ...patch, updatedAt: new Date().toISOString() };
-  await writeJsonAtomic(runtimePaths(root).state, updated);
-  await recordLedger(root, { type: 'state.patch', state: current.state, reason, patch });
-  return updated;
+  const { integrity: _previousIntegrity, ...carried } = current;
+  const updated = { ...carried, ...patch, updatedAt: new Date().toISOString() };
+  return writeSignedState(root, updated, { type: 'state.patch', state: current.state, to: updated.state, reason, patch });
+}
+
+/**
+ * Read state and refuse to return it when its integrity is broken. Every command that
+ * decides, mutates or reports authority uses this; only reporting surfaces use `readState`.
+ * @param {string} root
+ * @returns {Promise<Record<string, any>>}
+ */
+export async function readTrustedState(root) {
+  const state = await readState(root);
+  const integrity = await assessStateIntegrity(root);
+  if (integrity.level === 'TAMPERED') {
+    throw new ShippingError('ERR_STATE_TAMPERED', `Release state integrity is broken: ${integrity.reason}. Restore .shipping/state.json from trusted history before continuing.`, {
+      level: integrity.level,
+      reason: integrity.reason,
+      expected: integrity.expected,
+      observed: integrity.observed,
+      ledgerState: integrity.ledgerState,
+    });
+  }
+  return state;
 }
 
 /** @param {string} root @param {string} reason */

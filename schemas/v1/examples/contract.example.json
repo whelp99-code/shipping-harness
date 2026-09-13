@@ -43,7 +43,9 @@
     "maxFixCycles": 2,
     "maxAgentRuns": 3,
     "maxCommandSeconds": 900,
-    "maxOutputBytes": 1048576
+    "maxOutputBytes": 1048576,
+    "maxVerifyRuns": 25,
+    "maxRedundantVerifyRuns": 5
   },
   "stopPolicy": {
     "humanInterruptWins": true,

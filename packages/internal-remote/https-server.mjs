@@ -2,5 +2,122 @@ import https from 'node:https';
 import { readFile } from 'node:fs/promises';
 import { remoteError } from './gateway.mjs';
 import { validateListen } from './policy.mjs';
-async function readBody(request,maxBytes){const chunks=[];let total=0;for await(const chunk of request){total+=chunk.length;if(total>maxBytes){const e=new Error('Remote request body exceeds the bounded limit');e.code='ERR_REMOTE_BODY';throw e;}chunks.push(chunk);}return Buffer.concat(chunks).toString('utf8');}
-export async function createInternalHttpsServer({gateway,host='127.0.0.1',port=0,certPath,keyPath,maxBodyBytes=65536,maxConcurrent=4}){validateListen(host);if(!certPath||!keyPath){const e=new Error('TLS certificate and key are mandatory');e.code='ERR_REMOTE_TLS';throw e;}const [cert,key]=await Promise.all([readFile(certPath),readFile(keyPath)]);let active=0;const server=https.createServer({cert,key,minVersion:'TLSv1.2'},async(req,res)=>{res.setHeader('content-type','application/json; charset=utf-8');if(req.method==='GET'&&req.url==='/health'){res.statusCode=200;res.end(`${JSON.stringify({status:'healthy',tls:true,internalOnly:true})}\n`);return;}if(req.method!=='POST'||req.url!=='/v1/rpc'){res.statusCode=404;res.end(`${JSON.stringify({ok:false,error:{code:'ERR_REMOTE_ROUTE',message:'Not found'}})}\n`);return;}if(active>=maxConcurrent){res.statusCode=429;res.end(`${JSON.stringify(remoteError('unknown',Object.assign(new Error('Gateway concurrency limit exceeded'),{code:'ERR_REMOTE_CONCURRENCY'})))}\n`);return;}active+=1;let request;try{const body=await readBody(req,maxBodyBytes);request=JSON.parse(body);const result=await gateway.handle(request);res.statusCode=200;res.end(`${JSON.stringify(result)}\n`);}catch(error){res.statusCode=['ERR_REMOTE_SIGNATURE','ERR_REMOTE_IDENTITY','ERR_REMOTE_PERMISSION','ERR_REMOTE_PROJECT'].includes(error.code)?403:error.code==='ERR_REMOTE_REPLAY'?409:error.code==='ERR_REMOTE_RATE'?429:400;res.end(`${JSON.stringify(remoteError(request?.requestId,error))}\n`);}finally{active-=1;}});await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,host,()=>{server.off('error',reject);resolve();});});const address=server.address();return{server,host,address,close:()=>new Promise((resolve,reject)=>server.close(e=>e?reject(e):resolve()))};}
+
+/**
+ * Read a request body up to a bounded size, then return it as a UTF-8 string.
+ * @param {import('node:http').IncomingMessage} request
+ * @param {number} maxBytes
+ * @returns {Promise<string>}
+ */
+async function readBody(request, maxBytes) {
+  const chunks = [];
+  let total = 0;
+  for await (const chunk of request) {
+    total += chunk.length;
+    if (total > maxBytes) {
+      const error = /** @type {Error & {code?: string}} */ (new Error('Remote request body exceeds the bounded limit'));
+      error.code = 'ERR_REMOTE_BODY';
+      throw error;
+    }
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+/**
+ * Map a gateway error's code to the HTTP status the remote endpoint should report.
+ * @param {{ code?: string }} error
+ * @returns {number}
+ */
+function statusForError(error) {
+  const code = String(error.code ?? '');
+  if (['ERR_REMOTE_SIGNATURE', 'ERR_REMOTE_IDENTITY', 'ERR_REMOTE_PERMISSION', 'ERR_REMOTE_PROJECT'].includes(code)) return 403;
+  if (error.code === 'ERR_REMOTE_REPLAY') return 409;
+  if (error.code === 'ERR_REMOTE_RATE') return 429;
+  return 400;
+}
+
+/**
+ * Handle one HTTPS request: health check, or a bounded, concurrency-limited RPC call
+ * into the gateway. Never runs a raw shell command; only the gateway's own handlers.
+ * @param {{ handle: (request: unknown) => Promise<unknown> }} gateway
+ * @param {number} maxBodyBytes
+ * @param {number} maxConcurrent
+ * @param {{ value: number }} activeCounter mutable shared counter of in-flight requests
+ * @param {import('node:http').IncomingMessage} req
+ * @param {import('node:http').ServerResponse} res
+ */
+async function handleRequest(gateway, maxBodyBytes, maxConcurrent, activeCounter, req, res) {
+  res.setHeader('content-type', 'application/json; charset=utf-8');
+  if (req.method === 'GET' && req.url === '/health') {
+    res.statusCode = 200;
+    res.end(`${JSON.stringify({ status: 'healthy', tls: true, internalOnly: true })}\n`);
+    return;
+  }
+  if (req.method !== 'POST' || req.url !== '/v1/rpc') {
+    res.statusCode = 404;
+    res.end(`${JSON.stringify({ ok: false, error: { code: 'ERR_REMOTE_ROUTE', message: 'Not found' } })}\n`);
+    return;
+  }
+  if (activeCounter.value >= maxConcurrent) {
+    res.statusCode = 429;
+    res.end(`${JSON.stringify(remoteError('unknown', Object.assign(new Error('Gateway concurrency limit exceeded'), { code: 'ERR_REMOTE_CONCURRENCY' })))}\n`);
+    return;
+  }
+  activeCounter.value += 1;
+  let request;
+  try {
+    const body = await readBody(req, maxBodyBytes);
+    request = JSON.parse(body);
+    const result = await gateway.handle(request);
+    res.statusCode = 200;
+    res.end(`${JSON.stringify(result)}\n`);
+  } catch (error) {
+    res.statusCode = statusForError(error);
+    res.end(`${JSON.stringify(remoteError(request?.requestId, error))}\n`);
+  } finally {
+    activeCounter.value -= 1;
+  }
+}
+
+/**
+ * Start the internal-only TLS gateway HTTPS server. No public listener, no raw shell:
+ * every POST /v1/rpc body is handled only by the supplied gateway.
+ * @param {{
+ *   gateway: { handle: (request: unknown) => Promise<unknown> },
+ *   host?: string,
+ *   port?: number,
+ *   certPath: string,
+ *   keyPath: string,
+ *   maxBodyBytes?: number,
+ *   maxConcurrent?: number,
+ * }} options
+ */
+export async function createInternalHttpsServer({ gateway, host = '127.0.0.1', port = 0, certPath, keyPath, maxBodyBytes = 65536, maxConcurrent = 4 }) {
+  validateListen(host);
+  if (!certPath || !keyPath) {
+    const error = /** @type {Error & {code?: string}} */ (new Error('TLS certificate and key are mandatory'));
+    error.code = 'ERR_REMOTE_TLS';
+    throw error;
+  }
+  const [cert, key] = await Promise.all([readFile(certPath), readFile(keyPath)]);
+  const activeCounter = { value: 0 };
+  const server = https.createServer(
+    { cert, key, minVersion: 'TLSv1.2' },
+    (req, res) => handleRequest(gateway, maxBodyBytes, maxConcurrent, activeCounter, req, res),
+  );
+  await /** @type {Promise<void>} */ (new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(port, host, () => {
+      server.off('error', reject);
+      resolve();
+    });
+  }));
+  const address = server.address();
+  return {
+    server,
+    host,
+    address,
+    close: () => /** @type {Promise<void>} */ (new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())))),
+  };
+}

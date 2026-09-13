@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
 import { buildDecisionEvidence } from '../src/core/decision-evidence.mjs';
 import { compileIntentGate } from '../src/core/intent-gate.mjs';
-import { currentGitSha, gitStatus, runGit } from '../src/core/git.mjs';
+import { gitStatus, runGit } from '../src/core/git.mjs';
 import { SHIPPING_TOOLS } from '../src/mcp/tools.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');

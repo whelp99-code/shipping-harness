@@ -1,9 +1,16 @@
 import net from 'node:net';
 import path from 'node:path';
 
+/**
+ * @param {unknown} condition
+ * @param {string} code
+ * @param {string} message
+ * @param {Record<string, unknown>} [details]
+ * @returns {asserts condition}
+ */
 export function invariant(condition, code, message, details) {
   if (condition) return;
-  const error = new Error(message);
+  const error = /** @type {Error & {code?: string, details?: unknown}} */ (new Error(message));
   error.code = code;
   error.details = details;
   throw error;
@@ -72,6 +79,11 @@ function normalizedKey(key) {
   return String(key).replace(/[-_\s]/gu, '').toLowerCase();
 }
 
+/**
+ * @param {unknown} value
+ * @param {number} [depth]
+ * @returns {void}
+ */
 export function rejectArbitraryExecution(value, depth = 0) {
   invariant(depth <= 16, 'ERR_REMOTE_DEPTH', 'Remote input nesting is too deep');
   if (Array.isArray(value)) {
@@ -88,6 +100,10 @@ export function rejectArbitraryExecution(value, depth = 0) {
   }
 }
 
+/**
+ * @param {string} host
+ * @returns {boolean}
+ */
 export function privateListenHost(host) {
   if (host === 'localhost' || host === '::1') return true;
   if (net.isIP(host) !== 4) return false;
@@ -98,27 +114,54 @@ export function privateListenHost(host) {
     || (parts[0] === 192 && parts[1] === 168);
 }
 
+/**
+ * @param {string} host
+ * @returns {string}
+ */
 export function validateListen(host) {
   invariant(privateListenHost(host), 'ERR_REMOTE_LISTEN', 'Gateway listen host must be loopback or private IPv4; public and unspecified listeners are forbidden');
   return host;
 }
 
+/**
+ * @param {unknown} value
+ * @param {string} label
+ * @param {number} [max]
+ * @returns {string}
+ */
 export function boundedString(value, label, max = 4096) {
   invariant(typeof value === 'string' && value.length > 0 && Buffer.byteLength(value, 'utf8') <= max, 'ERR_REMOTE_ARGUMENT', `${label} is required and bounded`);
   return value;
 }
 
+/**
+ * @param {unknown} value
+ * @param {string} label
+ * @param {{min?: number, max?: number, fallback?: number}} [options]
+ * @returns {number}
+ */
 export function boundedInteger(value, label, { min = 1, max = Number.MAX_SAFE_INTEGER, fallback } = {}) {
-  const candidate = value ?? fallback;
-  invariant(Number.isInteger(candidate) && candidate >= min && candidate <= max, 'ERR_REMOTE_CONFIG', `${label} must be an integer between ${min} and ${max}`);
-  return candidate;
+  const candidate = /** @type {unknown} */ (value ?? fallback);
+  invariant(typeof candidate === 'number' && Number.isInteger(candidate) && candidate >= min && candidate <= max, 'ERR_REMOTE_CONFIG', `${label} must be an integer between ${min} and ${max}`);
+  return /** @type {number} */ (candidate);
 }
 
+/**
+ * @param {string} parent
+ * @param {string} target
+ * @returns {boolean}
+ */
 export function pathWithin(parent, target) {
   const relative = path.relative(path.resolve(parent), path.resolve(target));
   return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
 }
 
+/**
+ * @param {string} parent
+ * @param {string} target
+ * @param {string} [code]
+ * @returns {string}
+ */
 export function assertPathWithin(parent, target, code = 'ERR_REMOTE_PATH') {
   invariant(pathWithin(parent, target), code, 'Path is outside the configured internal root', { parent: path.resolve(parent), target: path.resolve(target) });
   return path.resolve(target);

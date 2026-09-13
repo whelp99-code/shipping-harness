@@ -119,6 +119,31 @@ export function issuesFromScope(scopeReport, runId) {
   }));
 }
 
+/**
+ * v1.10.0 Phase C: a verify-run budget is exhausted. Two can trip: the redundancy budget
+ * (`budgets.maxRedundantVerifyRuns`, runs that reproduced the previous tree fingerprint and
+ * acceptance results) and the total cap (`budgets.maxVerifyRuns`). The description names
+ * which one. Always a BLOCKER: both basisId and evidenceRef are set, so `normalizeIssue`
+ * never downgrades it.
+ * @param {{maxVerifyRuns: number, maxRedundantVerifyRuns: number, redundantVerifyRuns: number, verifyRuns: number, exhaustedBudget: string | null}} budget
+ * @param {string} runId
+ */
+export function issuesFromVerifyBudget(budget, runId) {
+  const description = budget.exhaustedBudget === 'maxVerifyRuns'
+    ? `budgets.maxVerifyRuns (${budget.maxVerifyRuns}) reached: ${budget.verifyRuns} verify run(s) have been recorded for this release.`
+    : `budgets.maxRedundantVerifyRuns (${budget.maxRedundantVerifyRuns}) reached after ${budget.redundantVerifyRuns} verify run(s) that reproduced the previous run's working-tree fingerprint and acceptance results with no new evidence.`;
+  return [{
+    id: 'ISSUE-VERIFY-BUDGET',
+    title: 'Verify run budget exhausted',
+    description,
+    classification: 'BLOCKER',
+    basisId: 'budget-exhausted',
+    evidenceRef: `runId:${runId}`,
+    source: 'verify-budget',
+    runId,
+  }];
+}
+
 /** @param {Array<Record<string, any>>} issues */
 export function backlogFromIssues(issues) {
   return issues

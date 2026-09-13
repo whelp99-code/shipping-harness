@@ -216,6 +216,26 @@ function actionPolicyFor(state, blockerCount) {
   return ACTION_POLICY[state] ?? ACTION_POLICY.PLANNING;
 }
 
+/**
+ * The loose status bag every plain-brief entry point accepts. Callers pass whichever of these
+ * documents they already hold; every field is optional and read defensively.
+ * `state` carries the release state object, or the state name when a caller already flattened it.
+ * @typedef {{canonicalState?: string, proposalState?: string, coreState?: string, state?: string & {state?: string, release?: string, blockerCount?: number, unknownCount?: number}, blockerCount?: number, unknownCount?: number, release?: string|null, evidenceFresh?: boolean, issues?: {counts?: Record<string, number>, items?: unknown[]}, contract?: {release?: string} & Record<string, unknown>, baseline?: {blockingCount?: number, counts?: Record<string, number>, plan?: Record<string, unknown>, entries?: unknown[]}|null, coverage?: BriefCoverage|null, intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}|null, analysis?: {intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence}|null, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence, releaseTrain?: import('./release-train.mjs').ReleaseTrain|null, intentGate?: {status?: string, defaultMode?: string, inferredMode?: string, selectedMode?: string|null, effectiveMode?: string, analysisComplete?: boolean, planningAllowed?: boolean, implementationAllowed?: boolean, autopilotAllowed?: boolean, question?: {id?: string}|null, hash?: string}|null, goalDiscovery?: {questions?: unknown[], status?: string, round?: number, recommendedCandidateId?: string|null, direction?: {hash?: string}|null}|null, goalCharter?: {status?: string, hash?: string, outcome?: string, primaryUser?: string, operatingBoundary?: string}|null, currentEvidenceSha?: string|null, contractHash?: string|null, integrity?: {ok?: boolean, level?: string, reason?: string, ledgerState?: string|null}|null, scopeWarning?: {outside?: string[], include?: string[]}|null, verifyBudget?: {verifyRuns?: number, redundantVerifyRuns?: number, maxVerifyRuns?: number}|null}} PlainBriefInput
+ * @typedef {{complete?: boolean, coveredPaths?: number, totalPaths?: number, uncoveredPaths?: unknown[]}} BriefCoverage
+ * @typedef {{root?: string|null, ambiguous?: boolean, requested?: boolean, confidence?: string}} BriefWorkspace
+ * @typedef {{baseVersion?: string|null, recommendedVersion?: string|null, confidence?: string|null}} BriefVersionEvidence
+ * @typedef {{schema: string, currentState: string, allowedNow: string[], forbiddenNow: string[], requiresHumanApproval: boolean, nextAction: string, userActionLabel: string, exactUserPhrase: string, hash: string}} ActionEnvelope
+ * @typedef {{code: string, authority: string, confidence: string, value: unknown, evidenceRefs: string[]}} BriefFact
+ * @typedef {{schema: string, state: string, release: string|null, facts: BriefFact[], hash: string}} BriefFactGraph
+ * @typedef {{code: string, text: string, evidenceRefs: string[]}} BriefItem
+ * @typedef {{schema: string, language: string, state: string, release: string|null, releaseTrain: {currentRelease: string|null, totalReleases: number, modelAuthority: boolean, steps: Array<{version: string, current: boolean, value: string}>}|null, headline: string, problems: BriefItem[], improvements: BriefItem[], nextPlan: BriefItem[], summary: BriefItem, userAction: {code: string, label: string, exactPhrase: string, requiresHumanApproval: boolean}, details: {available: boolean, evidenceRefs: string[], exactPathsInDefaultText: boolean}, actionEnvelope: ActionEnvelope, factGraph: BriefFactGraph, advisory: unknown, modelAuthority: boolean, hash: string, renderedText?: string, textHash?: string, quality?: PlainBriefQuality}} PlainBrief
+ * @typedef {{schema: string, healthy: boolean, checks: Record<string, boolean>, renderedBytes: number, structuredBytes: number, maxBytes: number}} PlainBriefQuality
+ */
+
+/**
+ * @param {PlainBriefInput} [input]
+ * @returns {ActionEnvelope}
+ */
 export function buildActionEnvelope(input = {}) {
   const state = normalizedState(input);
   const blockerCount = normalizedCount(input.blockerCount ?? input.issues?.counts?.BLOCKER ?? input.state?.blockerCount);
@@ -242,6 +262,35 @@ export function buildActionEnvelope(input = {}) {
   return { ...body, hash: hashObject(body) };
 }
 
+/**
+ * One bounded fact naming the acceptance criteria whose failure the engine reproduced on the
+ * locked baseline commit, so the brief says "the contract may be defective" without a model saying it.
+ * @param {PlainBriefInput} input
+ */
+function contractDefectFact(input) {
+  const items = /** @type {Array<Record<string, any>>} */ (Array.isArray(input.issues?.items) ? input.issues.items : []);
+  const criteria = items
+    .filter((issue) => (Array.isArray(issue?.diagnostics) ? issue.diagnostics : [])
+      .some((entry) => entry && typeof entry === 'object' && entry.code === 'CONTRACT_DEFECT_SUSPECTED'))
+    .map((issue) => String(issue.basisId ?? issue.id));
+  if (criteria.length === 0) return null;
+  return fact('CONTRACT_DEFECT_SUSPECTED', {
+    count: criteria.length,
+    criteria: criteria.slice(0, 3).map((value) => boundedTrainText(value, 60)),
+  }, ['issues.items[].diagnostics', 'evidence.results[].baselineReplay']);
+}
+
+/** @param {PlainBriefInput} input */
+function scopeWarningPaths(input) {
+  const outside = input.scopeWarning?.outside;
+  return Array.isArray(outside) ? outside.filter((value) => typeof value === 'string') : [];
+}
+
+/**
+ * @param {PlainBriefInput} [input]
+ * @param {ActionEnvelope} [actionEnvelope]
+ * @returns {BriefFactGraph}
+ */
 export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnvelope(input)) {
   const state = normalizedState(input);
   const blockerCount = normalizedCount(input.blockerCount ?? input.issues?.counts?.BLOCKER ?? input.state?.blockerCount);
@@ -282,14 +331,16 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
     }, ['intelligence.acceptanceCoverage']));
   }
   if (input.workspace ?? input.analysis?.workspace) {
-    const workspace = input.workspace ?? input.analysis.workspace;
+    // The enclosing guard already proved one of the two workspace documents is present.
+    const workspace = /** @type {BriefWorkspace} */ (input.workspace ?? input.analysis?.workspace);
     const root = workspace.root ?? null;
     if (root && (root !== '.' || workspace.ambiguous === true || workspace.requested === true)) {
       facts.push(fact('SELECTED_WORKSPACE', root, ['workspace.root', 'workspace.confidence']));
     }
   }
   if (input.versionEvidence ?? input.analysis?.versionEvidence) {
-    const version = input.versionEvidence ?? input.analysis.versionEvidence;
+    // The enclosing guard already proved one of the two version documents is present.
+    const version = /** @type {BriefVersionEvidence} */ (input.versionEvidence ?? input.analysis?.versionEvidence);
     facts.push(fact('VERSION_EVIDENCE', {
       baseVersion: version.baseVersion ?? null,
       recommendedVersion: version.recommendedVersion ?? null,
@@ -312,6 +363,30 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
       autopilotAllowed: input.intentGate.autopilotAllowed === true,
       modelAuthority: false,
     }, ['intentGate.status', 'intentGate.effectiveMode', 'intentGate.question', 'intentGate.hash']));
+  }
+  if (input.integrity) {
+    facts.push(fact('STATE_INTEGRITY', {
+      level: input.integrity.level ?? null,
+      ok: input.integrity.ok === true,
+      provenState: input.integrity.ledgerState ?? null,
+    }, ['integrity.level', 'state.integrity.digest', 'ledger.jsonl']));
+  }
+  const defects = contractDefectFact(input);
+  if (defects) facts.push(defects);
+  const outsideScope = scopeWarningPaths(input);
+  if (outsideScope.length > 0) {
+    facts.push(fact('SCOPE_WARNING', {
+      outside: outsideScope.length,
+      paths: outsideScope.slice(0, 3).map((value) => boundedTrainText(value, 120)),
+    }, ['scopeWarning.outside', 'contract.scope.paths.include']));
+  }
+  if (input.verifyBudget) {
+    const verifyBudget = /** @type {NonNullable<PlainBriefInput['verifyBudget']>} */ (input.verifyBudget);
+    facts.push(fact('VERIFY_BUDGET', {
+      verifyRuns: normalizedCount(verifyBudget.verifyRuns),
+      maxVerifyRuns: normalizedCount(verifyBudget.maxVerifyRuns),
+      redundantVerifyRuns: normalizedCount(verifyBudget.redundantVerifyRuns),
+    }, ['state.verifyRuns', 'state.redundantVerifyRuns', 'contract.budgets.maxVerifyRuns']));
   }
   if (input.goalDiscovery && ((input.goalDiscovery.questions?.length ?? 0) > 0 || state === 'READY_FOR_APPROVAL')) {
     facts.push(fact('GOAL_DISCOVERY', {
@@ -374,16 +449,21 @@ function dirtyBrief(input) {
   };
 }
 
-function proposalBrief(input, state) {
-  const questions = normalizedCount(input.questionCount ?? input.questions?.length ?? input.decision?.questions?.length);
-  const coverage = input.intelligence?.acceptanceCoverage ?? input.analysis?.intelligence?.acceptanceCoverage ?? input.coverage;
+/**
+ * The three Intent Gate proposal states report read-only analysis, an analysis-only
+ * boundary, or a completed plan; none of them grants implementation authority.
+ * @param {PlainBriefInput} input
+ * @param {string} state
+ * @returns {{headline: string, problems: BriefItem[], improvements: BriefItem[], nextPlan: BriefItem[], summary: BriefItem} | null}
+ */
+function intentGateBrief(input, state) {
   const baselineBlocking = normalizedCount(input.baseline?.blockingCount);
   const observedBaseline = baselineBlocking > 0
     ? item('EXISTING_BASELINE_OBSERVED', `기존 제품·릴리스 변경 ${baselineBlocking}개가 감지됐습니다. 분석에는 포함하지만 진행 범위가 정해지기 전 자동으로 기준선 처리하지 않습니다.`, ['baseline.blockingCount', 'baseline.counts', 'baseline.plan.hash'])
     : null;
   if (state === 'INTENT_CONFIRMATION_REQUIRED') return {
     headline: '읽기 전용 프로젝트 분석은 완료했습니다.',
-    problems: [item('WORKFLOW_INTENT_UNCONFIRMED', '분석 이후 계획·구현·자동 완성 중 어디까지 원하는지 아직 확정되지 않았습니다.', ['intentGate.status', 'intentGate.question', 'analysis']), observedBaseline].filter(Boolean),
+    problems: [item('WORKFLOW_INTENT_UNCONFIRMED', '분석 이후 계획·구현·자동 완성 중 어디까지 원하는지 아직 확정되지 않았습니다.', ['intentGate.status', 'intentGate.question', 'analysis']), observedBaseline].filter((entry) => entry !== null),
     improvements: [
       item('DEFAULT_TO_ANALYSIS_ONLY', '답변 전에는 분석 결과만 제공하고 코드 수정·커밋·검증 실행·버전 종료를 하지 않습니다.', ['intentGate.defaultMode', 'intentGate.analysisComplete', 'intentGate.implementationAllowed']),
       item('ASK_ONE_WORKFLOW_QUESTION', '프로젝트 상태를 먼저 보여준 뒤 진행 범위 한 가지만 확인합니다.', ['intentGate.question', 'intentGate.hash']),
@@ -396,7 +476,7 @@ function proposalBrief(input, state) {
   };
   if (state === 'ANALYSIS_COMPLETE') return {
     headline: '요청한 읽기 전용 프로젝트 분석이 완료됐습니다.',
-    problems: [item('ANALYSIS_BOUNDARY_ACTIVE', '현재 요청은 분석 결과 제공으로 제한되어 있어 계획 확정이나 개발은 시작하지 않습니다.', ['intentGate.effectiveMode', 'intentGate.implementationAllowed']), observedBaseline].filter(Boolean),
+    problems: [item('ANALYSIS_BOUNDARY_ACTIVE', '현재 요청은 분석 결과 제공으로 제한되어 있어 계획 확정이나 개발은 시작하지 않습니다.', ['intentGate.effectiveMode', 'intentGate.implementationAllowed']), observedBaseline].filter((entry) => entry !== null),
     improvements: [item('PRESERVE_READ_ONLY_BOUNDARY', '프로젝트 구조·Git 상태·검증 명령·위험을 설명하되 저장소와 Shipping 상태를 변경하지 않습니다.', ['analysis', 'intentGate.analysisComplete', 'intentGate.hash'])],
     nextPlan: [item('PLAN_REVIEW_ANALYSIS_RESULT', '분석 결과를 확인합니다. 계획이나 개발이 필요해지면 진행 범위를 새로 선택합니다.', ['intentGate.effectiveMode', 'analysis'])],
     summary: item('SUMMARY_ANALYSIS_COMPLETE', '분석은 완료됐고 코드 수정·커밋·범위 승인·검증 실행·CLOSED는 수행하지 않았습니다.', ['intentGate.effectiveMode', 'intentGate.implementationAllowed']),
@@ -408,6 +488,14 @@ function proposalBrief(input, state) {
     nextPlan: [item('PLAN_REVIEW_RELEASE_TRAIN', '버전 순서·사용자 가치·완료조건·운영 경계를 검토합니다.', ['releaseTrain', 'goalCharter']), item('PLAN_REQUEST_IMPLEMENTATION_SEPARATELY', '실제 개발이 필요하면 구현 또는 오토파일럿 범위를 별도로 선택합니다.', ['intentGate.effectiveMode', 'intentGate.hash'])],
     summary: item('SUMMARY_PLAN_COMPLETE', '개발계획은 완료됐지만 제품 코드 변경과 버전 실행은 시작하지 않았습니다.', ['intentGate.effectiveMode', 'releaseTrain']),
   };
+  return null;
+}
+
+function proposalBrief(input, state) {
+  const questions = normalizedCount(input.questionCount ?? input.questions?.length ?? input.decision?.questions?.length);
+  const coverage = input.intelligence?.acceptanceCoverage ?? input.analysis?.intelligence?.acceptanceCoverage ?? input.coverage;
+  const intentBrief = intentGateBrief(input, state);
+  if (intentBrief) return intentBrief;
   if (state === 'DIRTY_BASELINE') return dirtyBrief(input);
   if (state === 'NEEDS_INPUT' && (input.goalDiscovery?.questions?.length ?? 0) > 0) {
     const questions = input.goalDiscovery.questions.slice(0, 3);
@@ -538,6 +626,10 @@ function uniqueTexts(items) {
   return new Set(texts).size === texts.length;
 }
 
+/**
+ * @param {PlainBrief} brief
+ * @returns {PlainBriefQuality}
+ */
 export function auditPlainBrief(brief) {
   const sections = [brief.problems, brief.improvements, brief.nextPlan];
   const allItems = [...sections.flat(), brief.summary].filter(Boolean);
@@ -590,6 +682,10 @@ function renderReleaseTrain(train) {
   ];
 }
 
+/**
+ * @param {PlainBrief} brief
+ * @returns {string}
+ */
 export function renderPlainBrief(brief) {
   const action = brief.userAction?.exactPhrase
     ? `> **${brief.userAction.exactPhrase}**`
@@ -622,6 +718,10 @@ export function renderPlainBrief(brief) {
   ].join('\n').trim();
 }
 
+/**
+ * @param {PlainBriefInput} [input]
+ * @returns {PlainBrief}
+ */
 export function compilePlainBrief(input = {}) {
   const state = normalizedState(input);
   const blockerCount = normalizedCount(input.blockerCount ?? input.issues?.counts?.BLOCKER ?? input.state?.blockerCount);
@@ -675,6 +775,11 @@ export function compilePlainBrief(input = {}) {
   return { ...withText, quality };
 }
 
+/**
+ * @param {PlainBriefInput} [input]
+ * @param {(input: PlainBriefInput) => PlainBrief} [compiler]
+ * @returns {{plainBrief: PlainBrief|null, error: {code: string, message: string, quality?: PlainBriefQuality|null}|null}}
+ */
 export function compilePlainBriefSafe(input = {}, compiler = compilePlainBrief) {
   try {
     const plainBrief = compiler(input);

@@ -20,7 +20,12 @@ function sameArray(left, right, label) {
   invariant(JSON.stringify(left) === JSON.stringify(right), 'ERR_OMO_RECEIPT_BINDING', `${label} does not match the signed work order`);
 }
 
-/** @param {string} root @param {Record<string, any>} receipt @param {{order: Record<string, any>, hmacKey: string}} context */
+/**
+ * @param {string} root
+ * @param {Record<string, any>} receipt
+ * @param {{order: Record<string, any>, hmacKey: string}} context
+ * @returns {Record<string, any>}
+ */
 export function validatePrivateOmoReceipt(root, receipt, context) {
   invariant(receipt?.schema === 'shipping-omo-receipt/v1', 'ERR_OMO_RECEIPT_SCHEMA', 'Unsupported private OMO receipt schema');
   invariant(STATUS.has(receipt.status), 'ERR_OMO_RECEIPT_STATUS', `Unsupported private OMO receipt status: ${String(receipt.status)}`);

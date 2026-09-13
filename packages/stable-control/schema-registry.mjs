@@ -95,10 +95,26 @@ const REQUIRED_FIELDS = Object.freeze({
   goalCharter: ['id', 'status', 'project', 'release', 'proposalId', 'proposalRevision', 'proposalHash', 'gitSha', 'discoveryHash', 'directionHash', 'candidateHash', 'criticHash', 'outcome', 'primaryUser', 'operatingBoundary', 'value', 'include', 'nonGoals', 'successCriteria', 'assumptions', 'rollback', 'replanTriggers', 'evidenceRefs', 'binding', 'commandAuthority', 'approvalAuthority', 'closureAuthority', 'deploymentAuthority', 'modelAuthority', 'released', 'hash'],
 });
 
+/**
+ * @typedef {Readonly<{name: string, id: string, file: string, example: string, schemaPath: string, examplePath: string}>} StableSchemaDescriptor
+ */
+
+/**
+ * A JSON Schema 2020-12 node, limited to the keywords validateNode() understands.
+ * @typedef {{$schema?: string, $id?: string, 'x-shipping-version'?: string, type?: string|string[], required?: string[], properties?: Record<string, JsonSchemaNode>, additionalProperties?: boolean|JsonSchemaNode, items?: JsonSchemaNode, const?: unknown, enum?: unknown[], allOf?: JsonSchemaNode[], anyOf?: JsonSchemaNode[], oneOf?: JsonSchemaNode[], minLength?: number, maxLength?: number, pattern?: string, format?: string, minimum?: number, maximum?: number, exclusiveMinimum?: number, exclusiveMaximum?: number, minItems?: number, maxItems?: number, uniqueItems?: boolean, minProperties?: number, maxProperties?: number}} JsonSchemaNode
+ */
+
+/**
+ * @returns {string[]}
+ */
 export function stableSchemaNames() {
   return Object.keys(STABLE_SCHEMA_DESCRIPTORS);
 }
 
+/**
+ * @param {string} nameOrId
+ * @returns {StableSchemaDescriptor}
+ */
 export function stableSchemaDescriptor(nameOrId) {
   const descriptor = STABLE_SCHEMA_DESCRIPTORS[nameOrId] ?? BY_ID.get(nameOrId);
   stableInvariant(descriptor, 'ERR_STABLE_SCHEMA', `Unsupported stable schema: ${String(nameOrId)}`);
@@ -109,13 +125,17 @@ async function readJson(filePath) {
   try {
     return JSON.parse(await readFile(filePath, 'utf8'));
   } catch (error) {
-    const failure = new Error(`Unable to read stable JSON document: ${filePath}`);
+    const failure = /** @type {Error & {code?: string}} */ (new Error(`Unable to read stable JSON document: ${filePath}`));
     failure.code = error?.code === 'ENOENT' ? 'ERR_STABLE_SCHEMA_MISSING' : 'ERR_STABLE_SCHEMA_JSON';
     failure.cause = error;
     throw failure;
   }
 }
 
+/**
+ * @param {string} nameOrId
+ * @returns {Promise<JsonSchemaNode>}
+ */
 export async function loadStableSchema(nameOrId) {
   const descriptor = stableSchemaDescriptor(nameOrId);
   const schema = await readJson(descriptor.schemaPath);
@@ -126,11 +146,20 @@ export async function loadStableSchema(nameOrId) {
 // Compatibility alias used by the initial v1 tests and downstream internal tooling.
 export const loadSchema = loadStableSchema;
 
+/**
+ * @param {string} nameOrId
+ * @returns {Promise<Record<string, unknown>>}
+ */
 export async function loadStableExample(nameOrId) {
   const descriptor = stableSchemaDescriptor(nameOrId);
   return readJson(descriptor.examplePath);
 }
 
+/**
+ * @param {string|StableSchemaDescriptor} descriptorOrName
+ * @param {JsonSchemaNode} schema
+ * @returns {JsonSchemaNode}
+ */
 export function validateStableSchemaDefinition(descriptorOrName, schema) {
   const descriptor = typeof descriptorOrName === 'string'
     ? stableSchemaDescriptor(descriptorOrName)
@@ -160,12 +189,14 @@ function validateNode(schema, value, location) {
 
   if (Array.isArray(schema.allOf)) for (const branch of schema.allOf) validateNode(branch, value, location);
   if (Array.isArray(schema.anyOf)) {
+    // A branch rejection is expected control flow for this combinator, not a bug; only the aggregate count matters.
     const successes = schema.anyOf.filter((branch) => {
       try { validateNode(branch, value, location); return true; } catch { return false; }
     });
     stableInvariant(successes.length > 0, 'ERR_STABLE_DOCUMENT', `${location} does not match any allowed shape`);
   }
   if (Array.isArray(schema.oneOf)) {
+    // Same combinator pattern as anyOf above: branch rejections are data, the exact match count is what is validated.
     const successes = schema.oneOf.filter((branch) => {
       try { validateNode(branch, value, location); return true; } catch { return false; }
     });
@@ -223,6 +254,11 @@ function validateNode(schema, value, location) {
   }
 }
 
+/**
+ * @param {string} nameOrId
+ * @param {Record<string, unknown>} value
+ * @returns {Record<string, unknown>}
+ */
 export function validateStableArtifact(nameOrId, value) {
   const descriptor = stableSchemaDescriptor(nameOrId);
   stableInvariant(value && typeof value === 'object' && !Array.isArray(value), 'ERR_STABLE_ARTIFACT', `${descriptor.name} artifact must be an object`);
@@ -233,6 +269,11 @@ export function validateStableArtifact(nameOrId, value) {
   return value;
 }
 
+/**
+ * @param {string} nameOrId
+ * @param {Record<string, unknown>} value
+ * @returns {Promise<Record<string, unknown>>}
+ */
 export async function validateStableDocument(nameOrId, value) {
   const descriptor = stableSchemaDescriptor(nameOrId);
   const schema = await loadStableSchema(descriptor.name);
@@ -241,6 +282,9 @@ export async function validateStableDocument(nameOrId, value) {
   return value;
 }
 
+/**
+ * @returns {Promise<readonly Readonly<{name: string, id: string, schema: string, example: string}>[]>}
+ */
 export async function validateAllStableExamples() {
   const results = [];
   for (const name of stableSchemaNames()) {

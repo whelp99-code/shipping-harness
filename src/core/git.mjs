@@ -1,6 +1,8 @@
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { ShippingError, invariant } from './errors.mjs';
+import { analyzeScope } from './glob.mjs';
 
 /**
  * @param {string} cwd
@@ -75,6 +77,73 @@ export function changedPathsSince(root, baselineSha) {
   const tracked = runGit(root, ['diff', '--name-only', '-z', baselineSha, '--']).stdout;
   const untracked = runGit(root, ['ls-files', '--others', '--exclude-standard', '-z']).stdout;
   return [...new Set([...splitNul(tracked), ...splitNul(untracked)].map(normalizeGitPath))].sort();
+}
+
+/**
+ * Return staged, unstaged, and untracked paths relative to HEAD. These are the paths a
+ * commit would still have to capture, so a release receipt bound to HEAD cannot attest to them.
+ * @param {string} root
+ */
+export function uncommittedPaths(root) {
+  const tracked = runGit(root, ['diff', '--name-only', '-z', 'HEAD', '--']).stdout;
+  const untracked = runGit(root, ['ls-files', '--others', '--exclude-standard', '-z']).stdout;
+  return [...new Set([...splitNul(tracked), ...splitNul(untracked)].map(normalizeGitPath))].sort();
+}
+
+/** Runtime state is not part of the source tree under test. @param {string} value */
+function isShippingRuntimePath(value) {
+  return value === '.shipping' || value.startsWith('.shipping/');
+}
+
+/**
+ * Blob SHA of each path's *working copy* (not the index), computed by `git hash-object`
+ * so file bytes never pass through this process. A path that no longer exists (deleted
+ * relative to HEAD) hashes as the literal `absent`.
+ * @param {string} root
+ * @param {string[]} paths
+ * @returns {Map<string, string>}
+ */
+function workingCopyBlobShas(root, paths) {
+  const shas = new Map();
+  for (let index = 0; index < paths.length; index += 100) {
+    const chunk = paths.slice(index, index + 100);
+    const batch = runGit(root, ['hash-object', '--', ...chunk], { allowFailure: true });
+    const lines = batch.stdout.split(/\r?\n/u).filter(Boolean);
+    if (batch.exitCode === 0 && lines.length === chunk.length) {
+      chunk.forEach((filePath, offset) => shas.set(filePath, lines[offset]));
+      continue;
+    }
+    // One unreadable path (a deletion) fails the whole batch; fall back to one call each.
+    for (const filePath of chunk) {
+      const single = runGit(root, ['hash-object', '--', filePath], { allowFailure: true });
+      shas.set(filePath, single.exitCode === 0 ? single.stdout.trim() : 'absent');
+    }
+  }
+  return shas;
+}
+
+/**
+ * Identity of the tree the commands actually ran against: HEAD plus every working-tree
+ * deviation from it. A Git SHA alone attributes evidence to a commit that may not contain
+ * what was tested, so evidence binds to this instead and goes stale the moment a file changes.
+ * `.shipping/` runtime output is excluded, so recording evidence never invalidates it.
+ * @param {string} root
+ * @param {{include: string[], exclude: string[]} | null} [scopePaths] when given, `inScopeDirtyPaths` is filled
+ * @returns {{fingerprint: string, headSha: string, dirtyPaths: string[], inScopeDirtyPaths: string[]}}
+ */
+export function treeFingerprint(root, scopePaths = null) {
+  const headSha = currentGitSha(root);
+  const dirtyPaths = uncommittedPaths(root).filter((filePath) => !isShippingRuntimePath(filePath));
+  const shas = workingCopyBlobShas(root, dirtyPaths);
+  const digest = createHash('sha256');
+  digest.update(headSha);
+  for (const filePath of dirtyPaths) digest.update(`\n${filePath}\0${shas.get(filePath) ?? 'absent'}`);
+  return {
+    fingerprint: digest.digest('hex'),
+    headSha,
+    dirtyPaths,
+    inScopeDirtyPaths: scopePaths ? analyzeScope(dirtyPaths, scopePaths).allowed : [],
+  };
 }
 
 /** @param {string} root */

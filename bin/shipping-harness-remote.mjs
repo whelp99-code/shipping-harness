@@ -81,7 +81,7 @@ async function main(argv = process.argv.slice(2)) {
     maxBodyBytes: config.maxBodyBytes,
     maxConcurrent: config.maxConcurrent,
   });
-  const selectedPort = typeof running.address === 'object' ? running.address.port : port;
+  const selectedPort = running.address && typeof running.address === 'object' ? running.address.port : port;
   process.stderr.write(`shipping-harness-remote listening on https://${host}:${selectedPort} (internal only)\n`);
 
   let stopping = false;

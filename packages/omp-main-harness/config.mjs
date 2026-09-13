@@ -20,7 +20,7 @@ import {
 } from './io.mjs';
 import { packageRoot } from './paths.mjs';
 
-/** @param {unknown} value */
+/** @param {unknown} value @returns {value is Record<string, any>} */
 function plainObject(value) {
   return Boolean(value && typeof value === 'object' && !Array.isArray(value));
 }
@@ -35,13 +35,14 @@ export function ompCommandEnvironment(paths) {
 }
 
 /** @param {string} command @param {string} key @param {Record<string, any>} paths @param {unknown} fallback */
+/** @param {string} command @param {string} key @param {Record<string, any>} paths @param {unknown} [fallback] */
 export function readOmpConfigValue(command, key, paths, fallback = undefined) {
   try {
     const result = runCommand(command, ['config', 'get', key, '--json'], {
       env: ompCommandEnvironment(paths),
       timeoutMs: 60000,
     });
-    const parsed = parseJsonOutput(result.stdout, `OMP config get ${key}`);
+    const parsed = /** @type {Record<string, unknown>} */ (parseJsonOutput(result.stdout, `OMP config get ${key}`));
     return Object.hasOwn(parsed, 'value') ? parsed.value : fallback;
   } catch (error) {
     if (fallback !== undefined) return fallback;

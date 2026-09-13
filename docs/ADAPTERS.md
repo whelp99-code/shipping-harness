@@ -21,7 +21,7 @@ Every probe returns `shipping-harness/adapter-capabilities-v1` with adapter iden
 | `durableGoals` | Repository evidence proves a durable goal file is present. |
 | `durableLedger` | Repository evidence proves a durable ledger file is present. |
 | `artifactCollection` | Safe repository-local candidate paths are configured. |
-| `costTelemetry` | A stable cost receipt was proven. |
+| `costTelemetry` | A stable cost receipt was proven. True for every built-in adapter: `adapter run` always executes through the shared runner, whose run receipt carries `telemetry.durationMs` and `telemetry.exitCode`; `telemetry.toolCalls` stays `null` unless the host reports it. |
 
 Executable presence alone does not prove authentication, provider health, quota, supported model access, or task completion.
 
@@ -76,6 +76,17 @@ Normalized events are `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`, `
 6. Any other non-executable state: `DENY_CONTINUATION`.
 
 The receipt includes `allowStop`, `continue`, `reasonCode`, release state, blocker count, and budget counters. CLI exit code `3` represents a valid `CONTINUE` decision.
+
+## Verify budgets
+
+Two optional contract budgets bound verification iteration; both are integers and both are additive, so a contract that omits them behaves as before.
+
+| Field | Default | Range | Meaning |
+|---|---:|---|---|
+| `budgets.maxVerifyRuns` | 25 | 1..200 | Hard cap on the TOTAL verify runs recorded for one release, whatever each run produced. |
+| `budgets.maxRedundantVerifyRuns` | 5 | 1..100 | Cap on consecutive verify runs that reproduced the previous run's working-tree fingerprint AND per-criterion exit codes, i.e. produced no new evidence. Any change resets the counter. |
+
+Reaching either budget decides `BLOCKED` and attaches the `budget-exhausted` BLOCKER, whose description names the budget that tripped; the state machine then refuses further `verify` calls, so the acceptance commands are not run again. `fix` is the legal recovery path. Redundancy is measured against the tree fingerprint rather than the Git SHA so that toggling an uncommitted file between runs cannot reset the counter; the total cap is what stops an agent that keeps changing something irrelevant. `release prepare` and a fresh `init` reset both counters.
 
 ## Verification
 

@@ -1,5 +1,7 @@
 # Shipping Harness v1 Internal Handover
 
+**Current version:** 1.11.0
+
 ## Product promise
 
 The user states the desired outcome. Shipping Harness analyzes the repository, proposes the smallest releasable scope, asks only for exceptional high-risk decisions, requires one exact approval, controls bounded execution, independently verifies evidence, and closes the release only when blockers are zero.
@@ -15,6 +17,10 @@ The user is the approver, not the technical interviewer.
 5. Host agent, adapters, and private OMO execution claims.
 
 No model, OMO task, remote client, or recovery routine can outrank the first four levels.
+
+Evidence freshness is bound to the working tree, not only to `HEAD`. Every evidence manifest records `treeFingerprint` (sha256 over the HEAD sha plus each path changed relative to HEAD and the blob sha of its working copy, `.shipping/` excluded) and `dirtyPaths` (those paths). `assertFreshEvidence` compares that fingerprint as well as the contract hash and Git SHA, so acceptance results recorded against uncommitted work go stale the moment any file changes, even though `HEAD` never moved; `state.currentEvidenceFingerprint` carries the accepted run's fingerprint and `status` reports `evidence: dirty (N uncommitted paths)` whenever the tree holds uncommitted work. Manifests written before v1.10.0 carry no fingerprint and keep the old Git-SHA-only contract. `close` deliberately does not compare the fingerprint: in-scope uncommitted work is already refused with `ERR_CLOSE_UNCOMMITTED`, and committing it moves `HEAD` and fails the evidence-SHA check.
+
+A state whose integrity is `TAMPERED` blocks every command until an operator restores it from trusted history. `.shipping/state.json` carries an `integrity` digest bound to the head of the append-only `.shipping/ledger.jsonl` hash chain, and a `CLOSED` or `SHIPPABLE` state is additionally checked against the release receipt and the evidence manifest on disk. `verify`, `close`, `release prepare`, and hook ingestion refuse with `ERR_STATE_TAMPERED`; a Stop hook decision returns `DENY_CONTINUATION` with reason code `STATE_INTEGRITY_TAMPERED`. `status` and MCP `shipping_status` never throw: they report `integrity`, report the last state the ledger proves rather than the claim in the file, and add a derived `false-user-state` BLOCKER that is never persisted into `issues.json`. A state file written before v1.10 has no signature and reads as `UNVERIFIED_LEGACY`; that is reported but does not block.
 
 ## Components
 

@@ -8,11 +8,15 @@ function expiration(value) {
   return Number(value?.expiresAt ?? 0);
 }
 
+/**
+ * ReplayStore.
+ */
 export class ReplayStore {
   constructor(file, { ttlMs = 600000, maxEntries = 10000 } = {}) {
     this.file = path.resolve(file);
     this.ttlMs = boundedInteger(ttlMs, 'replay ttlMs', { min: 1000, max: 24 * 60 * 60 * 1000 });
     this.maxEntries = boundedInteger(maxEntries, 'replay maxEntries', { min: 1, max: 100000 });
+    /** @type {Promise<any>} */
     this.chain = Promise.resolve();
   }
 
@@ -36,6 +40,7 @@ export class ReplayStore {
     await rename(temporary, this.file);
   }
 
+  /** @param {string} key @param {{now?: number, ttlMs?: number, metadata?: Record<string, any> | null}} [options] */
   async claimKey(key, { now = Date.now(), ttlMs = this.ttlMs, metadata = null } = {}) {
     boundedString(key, 'replay key', 1024);
     const boundedTtl = boundedInteger(ttlMs, 'replay claim ttlMs', { min: 1000, max: 24 * 60 * 60 * 1000 });

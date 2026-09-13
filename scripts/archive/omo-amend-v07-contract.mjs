@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { copyFile, mkdir, readFile, rm } from 'node:fs/promises';
+import { mkdir, readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { contractHash, loadContract } from '../src/core/contract.mjs';
 import { stableStringify } from '../src/core/crypto.mjs';

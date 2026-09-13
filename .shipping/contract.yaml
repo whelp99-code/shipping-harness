@@ -1,26 +1,35 @@
 {
   "acceptance": [
     {
-      "id": "AC-18201",
-      "description": "Plain Brief unit, adversarial, and Orca-JARVIS-shaped budget regression tests pass.",
+      "id": "AC-11101",
+      "description": "Intent-gate unit, MCP, and adversarial tests pass on the merged v1.10.0 line.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/mcp/plain-brief.test.mjs test/integration/plain-brief-budget.test.mjs test/adversarial/plain-brief-attacks.test.mjs",
+      "command": "npm run test:intent-gate",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-18202",
-      "description": "Dirty nested field pilot keeps a healthy bounded beginner report and does not mutate the target project.",
+      "id": "AC-11102",
+      "description": "Intent-gate field pilot keeps nine tools and a bounded beginner report.",
       "type": "command",
-      "command": "npm run smoke:autopilot:field",
+      "command": "npm run smoke:intent-gate",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 600
     },
     {
-      "id": "AC-18203",
-      "description": "Full regression, security, license, documentation, train, autopilot, discovery, charter, and field gates pass.",
+      "id": "AC-11103",
+      "description": "Surface freeze, state integrity, and stable schema suites pass.",
+      "type": "command",
+      "command": "npm run test:stable",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-11104",
+      "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
@@ -28,7 +37,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-18204",
+      "id": "AC-11105",
       "description": "No whitespace or conflict-marker errors remain.",
       "type": "command",
       "command": "git diff --check",
@@ -171,9 +180,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Keep deterministic beginner reports below the fixed 8 KiB limit for legacy and goal-discovery dirty proposals by removing redundant plain-brief projections without weakening Shipping authority, evidence, or action policy.",
+  "goal": "Integrate the v1.8.3 intent-gate and analysis-mode snapshot from origin/main into the v1.10.0 line under a new contract, keeping nine MCP tools, signed state integrity, and all release gates",
   "project": "shipping-harness",
-  "release": "1.8.2",
+  "release": "1.11.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -190,13 +199,6 @@
   ],
   "schema": "shipping-harness/v1",
   "scope": {
-    "include": [
-      "Remove only plain-brief fact projections that are zero-valued or mechanically derivable from canonical state, action envelope, or the separate Release Train summary.",
-      "Preserve the full Action Envelope, exact next action, forbidden actions, mechanical evidence binding, fixed Korean sections, and modelAuthority=false.",
-      "Add a regression fixture matching the Orca-JARVIS dirty baseline plus three unresolved Goal Discovery questions and four-release train.",
-      "Require the real-world-shaped beginner report to remain healthy at no more than 7680 structured bytes while the hard product limit remains 8192 bytes.",
-      "Keep the existing nine-tool MCP surface, OMP 18.0.10 compatibility, CLOSED != RELEASED, and all external-consequence boundaries."
-    ],
     "exclude": [
       "Increasing the 8192-byte product limit or weakening the quality gate.",
       "Removing the Action Envelope, forbidden action set, evidence references, or Shipping authority checks.",
@@ -204,14 +206,14 @@
       "Publishing, deployment, customer contact, purchase, credential changes, or external writes.",
       "Mutating Orca-JARVIS product files or accepting its current baseline."
     ],
+    "include": [
+      "Remove only plain-brief fact projections that are zero-valued or mechanically derivable from canonical state, action envelope, or the separate Release Train summary.",
+      "Preserve the full Action Envelope, exact next action, forbidden actions, mechanical evidence binding, fixed Korean sections, and modelAuthority=false.",
+      "Add a regression fixture matching the Orca-JARVIS dirty baseline plus three unresolved Goal Discovery questions and four-release train.",
+      "Require the real-world-shaped beginner report to remain healthy at no more than 7680 structured bytes while the hard product limit remains 8192 bytes.",
+      "Keep the existing nine-tool MCP surface, OMP 18.0.10 compatibility, CLOSED != RELEASED, and all external-consequence boundaries."
+    ],
     "paths": {
-      "include": [
-        "package.json",
-        "src/core/plain-brief.mjs",
-        "test/mcp/plain-brief.test.mjs",
-        "test/integration/plain-brief-budget.test.mjs",
-        "docs/planning/32-V1.8.2-PLAIN-BRIEF-BUDGET-HOTFIX.md"
-      ],
       "exclude": [
         ".shipping/contract.yaml",
         ".shipping/contract.lock",
@@ -219,13 +221,20 @@
         "node_modules/**",
         "dist/**",
         "coverage/**"
+      ],
+      "include": [
+        "package.json",
+        "src/core/plain-brief.mjs",
+        "test/mcp/plain-brief.test.mjs",
+        "test/integration/plain-brief-budget.test.mjs",
+        "docs/planning/32-V1.8.2-PLAIN-BRIEF-BUDGET-HOTFIX.md"
       ]
     }
   },
   "stopPolicy": {
-    "humanInterruptWins": true,
     "autoContinueAfterInterrupt": false,
-    "closeWhenRequiredGatesPass": true
+    "closeWhenRequiredGatesPass": true,
+    "humanInterruptWins": true
   },
   "worker": "shipping-harness"
 }

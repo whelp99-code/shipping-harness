@@ -62,6 +62,7 @@ async function releaseHistory(root) {
         receiptSha256: sha256(raw),
       });
     } catch {
+      // A corrupt or oversized release receipt must not fail the whole history scan; record it as UNREADABLE instead.
       history.push({ release: name.replace(/\.json$/u, ''), state: 'UNREADABLE', gitSha: null, closedAt: null });
     }
   }

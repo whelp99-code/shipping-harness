@@ -2,6 +2,11 @@ import { execFileSync } from 'node:child_process';
 import { STABLE_SCHEMAS } from './schema-registry.mjs';
 import { SUPPORTED_RELEASES } from './migration.mjs';
 
+/**
+ * @template T
+ * @param {T} value
+ * @returns {T}
+ */
 function deepFreeze(value) {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
   for (const nested of Object.values(value)) deepFreeze(nested);
@@ -58,6 +63,10 @@ function major(version) {
   return Number.isFinite(value) ? value : null;
 }
 
+/**
+ * @param {{nodeVersion?: string, platform?: string, arch?: string, gitVersion?: string|null}} [input]
+ * @returns {typeof COMPATIBILITY & {observed: {nodeVersion: string, platform: string, arch: string, gitVersion: string}, supported: boolean, diagnostics: string[]}}
+ */
 export function compatibilityReport(input = {}) {
   const nodeVersion = input.nodeVersion ?? process.versions.node;
   const platform = input.platform ?? process.platform;
@@ -67,6 +76,7 @@ export function compatibilityReport(input = {}) {
     try {
       gitVersion = execFileSync('git', ['--version'], { encoding: 'utf8', timeout: 5000 }).trim().replace(/^git version\s+/u, '');
     } catch {
+      // git missing or unresponsive is a reportable compatibility fact, not a crash; the 'unavailable' value surfaces it.
       gitVersion = 'unavailable';
     }
   }

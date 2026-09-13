@@ -5,6 +5,7 @@
   "contractHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "baselineSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "currentEvidenceSha": null,
+  "currentEvidenceFingerprint": null,
   "lastRunId": null,
   "agentRuns": 1,
   "fixCycles": 0,
@@ -14,5 +15,15 @@
   "resumeState": "LOCKED",
   "humanStop": true,
   "createdAt": "2026-08-28T00:00:00.000Z",
-  "updatedAt": "2026-08-28T00:05:00.000Z"
+  "updatedAt": "2026-08-28T00:05:00.000Z",
+  "integrity": {
+    "algorithm": "sha256",
+    "ledgerHead": "3f1c0a52-3a4a-4f2a-9b7e-1d0c9a6f5b21",
+    "digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "verifyRuns": 3,
+  "redundantVerifyRuns": 0,
+  "telemetry": {
+    "totalAgentDurationMs": 42000
+  }
 }

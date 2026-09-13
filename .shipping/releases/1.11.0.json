@@ -1,0 +1,32 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 5,
+    "requiredFailed": 0,
+    "total": 5
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "67c7954276cd42f53027b4103a2fbf324a6a27a8",
+  "closedAt": "2026-09-13T03:18:24.617Z",
+  "closedGitSha": "20200d5e5f3a7047a927566fca9b3d7860b594dd",
+  "contractHash": "6c77836c9bddc7fe06377e446384f13bbc89eb090d2f9c188ce97885c8157075",
+  "evidenceRunId": "run-2026-09-13T03-18-05-886Z-bc6dc0a9",
+  "fixCycles": 0,
+  "goal": "Integrate the v1.8.3 intent-gate and analysis-mode snapshot from origin/main into the v1.10.0 line under a new contract, keeping nine MCP tools, signed state integrity, and all release gates",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.11.0",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

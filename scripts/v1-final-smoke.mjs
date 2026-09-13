@@ -154,7 +154,7 @@ try {
   exec('git', ['config', 'user.email', 'smoke@example.invalid'], { cwd: pluginProject });
   exec('git', ['config', 'user.name', 'Shipping Final Smoke'], { cwd: pluginProject });
   await writeFile(path.join(pluginProject, 'README.md'), 'plugin fixture\n');
-  await writeFile(path.join(pluginProject, 'package.json'), `${JSON.stringify({ name: 'shipping-v1-plugin-upgrade', private: true, type: 'module', scripts: { build: 'node -e \"process.exit(0)\"' } }, null, 2)}\n`);
+  await writeFile(path.join(pluginProject, 'package.json'), `${JSON.stringify({ name: 'shipping-v1-plugin-upgrade', private: true, type: 'module', scripts: { build: 'node -e "process.exit(0)"' } }, null, 2)}\n`);
   exec('git', ['add', '.'], { cwd: pluginProject });
   exec('git', ['commit', '-qm', 'fixture'], { cwd: pluginProject });
   exec(installedCli, ['init', '--project', 'shipping-v1-plugin-upgrade'], { cwd: pluginProject });
@@ -177,7 +177,7 @@ try {
   exec('git', ['config', 'user.email', 'smoke@example.invalid'], { cwd: mcpProject });
   exec('git', ['config', 'user.name', 'Shipping Final Smoke'], { cwd: mcpProject });
   await writeFile(path.join(mcpProject, 'README.md'), 'mcp fixture\n');
-  await writeFile(path.join(mcpProject, 'package.json'), `${JSON.stringify({ name: 'shipping-v1-installed-mcp', private: true, type: 'module', scripts: { build: 'node -e \"process.exit(0)\"' } }, null, 2)}\n`);
+  await writeFile(path.join(mcpProject, 'package.json'), `${JSON.stringify({ name: 'shipping-v1-installed-mcp', private: true, type: 'module', scripts: { build: 'node -e "process.exit(0)"' } }, null, 2)}\n`);
   exec('git', ['add', '.'], { cwd: mcpProject });
   exec('git', ['commit', '-qm', 'fixture'], { cwd: mcpProject });
   const mcpFlow = await installedMcpFlow(installedMcp, mcpProject);

@@ -27,6 +27,23 @@ A migration must never:
 7. Run plugin doctor, MCP discovery, private OMO doctor when configured, and remote health when enabled.
 8. Resume only after validation succeeds. A non-terminal restored release remains `PAUSED` until the operator resumes it.
 
+## v1.9 → v1.10 state integrity promotion
+
+v1.10 signs `.shipping/state.json` with an `integrity` object (`algorithm`, `ledgerHead`, `digest`) and turns `.shipping/ledger.jsonl` into a hash chain (`prev`, `digest` on every event). A project last written by v1.9 or earlier has neither.
+
+Procedure:
+
+1. Commit or stash source changes and pause active work, as for any migration.
+2. Back up `.shipping/` (the ledger especially: migration appends to it and never rewrites it).
+3. Run `migrateStateIntegrity(root)` from `packages/stable-control/migration.mjs` against a copied fixture first, then against the project.
+4. Re-read the status: `shipping-harness status --json` now reports `integrity.level`.
+
+The migration signs the existing state only when the ledger already proves the state the file claims. It appends exactly one `state.migrated` event and writes the signature over the unchanged state document; it never edits history, never changes the recorded state, and never reopens a `CLOSED` release.
+
+`UNVERIFIED_LEGACY` means the state predates signing and no signed state write exists yet, so the engine cannot prove the file was written by itself. It is reported everywhere but blocks nothing: `verify`, `close`, `release prepare`, and hook decisions all proceed. A legacy state is left at `UNVERIFIED_LEGACY` when the ledger cannot prove the recorded state (for example a ledger that was truncated or never carried a matching transition); that is not an error, but it also cannot be promoted, and the first normal state write after the upgrade signs it anyway.
+
+`TAMPERED` is different in kind: the state contradicts the ledger, the receipt, or the evidence on disk. That is an incident, not a migration case. Restore `.shipping/state.json` from trusted project history or a verified backup before running any further command.
+
 ## Schema policy
 
 The v1 schema registry rejects unknown schema IDs and unknown root fields. Legacy identifiers explicitly listed in `packages/stable-control/migration.mjs` may be mapped to their stable replacement. Unknown future major versions fail closed.

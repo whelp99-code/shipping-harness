@@ -59,6 +59,9 @@ function render(command, result) {
   ].join('\n') + '\n';
 }
 
+/**
+ * @returns {Promise<void>}
+ */
 export async function main() {
   const command = process.argv[2] ?? 'help';
   if (['help', '--help', '-h'].includes(command)) {
@@ -73,7 +76,7 @@ export async function main() {
   else if (command === 'rollback') {
     const value = input();
     if (!value.backupId) throw new Error('--backup-id is required for rollback');
-    result = await rollbackOmpMainHarness(value);
+    result = await rollbackOmpMainHarness({ ...value, backupId: value.backupId });
   } else if (command === 'field-smoke') {
     const { runFieldSmoke } = await import('./field-smoke.mjs');
     result = await runFieldSmoke({

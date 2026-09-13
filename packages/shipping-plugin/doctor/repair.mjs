@@ -3,7 +3,7 @@ import { doctorShippingPlugin } from './doctor.mjs';
 
 /**
  * Repair only plugin assets/registration. Repository .shipping state is read-only.
- * @param {{packageRoot: string, installRoot: string, host?: 'generic'|'codex', codexHome?: string|null, codexExecutable?: string, projectRoot?: string|null, dryRun?: boolean, run?: any}} input
+ * @param {{packageRoot: string, installRoot: string, host?: string, codexHome?: string|null, codexExecutable?: string, projectRoot?: string|null, dryRun?: boolean, run?: any}} input
  */
 export async function repairShippingPlugin(input) {
   const before = await doctorShippingPlugin(input);

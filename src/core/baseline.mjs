@@ -21,6 +21,7 @@ const GENERATED_SEGMENTS = new Set([
 function normalizePath(value) {
   let result = String(value ?? '').trim();
   if (result.startsWith('"') && result.endsWith('"')) {
+    // git quotes exotic paths as C-style JSON strings; if that decoding fails, strip the quotes as a best-effort fallback.
     try { result = JSON.parse(result); } catch { result = result.slice(1, -1); }
   }
   return result.replaceAll('\\', '/').replace(/^\.\//u, '');
@@ -169,7 +170,7 @@ function splitNul(value) {
  * stages, resets, stashes, or discards anything.
  * @param {string} root
  * @param {Record<string, any>} baseline
- * @param {{baselinePlanHash:string, baselineCommit:string, baselineAuthorizedByUser:boolean}} input
+ * @param {{baselinePlanHash?: string | null, baselineCommit?: string | null, baselineAuthorizedByUser?: boolean}} input
  */
 export function verifyBaselinePreservation(root, baseline, input) {
   invariant(baseline?.plan?.hash, 'ERR_BASELINE_PLAN', 'The active proposal has no baseline plan');

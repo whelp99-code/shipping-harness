@@ -95,6 +95,7 @@ export function startStdioServer(options) {
     }
   });
 
+  /** @type {Promise<void>} */
   const completed = new Promise((resolve) => {
     input.on('end', () => {
       const wait = () => {

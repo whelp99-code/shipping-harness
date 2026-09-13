@@ -395,6 +395,17 @@ export function validateReleaseTrain(train, options = {}) {
   return train;
 }
 
+/**
+ * @typedef {{order: number, version: string, predecessor: string|null, stage: string, detailLevel: string, goal: string, authority: string, canGrantCurrentAuthority: boolean, valueGate: {statement: string, measurable: boolean, testsAloneSufficient: boolean, criteria: Array<{code: string, proofClass: string}>}, acceptance: {exactCommands: Array<Record<string, unknown>>, futureCommandsAreAuthority: boolean}, entryGate: string[], exitGate: string[], rollback: {required: boolean, evidenceRequired: boolean}, replanTriggers: string[], transition: {nextReleaseRequiresClosedReceipt: boolean, releaseDoesNotImplyReleased: boolean}}} ReleaseTrainRelease
+ * @typedef {{schema: string, id: string, project: string, finalGoal: string, status: string, currentIndex: number, currentRelease: string, modelAuthority: boolean, deterministic: boolean, rollingPlan: boolean, source: Record<string, unknown>, limits: {minReleases: number, maxReleases: number, actualReleases: number}, releases: ReleaseTrainRelease[], trainCompleteWhen: string[], hash: string}} ReleaseTrain
+ * @typedef {{proposalId: string, proposalHash: string, contractHash: string, baselineSha: string, goalCharterHash?: string|null, approvedAt: string}} ReleaseTrainBinding
+ * @typedef {{schema: string, train: ReleaseTrain, binding: ReleaseTrainBinding, hash: string}} ReleaseTrainEnvelope
+ */
+
+/**
+ * @param {ReleaseTrain|null|undefined} train
+ * @returns {{schema: string, id: string, hash: string, finalGoal: string, currentRelease: string, currentIndex: number, totalReleases: number, modelAuthority: boolean, releases: Array<{order: number, version: string, stage: string, detailLevel: string, current: boolean, value: string, authority: string}>}|null}
+ */
 export function releaseTrainSummary(train) {
   if (!train) return null;
   validateReleaseTrain(train);
@@ -419,6 +430,11 @@ export function releaseTrainSummary(train) {
   };
 }
 
+/**
+ * @param {ReleaseTrain} train
+ * @param {ReleaseTrainBinding} binding
+ * @returns {ReleaseTrainEnvelope}
+ */
 export function bindApprovedReleaseTrain(train, binding) {
   validateReleaseTrain(train);
   const body = {
@@ -441,6 +457,12 @@ export function bindApprovedReleaseTrain(train, binding) {
   return { ...body, hash: hashObject(body) };
 }
 
+/**
+ * @param {string} root
+ * @param {ReleaseTrain} train
+ * @param {ReleaseTrainBinding} binding
+ * @returns {Promise<{path: string, envelope: ReleaseTrainEnvelope}>}
+ */
 export async function persistApprovedReleaseTrain(root, train, binding) {
   const target = runtimePaths(root).releaseTrain;
   await assertContainedPath(root, target);
@@ -449,6 +471,10 @@ export async function persistApprovedReleaseTrain(root, train, binding) {
   return { path: target, envelope };
 }
 
+/**
+ * @param {string} root
+ * @returns {Promise<ReleaseTrainEnvelope|null>}
+ */
 export async function loadApprovedReleaseTrain(root) {
   const target = runtimePaths(root).releaseTrain;
   if (!(await exists(target))) return null;

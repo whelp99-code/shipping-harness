@@ -52,3 +52,5 @@ The machine-readable inventory and critical-file digests are stored in `docs/rep
 ## v1.8.1 Goal Direction security boundary
 
 Goal Discovery, Direction Critic, Decision Ledger, Goal Charter, field pilot, Release Train, and Autopilot remain deterministic local code. They expose no raw shell, credentials, public listener, external write, model authority, automatic RELEASED, or in-place accepted-charter mutation.
+
+The v1.8.3 Intent Gate is deterministic local code and grants no command, approval, closure, deployment, or model authority. Ambiguous analysis requests default to `ANALYZE_ONLY`; hostile model prose, preloaded Goal Charter or Release Train data, unsafe intent answers, and dirty-baseline ordering cannot escalate the workflow. The field pilot performs no model or network call and proves the real target repository remains byte-for-byte unchanged.

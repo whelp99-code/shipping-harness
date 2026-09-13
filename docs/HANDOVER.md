@@ -88,6 +88,12 @@ Operators retain `docs/reports/v1.6.1-autopilot-field.json` with the source repo
 
 Operators retain the CLOSED receipt, annotated tag, `docs/reports/v1.7.0-goal-discovery.json`, and the stable Goal Discovery and Decision Ledger schema examples. The field report must show nine tools, zero technical questions, zero model-authority leaks, zero false direction/ready/closed/released results, and unchanged available real-project fingerprints. `.shipping/decision-ledger.jsonl` is runtime authority evidence: do not edit, truncate, reorder, or merge it manually. A hash, sequence, event-key, Git-binding, or retention failure is an incident and must stop planning until recovered from trusted project history or a separately verified backup.
 
+### Intent Gate handover
+
+For a new terse request, verify `intentGate` before interpreting baseline or Goal Discovery output. `CONFIRMATION_REQUIRED` means read-only analysis is complete and exactly one workflow-boundary answer remains. Preserve `ANALYZE_ONLY` as the default; do not create a Goal Charter, Release Train, approval, execution, verification command, commit, or close from that state. `ANALYSIS_COMPLETE` and `PLAN_COMPLETE` are non-approvable. Only `IMPLEMENT` or `AUTOPILOT` can enter the existing scope-approval flow. The intent answer must be appended through `shipping_refine`, never by editing the Proposal JSON.
+
+Operational verification is `npm run test:intent-gate` plus `npm run smoke:intent-gate`. The field smoke fingerprints the real Orca-JARVIS HEAD, porcelain, and all tracked bytes before and after bounded analysis. Any target mutation, extra MCP tool, model authority, premature planning, or premature implementation is a release blocker.
+
 ## v1.8.1 handover
 
 Operators verify the tagged package, nine-tool protocol, Goal Direction field report, real-project unchanged receipts, doctor, install receipt, OMP binary hashes, and rollback preview. Any non-zero safety counter blocks handover.

@@ -18,7 +18,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..', '..');
 
 const EXPECTED = {
-  tools: 'f4cf418cff5d25ea1c373021a9e3068a3851898a89b93fb55edf8e4a5cc0e8ab',
+  // Merge of origin/main intent gate (v1.8.3 snapshot): shipping_start's `title` and
+  // `description` now state that terse or ambiguous requests default to read-only
+  // analysis and ask one workflow-boundary question. The tool count stays nine, no tool
+  // was renamed, and no input property was added or removed. Deliberate tool-surface
+  // change, recorded in section 6 of
+  // docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md
+  // under "Merge of origin/main intent gate".
+  // Previous (v1.8.2) hash: f4cf418cff5d25ea1c373021a9e3068a3851898a89b93fb55edf8e4a5cc0e8ab
+  tools: '2634c56694a462b373c12b9f153a4da5ac6290cb1a697f56f1c20fb1599bf26a',
   // v1.10.0 Phase B: `lock`, `verify` and `close` gained the --skip-preflight,
   // --no-baseline-replay and --allow-uncommitted flags. A flag that cannot be discovered
   // from help is not a usable surface, so the baseline is updated deliberately and the
@@ -36,7 +44,12 @@ const EXPECTED = {
   // Previous (v1.10.0 Phase C) hash: 6d34415223f226331ab66e916b1424eb672dbd00324c750f2d18123a6af14893
   // Previous (v1.10.0 Phase A/B) hash: d8303d3c7d52f650534a0ed65b4aa090098a82d5fb854c898e270a97cdc4ab36
   // Previous (v1.8.2) hash: 563fa876d0c61f612c2f4fa8666d2ad7561d5ad1d29e04e8e1773b22d83923c8
-  schemas: '163a44c39f77bd0db7c050a38696caef95ba0714977d495bb0908fc3ce9f05d7',
+  //
+  // Merge of origin/main intent gate (v1.8.3 snapshot): schemas/v1/intent-gate.schema.json
+  // and schemas/v1/examples/intent-gate.example.json are new files. Purely additive; no
+  // existing schema changed. Recorded in the same section 6 entry.
+  // Previous (v1.10.0 dirty-tree) hash: 163a44c39f77bd0db7c050a38696caef95ba0714977d495bb0908fc3ce9f05d7
+  schemas: '947bde699a45beaf77ecb80a8575d47fba269c0c5d55fc3bba8ee1011dc0a101',
 };
 
 function sha256Hex(input) {

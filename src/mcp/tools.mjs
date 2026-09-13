@@ -6,8 +6,8 @@ import { TOOL_HANDLERS } from './handlers.mjs';
 export const SHIPPING_TOOLS = Object.freeze([
   {
     name: 'shipping_start',
-    title: 'Start a small shippable release',
-    description: 'Analyze the current Git repository without executing project code, then propose the smallest release scope, acceptance checks, and short plan. This does not approve or lock the release.',
+    title: 'Analyze a project and start a bounded workflow',
+    description: 'Analyze the current Git repository without executing project code. Terse or ambiguous requests default to read-only analysis and ask one workflow-boundary question before planning, implementation, or Autopilot. This never approves or locks a release.',
     inputSchema: {
       type: 'object',
       properties: {

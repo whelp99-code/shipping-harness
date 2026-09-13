@@ -64,7 +64,9 @@ Use Shipping Harness to finish this project as version 0.1.0.
 Keep only the smallest useful scope and show me the scope before approving it.
 ```
 
-The agent calls `shipping_start`, presents scope, exclusions, acceptance checks, and a short plan, and may call `shipping_approve_scope` only after explicit user approval with the exact proposal hash. No MCP tool accepts a raw shell command.
+The agent calls `shipping_start` once. Shipping always completes bounded read-only repository analysis first, then presents scope, exclusions, acceptance checks, and a short plan. A terse or ambiguous request such as `Analyze this project with Shipping Harness` produces exactly one workflow-boundary question and defaults to `ANALYZE_ONLY`; it does not create Goal Discovery, a Goal Charter, a Release Train, implementation authority, or closure authority before that intent is confirmed. Explicit planning requests may produce a non-executing plan; only explicit `IMPLEMENT` or `AUTOPILOT` requests can enter the scope-approval flow, and `shipping_approve_scope` may be called only after explicit user approval with the exact proposal hash. No MCP tool accepts a raw shell command.
+
+The stable intent modes are `ANALYZE_ONLY`, `PLAN_ONLY`, `IMPLEMENT`, and `AUTOPILOT`. Intent confirmation reuses `shipping_refine`; the MCP surface remains exactly nine tools. A dirty baseline remains visible evidence but cannot hide the intent question or trigger a baseline commit before the requested workflow boundary is known.
 
 ## Release flow
 

@@ -87,6 +87,7 @@ This table is derived directly from `SHIPPING_TOOLS` in `src/mcp/tools.mjs`. "Re
 `shipping_start` returns detected project type and manifest files, proposed release version and goal, included behavior and explicit exclusions, allowed and denied paths, existing build/test/lint commands selected as acceptance criteria, short execution steps, and a proposal ID and SHA-256 hash. It also returns one canonical proposal state:
 
 ```text
+INTENT_CONFIRMATION_REQUIRED | ANALYSIS_COMPLETE | PLAN_COMPLETE
 NEEDS_INPUT | DIRTY_BASELINE | NEEDS_ACCEPTANCE | READY_FOR_APPROVAL
 ```
 
@@ -97,6 +98,14 @@ Only `READY_FOR_APPROVAL` may be passed to `shipping_approve_scope`. Repeating t
 ### Dirty baseline preservation
 
 `DIRTY_BASELINE` returns a bounded `baseline` object with categorized entries, exact blocking/non-blocking paths, a suggested host commit message, a file-set hash, and one next action: `REVIEW_BASELINE`. Shipping does not stage, commit, stash, reset, or delete files. After the user separately approves the displayed plan, the host agent may commit exactly the included paths, then call `shipping_refine` with `rescan: true`, the exact `baselinePlanHash`, current full `baselineCommit`, and `baselineAuthorizedByUser: true`. Baseline preservation approval is not release-scope approval.
+
+### Intent gate and analysis mode
+
+`shipping_start` always completes bounded read-only analysis before deciding what workflow is allowed. A terse or ambiguous analysis request returns `intentGate.status=CONFIRMATION_REQUIRED`, exactly one `Q-INTENT-001` question, and the default `ANALYZE_ONLY`. The four stable choices are `ANALYZE_ONLY`, `PLAN_ONLY`, `IMPLEMENT`, and `AUTOPILOT`; the answer is recorded through the existing `shipping_refine` tool, so the MCP surface remains exactly nine tools.
+
+Before intent confirmation, `goalDiscovery`, `goalCharter`, and `releaseTrain` are null, `readyForApproval` is false, and approval, execution, verification commands, baseline mutation, and close remain forbidden. `ANALYSIS_COMPLETE` is a read-only terminal proposal state. `PLAN_COMPLETE` may expose a proposed Goal Charter and bounded Release Train but cannot be passed to `shipping_approve_scope`. Only a confirmed `IMPLEMENT` or `AUTOPILOT` intent can reach `READY_FOR_APPROVAL`.
+
+Intent confirmation precedes `DIRTY_BASELINE` in the proposal projection, so a dirty repository cannot hide the user's workflow choice; the dirty baseline remains visible evidence and still blocks implementation after intent and product direction are resolved. The classifier is deterministic local code with no model or network call, no raw command field, and no additional MCP tool.
 
 ### Goal discovery, charter, train, and autopilot
 

@@ -83,7 +83,9 @@
     "test:goal-charter:field": "node --test --test-reporter=spec test/integration/goal-direction-field.test.mjs test/adversarial/goal-direction-field-attacks.test.mjs test/integration/goal-direction-field-performance.test.mjs test/integration/goal-charter-field.test.mjs test/adversarial/goal-charter-field-attacks.test.mjs test/integration/goal-charter-field-performance.test.mjs",
     "smoke:goal-charter:field": "node scripts/goal-charter-field-pilot.mjs --check",
     "test:goal-direction:field": "npm run test:goal-charter:field",
-    "smoke:goal-direction:field": "npm run smoke:goal-charter:field"
+    "smoke:goal-direction:field": "npm run smoke:goal-charter:field",
+    "test:intent-gate": "node --test --test-reporter=spec test/unit/intent-gate.test.mjs test/mcp/intent-gate.test.mjs test/adversarial/intent-gate-attacks.test.mjs",
+    "smoke:intent-gate": "node scripts/intent-gate-pilot.mjs --check"
   },
   "license": "MIT",
   "devDependencies": {

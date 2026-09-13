@@ -247,6 +247,17 @@ Any implementation that cannot map to a requirement is out of scope or must amen
 | REQ-BOUNDARY-001..002 | nine-tool reuse, no technical questions, no model/command/approval/close/release authority | MCP inventory, OMP tests, hostile-model tests, read-only real-project pilot |
 | AC-17001..17016 | locked v1.7.0 contract acceptance and closure evidence | full `npm run release:verify`, Shipping receipt, annotated tag, clean source, installed doctor/rollback audit |
 
+## v1.8.3 Intent Gate and Analysis Mode
+
+| Requirement | Implementation | Verification |
+|---|---|---|
+| REQ-INTENT-183-001..003 | `src/core/intent-gate.mjs`; read-only analysis first, one bounded workflow question, default `ANALYZE_ONLY` | `test/unit/intent-gate.test.mjs`, `test/mcp/intent-gate.test.mjs` |
+| REQ-INTENT-183-004..006 | `src/core/proposal-state.mjs`, `src/core/proposals.mjs`; `ANALYSIS_COMPLETE`, `PLAN_COMPLETE`, implementation-only approval | MCP intent flow tests and full proposal regression |
+| REQ-INTENT-183-007..009 | existing `shipping_refine`, deterministic intent hash, unsafe-choice rejection | `test/adversarial/intent-gate-attacks.test.mjs` |
+| REQ-INTENT-183-010..012 | intent-before-dirty precedence and Korean deterministic plain brief | MCP/adversarial intent tests and `src/core/plain-brief.mjs` |
+| REQ-INTENT-183-013 | frozen schema and deterministic example | `schemas/v1/intent-gate.schema.json`, stable schema suite |
+| REQ-INTENT-183-014 | nine tools, no model/network authority, read-only Orca-JARVIS pilot | `scripts/intent-gate-pilot.mjs --check`, OMP and full release verification |
+
 ## v1.8.1 Goal Direction Field Hardening
 
 | Requirement | Evidence |

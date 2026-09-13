@@ -2,6 +2,9 @@ import { hashObject } from './crypto.mjs';
 
 export const PROPOSAL_STATES = Object.freeze([
   'PLANNING',
+  'INTENT_CONFIRMATION_REQUIRED',
+  'ANALYSIS_COMPLETE',
+  'PLAN_COMPLETE',
   'NEEDS_INPUT',
   'DIRTY_BASELINE',
   'NEEDS_ACCEPTANCE',
@@ -21,7 +24,7 @@ const FALLBACK_COMMANDS = new Set(['git diff --check']);
  */
 export function proposalAuthorityStatus(state) {
   if (state === 'READY_FOR_APPROVAL') return 'APPROVABLE';
-  if (state === 'NEEDS_INPUT') return 'NEEDS_INPUT';
+  if (['INTENT_CONFIRMATION_REQUIRED', 'NEEDS_INPUT'].includes(state)) return 'NEEDS_INPUT';
   if (state === 'APPROVED') return 'APPROVED';
   if (state === 'SUPERSEDED') return 'SUPERSEDED';
   if (state === 'EXPIRED') return 'EXPIRED';
@@ -32,6 +35,9 @@ export function proposalAuthorityStatus(state) {
 export function proposalNextAction(state) {
   const actions = {
     PLANNING: 'WAIT_FOR_ANALYSIS',
+    INTENT_CONFIRMATION_REQUIRED: 'CONFIRM_INTENT',
+    ANALYSIS_COMPLETE: 'REVIEW_ANALYSIS',
+    PLAN_COMPLETE: 'REVIEW_PLAN',
     NEEDS_INPUT: 'ANSWER_EXCEPTION',
     DIRTY_BASELINE: 'REVIEW_BASELINE',
     NEEDS_ACCEPTANCE: 'STRENGTHEN_ACCEPTANCE',
@@ -104,12 +110,18 @@ export function deriveProposalState(proposal, now = Date.now()) {
   if (proposal?.approval?.confirmed === true || proposal?.lifecycle?.state === 'APPROVED') return 'APPROVED';
   if (proposal?.lifecycle?.state === 'SUPERSEDED') return 'SUPERSEDED';
   if (Number.isFinite(Date.parse(proposal?.expiresAt)) && Date.parse(proposal.expiresAt) <= now) return 'EXPIRED';
-  if (Array.isArray(proposal?.sourceChanges) && proposal.sourceChanges.length > 0) return 'DIRTY_BASELINE';
+  const intent = proposal?.intentGate ?? null;
+  if (intent?.status === 'CONFIRMATION_REQUIRED') return 'INTENT_CONFIRMATION_REQUIRED';
+  if (intent?.status === 'CONFIRMED' && intent.effectiveMode === 'ANALYZE_ONLY') return 'ANALYSIS_COMPLETE';
   if ((proposal?.decision?.questions?.length ?? 0) > 0 || proposal?.decision?.approvalStatus === 'NEEDS_INPUT') return 'NEEDS_INPUT';
+  if (intent?.status === 'CONFIRMED' && intent.effectiveMode === 'PLAN_ONLY') {
+    return proposal?.goalDiscovery?.status === 'READY' && proposal?.goalDiscovery?.direction ? 'PLAN_COMPLETE' : 'PLANNING';
+  }
+  if (Array.isArray(proposal?.sourceChanges) && proposal.sourceChanges.length > 0) return 'DIRTY_BASELINE';
   const strength = proposal?.acceptanceStrength ?? classifyAcceptanceStrength(proposal?.analysis);
   if (strength.sufficient !== true) return 'NEEDS_ACCEPTANCE';
   if (proposal?.decision?.approvalStatus === 'BLOCKED') return 'NEEDS_INPUT';
-  if (proposal?.decision?.approvalStatus === 'APPROVABLE') return 'READY_FOR_APPROVAL';
+  if (proposal?.decision?.approvalStatus === 'APPROVABLE' && intent?.implementationAllowed !== false) return 'READY_FOR_APPROVAL';
   return 'PLANNING';
 }
 
@@ -151,6 +163,7 @@ export function proposalSummary(proposal) {
     workspaceCandidates: proposal.workspaceCandidates ?? proposal.analysis?.workspaceCandidates ?? [],
     versionEvidence: proposal.versionEvidence ?? proposal.analysis?.versionEvidence ?? null,
     intelligence: proposal.intelligence ?? proposal.analysis?.intelligence ?? null,
+    intentGate: proposal.intentGate ?? null,
     releaseTrain: proposal.releaseTrain ?? null,
     releaseTrainSummary: proposal.releaseTrainSummary ?? null,
     oneScreenApproval: proposal.oneScreenApproval ?? null,

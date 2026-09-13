@@ -16,6 +16,9 @@ const USER_STATE_MAP = Object.freeze({
 
 function nextAction(state, blockers) {
   if (state === 'PLANNING') return '원하는 결과를 한 문장으로 말하세요.';
+  if (state === 'INTENT_CONFIRMATION_REQUIRED') return '분석만, 계획까지, 구현까지, 검증·CLOSED까지 중 원하는 범위를 하나 선택하세요.';
+  if (state === 'ANALYSIS_COMPLETE') return '읽기 전용 분석 결과를 확인하세요.';
+  if (state === 'PLAN_COMPLETE') return '버전별 계획과 완료조건을 확인하세요.';
   if (state === 'NEEDS_INPUT') return '남은 핵심 질문에 답하거나 권장 안전안을 승인하세요.';
   if (state === 'DIRTY_BASELINE') return '기존 변경사항의 기준선 보존 계획을 검토하세요.';
   if (state === 'NEEDS_ACCEPTANCE') return '실제 빌드·테스트·검증 명령을 확인해 완료조건에 반영하세요.';
@@ -36,6 +39,9 @@ export function buildUserStatusView(status) {
     const userState = proposal.state === 'READY_FOR_APPROVAL' ? 'AWAITING_APPROVAL' : proposal.state;
     const summaries = {
       PLANNING: '이번 버전의 목표와 범위를 정하는 중입니다.',
+      INTENT_CONFIRMATION_REQUIRED: '읽기 전용 분석은 완료됐고, 이후 어디까지 진행할지 한 번 확인해야 합니다.',
+      ANALYSIS_COMPLETE: '요청한 읽기 전용 프로젝트 분석이 완료됐습니다.',
+      PLAN_COMPLETE: '목표와 버전별 계획은 준비됐고 구현은 시작하지 않았습니다.',
       NEEDS_INPUT: '승인 전에 사용자의 핵심 결정이 필요합니다.',
       DIRTY_BASELINE: '기존 변경사항이 있어 아직 범위를 잠글 수 없습니다.',
       NEEDS_ACCEPTANCE: '완료를 증명할 강한 빌드·테스트·검증 기준이 부족합니다.',
@@ -70,6 +76,7 @@ export function buildUserStatusView(status) {
       acceptanceStrength: proposal.acceptanceStrength,
       baseline: proposal.baseline ?? null,
       intelligence: proposal.intelligence ?? null,
+      intentGate: proposal.intentGate ?? null,
       goalDiscovery: proposal.goalDiscovery ?? null,
       goalCharter: proposal.goalCharter ?? null,
       oneScreenApproval: proposal.oneScreenApproval ?? null,

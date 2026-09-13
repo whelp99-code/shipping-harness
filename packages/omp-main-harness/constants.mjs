@@ -49,6 +49,8 @@ export const OMP_AGENT_BLOCK = `${OMP_AGENT_BLOCK_START}
 
 1. 현재 Git 프로젝트에서 먼저 \`mcp__shipping_harness_shipping_status\`를 호출한다.
 2. 새 작업이면 사용자 결과를 바탕으로 \`mcp__shipping_harness_shipping_start\`를 정확히 한 번 호출한다. 시작 모드는 AUTO이며 모델이 바꾸지 않는다.
+2a. 짧거나 모호한 분석 요청은 읽기 전용 분석을 먼저 보여주고 \`intentGate\`의 한 가지 진행 범위 질문을 그대로 표시한다. 답변 전 기본값은 \`ANALYZE_ONLY\`이며 Goal Charter, releaseTrain, 구현, 커밋, 검증 실행, 승인, CLOSED를 만들거나 암시하지 않는다.
+2b. \`ANALYSIS_COMPLETE\`는 분석 종료, \`PLAN_COMPLETE\`는 비실행 계획 종료다. 오직 명시적으로 확인된 \`IMPLEMENT\` 또는 \`AUTOPILOT\`만 범위 승인 단계로 진행한다. 선택은 기존 \`shipping_refine\`으로만 기록한다.
 3. Shipping의 Proposal ID, Revision, canonical state, 선택 Workspace, 명령과 각 \`cwd\`, baseline, intelligence, coverage, releaseTrain만 권위 있는 계획으로 사용한다. 추론한 목표는 추천일 뿐 사용자 목표를 덮어쓰지 않는다.
 4. releaseTrain의 첫 버전만 현재 계약 후보다. 미래 버전은 \`ADVISORY_REPLAN_REQUIRED\`이며 앞 버전 CLOSED 후 다시 분석되기 전에는 명령·경로·실행·종료 권한이 없다.
 5. \`NEEDS_INPUT\`, \`DIRTY_BASELINE\`, \`NEEDS_ACCEPTANCE\`를 승인 가능 상태로 표현하지 않는다.

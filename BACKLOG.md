@@ -16,6 +16,7 @@ Shipping Harness v1 deliberately closes with a small internal product surface. I
 - [ ] BACKLOG-010: Team/DAG reconsideration only after a real coordination bottleneck and measurable completion benefit are proven.
 - [ ] BACKLOG-011: Additional agent-host profiles and native integrations after the stable MCP interface proves insufficient.
 - [ ] BACKLOG-012: Optional internal UI for approval, progress, blockers, completion, backup, and incident status.
+- [x] BACKLOG-013: Deterministic Intent Gate and read-only Analysis Mode, completed in v1.8.3 without a model classifier or tenth MCP tool.
 
 ## Completed roadmap items
 

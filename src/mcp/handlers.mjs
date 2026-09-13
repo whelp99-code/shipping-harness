@@ -166,6 +166,40 @@ function validateStartArgs(args) {
   return goal;
 }
 
+/**
+ * The user-facing action list for one shipping_start proposal state.
+ * @param {Record<string, any>} proposal
+ * @returns {string[]}
+ */
+function startUserActions(proposal) {
+  if (proposal.readyForApproval) return ['approve', 'edit-scope', 'stop'];
+  const actions = {
+    INTENT_CONFIRMATION_REQUIRED: ['confirm-intent', 'review-analysis', 'stop'],
+    ANALYSIS_COMPLETE: ['review-analysis', 'confirm-intent', 'stop'],
+    PLAN_COMPLETE: ['review-plan', 'confirm-intent', 'stop'],
+    DIRTY_BASELINE: ['preserve-baseline', 'inspect-changes', 'stop'],
+    NEEDS_ACCEPTANCE: ['inspect-acceptance', 'stop'],
+  };
+  return actions[proposal.canonicalState] ?? ['answer-questions', 'stop'];
+}
+
+/**
+ * The one-sentence next step printed with a shipping_start result.
+ * @param {Record<string, any>} proposal
+ * @returns {string}
+ */
+function startNextStep(proposal) {
+  if (proposal.readyForApproval) return 'Review the one-screen approval brief, then call shipping_approve_scope with the exact proposal ID and hash.';
+  const steps = {
+    INTENT_CONFIRMATION_REQUIRED: 'Read-only analysis is complete. Confirm ANALYZE_ONLY, PLAN_ONLY, IMPLEMENT, or AUTOPILOT before continuing.',
+    ANALYSIS_COMPLETE: 'Read-only analysis is complete; no planning, mutation, verification execution, or closure was requested.',
+    PLAN_COMPLETE: 'The version plan is complete; implementation requires a separately confirmed IMPLEMENT or AUTOPILOT intent.',
+    DIRTY_BASELINE: 'Review the exact baseline preservation plan before approval.',
+    NEEDS_ACCEPTANCE: 'A repository-owned build, test, verify, check, package, or equivalent acceptance command must be detected before approval.',
+  };
+  return steps[proposal.canonicalState] ?? 'Resolve the grouped exception questions before approval.';
+}
+
 /** @param {Record<string, any>} proposal @param {string} root */
 async function buildStartData(proposal, root) {
   return {
@@ -186,6 +220,7 @@ async function buildStartData(proposal, root) {
     versionEvidence: proposal.versionEvidence,
     baseline: proposal.baseline,
     intelligence: proposal.intelligence,
+    intentGate: proposal.intentGate ?? null,
     oneScreenApproval: proposal.oneScreenApproval,
     briefFactGraph: proposal.briefFactGraph,
     actionEnvelope: proposal.actionEnvelope,
@@ -204,7 +239,7 @@ async function buildStartData(proposal, root) {
     plan: proposal.plan,
     detected: proposal.analysis,
     diagnostics: proposal.diagnostics,
-    approvalRequired: true,
+    approvalRequired: proposal.intentGate?.implementationAllowed === true,
     userView: {
       schema: 'shipping-harness/approval-user-view-v1',
       userState: proposal.readyForApproval ? 'AWAITING_APPROVAL' : proposal.canonicalState,
@@ -216,14 +251,9 @@ async function buildStartData(proposal, root) {
       risks: proposal.approvalBrief.risks,
       questions: proposal.approvalBrief.questions,
       limits: proposal.approvalBrief.limits,
+      intentGate: proposal.intentGate ?? null,
       releaseTrain: proposal.releaseTrainSummary,
-      actions: proposal.readyForApproval
-        ? ['approve', 'edit-scope', 'stop']
-        : proposal.canonicalState === 'DIRTY_BASELINE'
-          ? ['preserve-baseline', 'inspect-changes', 'stop']
-          : proposal.canonicalState === 'NEEDS_ACCEPTANCE'
-            ? ['inspect-acceptance', 'stop']
-            : ['answer-questions', 'stop'],
+      actions: startUserActions(proposal),
     },
   };
 }
@@ -239,13 +269,7 @@ export async function handleStart(root, args) {
     proposerId: args.proposerId ?? 'mcp-host-agent',
   });
   const data = { ...(await buildStartData(proposal, root)), reused, supersededProposalId, proposalPath };
-  const next = proposal.readyForApproval
-    ? 'Review the one-screen approval brief, then call shipping_approve_scope with the exact proposal ID and hash.'
-    : proposal.canonicalState === 'DIRTY_BASELINE'
-      ? 'Review the exact baseline preservation plan before approval.'
-      : proposal.canonicalState === 'NEEDS_ACCEPTANCE'
-        ? 'A repository-owned build, test, verify, check, package, or equivalent acceptance command must be detected before approval.'
-        : 'Resolve the grouped exception questions before approval.';
+  const next = startNextStep(proposal);
   return complete(data, proposal.plainBriefText ?? `${reused ? 'Reused' : 'Proposed'} ${proposal.release} in ${proposal.mode} mode. State: ${proposal.canonicalState}. ${next}`);
 }
 
@@ -297,6 +321,7 @@ async function buildRefineData(proposal, result, root) {
     versionEvidence: proposal.versionEvidence,
     baseline: proposal.baseline,
     intelligence: proposal.intelligence,
+    intentGate: proposal.intentGate ?? null,
     oneScreenApproval: proposal.oneScreenApproval,
     briefFactGraph: proposal.briefFactGraph,
     actionEnvelope: proposal.actionEnvelope,
@@ -325,6 +350,7 @@ async function buildRefineData(proposal, result, root) {
       versionEvidence: proposal.versionEvidence,
       baseline: proposal.baseline,
       intelligence: proposal.intelligence,
+      intentGate: proposal.intentGate ?? null,
       oneScreenApproval: proposal.oneScreenApproval,
       briefFactGraph: proposal.briefFactGraph,
       actionEnvelope: proposal.actionEnvelope,

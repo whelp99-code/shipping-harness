@@ -29,6 +29,7 @@ import { acceptGoalCharter, compileGoalCharterPreview, persistAcceptedGoalCharte
 import { validateAutopilotDecision } from './autopilot-policy.mjs';
 import { loadAutopilotPolicy } from './autopilot.mjs';
 import { compileGoalDiscovery, goalDiscoverySummary, mergeGoalDiscoveryQuestions } from './goal-discovery.mjs';
+import { compileIntentGate, intentAllowsImplementation, intentAllowsPlanning } from './intent-gate.mjs';
 import { appendDecisionLedgerEvent, decisionLedgerSummary } from './decision-ledger.mjs';
 import { initializeState, readState, recordLedger, transitionState } from './state.mjs';
 
@@ -122,6 +123,17 @@ function decisionHash(value) {
  */
 export function projectProposalAuthority(input) {
   const proposal = structuredClone(input);
+  proposal.intentGate = compileIntentGate(proposal.goal, {
+    resolutions: proposal.decision?.resolutions ?? [],
+  });
+  const planningAllowed = intentAllowsPlanning(proposal.intentGate);
+  if (planningAllowed && !proposal.goalDiscovery && proposal.evidence) {
+    proposal.goalDiscovery = compileGoalDiscovery(proposal.evidence, {
+      resolutions: proposal.decision?.resolutions ?? [],
+    });
+  } else if (!planningAllowed) {
+    proposal.goalDiscovery = null;
+  }
   const state = deriveProposalState(proposal);
   proposal.canonicalState = state;
   proposal.readyForApproval = state === 'READY_FOR_APPROVAL';
@@ -130,25 +142,27 @@ export function projectProposalAuthority(input) {
     proposal.decision.hash = decisionHash(proposal.decision);
     proposal.approvalBrief = buildApprovalBrief(proposal.decision);
   }
-  if (proposal.goalCharter?.status === 'ACCEPTED') validateGoalCharter(proposal.goalCharter);
-  else proposal.goalCharter = proposal.goalDiscovery?.status === 'READY' && proposal.goalDiscovery?.direction
+  if (planningAllowed && proposal.goalCharter?.status === 'ACCEPTED') validateGoalCharter(proposal.goalCharter);
+  else proposal.goalCharter = planningAllowed && proposal.goalDiscovery?.status === 'READY' && proposal.goalDiscovery?.direction
     ? compileGoalCharterPreview(proposal)
     : null;
-  proposal.releaseTrain = buildReleaseTrain({
-    finalGoal: proposal.goalCharter?.outcome ?? proposal.goalDiscovery?.direction?.outcome ?? proposal.goal,
-    proposalRelease: proposal.release,
-    gitSha: proposal.gitSha,
-    proposalId: proposal.id,
-    goalCharterHash: proposal.goalCharter?.status === 'ACCEPTED'
-      ? proposal.goalCharter.binding.previewHash
-      : proposal.goalCharter?.hash ?? null,
-    projectName: proposal.contract?.project ?? proposal.analysis?.projectName ?? null,
-    analysis: proposal.analysis,
-    baseline: proposal.baseline,
-    acceptanceStrength: proposal.acceptanceStrength,
-    contract: proposal.contract,
-  });
-  proposal.releaseTrainSummary = releaseTrainSummary(proposal.releaseTrain);
+  proposal.releaseTrain = planningAllowed && proposal.goalDiscovery?.status === 'READY' && proposal.goalDiscovery?.direction
+    ? buildReleaseTrain({
+        finalGoal: proposal.goalCharter?.outcome ?? proposal.goalDiscovery.direction.outcome,
+        proposalRelease: proposal.release,
+        gitSha: proposal.gitSha,
+        proposalId: proposal.id,
+        goalCharterHash: proposal.goalCharter?.status === 'ACCEPTED'
+          ? proposal.goalCharter.binding.previewHash
+          : proposal.goalCharter?.hash ?? null,
+        projectName: proposal.contract?.project ?? proposal.analysis?.projectName ?? null,
+        analysis: proposal.analysis,
+        baseline: proposal.baseline,
+        acceptanceStrength: proposal.acceptanceStrength,
+        contract: proposal.contract,
+      })
+    : null;
+  proposal.releaseTrainSummary = proposal.releaseTrain ? releaseTrainSummary(proposal.releaseTrain) : null;
   proposal.oneScreenApproval = buildOneScreenApproval(proposal);
   const compiled = compilePlainBriefSafe(proposal);
   proposal.briefFactGraph = compiled.plainBrief?.factGraph ?? null;
@@ -159,9 +173,8 @@ export function projectProposalAuthority(input) {
   return proposal;
 }
 
-/** @param {Record<string, any>} input */
-function authorityFingerprint(input) {
-  const proposal = projectProposalAuthority(input);
+/** @param {Record<string, any>} proposal */
+function normalizedFingerprintBaseline(proposal) {
   const baseline = structuredClone(proposal.baseline ?? null);
   if (baseline && typeof baseline === 'object') {
     baseline.entries = (baseline.entries ?? []).filter((entry) => entry.blocking === true);
@@ -176,6 +189,13 @@ function authorityFingerprint(input) {
       delete baseline.plan.hash;
     }
   }
+  return baseline;
+}
+
+/** @param {Record<string, any>} input */
+function authorityFingerprint(input) {
+  const proposal = projectProposalAuthority(input);
+  const baseline = normalizedFingerprintBaseline(proposal);
   const evidence = structuredClone(proposal.evidence ?? null);
   if (evidence && typeof evidence === 'object') {
     delete evidence.createdAt;
@@ -188,6 +208,8 @@ function authorityFingerprint(input) {
     delete goalDiscovery.hash;
     delete goalDiscovery.evidenceHash;
   }
+  const intentGate = structuredClone(proposal.intentGate ?? null);
+  if (intentGate && typeof intentGate === 'object') delete intentGate.hash;
   const decision = structuredClone(proposal.decision ?? null);
   if (decision && typeof decision === 'object') {
     delete decision.hash;
@@ -222,6 +244,7 @@ function authorityFingerprint(input) {
     baseline,
     baselinePreservation: proposal.baselinePreservation ?? null,
     intelligence: proposal.intelligence ?? proposal.analysis?.intelligence ?? null,
+    intentGate,
     goalDiscovery,
     goalCharter,
     acceptanceStrength: proposal.acceptanceStrength,
@@ -383,20 +406,33 @@ function composeProposalDecision(base, ctx, input) {
     proposerId: typeof input.proposerId === 'string' && input.proposerId.trim() ? input.proposerId.trim().slice(0, 160) : undefined,
   });
   decision = applyDecisionPolicy(ctx.evidence, decision, { budgets: base.budgets });
-  const goalDiscovery = compileGoalDiscovery(ctx.evidence);
-  decision.questions = mergeGoalDiscoveryQuestions(decision, goalDiscovery, ctx.evidence.questionBudget);
-  decision.approvalStatus = decision.questions.length > 0 ? 'NEEDS_INPUT' : 'APPROVABLE';
+  const intentGate = compileIntentGate(ctx.goal);
+  let goalDiscovery = null;
+  if (intentGate.status === 'CONFIRMATION_REQUIRED') {
+    decision.questions = [intentGate.question];
+  } else if (intentAllowsPlanning(intentGate)) {
+    goalDiscovery = compileGoalDiscovery(ctx.evidence);
+    decision.questions = mergeGoalDiscoveryQuestions(decision, goalDiscovery, ctx.evidence.questionBudget);
+  } else {
+    decision.questions = [];
+  }
+  decision.approvalStatus = decision.questions.length > 0
+    ? 'NEEDS_INPUT'
+    : intentAllowsImplementation(intentGate)
+      ? 'APPROVABLE'
+      : 'NOT_READY';
   decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
   decision = validateDecisionPackage(ctx.evidence, decision);
   const approvalBrief = buildApprovalBrief(decision);
   const contract = compileDecisionContract(base, decision);
-  return { decision, goalDiscovery, approvalBrief, contract };
+  return { decision, intentGate, goalDiscovery, approvalBrief, contract };
 }
 
-/** @param {Record<string, any>} analysis @param {Record<string, any>} decision @param {Record<string, any>} acceptanceStrength @param {string[]} inheritedCommands @param {string[]} sourceChanges */
-function buildProposalDiagnostics(analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges) {
+/** @param {Record<string, any>} analysis @param {Record<string, any>} decision @param {Record<string, any>} acceptanceStrength @param {string[]} inheritedCommands @param {string[]} sourceChanges @param {Record<string, any> | null} [intentGate] */
+function buildProposalDiagnostics(analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate = null) {
   return [
     ...analysis.diagnostics,
+    ...(intentGate?.status === 'CONFIRMATION_REQUIRED' ? ['Read-only analysis is complete; confirm whether to stop at analysis, plan, implement, or run policy Autopilot.'] : []),
     ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
     ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
     ...(acceptanceStrength.sufficient ? [] : [acceptanceStrength.level === 'UNCOVERED' ? `Acceptance does not cover: ${(acceptanceStrength.uncoveredPaths ?? []).join(', ')}` : 'A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
@@ -406,7 +442,7 @@ function buildProposalDiagnostics(analysis, decision, acceptanceStrength, inheri
 
 /** @param {string} root @param {Record<string, any>} ctx @param {Record<string, any>} decisionBundle @param {Record<string, any> | null} active @param {string[]} inheritedCommands @param {Record<string, any>} input */
 function assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, input) {
-  const { decision, goalDiscovery, approvalBrief, contract } = decisionBundle;
+  const { decision, intentGate, goalDiscovery, approvalBrief, contract } = decisionBundle;
   const acceptance = contract.acceptance;
   const now = new Date();
   const baseline = ctx.evidence.baseline;
@@ -434,6 +470,7 @@ function assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, 
     sourceChanges,
     baseline,
     intelligence: ctx.evidence.intelligence,
+    intentGate,
     goalDiscovery,
     acceptanceStrength,
     workspace: ctx.analysis.workspace,
@@ -444,8 +481,8 @@ function assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, 
     decision,
     approvalBrief,
     contract,
-    plan: buildShortPlan(ctx.analysis, acceptance),
-    diagnostics: buildProposalDiagnostics(ctx.analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges),
+    plan: intentAllowsPlanning(intentGate) ? buildShortPlan(ctx.analysis, acceptance) : [],
+    diagnostics: buildProposalDiagnostics(ctx.analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate),
   };
 }
 
@@ -615,7 +652,9 @@ async function validateRefineRequest(root, input) {
   let answers = [...(input.answers ?? [])];
   invariant(Array.isArray(answers), 'ERR_PROPOSAL_REFINE', 'Refinement answers must be an array');
   if (input.acceptRecommendedDiscoveryDefaults === true) {
-    const delegated = (proposal.goalDiscovery?.questions ?? []).map((question) => ({ questionId: question.id, choice: 'recommended' }));
+    const delegated = [proposal.intentGate?.question, ...(proposal.goalDiscovery?.questions ?? [])]
+      .filter(Boolean)
+      .map((question) => ({ questionId: question.id, choice: 'recommended' }));
     const supplied = new Set(answers.map((entry) => entry?.questionId));
     answers = [...answers, ...delegated.filter((entry) => !supplied.has(entry.questionId))];
   }
@@ -661,14 +700,21 @@ function composeRefineDecision(evidenceCtx, proposal, answers) {
     proposerId: proposal.decision?.proposer?.id ?? 'mcp-host-agent',
   });
   decision = applyDecisionPolicy(evidence, decision, { budgets: base.budgets });
+  const policyQuestions = [...(decision.questions ?? [])];
   const priorResolutions = proposal.decision?.resolutions ?? [];
+  const preliminaryIntent = compileIntentGate(proposal.goal, { resolutions: priorResolutions });
   const answeredDiscovery = answers.some((entry) => String(entry?.questionId ?? '').startsWith('Q-GOAL-'));
   const discoveryRound = Math.min(2, (proposal.goalDiscovery?.round ?? 1) + (answeredDiscovery ? 1 : 0));
-  let goalDiscovery = compileGoalDiscovery(evidence, { resolutions: priorResolutions, round: discoveryRound });
-  decision.questions = mergeGoalDiscoveryQuestions(decision, goalDiscovery, evidence.questionBudget);
+  let goalDiscovery = intentAllowsPlanning(preliminaryIntent)
+    ? compileGoalDiscovery(evidence, { resolutions: priorResolutions, round: discoveryRound })
+    : null;
+  if (preliminaryIntent.status === 'CONFIRMATION_REQUIRED') decision.questions = [preliminaryIntent.question];
+  else if (goalDiscovery) decision.questions = mergeGoalDiscoveryQuestions({ ...decision, questions: policyQuestions }, goalDiscovery, evidence.questionBudget);
+  else decision.questions = [];
   const availableQuestions = new Map([
     ...(proposal.decision?.questions ?? []).map((question) => [question.id, question]),
-    ...(goalDiscovery.questions ?? []).map((question) => [question.id, question]),
+    ...(proposal.intentGate?.question ? [[proposal.intentGate.question.id, proposal.intentGate.question]] : []),
+    ...((goalDiscovery?.questions ?? []).map((question) => [question.id, question])),
     ...(decision.questions ?? []).map((question) => [question.id, question]),
   ]);
   const previouslyResolvedIds = new Set(priorResolutions.map((entry) => entry.questionId));
@@ -680,17 +726,31 @@ function composeRefineDecision(evidenceCtx, proposal, answers) {
     ...(proposal.decision?.resolutions ?? []),
     ...resolved.resolutions,
   ].slice(-20);
-  goalDiscovery = compileGoalDiscovery(evidence, { resolutions: decision.resolutions, round: discoveryRound });
-  decision.questions = mergeGoalDiscoveryQuestions({
-    ...decision,
-    questions: decision.questions.filter((question) => !question.id.startsWith('Q-GOAL-')),
-  }, goalDiscovery, evidence.questionBudget);
-  decision.approvalStatus = decision.questions.length > 0 ? 'NEEDS_INPUT' : 'APPROVABLE';
+  const intentGate = compileIntentGate(proposal.goal, { resolutions: decision.resolutions });
+  const resolvedIds = new Set(decision.resolutions.map((entry) => entry.questionId));
+  if (intentGate.status === 'CONFIRMATION_REQUIRED') {
+    goalDiscovery = null;
+    decision.questions = [intentGate.question];
+  } else if (intentAllowsPlanning(intentGate)) {
+    goalDiscovery = compileGoalDiscovery(evidence, { resolutions: decision.resolutions, round: discoveryRound });
+    decision.questions = mergeGoalDiscoveryQuestions({
+      ...decision,
+      questions: policyQuestions.filter((question) => !resolvedIds.has(question.id) && question.id !== intentGate.question?.id),
+    }, goalDiscovery, evidence.questionBudget);
+  } else {
+    goalDiscovery = null;
+    decision.questions = [];
+  }
+  decision.approvalStatus = decision.questions.length > 0
+    ? 'NEEDS_INPUT'
+    : intentAllowsImplementation(intentGate)
+      ? 'APPROVABLE'
+      : 'NOT_READY';
   decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
   decision = validateDecisionPackage(evidence, decision);
   const approvalBrief = buildApprovalBrief(decision);
   const contract = compileDecisionContract(base, decision);
-  return { decision, goalDiscovery, resolved, approvalBrief, contract };
+  return { decision, intentGate, goalDiscovery, resolved, approvalBrief, contract };
 }
 
 /** @param {Record<string, any>} evidenceCtx @param {Record<string, any>} proposal @param {Record<string, any> | null} baselinePreservation */
@@ -717,7 +777,7 @@ function mergeRefineIntelligence(evidenceCtx, proposal, baselinePreservation) {
 /** @param {string} root @param {Record<string, any>} proposal @param {Record<string, any>} evidenceCtx @param {Record<string, any>} decisionBundle @param {string} requestedMode */
 function buildRefineCandidate(root, proposal, evidenceCtx, decisionBundle, requestedMode) {
   const { evidence, analysis, baselinePreservation, release, projectName } = evidenceCtx;
-  const { decision, goalDiscovery, approvalBrief, contract } = decisionBundle;
+  const { decision, intentGate, goalDiscovery, approvalBrief, contract } = decisionBundle;
   const baseline = evidence.baseline;
   const sourceChanges = baseline.blockingPaths;
   const { intelligence, proposalAnalysis } = mergeRefineIntelligence(evidenceCtx, proposal, baselinePreservation);
@@ -754,6 +814,7 @@ function buildRefineCandidate(root, proposal, evidenceCtx, decisionBundle, reque
     baseline,
     baselinePreservation,
     intelligence,
+    intentGate,
     goalDiscovery,
     acceptanceStrength,
     workspace: proposalAnalysis.workspace,
@@ -764,9 +825,10 @@ function buildRefineCandidate(root, proposal, evidenceCtx, decisionBundle, reque
     decision,
     approvalBrief,
     contract,
-    plan: buildShortPlan(proposalAnalysis, contract.acceptance),
+    plan: intentAllowsPlanning(intentGate) ? buildShortPlan(proposalAnalysis, contract.acceptance) : [],
     diagnostics: [
       ...proposalAnalysis.diagnostics,
+      ...(intentGate?.status === 'CONFIRMATION_REQUIRED' ? ['Read-only analysis is complete; confirm whether to stop at analysis, plan, implement, or run policy Autopilot.'] : []),
       ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
       ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
       ...(acceptanceStrength.sufficient ? [] : [acceptanceStrength.level === 'UNCOVERED' ? `Acceptance does not cover: ${(acceptanceStrength.uncoveredPaths ?? []).join(', ')}` : 'A repository-owned build, test, verify, check, package, or equivalent acceptance command is required before approval.']),
@@ -862,6 +924,7 @@ async function validateApprovableProposal(root, input, approverType, approverId)
   const { proposal, projectedProposal, proposalPath, summary } = await loadScopeProposal(root, input.proposalId);
   invariant(input.proposalHash === proposal.hash, 'ERR_PROPOSAL_HASH', 'The supplied proposal hash does not match');
   invariant(summary.state === 'READY_FOR_APPROVAL', 'ERR_DECISION_NEEDS_INPUT', `Proposal has unresolved mandatory risks or questions, a dirty baseline, weak acceptance, or another non-ready condition: ${summary.state}`);
+  invariant(projectedProposal.intentGate?.status === 'CONFIRMED' && intentAllowsImplementation(projectedProposal.intentGate), 'ERR_INTENT_NOT_IMPLEMENTABLE', 'Scope approval requires an explicitly confirmed IMPLEMENT or AUTOPILOT intent');
   invariant(projectedProposal.goalDiscovery?.status === 'READY' && projectedProposal.goalDiscovery?.direction, 'ERR_DIRECTION_NOT_READY', 'A bounded accepted direction is required before scope approval');
   if (approverType === 'human') invariant(approverId !== proposal.decision?.proposer?.id, 'ERR_MODEL_SELF_APPROVAL', 'The proposer cannot approve its own decision package');
   invariant(Date.parse(proposal.expiresAt) > Date.now(), 'ERR_PROPOSAL_EXPIRED', 'Proposal has expired; create a new proposal');

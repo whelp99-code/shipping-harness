@@ -154,6 +154,11 @@ const goalDirectionFieldReport = JSON.parse(readFileSync(path.join(root, 'docs',
 if (goalDirectionFieldReport.schema !== 'shipping-harness/goal-direction-field-v1' || goalDirectionFieldReport.status !== 'PASS' || goalDirectionFieldReport.released !== false || goalDirectionFieldReport.mcp?.tools !== 9) failures.push('goal direction field report is not a passing bounded internal report');
 if (Object.values(goalDirectionFieldReport.safety ?? {}).some((value) => value !== 0)) failures.push('goal direction field report contains a non-zero safety counter');
 if ((goalDirectionFieldReport.realProjects ?? []).filter((entry) => entry.available).some((entry) => entry.unchanged !== true)) failures.push('goal direction field report contains a mutated real-project lane');
+const intentGateReport = JSON.parse(readFileSync(path.join(root, 'docs', 'reports', 'v1.8.3-intent-gate-field.json'), 'utf8'));
+if (intentGateReport.schema !== 'shipping-harness/intent-gate-field-v1' || intentGateReport.status !== 'PASS' || intentGateReport.mcp?.tools !== 9) failures.push('intent gate field report is not a passing bounded internal report');
+if (intentGateReport.cases?.terseAnalysis?.status !== 'CONFIRMATION_REQUIRED' || intentGateReport.cases?.terseAnalysis?.defaultMode !== 'ANALYZE_ONLY' || intentGateReport.cases?.terseAnalysis?.questionCount !== 1) failures.push('intent gate field report does not preserve the one-question analysis default');
+if (Object.values(intentGateReport.safety ?? {}).some((value) => value !== 0)) failures.push('intent gate field report contains a non-zero safety counter');
+if (intentGateReport.realProject?.available && intentGateReport.realProject?.unchanged !== true) failures.push('intent gate field report contains a mutated real-project lane');
 const activeContract = JSON.parse(readFileSync(path.join(root, '.shipping', 'contract.yaml'), 'utf8'));
 if (packageJson.version !== activeContract.release) failures.push(`package version is ${packageJson.version}, active release is ${activeContract.release}`);
 if (!/^1\.\d+\.\d+$/u.test(packageJson.version)) failures.push(`package version ${packageJson.version} is outside the stable v1 release line`);

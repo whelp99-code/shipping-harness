@@ -1,0 +1,50 @@
+{
+  "schema": "https://shipping-harness.local/schemas/v1/intent-gate.schema.json",
+  "requestText": "이 프로젝트 분석해. 쉬핑하네스로",
+  "status": "CONFIRMATION_REQUIRED",
+  "defaultMode": "ANALYZE_ONLY",
+  "inferredMode": "ANALYZE_ONLY",
+  "selectedMode": null,
+  "effectiveMode": "ANALYZE_ONLY",
+  "inferenceReason": "analysis-request-needs-workflow-boundary",
+  "confirmationSource": null,
+  "question": {
+    "id": "Q-INTENT-001",
+    "category": "workflow-boundary",
+    "prompt": "읽기 전용 프로젝트 분석은 완료했습니다. 어디까지 진행할까요? 1. 분석 결과만 2. 다음 버전 계획까지 3. 승인 후 구현까지 4. 정책 범위 안에서 검증·CLOSED까지",
+    "recommendedChoice": "ANALYZE_ONLY",
+    "choices": [
+      {
+        "mode": "ANALYZE_ONLY",
+        "label": "1. 분석 결과만 보여줘"
+      },
+      {
+        "mode": "PLAN_ONLY",
+        "label": "2. 다음 운영 가능한 버전 계획까지 만들어줘"
+      },
+      {
+        "mode": "IMPLEMENT",
+        "label": "3. 목표를 확인한 뒤 승인된 범위를 구현해"
+      },
+      {
+        "mode": "AUTOPILOT",
+        "label": "4. 목표를 확인한 뒤 정책 범위 안에서 검증·CLOSED까지 진행해"
+      }
+    ],
+    "riskIds": [],
+    "evidenceRefs": [
+      "user.goal",
+      "analysis"
+    ],
+    "authority": "mechanical-question"
+  },
+  "analysisComplete": true,
+  "planningAllowed": false,
+  "implementationAllowed": false,
+  "autopilotAllowed": false,
+  "modelAuthority": false,
+  "commandAuthority": false,
+  "approvalAuthority": false,
+  "closureAuthority": false,
+  "hash": "a55a0d148a87e379bed70de3aa67a5af68ea5daffe7e0ea208d9861049b83573"
+}

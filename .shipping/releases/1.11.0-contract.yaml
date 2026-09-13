@@ -1,17 +1,35 @@
 {
   "acceptance": [
     {
-      "id": "AC-111101",
-      "description": "The private OMO bridge is absent from release:verify and its tests are excluded from every gate; the OMO Native adapter and nine MCP tools are unchanged.",
+      "id": "AC-11101",
+      "description": "Intent-gate unit, MCP, and adversarial tests pass on the merged v1.10.0 line.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/omo-bridge-retirement.test.mjs test/stable/surface-freeze.test.mjs",
+      "command": "npm run test:intent-gate",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-111102",
-      "description": "Full regression and release gates pass with zero skipped steps.",
+      "id": "AC-11102",
+      "description": "Intent-gate field pilot keeps nine tools and a bounded beginner report.",
+      "type": "command",
+      "command": "npm run smoke:intent-gate",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 600
+    },
+    {
+      "id": "AC-11103",
+      "description": "Surface freeze, state integrity, and stable schema suites pass.",
+      "type": "command",
+      "command": "npm run test:stable",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-11104",
+      "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
@@ -19,13 +37,13 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-111103",
-      "description": "Documentation audit passes and no whitespace errors remain.",
+      "id": "AC-11105",
+      "description": "No whitespace or conflict-marker errors remain.",
       "type": "command",
-      "command": "npm run verify:docs && git diff --check",
+      "command": "git diff --check",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 120
+      "timeoutSeconds": 60
     }
   ],
   "adapters": {
@@ -162,9 +180,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Retire the private OMO runtime bridge: remove it from the release gates, mark packages/internal-omo-bridge and the OMO pin as deprecated, and record the decision, without changing the nine MCP tools or the OMO Native adapter",
+  "goal": "Integrate the v1.8.3 intent-gate and analysis-mode snapshot from origin/main into the v1.10.0 line under a new contract, keeping nine MCP tools, signed state integrity, and all release gates",
   "project": "shipping-harness",
-  "release": "1.11.1",
+  "release": "1.11.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

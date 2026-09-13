@@ -2,24 +2,31 @@
   "agentRuns": 0,
   "baselineSha": "2c182e5c5dc0768a21cde32709d8a2964c82f3e3",
   "blockerCount": 0,
+  "closedAt": "2026-09-13T02:55:43.636Z",
+  "closedGitSha": "f6a5c509afe5b44c29fe24567c945f5f5f708021",
   "contractHash": "7d2dfa65f7e92df12d109a57aa90cd0c3ea1e63e555c1b120d1a10a5b228ce79",
   "createdAt": "2026-09-12T13:29:16.819Z",
-  "currentEvidenceSha": null,
+  "currentEvidenceFingerprint": "45f1d6a1ce79cb68c046e70c55af9c6d0e1656eff20788b997933a96f98ef8a5",
+  "currentEvidenceSha": "f6a5c509afe5b44c29fe24567c945f5f5f708021",
   "fixCycles": 0,
   "humanStop": false,
   "ignoreCount": 0,
   "integrity": {
     "algorithm": "sha256",
-    "digest": "3aad5add869130c7c6c61e9337d557bb55261a0d09b75962e537f5e97c7fb369",
-    "ledgerHead": "976e6f6a-ce34-4ed0-b41a-92662a4ea087"
+    "digest": "9b00ea1131dbcf4165b548b5dfb8d89dcc8a9f762b1a61a0afd91c6393efeaef",
+    "ledgerHead": "8aa4e35c-ff73-4907-8908-82e74883f473"
   },
-  "lastRunId": null,
+  "lastRunId": "run-2026-09-13T02-55-05-519Z-09405d9d",
+  "lastVerifiedAt": "2026-09-13T02:55:31.408Z",
   "nextCount": 0,
   "previousRelease": "1.9.0",
+  "redundantVerifyRuns": 0,
   "release": "1.10.0",
+  "releaseReceipt": ".shipping/releases/1.10.0.json",
   "resumeState": null,
   "schema": "shipping-harness/state-v1",
-  "state": "LOCKED",
+  "state": "CLOSED",
   "unknownCount": 0,
-  "updatedAt": "2026-09-13T02:55:05.407Z"
+  "updatedAt": "2026-09-13T02:55:43.639Z",
+  "verifyRuns": 1
 }

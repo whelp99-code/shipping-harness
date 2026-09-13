@@ -2,7 +2,11 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.10.0] - Unreleased
+## [1.11.0] - Unreleased
+
+In progress: integrates the v1.8.3 intent-gate and analysis-mode snapshot from origin/main into the v1.10.0 line (nine tools unchanged, `shipping_start` title/description reworded, `intent-gate.schema.json` added) and fixes the refine user view schema id that had been the literal `[REDACTED]` since v1.8.2.
+
+## [1.10.0] - 2026-09-13
 
 In progress. See `docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md`: state integrity digest, hash-chained ledger, receipt cross-check, tamper reporting, contract-defect signalling, verify-run budget.
 

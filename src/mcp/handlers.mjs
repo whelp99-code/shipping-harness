@@ -343,7 +343,7 @@ async function buildRefineData(proposal, result, root) {
     proposalPath: result.proposalPath,
     archivedRevisionPath: result.archivedRevisionPath,
     userView: {
-      schema: '[REDACTED]',
+      schema: 'shipping-harness/user-view-v1',
       userState: proposal.readyForApproval ? 'AWAITING_APPROVAL' : proposal.canonicalState,
       outcome: proposal.approvalBrief.outcome,
       workspace: proposal.workspace,

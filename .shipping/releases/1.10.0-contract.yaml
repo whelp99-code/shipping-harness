@@ -1,34 +1,25 @@
 {
   "acceptance": [
     {
-      "id": "AC-11101",
-      "description": "Intent-gate unit, MCP, and adversarial tests pass on the merged v1.10.0 line.",
+      "id": "AC-11001",
+      "description": "State forgery, ledger truncation, and receipt removal are detected and reported; release prepare and hook decisions refuse tampered state.",
       "type": "command",
-      "command": "npm run test:intent-gate",
+      "command": "node --test --test-reporter=spec test/adversarial/state-forgery-attacks.test.mjs test/unit/state-integrity.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-11102",
-      "description": "Intent-gate field pilot keeps nine tools and a bounded beginner report.",
+      "id": "AC-11002",
+      "description": "Legacy (unsigned) state migrates to UNVERIFIED_LEGACY and the normal release cycle still closes.",
       "type": "command",
-      "command": "npm run smoke:intent-gate",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 600
-    },
-    {
-      "id": "AC-11103",
-      "description": "Surface freeze, state integrity, and stable schema suites pass.",
-      "type": "command",
-      "command": "npm run test:stable",
+      "command": "node --test --test-reporter=spec test/stable/*.test.mjs test/integration/state-integrity-migration.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-11104",
+      "id": "AC-11003",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -37,13 +28,31 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-11105",
+      "id": "AC-11004",
       "description": "No whitespace or conflict-marker errors remain.",
       "type": "command",
       "command": "git diff --check",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 60
+    },
+    {
+      "id": "AC-11005",
+      "description": "Contract-defect replay, lock preflight, scope warning, and uncommitted-close refusal behave as specified.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/integration/contract-defect.test.mjs test/unit/lock-preflight.test.mjs test/unit/scope-warning.test.mjs test/adversarial/close-uncommitted-attacks.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-11006",
+      "description": "Redundant verify runs are bounded by budgets.maxVerifyRuns and adapter runs carry cost telemetry.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/unit/verify-budget.test.mjs test/integration/verify-budget-flow.test.mjs test/unit/cost-telemetry.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
     }
   ],
   "adapters": {
@@ -180,9 +189,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Integrate the v1.8.3 intent-gate and analysis-mode snapshot from origin/main into the v1.10.0 line under a new contract, keeping nine MCP tools, signed state integrity, and all release gates",
+  "goal": "Make CLOSED and SHIPPABLE trustworthy: state.json integrity digest, hash-chained ledger, receipt cross-check, tamper reporting across CLI/MCP/hook, contract-defect signalling, verify-run budget, and migration for legacy state",
   "project": "shipping-harness",
-  "release": "1.11.0",
+  "release": "1.10.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

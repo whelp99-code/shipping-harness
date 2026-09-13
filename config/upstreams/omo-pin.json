@@ -2,6 +2,8 @@
   "schema": "shipping-harness/private-omo-pin-v1",
   "internalOnly": true,
   "publicPublish": false,
+  "deprecated": true,
+  "deprecationNote": "Retired from release gates in shipping-harness v1.11.1; the pinned runtime repository was archived and this pin's sealed manifest path no longer resolves. See ../../dev-wiki/decisions/2026-09-13-shipping-harness-private-OMO-브리지-은퇴.md and packages/internal-omo-bridge/DEPRECATED.md. Reactivation requires a new ADR and contract.",
   "runtimeProject": "/home/jm/orca/projects/shipping-harness-omo-runtime",
   "runtimeRoot": "/home/jm/orca/projects/shipping-harness-omo-runtime/shipping-internal",
   "cliPath": "/home/jm/orca/projects/shipping-harness-omo-runtime/shipping-internal/bin/shipping-omo-runtime.mjs",

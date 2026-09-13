@@ -4,7 +4,7 @@ All notable changes to Shipping Harness are documented in this file, most recent
 
 ## [1.11.1] - Unreleased
 
-In progress: retires the private OMO runtime bridge (`packages/internal-omo-bridge`, `config/upstreams/omo-pin.json`) from the release gates and marks it deprecated. The pinned runtime repository was archived per dev-wiki; its sealed manifest references the old path, so the bridge tests could no longer run. The OMO Native adapter (`src/adapters/omo.mjs`) and the nine MCP tools are unchanged.
+Retires the private OMO runtime bridge (`packages/internal-omo-bridge`, `config/upstreams/omo-pin.json`) from the release gates and marks it deprecated (ADR 2026-09-13, `../dev-wiki/decisions/2026-09-13-shipping-harness-private-OMO-브리지-은퇴.md`). The pinned runtime repository was archived; its sealed manifest references the old path, so the bridge's 5 runtime-dependent tests could no longer run and are excluded from `npm run release:verify` and `npm run check` (they remain runnable manually via `npm run test:omo-bridge`). Code, schemas, and historical receipts are retained; reactivation requires a new ADR and contract. The OMO Native adapter (`src/adapters/omo.mjs`) and the nine MCP tools are unchanged.
 
 ## [1.11.0] - 2026-09-13
 

@@ -31,7 +31,7 @@ node --test --test-reporter=spec test/unit/contract.test.mjs
 node --test --test-reporter=spec --test-name-pattern="lock" test/unit/contract.test.mjs
 ```
 
-Suites outside `npm test` (plugin, remote, stable, omo, autopilot, goal-*, release-train, omp-main) have their own `test:*` scripts and are pulled in by `release:verify`. `smoke:*` scripts run pilot scenarios against temp repos with `--check`.
+Suites outside `npm test` (plugin, remote, stable, autopilot, goal-*, release-train, omp-main) have their own `test:*` scripts and are pulled in by `release:verify`. `smoke:*` scripts run pilot scenarios against temp repos with `--check`. `omo` (`test:omo-bridge`) is deprecated as of v1.11.1 and is a manual-only script, not pulled into `release:verify` — see `packages/internal-omo-bridge/DEPRECATED.md`.
 
 `scripts/run-tests.mjs` only discovers `*.test.mjs` under `test/<suite>/`, so new tests must follow that name and location.
 
@@ -47,7 +47,7 @@ Suites outside `npm test` (plugin, remote, stable, omo, autopilot, goal-*, relea
   - `hooks.mjs`: lifecycle/stop decisions for host agents. CLI exit code `3` means `CONTINUE`, not failure.
 - `src/adapters/` — one module per external harness plus `registry.mjs`/`runner.mjs`. Adapters only probe with non-mutating commands and only execute commands stored in the contract or passed by the operator. See `docs/ADAPTERS.md`.
 - `src/mcp/` — `tools.mjs` defines exactly nine `shipping_*` tools and `handlers.mjs` holds one handler per tool; `test/stable/surface-freeze.test.mjs` pins the tool JSON, `renderHelp()`, and `schemas/v1` to their v1.8.2 hashes; `protocol.mjs` is JSON-RPC; `stdio.mjs` is newline-delimited with bounded queue/in-flight; `resources.mjs` exposes `shipping://current/*`. The security check rejects any tool input property named `command`, `shell`, `args`, `argv`, `env`, `environment`, and requires `additionalProperties: false`.
-- `packages/` — `stable-control` (frozen v1 schemas, compatibility, migration, health, events), `internal-remote` (TLS gateway, signed requests, replay store), `internal-omo-bridge` (signed work orders/receipts to the private OMO runtime), `omp-main-harness` (OMP install/doctor/bootstrap), `shipping-plugin`.
+- `packages/` — `stable-control` (frozen v1 schemas, compatibility, migration, health, events), `internal-remote` (TLS gateway, signed requests, replay store), `internal-omo-bridge` (signed work orders/receipts to the private OMO runtime; **deprecated as of v1.11.1**, see `packages/internal-omo-bridge/DEPRECATED.md`), `omp-main-harness` (OMP install/doctor/bootstrap), `shipping-plugin`.
 - `schemas/v1/` — every authority surface has a JSON Schema with `additionalProperties: false` and a validated example under `examples/`. `verify:docs` validates all examples; add a schema + example together.
 - `test/helpers/repo.mjs` — `createFixtureRepo()` builds a real temp Git repo with an initialized contract; `test/helpers/cli.mjs` — `runCli(root, args)` spawns the real binary. Prefer these over mocking; tests exercise real files and `git`.
 

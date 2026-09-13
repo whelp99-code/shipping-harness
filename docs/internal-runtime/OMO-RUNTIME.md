@@ -1,5 +1,7 @@
 # Private OMO Runtime Boundary
 
+> **Deprecated as of v1.11.1.** The pinned private OMO runtime repository was archived and `packages/internal-omo-bridge` is retired from the release gates; `npm run test:omo-bridge` runs manually only. Code, schemas, and historical receipts are retained. See `packages/internal-omo-bridge/DEPRECATED.md` and `../dev-wiki/decisions/2026-09-13-shipping-harness-private-OMO-브리지-은퇴.md`. Reactivation requires a new ADR and contract.
+
 Shipping Harness uses OMO only as a separate personal or company-internal runtime. OMO source is not copied into Shipping Core and is never publicly published by this project.
 
 ## Authority order

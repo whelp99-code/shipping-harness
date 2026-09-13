@@ -12,7 +12,7 @@ Shipping Harness v1 deliberately closes with a small internal product surface. I
 - [ ] BACKLOG-006: Optional LLM-assisted issue triage subordinate to deterministic blocker policy.
 - [x] BACKLOG-007: Evidence-first Gajae-style bounded product interview and deterministic direction critic, completed in v1.7.0 without technical interrogation or model authority.
 - [ ] BACKLOG-008: Ouroboros-style next-version evolution proposals; never automatic reopening of a closed release.
-- [ ] BACKLOG-009: OMO memory/reflection evaluation only after a measured internal need and separate license/security review.
+- [ ] BACKLOG-009: OMO memory/reflection evaluation only after a measured internal need and separate license/security review. The private OMO runtime bridge itself was retired from the release gates in v1.11.1 (pinned runtime archived); reactivating either requires a new ADR and contract, not this backlog item alone.
 - [ ] BACKLOG-010: Team/DAG reconsideration only after a real coordination bottleneck and measurable completion benefit are proven.
 - [ ] BACKLOG-011: Additional agent-host profiles and native integrations after the stable MCP interface proves insufficient.
 - [ ] BACKLOG-012: Optional internal UI for approval, progress, blockers, completion, backup, and incident status.

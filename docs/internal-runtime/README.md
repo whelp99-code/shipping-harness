@@ -1,5 +1,7 @@
 # Private OMO Runtime Integration — v0.7.0
 
+> **Deprecated as of v1.11.1.** The pinned runtime repository below was archived; `npm run test:omo-bridge` is no longer part of `release:verify` and runs manually only. Code, schemas, and historical receipts are retained. See `packages/internal-omo-bridge/DEPRECATED.md` and `../dev-wiki/decisions/2026-09-13-shipping-harness-private-OMO-브리지-은퇴.md`. Reactivation requires a new ADR and contract.
+
 Shipping Harness v0.7 delegates bounded internal execution to a **separate private repository** at `shipping-harness-omo-runtime`. OMO source is not copied into Shipping Core or its package.
 
 ## Authority

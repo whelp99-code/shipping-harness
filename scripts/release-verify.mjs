@@ -5,8 +5,15 @@
 // visible WARNING for any step whose test run reported skipped tests, and exits 0
 // only when no step failed — skips are surfaced, never hidden, but do not fail the
 // build (see docs/planning/33-V1.9.0-ENGINEERING-INFRASTRUCTURE-DEVELOPMENT-PLAN.md
-// section 6, Phase B, item 12: the private OMO runtime tests skip on machines where
-// the pinned runtime is not installed).
+// section 6, Phase B, item 12).
+//
+// `test:omo-bridge` (packages/internal-omo-bridge) is intentionally NOT a step here.
+// The private OMO runtime it pins was archived (see
+// ../dev-wiki/decisions/2026-09-13-shipping-harness-private-OMO-브리지-은퇴.md); its
+// sealed manifest references a path that no longer exists, so those 5 tests can never
+// pass again without a runtime rebuild. Run it manually with `npm run test:omo-bridge`
+// when the runtime is reactivated under a new ADR. The OMO Native adapter
+// (`src/adapters/omo.mjs`) and the nine MCP tools are unrelated and unaffected.
 import { spawn } from 'node:child_process';
 import os from 'node:os';
 
@@ -16,7 +23,6 @@ import os from 'node:os';
 const STEPS = [
   { name: 'check', script: 'check' },
   { name: 'test:plugin', script: 'test:plugin' },
-  { name: 'test:omo-bridge', script: 'test:omo-bridge' },
   { name: 'test:remote', script: 'test:remote' },
   { name: 'test:stable', script: 'test:stable' },
   { name: 'security', script: 'security' },
@@ -118,7 +124,7 @@ process.stdout.write('-'.repeat(72) + '\n');
 if (skippedSteps.length > 0) {
   process.stdout.write('\nWARNING: the following steps had skipped tests:\n');
   for (const result of skippedSteps) {
-    process.stdout.write(`  WARNING: ${result.name} skipped ${result.skipped} test(s) - private OMO runtime is not installed at the pinned path\n`);
+    process.stdout.write(`  WARNING: ${result.name} skipped ${result.skipped} test(s)\n`);
   }
   process.stdout.write('\n');
 }

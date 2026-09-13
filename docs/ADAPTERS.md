@@ -47,7 +47,7 @@ Detects `ooo`, then `ouroboros`. Seed and Ledger candidates are collected only w
 
 Detects `omo`; `opencode` may be reported only as an observed host. Project `.omo/omo.jsonc` or `.omo/omo.json` can establish configured evidence. The integration is a process/config/event bridge, not a native-plugin claim.
 
-This describes the implemented v0.2 adapter only. The accepted v0.7 direction adds a separately pinned private internal OMO runtime behind a versioned bridge; it does not change this adapter's truthful capability report. The internal runtime may execute selected upstream task/routing/continuation/recovery code, but Shipping remains authoritative for contracts, budgets, human stop, accepted evidence, blockers, SHIPPABLE, and CLOSED. See [`planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md).
+This describes the implemented v0.2 adapter only. The v0.7 direction added a separately pinned private internal OMO runtime behind a versioned bridge (`packages/internal-omo-bridge`); it did not change this adapter's truthful capability report, and this adapter stays as-is. That bridge is **deprecated as of v1.11.1** — the pinned runtime repository was archived and the bridge is retired from the release gates; see `packages/internal-omo-bridge/DEPRECATED.md` and `../dev-wiki/decisions/2026-09-13-shipping-harness-private-OMO-브리지-은퇴.md`. Shipping remains authoritative for contracts, budgets, human stop, accepted evidence, blockers, SHIPPABLE, and CLOSED regardless. See [`planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md).
 
 ## Artifact receipt
 

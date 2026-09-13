@@ -2,7 +2,11 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.11.0] - Unreleased
+## [1.11.1] - Unreleased
+
+Retires the private OMO runtime bridge (`packages/internal-omo-bridge`, `config/upstreams/omo-pin.json`) from the release gates and marks it deprecated (ADR 2026-09-13, `../dev-wiki/decisions/2026-09-13-shipping-harness-private-OMO-브리지-은퇴.md`). The pinned runtime repository was archived; its sealed manifest references the old path, so the bridge's 5 runtime-dependent tests could no longer run and are excluded from `npm run release:verify` and `npm run check` (they remain runnable manually via `npm run test:omo-bridge`). Code, schemas, and historical receipts are retained; reactivation requires a new ADR and contract. The OMO Native adapter (`src/adapters/omo.mjs`) and the nine MCP tools are unchanged.
+
+## [1.11.0] - 2026-09-13
 
 In progress: integrates the v1.8.3 intent-gate and analysis-mode snapshot from origin/main into the v1.10.0 line (nine tools unchanged, `shipping_start` title/description reworded, `intent-gate.schema.json` added) and fixes the refine user view schema id that had been the literal `[REDACTED]` since v1.8.2.
 

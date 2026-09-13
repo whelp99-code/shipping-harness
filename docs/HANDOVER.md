@@ -1,6 +1,6 @@
 # Shipping Harness v1 Internal Handover
 
-**Current version:** 1.11.0
+**Current version:** 1.11.1
 
 ## Product promise
 
@@ -28,7 +28,7 @@ A state whose integrity is `TAMPERED` blocks every command until an operator res
 - `shipping-harness-mcp`: project-root-fixed local STDIO MCP server.
 - `shipping-harness-plugin`: beginner installer, doctor, upgrade, rollback, and uninstall surface.
 - `shipping-harness-remote`: optional authenticated internal TLS gateway; no arbitrary shell.
-- `shipping-harness-omo-runtime`: separate private internal runtime pinned outside Shipping Core.
+- `shipping-harness-omo-runtime`: separate private internal runtime pinned outside Shipping Core; **deprecated as of v1.11.1** — the pinned runtime repository was archived and `packages/internal-omo-bridge` is retired from the release gates (see `packages/internal-omo-bridge/DEPRECATED.md` and `../dev-wiki/decisions/2026-09-13-shipping-harness-private-OMO-브리지-은퇴.md`). The OMO Native adapter (`src/adapters/omo.mjs`) is unaffected.
 - `packages/stable-control`: stable schema, compatibility, migration, health, and event surfaces.
 
 ## Operator checks
@@ -49,11 +49,12 @@ Shipping Core compiles the default Korean report from canonical state, baseline,
 
 ## Support boundary
 
-Supported internal issues include installation, MCP registration, contract/proposal state, evidence freshness, plugin repair, private OMO pin/bridge, internal remote gateway, backup/restore, and rollback. Application-specific feature design remains the responsibility of the selected host agent under the approved Shipping contract.
+Supported internal issues include installation, MCP registration, contract/proposal state, evidence freshness, plugin repair, internal remote gateway, backup/restore, and rollback. The private OMO pin/bridge is deprecated as of v1.11.1 (see Known limitations); it is no longer a supported operational surface pending a new ADR. Application-specific feature design remains the responsibility of the selected host agent under the approved Shipping contract.
 
 ## Known limitations
 
 - Internal use only; no customer/public SaaS or integrated OMO redistribution.
+- The private OMO runtime bridge (`packages/internal-omo-bridge`, `config/upstreams/omo-pin.json`) is deprecated as of v1.11.1: the pinned runtime repository was archived, so its 5 runtime-dependent tests are excluded from `release:verify` and run only manually (`npm run test:omo-bridge`). The code, schemas, and historical receipts are retained; reactivation requires a new ADR and contract (`../dev-wiki/decisions/2026-09-13-shipping-harness-private-OMO-브리지-은퇴.md`). The OMO Native adapter and the nine MCP tools are unchanged.
 - Team/DAG remains disabled because the v0.7 pilot did not prove a coordination bottleneck.
 - Remote mobile use requires an operator-managed private TLS endpoint and credentials.
 - Shipping does not automatically push, deploy, purchase, or contact customers.

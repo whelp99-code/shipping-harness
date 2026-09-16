@@ -77,7 +77,7 @@ function requestProtocol(params, state, method) {
     return MCP_PROTOCOL_VERSION;
   }
   const meta = params?._meta;
-  if (meta && typeof meta === 'object') {
+  if (meta && typeof meta === 'object' && meta['io.modelcontextprotocol/protocolVersion'] !== undefined) {
     const requested = meta['io.modelcontextprotocol/protocolVersion'];
     if (!MCP_SUPPORTED_VERSIONS.includes(requested)) {
       throw new McpProtocolError(-32022, 'Unsupported protocol version', { supported: MCP_SUPPORTED_VERSIONS, requested: requested ?? 'missing' });

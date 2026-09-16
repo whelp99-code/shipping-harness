@@ -6,6 +6,18 @@ All notable changes to Shipping Harness are documented in this file, most recent
 
 In progress: plan-file update rules. See `docs/planning/37-V1.12.1-PLAN-UPDATE-RULES-DEVELOPMENT-PLAN.md`.
 
+### Added
+
+- Plan-stage immutability: a stage that already carries evidence (a `CLOSED` release receipt or the current contract lock) freezes its `id`/`title`/`outcome`/scope/`acceptanceRefs`/`size`/`dependsOn` in `docs/shipping-plan.json`. `closeRelease` and `lockContract` snapshot the bound stage into the release receipt and the lock (`planStage`), and `auditPlanHistory`/`assertPlanHistory` refuse a rewrite of an evidenced stage with `ERR_PLAN_HISTORY_LOST`, wired through `loadShippingPlan`, `shipping_start`/`shipping_refine`, `lock`, `close`, `plan status`, and `plan check`. Not-started stages stay fully editable and new stages can always be added. `program.supersedes` (a plan-replacing hash) skips the audit, reports the abandoned stage count as `PLAN_SUPERSEDED`, and recounts progress from zero against the new plan hash alone.
+- `sources[].sha256` (optional, additive): compared against the file on disk at load time. A mismatch is `PLAN_SOURCE_DRIFT: <path> changed since the plan was written (plan <hash8>, now <hash8>)`; a missing file is `PLAN_SOURCE_MISSING: <path>`; a source with no `sha256` (or a plan with no `revision`) is `PLAN_LEGACY_FORMAT`. All three are diagnostics only — never blocking — surfaced in `plan status` (`WARNING:` lines), `plan check --json` (`sourceDrift`, `legacyFormat`), `shipping_start`'s `shippingPlan.diagnostics`, and one bounded plain-brief line when drift exists.
+- `revision` (optional positive integer, additive) and the append-only, hash-chained `.shipping/plan-history.jsonl` (`src/core/plan-history.mjs`, reusing the same `prev`/`digest` hash-chain helpers as `.shipping/ledger.jsonl`). One entry is recorded whenever `plan check`, `shipping_start`/`shipping_refine`, or `lock` sees a plan hash it has not recorded yet; the same hash seen again is a no-op. `revision` going backwards is `ERR_PLAN_REVISION_REGRESSED`; the same `revision` naming a different plan hash is `ERR_PLAN_REVISION_REUSED`; a broken history chain is `ERR_PLAN_HISTORY_TAMPERED`. Each entry also diffs the plan's bounded stage snapshots against the previous entry into `changedStages: { added, modified, removed }`. `plan check --json` gains `history: { entries, lastRevision, lastPlanHash }`; `plan status` prints `Revision: <n> (history entries: m)`.
+- `docs/SHIPPING-PLAN.md`: an "Updating an existing plan" section with the immutability table, the `program.supersedes` escape hatch, and a replaced host-model prompt that checks `plan check --json` first and never rewrites an evidenced stage.
+
+### Changed
+
+- `.shipping/plan-history.jsonl` is runtime authority evidence like `.shipping/ledger.jsonl` and `.shipping/decision-ledger.jsonl`: committed (never gitignored), append-only, and must never be hand-edited (`docs/HANDOVER.md`).
+- `schemas/v1` hash updated twice this cycle: Phase A added optional `planStage` snapshots to `release.schema.json`/`lock.schema.json` and `program.supersedes` to `shipping-plan.schema.json`; Phase B added optional `revision` and `sources[].sha256` to `shipping-plan.schema.json`. Both purely additive, `additionalProperties: false` kept, examples updated. `tools` and `help` unchanged in both phases. See section 6 of the development plan.
+
 ## [1.12.0] - 2026-09-16
 
 In progress: plan-aware proposals. See `docs/planning/36-V1.12.0-PLAN-AWARE-PROPOSALS-DEVELOPMENT-PLAN.md`.

@@ -101,6 +101,28 @@ Operational verification is `npm run test:intent-gate` plus `npm run smoke:inten
 
 `shipping_start`/`shipping_refine` may bind an optional repository-owned `docs/shipping-plan.json` (schema `shipping-harness/plan-v1`; see `docs/SHIPPING-PLAN.md`). The file is written and committed by a person (a host model may draft it, but never runs it), never by Shipping Harness, and can never carry a `command`/`shell`/`args`/`argv`/`env`/`environment` key anywhere in the document — stage acceptance only references a candidate command the deterministic project analyzer already detected. Progress (`DONE`/`ACTIVE`/`READY`/`BLOCKED_BY_DEPENDENCY`/`BLOCKED_BY_UNRESOLVED`) is computed only from `.shipping/releases/*.json` closure receipts carrying a matching `planStageId`, never from the plan file's own claims. `PROGRAM` (the whole-project projection) has no execution or approval authority; only `MILESTONE`/`PATCH` (one plan stage, or the existing small-patch fallback) is ever approvable, and `shipping_approve_scope` rejects any attempt to approve the `PROGRAM` projection's hash with `ERR_PLAN_PROGRAM_NOT_APPROVABLE`. A missing or invalid plan file changes nothing: the proposal degrades to the pre-v1.12.0 small-patch shape with a visible diagnostic. The CLI (`shipping-harness plan status`, `shipping-harness plan check`) is read-only and never mutates `.shipping/` or the plan file.
 
+## v1.12.1 plan-file update rules
+
+The plan file is **evidence-immutable**: a stage that already carries evidence — a `CLOSED` release receipt
+(`DONE`) or the current contract lock (`ACTIVE`) — can never have its `id`, `title`, `outcome`, scope,
+`acceptanceRefs`, `size`, or `dependsOn` changed or the stage deleted, in `docs/shipping-plan.json` or via
+`shipping_start`/`shipping_refine`'s `planPath`. Only not-started (`READY`/`BLOCKED_BY_*`) stages are free to
+edit, and adding a new stage is always allowed; adding a new dependency to an evidenced stage's `dependsOn`
+is refused as `ERR_PLAN_HISTORY_LOST` even though the new stage itself is fine. A closed stage that genuinely
+must change requires `program.supersedes` (the previous plan's hash) rather than an in-place rewrite; an
+unknown `supersedes` value is `ERR_PLAN_SUPERSEDES_UNKNOWN`. See "Updating an existing plan" in
+`docs/SHIPPING-PLAN.md`.
+
+`.shipping/plan-history.jsonl` is runtime authority evidence with the same status as
+`.shipping/decision-ledger.jsonl` and `.shipping/ledger.jsonl`: append-only, hash-chained with the same
+`prev`/`digest` fields, and committed (never gitignored). Do not edit, truncate, reorder, or merge it
+manually — a broken chain is `ERR_PLAN_HISTORY_TAMPERED` and blocks every plan-touching command the same way
+a tampered `state.json` blocks release commands. `revision` (optional, on the plan file) must never go
+backwards (`ERR_PLAN_REVISION_REGRESSED`) or be reused against a different plan hash
+(`ERR_PLAN_REVISION_REUSED`); a plan with no `revision`, or a `sources[]` entry with no `sha256`, is legacy
+(pre-v1.12.1) and only warned (`PLAN_LEGACY_FORMAT`), never blocked. `sources[].sha256` drift
+(`PLAN_SOURCE_DRIFT`/`PLAN_SOURCE_MISSING`) is diagnostic-only and never blocks a proposal, lock, or close.
+
 ## v1.8.1 handover
 
 Operators verify the tagged package, nine-tool protocol, Goal Direction field report, real-project unchanged receipts, doctor, install receipt, OMP binary hashes, and rollback preview. Any non-zero safety counter blocks handover.

@@ -16,6 +16,53 @@ candidate command the project analyzer already detected in the repository — ne
 plan file supplies itself. This is enforced by `src/core/shipping-plan.mjs` (`ERR_PLAN_RAW_COMMAND`), not by
 convention.
 
+## Updating an existing plan
+
+The plan file is a document whose **evidenced parts are immutable and whose unevidenced parts are free**.
+Evidence is a `CLOSED` release receipt for that stage (it is `DONE`) or the current contract lock (it is
+`ACTIVE`). An update rewrites `docs/shipping-plan.json` in place — the path is fixed and any other path (or
+`--plan`/`planPath` pointing elsewhere) is refused with `ERR_PLAN_PATH_FIXED`.
+
+| Stage state | Evidence | `id` | title/outcome/scope/acceptanceRefs/size | `dependsOn` | Delete |
+|---|---|---|---|---|---|
+| DONE | `planStageId` on a `CLOSED` receipt | immutable | immutable | immutable | not allowed |
+| ACTIVE | `plan.stageId` on the current contract | immutable | immutable | immutable | not allowed |
+| Not started (READY/BLOCKED) | none | free | free | free (no cycles) | allowed |
+
+(한국어: 계획 파일은 **증거가 붙은 부분은 불변, 증거가 없는 부분만 가변**인 문서다. 증거 = 그 단계의
+CLOSED receipt 또는 현재 잠긴 계약. 표는 위 영문 표와 동일하다.)
+
+- Adding a new stage is always allowed. Adding a new entry to a `DONE`/`ACTIVE` stage's `dependsOn` is
+  rewriting the past, so it is refused even though the new stage itself is free.
+- Any violation — a renamed or deleted evidenced stage ID, a changed evidenced field, or a rewritten
+  `dependsOn` on an evidenced stage — is refused as `ERR_PLAN_HISTORY_LOST` with one `VIOLATION:` line per
+  rewritten field, citing the receipt or lock that proves the stage.
+- If a closed stage genuinely must change, that is not an update — it is a new plan: set
+  `program.supersedes` to the SHA-256 hash of the plan being replaced (the harness reports how many
+  completed stages are not inherited, `PLAN_SUPERSEDED`, and progress recounts from zero against the new
+  plan hash alone). A `supersedes` value that names no closed receipt is refused as
+  `ERR_PLAN_SUPERSEDES_UNKNOWN`.
+- Bump `revision` by one on every update that changes the plan hash, and recompute `sources[].sha256` for
+  every cited source document. `.shipping/plan-history.jsonl` records the hash, revision, and a diff of
+  which stages changed (`added`/`modified`/`removed`) every time `plan check`, `shipping_start`/`refine`, or
+  `lock` sees a new plan hash. `revision` going backwards is `ERR_PLAN_REVISION_REGRESSED`; reusing a
+  revision number under a different plan hash is `ERR_PLAN_REVISION_REUSED`. The history file is
+  append-only and hash-chained exactly like `.shipping/ledger.jsonl`; a broken chain is
+  `ERR_PLAN_HISTORY_TAMPERED`.
+- A plan with no `revision`, or a `sources[]` entry with no `sha256`, still works exactly as it did in
+  v1.12.0 — it is warned once (`PLAN_LEGACY_FORMAT`), never blocked.
+
+## Source drift
+
+Each entry in `sources[]` may carry the SHA-256 hash of the source document's content when the plan was
+written (`sources[].sha256`, optional, additive). On every load the harness compares that hash against the
+file on disk: a mismatch is `PLAN_SOURCE_DRIFT: <path> changed since the plan was written (plan <hash8>, now
+<hash8>)` and a missing file is `PLAN_SOURCE_MISSING: <path>`. Both are diagnostics only — they never block a
+proposal, a lock, or a close. They surface as `WARNING:` lines in `shipping-harness plan status`, as
+`sourceDrift`/`legacyFormat` in `plan check --json`, in `shipping_start`'s `shippingPlan.diagnostics`, and —
+only when drift exists — as one bounded plain-brief line ("계획 원본 N개가 바뀌었습니다. 계획 파일 갱신을
+검토하세요.").
+
 ## Format
 
 Schema: [`schemas/v1/shipping-plan.schema.json`](../schemas/v1/shipping-plan.schema.json)
@@ -36,8 +83,13 @@ Schema: [`schemas/v1/shipping-plan.schema.json`](../schemas/v1/shipping-plan.sch
   "sources": [
     // Optional. The planning documents the host model read to produce this file —
     // repository-relative paths only, for a human reviewer to check against.
-    { "path": "docs/planning/ROADMAP.md", "note": "read-only planning source" }
+    // Optional "sha256": the source file's content hash when this plan was written;
+    // compared against the file on disk at load time (see "Source drift" below).
+    { "path": "docs/planning/ROADMAP.md", "note": "read-only planning source", "sha256": "…64 hex…" }
   ],
+  // Optional positive integer, bumped by one on every update that changes the plan
+  // hash. See "Updating an existing plan" below.
+  "revision": 1,
   "stages": [
     {
       // A stage is one release the harness can lock, run, verify, and close on its own.
@@ -102,20 +154,34 @@ shipping-harness plan check  [--plan PATH] [--json]    # validate the plan file 
 ```
 
 Both default `--plan` to `docs/shipping-plan.json` (repository-relative) and never write to `.shipping/` or the
-plan file itself.
+plan file itself. `plan check` also records a newly-seen plan hash into `.shipping/plan-history.jsonl` (a
+no-op when the hash is unchanged); `plan status` additionally prints `Revision: <n> (history entries: m)` and
+one `WARNING:` line per source-drift or legacy-format diagnostic.
 
 ## Prompt for a host model
 
-Use this (or something close to it) to have a host model turn existing planning documents into a plan file a
-human can review and commit:
+Use this (or something close to it) whenever a host model is asked to write or update the plan file. It
+covers both the empty-repository case and the far more common case where `docs/shipping-plan.json` already
+exists:
 
 ```text
-Read docs/planning/*.md and any STATUS/ROADMAP files in this repository. Write docs/shipping-plan.json
-following schemas/v1/shipping-plan.schema.json (schema "shipping-harness/plan-v1"). Break the remaining work
-into stages small enough that `shipping-harness` can lock, run, verify, and close each one on its own. Do not
-include a `command`, `shell`, `args`, `argv`, `env`, or `environment` key anywhere in the file — reference only
-candidate command IDs from `shipping-harness plan check --json`. Stop after writing the file; do not run
-`shipping-harness lock`.
+If docs/shipping-plan.json already exists, run `shipping-harness plan check --json` first and read its
+`protectedStageIds`: those stages already carry evidence (a CLOSED receipt or the current lock). Never change
+a single character of a protected stage's id, title, outcome, scope, acceptanceRefs, size, or dependsOn, and
+never delete one — reflect any change in the source documents only by editing an unstarted (READY/BLOCKED)
+stage or by adding a new stage. If a protected stage genuinely must change, that is a new plan, not an
+update: set program.supersedes to the plan's current hash instead of rewriting it. After editing, bump
+`revision` by one and recompute the sha256 of every entry in `sources[]`.
+
+If the file does not exist yet, read docs/planning/*.md and any STATUS/ROADMAP files in this repository and
+write docs/shipping-plan.json following schemas/v1/shipping-plan.schema.json (schema
+"shipping-harness/plan-v1"). Break the remaining work into stages small enough that `shipping-harness` can
+lock, run, verify, and close each one on its own, and set an initial `revision: 1`.
+
+Either way: do not include a `command`, `shell`, `args`, `argv`, `env`, or `environment` key anywhere in the
+file — reference only candidate command IDs from `shipping-harness plan check --json`. Never create a second
+plan file or point `--plan`/`planPath` at a different location; the path is fixed at
+docs/shipping-plan.json. Stop after writing the file; do not run `shipping-harness lock`.
 ```
 
 ## What `shipping_start`/`shipping_refine` do with it

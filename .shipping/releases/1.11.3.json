@@ -1,0 +1,32 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "62b48fec477043d14b9e667edca91af82b15d455",
+  "closedAt": "2026-09-16T12:01:42.649Z",
+  "closedGitSha": "ac54fbafd835b3d9153b5216260b96f9732c609d",
+  "contractHash": "f7b551719f89cd2d2540eb957f447d2e727fce6c33f1bf90440d4bac71740d3e",
+  "evidenceRunId": "run-2026-09-16T12-01-22-459Z-e4b44050",
+  "fixCycles": 0,
+  "goal": "Keep the negotiated MCP revision for requests whose _meta carries only a progressToken, so Claude Code tool calls succeed after initialize",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.11.3",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

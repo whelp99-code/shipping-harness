@@ -1,6 +1,6 @@
 # Shipping Harness v1 Internal Handover
 
-**Current version:** 1.11.3
+**Current version:** 1.12.0
 
 ## Product promise
 

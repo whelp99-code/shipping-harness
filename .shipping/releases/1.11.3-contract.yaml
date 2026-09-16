@@ -1,25 +1,16 @@
 {
   "acceptance": [
     {
-      "id": "AC-11201",
-      "description": "Plan file loading, progress from receipts, and the three-tier proposal behave as specified; command keys anywhere in a plan file are rejected.",
+      "id": "AC-111301",
+      "description": "A tool call whose _meta carries only a progressToken uses the negotiated revision; a bad vendor revision in _meta still fails closed.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/shipping-plan.test.mjs test/unit/plan-progress.test.mjs test/integration/plan-aware-proposal.test.mjs test/adversarial/plan-attacks.test.mjs",
+      "command": "node --test --test-reporter=spec test/mcp/protocol.test.mjs test/mcp/omp-compatibility.test.mjs test/mcp/stdio.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-11202",
-      "description": "Projects without a plan file behave exactly as before; nine tools; surface freeze updated deliberately.",
-      "type": "command",
-      "command": "node --test --test-reporter=spec test/mcp/*.test.mjs test/usability/*.test.mjs test/stable/surface-freeze.test.mjs",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 600
-    },
-    {
-      "id": "AC-11203",
+      "id": "AC-111302",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -28,7 +19,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-11204",
+      "id": "AC-111303",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -171,9 +162,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Plan-aware proposals: a reviewable shipping-plan file authored by the host model, deterministic stage progress from closure receipts, and a fixed PROGRAM / MILESTONE / PATCH proposal structure, without giving any model or the PROGRAM tier execution authority",
+  "goal": "Keep the negotiated MCP revision for requests whose _meta carries only a progressToken, so Claude Code tool calls succeed after initialize",
   "project": "shipping-harness",
-  "release": "1.12.0",
+  "release": "1.11.3",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

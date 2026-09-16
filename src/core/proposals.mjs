@@ -12,6 +12,8 @@ import { compilePlainBriefSafe } from './plain-brief.mjs';
 import { invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
 import { buildShortPlan } from './project-analysis.mjs';
+import { DEFAULT_PLAN_PATH, computePlanProgress, loadShippingPlan } from './shipping-plan.mjs';
+import { applyPlanStageToContract, compilePlanTiers } from './plan-proposal.mjs';
 import { buildDecisionEvidence } from './decision-evidence.mjs';
 import { compileDecisionContract, composeDefaultDecision, validateDecisionPackage } from './decision-package.mjs';
 import { applyDecisionPolicy, buildApprovalBrief } from './decision-policy.mjs';
@@ -256,6 +258,8 @@ function authorityFingerprint(input) {
     decision,
     contract: proposal.contract,
     plan: proposal.plan,
+    shippingPlan: proposal.shippingPlan ?? null,
+    tier: proposal.tier ?? 'PATCH',
     diagnostics: proposal.diagnostics,
     releaseTrain,
     canonicalState: proposal.canonicalState,
@@ -346,7 +350,36 @@ async function supersedeProposal(root, proposal, supersededBy) {
   return projected;
 }
 
-/** @param {string} root @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, workspaceCandidateId?: string | null}} input */
+/**
+ * Load the repository plan file and compile the proposal tiers. A missing plan file is
+ * not an error; a broken one degrades to PATCH with a visible diagnostic.
+ * @param {string} root @param {{planPath?: string | null, stageId?: string | null}} input @param {Record<string, any>} analysis @param {string} goal
+ */
+async function loadPlanTiers(root, input, analysis, goal) {
+  let binding = null;
+  /** @type {{code: string, message: string} | null} */
+  let planError = null;
+  try {
+    binding = await loadShippingPlan(root, input.planPath ?? DEFAULT_PLAN_PATH);
+  } catch (error) {
+    // An unusable address is a request error; unusable content degrades to a visible PATCH.
+    if (error?.code === 'ERR_PLAN_PATH' || error?.code === 'ERR_PLAN_FILE_MISSING' || error?.code === 'ERR_PATH_OUTSIDE_REPO') throw error;
+    planError = {
+      code: typeof error?.code === 'string' ? error.code : 'ERR_PLAN_INVALID',
+      message: String(error?.message ?? 'Plan file could not be loaded').slice(0, 300),
+    };
+  }
+  return compilePlanTiers({
+    binding,
+    planError,
+    analysis,
+    goal,
+    requestedStageId: input.stageId ?? null,
+    progressFor: (plan, unresolved) => computePlanProgress(root, plan, { unresolvedStageIds: unresolved }),
+  });
+}
+
+/** @param {string} root @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, workspaceCandidateId?: string | null, planPath?: string | null, stageId?: string | null}} input */
 async function loadProposalContext(root, input) {
   const context = await currentReleaseContext(root);
   if (context.state) {
@@ -375,7 +408,9 @@ async function loadProposalContext(root, input) {
     mode: evidence.mode,
     projectName,
   });
-  return { context, evidence, analysis, release, goal, projectName, fingerprint };
+  const planTiers = await loadPlanTiers(root, input, analysis, goal);
+  const planRequest = { path: input.planPath ?? null, stageId: input.stageId ?? null };
+  return { context, evidence, analysis, release, goal, projectName, fingerprint, planTiers, planRequest };
 }
 
 /** @param {string} root @param {Record<string, any>} ctx */
@@ -383,7 +418,9 @@ async function reuseMatchingProposal(root, ctx) {
   const active = await findActiveScopeProposal(root);
   if (active && !isTerminalProposalState(active.summary.state)) {
     invariant(active.proposal.mode === ctx.evidence.mode, 'ERR_PROPOSAL_MODE_CHANGE', `Active proposal mode is ${active.proposal.mode}; create or refine it without silently switching mode`);
-    if (active.proposal.fingerprint === ctx.fingerprint) {
+    const samePlanBinding = (active.proposal.shippingPlan?.planHash ?? null) === (ctx.planTiers.projection?.planHash ?? null)
+      && (active.proposal.shippingPlan?.milestone?.stageId ?? null) === (ctx.planTiers.projection?.milestone?.stageId ?? null);
+    if (active.proposal.fingerprint === ctx.fingerprint && samePlanBinding) {
       return {
         active,
         reused: {
@@ -396,6 +433,23 @@ async function reuseMatchingProposal(root, ctx) {
     }
   }
   return { active, reused: null };
+}
+
+/**
+ * Bind the selected plan stage to the compiled contract, or return it unchanged.
+ * @param {Record<string, any>} contract @param {Record<string, any>} ctx
+ */
+function bindPlanStageContract(contract, ctx) {
+  const tiers = ctx.planTiers;
+  if (!tiers?.stage || !tiers.projection) return contract;
+  return applyPlanStageToContract(contract, {
+    stage: tiers.stage,
+    resolved: tiers.resolved,
+    analysis: ctx.analysis,
+    path: tiers.projection.path,
+    planHash: tiers.projection.planHash,
+    tier: tiers.tier,
+  });
 }
 
 /** @param {Record<string, any>} base @param {Record<string, any>} ctx @param {Record<string, any>} input */
@@ -424,14 +478,15 @@ function composeProposalDecision(base, ctx, input) {
   decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
   decision = validateDecisionPackage(ctx.evidence, decision);
   const approvalBrief = buildApprovalBrief(decision);
-  const contract = compileDecisionContract(base, decision);
+  const contract = bindPlanStageContract(compileDecisionContract(base, decision), ctx);
   return { decision, intentGate, goalDiscovery, approvalBrief, contract };
 }
 
-/** @param {Record<string, any>} analysis @param {Record<string, any>} decision @param {Record<string, any>} acceptanceStrength @param {string[]} inheritedCommands @param {string[]} sourceChanges @param {Record<string, any> | null} [intentGate] */
-function buildProposalDiagnostics(analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate = null) {
+/** @param {Record<string, any>} analysis @param {Record<string, any>} decision @param {Record<string, any>} acceptanceStrength @param {string[]} inheritedCommands @param {string[]} sourceChanges @param {Record<string, any> | null} [intentGate] @param {string[]} [planDiagnostics] */
+function buildProposalDiagnostics(analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate = null, planDiagnostics = []) {
   return [
     ...analysis.diagnostics,
+    ...planDiagnostics,
     ...(intentGate?.status === 'CONFIRMATION_REQUIRED' ? ['Read-only analysis is complete; confirm whether to stop at analysis, plan, implement, or run policy Autopilot.'] : []),
     ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
     ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
@@ -482,7 +537,10 @@ function assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, 
     approvalBrief,
     contract,
     plan: intentAllowsPlanning(intentGate) ? buildShortPlan(ctx.analysis, acceptance) : [],
-    diagnostics: buildProposalDiagnostics(ctx.analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate),
+    tier: ctx.planTiers.tier,
+    shippingPlan: ctx.planTiers.projection,
+    planRequest: ctx.planRequest,
+    diagnostics: buildProposalDiagnostics(ctx.analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate, ctx.planTiers.diagnostics),
   };
 }
 
@@ -508,7 +566,7 @@ async function persistProposal(root, proposal, active) {
 /**
  * Create a reviewable, Git-bound release proposal without locking a release.
  * @param {string} root
- * @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, proposerId?: string | null, workspaceCandidateId?: string | null}} input
+ * @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, proposerId?: string | null, workspaceCandidateId?: string | null, planPath?: string | null, stageId?: string | null}} input
  */
 export async function createScopeProposal(root, input) {
   invariant(typeof input.goal === 'string' && input.goal.trim().length >= 5, 'ERR_PROPOSAL_GOAL', 'A concrete goal of at least 5 characters is required');
@@ -659,7 +717,7 @@ async function validateRefineRequest(root, input) {
     answers = [...answers, ...delegated.filter((entry) => !supplied.has(entry.questionId))];
   }
   invariant(answers.length <= 3, 'ERR_PROPOSAL_REFINE', 'Refinement accepts at most three grouped answers');
-  invariant(answers.length > 0 || input.workspaceCandidateId || requestedMode !== proposal.mode || input.rescan === true, 'ERR_PROPOSAL_REFINE', 'Refinement must include an answer, workspace selection, authorized mode change, or rescan');
+  invariant(answers.length > 0 || input.workspaceCandidateId || requestedMode !== proposal.mode || input.rescan === true || typeof input.stageId === 'string', 'ERR_PROPOSAL_REFINE', 'Refinement must include an answer, workspace selection, authorized mode change, plan stage, or rescan');
   if (input.baselinePlanHash !== undefined) invariant(/^[a-f0-9]{64}$/u.test(input.baselinePlanHash), 'ERR_BASELINE_PLAN', 'baselinePlanHash must be a SHA-256 hex digest');
   if (input.baselineCommit !== undefined) invariant(/^[a-f0-9]{40}$/u.test(input.baselineCommit), 'ERR_BASELINE_COMMIT', 'baselineCommit must be a full Git SHA');
   invariant(input.baselineAuthorizedByUser !== true || (input.baselinePlanHash && input.baselineCommit), 'ERR_BASELINE_APPROVAL', 'Baseline authorization requires the reviewed plan hash and commit SHA');
@@ -688,7 +746,12 @@ async function buildRefineEvidence(root, proposal, summary, requestedMode, works
   const context = await currentReleaseContext(root);
   const projectName = safeProjectName(analysis.projectName, proposal.decision?.projectName ?? path.basename(root));
   const base = context.contract ? structuredClone(context.contract) : createDefaultContract(projectName);
-  return { evidence, analysis, baselinePreservation, release, projectName, base };
+  const planRequest = {
+    path: input.planPath ?? proposal.planRequest?.path ?? null,
+    stageId: input.stageId ?? proposal.planRequest?.stageId ?? null,
+  };
+  const planTiers = await loadPlanTiers(root, planRequest, analysis, proposal.goal);
+  return { evidence, analysis, baselinePreservation, release, projectName, base, planTiers, planRequest };
 }
 
 /** @param {Record<string, any>} evidenceCtx @param {Record<string, any>} proposal @param {Array<{questionId:string,choice:string}>} answers */
@@ -749,7 +812,7 @@ function composeRefineDecision(evidenceCtx, proposal, answers) {
   decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
   decision = validateDecisionPackage(evidence, decision);
   const approvalBrief = buildApprovalBrief(decision);
-  const contract = compileDecisionContract(base, decision);
+  const contract = bindPlanStageContract(compileDecisionContract(base, decision), evidenceCtx);
   return { decision, intentGate, goalDiscovery, resolved, approvalBrief, contract };
 }
 
@@ -826,8 +889,12 @@ function buildRefineCandidate(root, proposal, evidenceCtx, decisionBundle, reque
     approvalBrief,
     contract,
     plan: intentAllowsPlanning(intentGate) ? buildShortPlan(proposalAnalysis, contract.acceptance) : [],
+    tier: evidenceCtx.planTiers.tier,
+    shippingPlan: evidenceCtx.planTiers.projection,
+    planRequest: evidenceCtx.planRequest,
     diagnostics: [
       ...proposalAnalysis.diagnostics,
+      ...evidenceCtx.planTiers.diagnostics,
       ...(intentGate?.status === 'CONFIRMATION_REQUIRED' ? ['Read-only analysis is complete; confirm whether to stop at analysis, plan, implement, or run policy Autopilot.'] : []),
       ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
       ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
@@ -883,7 +950,7 @@ async function persistRefinedProposal(root, proposal, candidate, proposalPath, r
 /**
  * Refine one active proposal identity using bounded structured user decisions.
  * @param {string} root
- * @param {{proposalId:string, proposalHash:string, answers?:Array<{questionId:string,choice:string}>, acceptRecommendedDiscoveryDefaults?:boolean, workspaceCandidateId?:string|null, mode?:string|null, modeAuthorizedByUser?:boolean, rescan?:boolean, baselinePlanHash?:string, baselineCommit?:string, baselineAuthorizedByUser?:boolean}} input
+ * @param {{proposalId:string, proposalHash:string, answers?:Array<{questionId:string,choice:string}>, acceptRecommendedDiscoveryDefaults?:boolean, workspaceCandidateId?:string|null, mode?:string|null, modeAuthorizedByUser?:boolean, rescan?:boolean, baselinePlanHash?:string, baselineCommit?:string, baselineAuthorizedByUser?:boolean, stageId?:string|null, planPath?:string|null}} input
  */
 export async function refineScopeProposal(root, input) {
   return withProposalLock(root, async () => {
@@ -911,8 +978,23 @@ async function authorizeApproval(root, input) {
   return { approverType, approverId };
 }
 
+/**
+ * The PROGRAM layer carries no authority: a hash derived from the program projection can
+ * never be used to approve anything.
+ * @param {string} root @param {string} suppliedHash
+ */
+async function assertNotProgramHash(root, suppliedHash) {
+  const active = await findActiveScopeProposal(root);
+  const program = active?.projectedProposal?.shippingPlan?.program ?? null;
+  if (!program) return;
+  invariant(suppliedHash !== hashObject(program), 'ERR_PLAN_PROGRAM_NOT_APPROVABLE', 'The PROGRAM plan layer has no approval authority; approve the MILESTONE or PATCH proposal instead', {
+    stageCount: program.stages?.length ?? 0,
+  });
+}
+
 /** @param {string} root @param {Record<string, any>} input @param {string} approverType @param {string} approverId */
 async function validateApprovableProposal(root, input, approverType, approverId) {
+  await assertNotProgramHash(root, input.proposalHash);
   const existingPaths = runtimePaths(root);
   if (await exists(existingPaths.state)) {
     const existingState = await readState(root);

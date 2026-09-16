@@ -86,6 +86,27 @@ function requireInteger(value, label, range = {}) {
   if (range.max !== undefined) invariant(value <= range.max, 'ERR_CONTRACT_INVALID', `${label} must be <= ${range.max}`, { label, value });
 }
 
+/**
+ * The optional plan binding a plan-aware proposal writes into the contract.
+ * It references a reviewed repository plan file; it never carries a command.
+ * @param {unknown} value
+ */
+function validateContractPlan(value) {
+  requireObject(value, 'plan');
+  const plan = /** @type {Record<string, any>} */ (value);
+  for (const key of Object.keys(plan)) {
+    invariant(['path', 'planHash', 'stageId', 'tier'].includes(key), 'ERR_CONTRACT_INVALID', `plan.${key} is not an allowed field`, { key });
+  }
+  requireString(plan.path, 'plan.path');
+  invariant(plan.path.length <= 300 && !plan.path.startsWith('/') && !plan.path.split('/').includes('..'), 'ERR_CONTRACT_INVALID', 'plan.path must be a bounded repository-relative path');
+  requireString(plan.planHash, 'plan.planHash');
+  invariant(/^[a-f0-9]{64}$/u.test(plan.planHash), 'ERR_CONTRACT_INVALID', 'plan.planHash must be a SHA-256 hex digest');
+  requireString(plan.stageId, 'plan.stageId');
+  invariant(/^S-[A-Za-z0-9_-]{1,32}$/u.test(plan.stageId), 'ERR_CONTRACT_INVALID', 'plan.stageId must look like S-01');
+  requireString(plan.tier, 'plan.tier');
+  invariant(['PATCH', 'MILESTONE'].includes(plan.tier), 'ERR_CONTRACT_INVALID', 'plan.tier must be PATCH or MILESTONE');
+}
+
 /** @param {unknown} input */
 export function validateContract(input) {
   requireObject(input, 'contract');
@@ -144,6 +165,7 @@ export function validateContract(input) {
   requireObject(contract.releasePolicy, 'releasePolicy');
 
   if (contract.adapters !== undefined) requireObject(contract.adapters, 'adapters');
+  if (contract.plan !== undefined) validateContractPlan(contract.plan);
   return contract;
 }
 

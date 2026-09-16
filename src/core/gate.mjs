@@ -215,6 +215,38 @@ export async function finishAgentRun(root, runResult, telemetry = null) {
 }
 
 /**
+ * The closure receipt for one release. A plan-bound contract propagates its stage
+ * identity here so plan progress is computable from closed receipts alone.
+ * @param {{contract: Record<string, any>, lock: Record<string, any>, state: Record<string, any>, gitSha: string, manifest: Record<string, any>, counts: Record<string, number>, backlog: Record<string, any>, integrations: unknown, uncommitted: string[], closedAt: string}} input
+ * @returns {Record<string, any> & {release: string, closedGitSha: string}}
+ */
+function composeReleaseReceipt(input) {
+  const { contract, lock, state, backlog } = input;
+  return {
+    schema: 'shipping-harness/release-v1',
+    project: contract.project,
+    worker: contract.worker,
+    release: contract.release,
+    goal: contract.goal,
+    contractHash: lock.contractHash,
+    baselineSha: lock.baselineSha,
+    closedGitSha: input.gitSha,
+    evidenceRunId: state.lastRunId,
+    acceptance: input.manifest.summary,
+    issueCounts: input.counts,
+    backlogCount: backlog.items.length,
+    fixCycles: state.fixCycles,
+    agentRuns: state.agentRuns,
+    verifyRuns: state.verifyRuns ?? 0,
+    telemetry: { totalAgentDurationMs: state.telemetry?.totalAgentDurationMs ?? 0 },
+    integrations: input.integrations,
+    closedAt: input.closedAt,
+    ...(contract.plan ? { planStageId: contract.plan.stageId, planHash: contract.plan.planHash, tier: contract.plan.tier } : {}),
+    ...(input.uncommitted.length > 0 ? { uncommittedPaths: input.uncommitted } : {}),
+  };
+}
+
+/**
  * @param {string} root
  * @param {{allowUncommitted?: boolean}} [options] `allowUncommitted: true` records the override in the receipt.
  */
@@ -263,27 +295,7 @@ export async function closeRelease(root, options = {}) {
   await writeJsonAtomic(paths.backlog, backlog);
 
   const closedAt = new Date().toISOString();
-  const receipt = {
-    schema: 'shipping-harness/release-v1',
-    project: contract.project,
-    worker: contract.worker,
-    release: contract.release,
-    goal: contract.goal,
-    contractHash: lock.contractHash,
-    baselineSha: lock.baselineSha,
-    closedGitSha: gitSha,
-    evidenceRunId: state.lastRunId,
-    acceptance: manifest.summary,
-    issueCounts: counts,
-    backlogCount: backlog.items.length,
-    fixCycles: state.fixCycles,
-    agentRuns: state.agentRuns,
-    verifyRuns: state.verifyRuns ?? 0,
-    telemetry: { totalAgentDurationMs: state.telemetry?.totalAgentDurationMs ?? 0 },
-    integrations,
-    closedAt,
-    ...(uncommitted.length > 0 ? { uncommittedPaths: uncommitted } : {}),
-  };
+  const receipt = composeReleaseReceipt({ contract, lock, state, gitSha, manifest, counts, backlog, integrations, uncommitted, closedAt });
   const receiptPath = path.join(paths.releases, `${contract.release}.json`);
   const reportPath = path.join(paths.releases, `${contract.release}.md`);
   await writeJsonAtomic(receiptPath, receipt);

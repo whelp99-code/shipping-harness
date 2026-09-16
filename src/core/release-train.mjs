@@ -7,6 +7,9 @@ import { compareSemver } from './release-transition.mjs';
 const TRAIN_SCHEMA = 'shipping-harness/release-train-v1';
 const TRAIN_BINDING_SCHEMA = 'shipping-harness/release-train-binding-v1';
 const MAX_RELEASES = 5;
+
+/** The rolling train never plans more than five releases ahead. */
+export const RELEASE_TRAIN_MAX_RELEASES = MAX_RELEASES;
 const MAX_TEXT = 500;
 const PROFILE_ORDER = ['software', 'web', 'api', 'data', 'package', 'cli', 'security', 'operations', 'documentation'];
 

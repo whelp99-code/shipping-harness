@@ -6,6 +6,18 @@ All notable changes to Shipping Harness are documented in this file, most recent
 
 In progress: plan-aware proposals. See `docs/planning/36-V1.12.0-PLAN-AWARE-PROPOSALS-DEVELOPMENT-PLAN.md`.
 
+### Added
+
+- A repository-owned, reviewable plan file (`docs/shipping-plan.json` by default, schema `shipping-harness/plan-v1`; see `docs/SHIPPING-PLAN.md`) that a host model may draft but never executes. It can never carry a `command`/`shell`/`args`/`argv`/`env`/`environment` key; stage acceptance only references analyzer-detected candidate command IDs. Deterministic progress (`DONE`/`ACTIVE`/`READY`/`BLOCKED_BY_DEPENDENCY`/`BLOCKED_BY_UNRESOLVED`) comes only from closed release receipts, never the file's own claims.
+- `shipping_start`/`shipping_refine` gain optional `planPath`/`stageId` input and a `tier` (`PATCH`/`MILESTONE`) plus `shippingPlan` output projection (`program`/`milestone`/`patch`), additive and `null` when no plan is bound. Only `milestone`/`patch` is ever approvable; approving the `program` projection is rejected with `ERR_PLAN_PROGRAM_NOT_APPROVABLE`. Existing MCP output is byte-identical when no plan file is present.
+- CLI `plan status [--plan PATH] [--json]` (a progress table: stage id, title, status, next) and `plan check [--plan PATH] [--json]` (validates the plan file only, prints resolvable candidate command IDs, exits 1 with the plan error code when invalid). Both default `--plan` to `docs/shipping-plan.json` and never write to `.shipping/` or the plan file.
+- The plain brief gains one bounded `PLAN_PROGRESS` fact ("N/M 단계 완료, 다음: <제목>") when a plan is bound, and `shipping_start`/`shipping_refine` text renders three fixed blocks (`## 전체 목표`, `## 이번 릴리즈`, `## 작은 수정` when a separate patch candidate exists) at the top when a plan is bound; the 8 KiB plain-brief budget is unchanged and output without a plan is byte-identical to v1.11.3.
+- `docs/SHIPPING-PLAN.md`: file format, a worked example, how to discover stage acceptance reference IDs, and a copy-pasteable prompt for a host model to draft the plan file.
+
+### Changed
+
+- CLI `help` surface hash updated (new `plan status`/`plan check` lines); `tools` and `schemas/v1` hashes carried over from Phase A unchanged in Phase B. Recorded in section 6 of `docs/planning/36-V1.12.0-PLAN-AWARE-PROPOSALS-DEVELOPMENT-PLAN.md`.
+
 ## [1.11.3] - 2026-09-16
 
 In progress: `requestProtocol` only enters the vendor-version branch when `_meta` actually carries `io.modelcontextprotocol/protocolVersion`. Claude Code attaches `_meta.progressToken` to every tool call, which previously hit that branch with `requested: missing` and made every call fail after a successful `initialize`. Found and fixed by the first Claude Code session to use the server; v1.11.2 had only fixed the handshake.

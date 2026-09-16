@@ -220,7 +220,7 @@ function actionPolicyFor(state, blockerCount) {
  * The loose status bag every plain-brief entry point accepts. Callers pass whichever of these
  * documents they already hold; every field is optional and read defensively.
  * `state` carries the release state object, or the state name when a caller already flattened it.
- * @typedef {{canonicalState?: string, proposalState?: string, coreState?: string, state?: string & {state?: string, release?: string, blockerCount?: number, unknownCount?: number}, blockerCount?: number, unknownCount?: number, release?: string|null, evidenceFresh?: boolean, issues?: {counts?: Record<string, number>, items?: unknown[]}, contract?: {release?: string} & Record<string, unknown>, baseline?: {blockingCount?: number, counts?: Record<string, number>, plan?: Record<string, unknown>, entries?: unknown[]}|null, coverage?: BriefCoverage|null, intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}|null, analysis?: {intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence}|null, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence, releaseTrain?: import('./release-train.mjs').ReleaseTrain|null, intentGate?: {status?: string, defaultMode?: string, inferredMode?: string, selectedMode?: string|null, effectiveMode?: string, analysisComplete?: boolean, planningAllowed?: boolean, implementationAllowed?: boolean, autopilotAllowed?: boolean, question?: {id?: string}|null, hash?: string}|null, goalDiscovery?: {questions?: unknown[], status?: string, round?: number, recommendedCandidateId?: string|null, direction?: {hash?: string}|null}|null, goalCharter?: {status?: string, hash?: string, outcome?: string, primaryUser?: string, operatingBoundary?: string}|null, currentEvidenceSha?: string|null, contractHash?: string|null, integrity?: {ok?: boolean, level?: string, reason?: string, ledgerState?: string|null}|null, scopeWarning?: {outside?: string[], include?: string[]}|null, verifyBudget?: {verifyRuns?: number, redundantVerifyRuns?: number, maxVerifyRuns?: number}|null}} PlainBriefInput
+ * @typedef {{canonicalState?: string, proposalState?: string, coreState?: string, state?: string & {state?: string, release?: string, blockerCount?: number, unknownCount?: number}, blockerCount?: number, unknownCount?: number, release?: string|null, evidenceFresh?: boolean, issues?: {counts?: Record<string, number>, items?: unknown[]}, contract?: {release?: string} & Record<string, unknown>, baseline?: {blockingCount?: number, counts?: Record<string, number>, plan?: Record<string, unknown>, entries?: unknown[]}|null, coverage?: BriefCoverage|null, intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}|null, analysis?: {intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence}|null, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence, releaseTrain?: import('./release-train.mjs').ReleaseTrain|null, intentGate?: {status?: string, defaultMode?: string, inferredMode?: string, selectedMode?: string|null, effectiveMode?: string, analysisComplete?: boolean, planningAllowed?: boolean, implementationAllowed?: boolean, autopilotAllowed?: boolean, question?: {id?: string}|null, hash?: string}|null, goalDiscovery?: {questions?: unknown[], status?: string, round?: number, recommendedCandidateId?: string|null, direction?: {hash?: string}|null}|null, goalCharter?: {status?: string, hash?: string, outcome?: string, primaryUser?: string, operatingBoundary?: string}|null, currentEvidenceSha?: string|null, contractHash?: string|null, integrity?: {ok?: boolean, level?: string, reason?: string, ledgerState?: string|null}|null, scopeWarning?: {outside?: string[], include?: string[]}|null, verifyBudget?: {verifyRuns?: number, redundantVerifyRuns?: number, maxVerifyRuns?: number}|null, shippingPlan?: {progress?: {done?: number, total?: number, nextStageId?: string|null}, program?: {title?: string, outcome?: string, stages?: Array<{id?: string, title?: string, state?: string}>}, milestone?: {stageId?: string, title?: string, tier?: string}|null, patch?: {goal?: string}|null}|null}} PlainBriefInput
  * @typedef {{complete?: boolean, coveredPaths?: number, totalPaths?: number, uncoveredPaths?: unknown[]}} BriefCoverage
  * @typedef {{root?: string|null, ambiguous?: boolean, requested?: boolean, confidence?: string}} BriefWorkspace
  * @typedef {{baseVersion?: string|null, recommendedVersion?: string|null, confidence?: string|null}} BriefVersionEvidence
@@ -228,7 +228,10 @@ function actionPolicyFor(state, blockerCount) {
  * @typedef {{code: string, authority: string, confidence: string, value: unknown, evidenceRefs: string[]}} BriefFact
  * @typedef {{schema: string, state: string, release: string|null, facts: BriefFact[], hash: string}} BriefFactGraph
  * @typedef {{code: string, text: string, evidenceRefs: string[]}} BriefItem
- * @typedef {{schema: string, language: string, state: string, release: string|null, releaseTrain: {currentRelease: string|null, totalReleases: number, modelAuthority: boolean, steps: Array<{version: string, current: boolean, value: string}>}|null, headline: string, problems: BriefItem[], improvements: BriefItem[], nextPlan: BriefItem[], summary: BriefItem, userAction: {code: string, label: string, exactPhrase: string, requiresHumanApproval: boolean}, details: {available: boolean, evidenceRefs: string[], exactPathsInDefaultText: boolean}, actionEnvelope: ActionEnvelope, factGraph: BriefFactGraph, advisory: unknown, modelAuthority: boolean, hash: string, renderedText?: string, textHash?: string, quality?: PlainBriefQuality}} PlainBrief
+ * @typedef {{stageId?: string, title: string, tier: string}} PlanBlockMilestone
+ * @typedef {{goal: string}} PlanBlockPatch
+ * @typedef {{program: {title: string, outcome: string, done: number, total: number, remainingStages: Array<{id: string, title: string}>}, milestone: PlanBlockMilestone|null, patch: PlanBlockPatch|null}} PlanBlocks
+ * @typedef {{schema: string, language: string, state: string, release: string|null, releaseTrain: {currentRelease: string|null, totalReleases: number, modelAuthority: boolean, steps: Array<{version: string, current: boolean, value: string}>}|null, planBlocks: PlanBlocks|null, headline: string, problems: BriefItem[], improvements: BriefItem[], nextPlan: BriefItem[], summary: BriefItem, userAction: {code: string, label: string, exactPhrase: string, requiresHumanApproval: boolean}, details: {available: boolean, evidenceRefs: string[], exactPathsInDefaultText: boolean}, actionEnvelope: ActionEnvelope, factGraph: BriefFactGraph, advisory: unknown, modelAuthority: boolean, hash: string, renderedText?: string, textHash?: string, quality?: PlainBriefQuality}} PlainBrief
  * @typedef {{schema: string, healthy: boolean, checks: Record<string, boolean>, renderedBytes: number, structuredBytes: number, maxBytes: number}} PlainBriefQuality
  */
 
@@ -278,6 +281,43 @@ function contractDefectFact(input) {
     count: criteria.length,
     criteria: criteria.slice(0, 3).map((value) => boundedTrainText(value, 60)),
   }, ['issues.items[].diagnostics', 'evidence.results[].baselineReplay']);
+}
+
+/**
+ * The single PLAN_PROGRESS fact: "N/M 단계 완료, 다음: <title>". Bounded, derived only
+ * from the small `shippingPlan` projection (never the raw plan file), so it never risks
+ * the 8 KiB render budget.
+ * @param {Record<string, any> | null | undefined} shippingPlan
+ */
+function planProgressFact(shippingPlan) {
+  if (!shippingPlan?.progress) return null;
+  const { done, total } = shippingPlan.progress;
+  const nextStage = (shippingPlan.program?.stages ?? []).find((stage) => stage.id === shippingPlan.progress.nextStageId);
+  const nextTitle = nextStage ? boundedTrainText(nextStage.title, 80) : '없음';
+  return fact('PLAN_PROGRESS', `${done}/${total} 단계 완료, 다음: ${nextTitle}`, ['shippingPlan.progress', 'shippingPlan.program.stages'], 'mechanical', 'exact');
+}
+
+/**
+ * A tiny, budget-safe rendering summary derived from the plan-proposal projection: the
+ * program headline, up to three remaining stages, and whichever tier is actually
+ * proposed. Never stores the full projection, so it cannot push the brief over 8 KiB.
+ * @param {Record<string, any> | null | undefined} shippingPlan
+ */
+function derivePlanBlocks(shippingPlan) {
+  if (!shippingPlan?.program) return null;
+  const { program, progress, milestone, patch } = shippingPlan;
+  const remaining = (program.stages ?? []).filter((stage) => stage.state !== 'DONE').slice(0, 3);
+  return {
+    program: {
+      title: boundedTrainText(program.title, 120),
+      outcome: boundedTrainText(program.outcome, 200),
+      done: progress?.done ?? 0,
+      total: progress?.total ?? 0,
+      remainingStages: remaining.map((stage) => ({ id: stage.id, title: boundedTrainText(stage.title, 100) })),
+    },
+    milestone: milestone ? { stageId: milestone.stageId, title: boundedTrainText(milestone.title, 150), tier: milestone.tier } : null,
+    patch: patch ? { goal: boundedTrainText(patch.goal, 150) } : null,
+  };
 }
 
 /** @param {PlainBriefInput} input */
@@ -373,6 +413,8 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
   }
   const defects = contractDefectFact(input);
   if (defects) facts.push(defects);
+  const planProgress = planProgressFact(input.shippingPlan);
+  if (planProgress) facts.push(planProgress);
   const outsideScope = scopeWarningPaths(input);
   if (outsideScope.length > 0) {
     facts.push(fact('SCOPE_WARNING', {
@@ -683,6 +725,51 @@ function renderReleaseTrain(train) {
 }
 
 /**
+ * The three fixed plan blocks shown at the top of shipping_start/shipping_refine text
+ * when a shipping-plan.json is bound to the proposal. Approval guidance always names
+ * exactly one approvable proposal (the MILESTONE or, absent one, the PATCH) and states
+ * that PROGRAM carries no execution or approval authority. `## 작은 수정` only appears
+ * when a patch candidate exists alongside a bound milestone.
+ * @param {PlanBlocks | null} planBlocks
+ * @returns {string[]}
+ */
+function renderPlanBlocks(planBlocks) {
+  if (!planBlocks) return [];
+  const { program, milestone, patch } = planBlocks;
+  const lines = [
+    '## 전체 목표',
+    '',
+    `**${program.title}** — ${program.outcome}`,
+    '',
+    `${program.done}/${program.total} 완료`,
+    '',
+  ];
+  if (program.remainingStages.length > 0) {
+    lines.push('다음 단계:', ...program.remainingStages.map((stage, index) => `${index + 1}. ${stage.title}`), '');
+  }
+  lines.push('## 이번 릴리즈', '');
+  if (milestone) {
+    lines.push(
+      `**${milestone.title}** (tier: ${milestone.tier})`,
+      '',
+      '이 MILESTONE 제안만 승인 대상입니다. PROGRAM(전체 목표)에는 실행·승인 권한이 없습니다.',
+      '',
+    );
+  } else if (patch) {
+    lines.push(
+      `**작은 수정** (tier: PATCH) — ${patch.goal}`,
+      '',
+      '이 PATCH 제안만 승인 대상입니다. PROGRAM(전체 목표)에는 실행·승인 권한이 없습니다.',
+      '',
+    );
+  }
+  if (milestone && patch) {
+    lines.push('## 작은 수정', '', patch.goal, '');
+  }
+  return lines;
+}
+
+/**
  * @param {PlainBrief} brief
  * @returns {string}
  */
@@ -691,6 +778,7 @@ export function renderPlainBrief(brief) {
     ? `> **${brief.userAction.exactPhrase}**`
     : brief.userAction?.label ?? '현재 상태를 확인하세요.';
   return [
+    ...renderPlanBlocks(brief.planBlocks ?? null),
     '## 현재 상태',
     '',
     `**${brief.headline}**`,
@@ -735,6 +823,7 @@ export function compilePlainBrief(input = {}) {
     state,
     release: input.release ?? input.contract?.release ?? input.state?.release ?? null,
     releaseTrain: buildReleaseTrainBrief(input.releaseTrain),
+    planBlocks: derivePlanBlocks(input.shippingPlan),
     headline: sections.headline,
     problems: sectionItems(sections.problems),
     improvements: sectionItems(sections.improvements),

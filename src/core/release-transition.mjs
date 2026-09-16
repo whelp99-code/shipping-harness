@@ -57,11 +57,14 @@ export async function prepareNextRelease(root, input) {
   await writeAtomic(archivedContract, await readText(paths.contract));
   if (await exists(paths.lock)) await writeAtomic(archivedLock, await readText(paths.lock));
 
+  /** @type {Record<string, any>} */
   const next = {
     ...current,
     release: input.release,
     goal: input.goal?.trim() || `Define the ${input.release} release outcome before locking this draft.`,
   };
+  // A plan stage binding belongs to the closed release only; the next DRAFT starts unbound.
+  delete next.plan;
   validateContract(next);
   await writeAtomic(paths.contract, stableStringify(next));
   await rm(paths.lock, { force: true });

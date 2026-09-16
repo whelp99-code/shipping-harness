@@ -187,3 +187,32 @@ OMP 바이너리 변경                    0
 답하기 전 기본값은 `ANALYZE_ONLY`입니다. 따라서 코드 수정, 커밋, 테스트 실행, Goal Charter, 전체 개발계획 확정, 범위 승인, 버전 종료가 발생하지 않습니다. `DIRTY_BASELINE`이 있어도 프로젝트 분석 결과는 보여주며, 기존 변경사항은 의도가 확정되기 전 자동으로 보존하거나 폐기하지 않습니다.
 
 `PLAN_ONLY`는 목표 질문과 버전별 계획까지만 만들고 개발하지 않습니다. `IMPLEMENT`와 `AUTOPILOT`만 기존 범위 승인·정책 Gate로 들어갑니다.
+
+## 10. 개발 중인 프로젝트 — 전체 계획을 하네스에 알려주기
+
+이미 개발이 진행 중이고 전체 계획(`docs/planning/`, `STATUS.json`, 로드맵 문서 등)이 저장소 안에 있다면, 모델에게
+그 계획을 읽고 `docs/shipping-plan.json` 파일로 정리해 달라고 시킬 수 있다.
+
+```text
+docs/planning 아래 문서와 STATUS 파일을 읽고 docs/shipping-plan.json을 써줘.
+schemas/v1/shipping-plan.schema.json 형식을 따르고, 명령어는 절대 넣지 마.
+```
+
+이 파일은 사람이 검토하고 커밋하는 일반 소스 파일이다. 하네스는 이 파일을 쓰지 않고, 내용을 검증만 한다. 저장
+전에 다음으로 확인할 수 있다.
+
+```bash
+shipping-harness plan check --json
+shipping-harness plan status
+```
+
+`docs/shipping-plan.json`이 있으면 이후 `shipping_start` 응답 맨 위에 세 부분이 고정 순서로 나온다.
+
+- **전체 목표** — 프로젝트 전체가 끝났을 때의 결과와 현재까지 몇 단계가 끝났는지, 다음 세 단계.
+  실행·승인 권한이 없는 읽기 전용 요약이다.
+- **이번 릴리즈** — 지금 승인하면 실제로 진행되는 단계 하나(MILESTONE 또는 작은 수정). 승인 대상은
+  언제나 이 하나뿐이며, 전체 목표는 승인할 수 없다.
+- **작은 수정** — 별도의 작은 수정 후보가 있을 때만 나온다.
+
+승인은 지금과 똑같이 정확히 하나의 제안(이번 릴리즈)에만 한다. 자세한 파일 형식과 예제는
+[`docs/SHIPPING-PLAN.md`](SHIPPING-PLAN.md)를 본다.

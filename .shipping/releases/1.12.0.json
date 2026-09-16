@@ -1,0 +1,32 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 4,
+    "requiredFailed": 0,
+    "total": 4
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "93c5de8df9b4a322e3eea88ecf997427c91da285",
+  "closedAt": "2026-09-16T13:04:22.591Z",
+  "closedGitSha": "171ff3a82494e9632e6c6bffc6f3a8fa9a160fbc",
+  "contractHash": "fa5f6199ccc88300a5b9e6c7b4966f67c719eac2afb38bf11aa6ede4e9d7dbf0",
+  "evidenceRunId": "run-2026-09-16T13-03-57-091Z-7af4a915",
+  "fixCycles": 0,
+  "goal": "Plan-aware proposals: a reviewable shipping-plan file authored by the host model, deterministic stage progress from closure receipts, and a fixed PROGRAM / MILESTONE / PATCH proposal structure, without giving any model or the PROGRAM tier execution authority",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.12.0",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

@@ -12,7 +12,7 @@ export const INTENT_GATE = Object.freeze({
 
 const AUTOPILOT = /\b(?:autopilot|closed|finish\s+everything|complete\s+end[- ]to[- ]end)\b|오토파일럿|끝까지|완성(?:해|해줘|해주세요|까지)|개발\s*완료|구현\s*완료|종료까지|닫을\s*때까지|자동으로\s*(?:진행|완성)/iu;
 const PLAN_ONLY = /\b(?:plan|planning|roadmap|design|proposal)\b|기획|계획|로드맵|설계|제안(?:해|해줘|해주세요)?/iu;
-const IMPLEMENT = /\b(?:implement|develop|build|fix|patch|package|code|add|remove|refactor|ship|deliver|finish|complete|preserve|verify|harden|deploy|publish|write|migrate|prepare|make|run|execute)\b|개발(?:해|해줘|해주세요)?|구현(?:해|해줘|해주세요)?|수정(?:해|해줘|해주세요)?|완료(?:한다|해|해줘|해주세요)?|검증(?:해|해줘|해주세요)?|배포(?:해|해줘|해주세요)?|고쳐|만들어|추가(?:해|해줘)|제거(?:해|해줘)|리팩터/iu;
+const IMPLEMENT = /\b(?:implement|develop|build|fix|patch|package|code|add|remove|refactor|ship|deliver|finish|complete|preserve|verify|harden|deploy|publish|write|migrate|prepare|make|run|execute)\b|개발(?:해|해줘|해주세요)?|구현(?:해|해줘|해주세요)?|수정(?:해|해줘|해주세요)?|완료(?:한다|해|해줘|해주세요)?|완성한다|검증(?:해|해줘|해주세요)?|배포(?:해|해줘|해주세요)?|고쳐|만들어|추가(?:해|해줘)|제거(?:해|해줘)|리팩터/iu;
 const ANALYZE = /\b(?:analy[sz]e|inspect|review|explain|check|understand)\b|분석|확인|검토|설명|파악|진단/iu;
 const ANALYZE_ONLY = /\b(?:analysis\s+only|read[- ]only|do\s+not\s+(?:change|edit|implement|develop))\b|분석(?:만|\s*결과만)|확인만|검토만|설명만|읽기\s*전용|코드\s*(?:수정|변경)하지\s*마|개발하지\s*마|구현하지\s*마|아직\s*(?:개발|구현)(?:은|을)?\s*(?:시작하지|하지)\s*마/iu;
 const PLAN_BOUNDARY = /\b(?:plan\s+only|do\s+not\s+implement|before\s+implementation)\b|계획(?:까지만|만)|기획(?:까지만|만)|아직\s*(?:개발|구현)(?:은|을)?\s*(?:시작하지|하지)\s*마/iu;

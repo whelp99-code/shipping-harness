@@ -1,0 +1,50 @@
+{
+  "schema": "shipping-harness/plan-v1",
+  "project": "example-project",
+  "program": {
+    "title": "Example program",
+    "outcome": "Deliver the example product end to end so an internal operator can install it, use the core flow, and recover from failure."
+  },
+  "sources": [
+    {
+      "path": "docs/planning/ROADMAP.md",
+      "note": "Read-only planning source the host model extracted this plan from."
+    }
+  ],
+  "stages": [
+    {
+      "id": "S-01",
+      "title": "Deliver the core flow",
+      "outcome": "A user can complete the core flow from start to result on the current revision.",
+      "dependsOn": [],
+      "acceptanceRefs": [
+        "node-test"
+      ],
+      "scopeInclude": [
+        "Core flow implementation and its acceptance evidence."
+      ],
+      "scopeExclude": [
+        "Optional polish and future extensibility work."
+      ],
+      "size": "MILESTONE"
+    },
+    {
+      "id": "S-02",
+      "title": "Operate and recover",
+      "outcome": "The result can be installed, checked, and rolled back with reproducible evidence.",
+      "dependsOn": [
+        "S-01"
+      ],
+      "acceptanceRefs": [
+        "node-test"
+      ],
+      "scopeInclude": [
+        "Install, health check, and rollback paths."
+      ],
+      "scopeExclude": [
+        "New core product features."
+      ],
+      "size": "PATCH"
+    }
+  ]
+}

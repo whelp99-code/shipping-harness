@@ -63,5 +63,11 @@
       "command": null,
       "artifactPaths": []
     }
+  },
+  "plan": {
+    "path": "docs/shipping-plan.json",
+    "planHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "stageId": "S-01",
+    "tier": "MILESTONE"
   }
 }

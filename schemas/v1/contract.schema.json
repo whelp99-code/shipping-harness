@@ -275,6 +275,41 @@
       },
       "additionalProperties": false,
       "maxProperties": 128
+    },
+    "plan": {
+      "type": "object",
+      "required": [
+        "path",
+        "planHash",
+        "stageId",
+        "tier"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "planHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "maxLength": 256
+        },
+        "stageId": {
+          "type": "string",
+          "pattern": "^S-[A-Za-z0-9_-]{1,32}$",
+          "maxLength": 40
+        },
+        "tier": {
+          "type": "string",
+          "enum": [
+            "PATCH",
+            "MILESTONE"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 8
     }
   },
   "additionalProperties": false,

@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { runGit, currentGitSha } from '../../src/core/git.mjs';
@@ -8,7 +8,7 @@ import { stableStringify } from '../../src/core/crypto.mjs';
 import { runtimePaths } from '../../src/core/paths.mjs';
 
 /**
- * @param {{testScript?: string, packageScripts?: Record<string, string>, initializeShipping?: boolean, contract?: (contract: Record<string, any>) => Record<string, any>}} [options]
+ * @param {{testScript?: string, packageScripts?: Record<string, string>, initializeShipping?: boolean, contract?: (contract: Record<string, any>) => Record<string, any>, files?: Record<string, string>}} [options]
  */
 export async function createFixtureRepo(options = {}) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'shipping-harness-test-'));
@@ -25,6 +25,11 @@ export async function createFixtureRepo(options = {}) {
   }, null, 2)}\n`, 'utf8');
   await writeFile(path.join(root, '.gitignore'), '.shipping/evidence/\n.shipping/tmp/\n', 'utf8');
   await writeFile(path.join(root, 'README.md'), '# Fixture\n', 'utf8');
+  for (const [relativePath, content] of Object.entries(options.files ?? {})) {
+    const target = path.join(root, relativePath);
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, content, 'utf8');
+  }
   if (options.initializeShipping !== false) {
     await initializeContract(root, 'fixture');
     await initializeState(root);
@@ -57,6 +62,12 @@ export async function createFixtureRepo(options = {}) {
     },
     async read(relativePath) {
       return readFile(path.join(root, relativePath), 'utf8');
+    },
+    async write(relativePath, content) {
+      const target = path.join(root, relativePath);
+      await mkdir(path.dirname(target), { recursive: true });
+      await writeFile(target, content, 'utf8');
+      return target;
     },
     async cleanup() {
       await rm(root, { recursive: true, force: true });

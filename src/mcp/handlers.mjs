@@ -157,12 +157,17 @@ async function statusOrUninitialized(root) {
 
 /** @param {Record<string, any>} args */
 function validateStartArgs(args) {
-  rejectUnknownKeys(args, ['goal', 'release', 'projectName', 'mode', 'proposerId']);
+  rejectUnknownKeys(args, ['goal', 'release', 'projectName', 'mode', 'proposerId', 'planPath', 'stageId']);
   const goal = requiredString(args.goal, 'goal', 5, 4000);
   if (args.release !== undefined) requiredString(args.release, 'release', 5, 80);
   if (args.projectName !== undefined) requiredString(args.projectName, 'projectName', 1, 120);
   if (args.mode !== undefined) invariant(args.mode === 'AUTO', 'ERR_PROPOSAL_MODE_AUTHORIZATION', 'Unsupported decision mode for shipping_start: only AUTO is allowed; a host agent cannot silently switch decision mode');
   if (args.proposerId !== undefined) requiredString(args.proposerId, 'proposerId', 1, 160);
+  if (args.planPath !== undefined) requiredString(args.planPath, 'planPath', 1, 300);
+  if (args.stageId !== undefined) {
+    requiredString(args.stageId, 'stageId', 3, 40);
+    invariant(/^S-[A-Za-z0-9_-]{1,32}$/u.test(args.stageId), 'ERR_MCP_ARGUMENTS', 'stageId must look like S-01');
+  }
   return goal;
 }
 
@@ -237,6 +242,8 @@ async function buildStartData(proposal, root) {
     scope: proposal.contract.scope,
     acceptance: proposal.contract.acceptance,
     plan: proposal.plan,
+    tier: proposal.tier ?? 'PATCH',
+    shippingPlan: proposal.shippingPlan ?? null,
     detected: proposal.analysis,
     diagnostics: proposal.diagnostics,
     approvalRequired: proposal.intentGate?.implementationAllowed === true,
@@ -267,6 +274,8 @@ export async function handleStart(root, args) {
     projectName: args.projectName,
     mode: args.mode,
     proposerId: args.proposerId ?? 'mcp-host-agent',
+    planPath: args.planPath,
+    stageId: args.stageId,
   });
   const data = { ...(await buildStartData(proposal, root)), reused, supersededProposalId, proposalPath };
   const next = startNextStep(proposal);
@@ -275,7 +284,7 @@ export async function handleStart(root, args) {
 
 /** @param {Record<string, any>} args */
 function validateRefineArgs(args) {
-  rejectUnknownKeys(args, ['proposalId', 'proposalHash', 'answers', 'acceptRecommendedDiscoveryDefaults', 'workspaceCandidateId', 'mode', 'modeAuthorizedByUser', 'rescan', 'baselinePlanHash', 'baselineCommit', 'baselineAuthorizedByUser']);
+  rejectUnknownKeys(args, ['proposalId', 'proposalHash', 'answers', 'acceptRecommendedDiscoveryDefaults', 'workspaceCandidateId', 'mode', 'modeAuthorizedByUser', 'rescan', 'baselinePlanHash', 'baselineCommit', 'baselineAuthorizedByUser', 'stageId']);
   const proposalId = requiredString(args.proposalId, 'proposalId', 1, 160);
   const proposalHash = requiredString(args.proposalHash, 'proposalHash', 64, 64);
   invariant(/^[a-f0-9]{64}$/u.test(proposalHash), 'ERR_MCP_ARGUMENTS', 'proposalHash must be a lowercase SHA-256 value');
@@ -290,6 +299,10 @@ function validateRefineArgs(args) {
   if (args.baselinePlanHash !== undefined) invariant(/^[a-f0-9]{64}$/u.test(args.baselinePlanHash), 'ERR_MCP_ARGUMENTS', 'baselinePlanHash must be a lowercase SHA-256 value');
   if (args.baselineCommit !== undefined) invariant(/^[a-f0-9]{40}$/u.test(args.baselineCommit), 'ERR_MCP_ARGUMENTS', 'baselineCommit must be a full lowercase Git SHA');
   invariant(args.baselineAuthorizedByUser === undefined || typeof args.baselineAuthorizedByUser === 'boolean', 'ERR_MCP_ARGUMENTS', 'baselineAuthorizedByUser must be boolean');
+  if (args.stageId !== undefined) {
+    requiredString(args.stageId, 'stageId', 3, 40);
+    invariant(/^S-[A-Za-z0-9_-]{1,32}$/u.test(args.stageId), 'ERR_MCP_ARGUMENTS', 'stageId must look like S-01');
+  }
   if (args.answers !== undefined) {
     invariant(Array.isArray(args.answers) && args.answers.length <= 3, 'ERR_MCP_ARGUMENTS', 'answers must contain at most three entries');
     for (const answer of args.answers) {
@@ -337,6 +350,8 @@ async function buildRefineData(proposal, result, root) {
     nextAction: proposalNextAction(proposal.canonicalState),
     acceptanceStrength: proposal.acceptanceStrength,
     acceptance: proposal.contract.acceptance,
+    tier: proposal.tier ?? 'PATCH',
+    shippingPlan: proposal.shippingPlan ?? null,
     questions: proposal.decision.questions,
     resolutions: result.resolutions,
     approvalBrief: proposal.approvalBrief,
@@ -386,6 +401,7 @@ export async function handleRefine(root, args) {
     baselinePlanHash: args.baselinePlanHash,
     baselineCommit: args.baselineCommit,
     baselineAuthorizedByUser: args.baselineAuthorizedByUser === true,
+    stageId: args.stageId,
   });
   const proposal = result.proposal;
   const data = await buildRefineData(proposal, result, root);

@@ -179,6 +179,49 @@ test('plain brief items are mechanically coded and evidence-bound', () => {
   assert.equal(renderPlainBrief(brief), brief.renderedText);
 });
 
+test('a bound shippingPlan projection adds one bounded PLAN_PROGRESS fact and three plan blocks; its absence changes nothing', () => {
+  const withoutPlan = compilePlainBrief(proposal('READY_FOR_APPROVAL'));
+  assert.equal(withoutPlan.factGraph.facts.some((entry) => entry.code === 'PLAN_PROGRESS'), false);
+  assert.equal(withoutPlan.planBlocks, null);
+  assert.doesNotMatch(withoutPlan.renderedText, /## 전체 목표/u);
+
+  const shippingPlan = {
+    tier: 'MILESTONE',
+    progress: { total: 3, done: 1, nextStageId: 'S-02' },
+    program: {
+      title: 'Ship the whole thing',
+      outcome: 'Deliver the product end to end so an operator can run it.',
+      stages: [
+        { id: 'S-01', title: 'First stage', state: 'DONE' },
+        { id: 'S-02', title: 'Second stage', state: 'READY' },
+        { id: 'S-03', title: 'Third stage', state: 'BLOCKED_BY_DEPENDENCY' },
+      ],
+    },
+    milestone: { stageId: 'S-02', title: 'Second stage work', tier: 'MILESTONE' },
+    patch: null,
+  };
+  const withPlan = compilePlainBrief(proposal('READY_FOR_APPROVAL', { shippingPlan }));
+  assert.equal(withPlan.quality.healthy, true, JSON.stringify(withPlan.quality.checks));
+  const planFact = withPlan.factGraph.facts.find((entry) => entry.code === 'PLAN_PROGRESS');
+  assert.ok(planFact);
+  assert.equal(planFact.value, '1/3 단계 완료, 다음: Second stage');
+  assert.equal(planFact.authority, 'mechanical');
+  assert.ok(planFact.evidenceRefs.length > 0);
+  assert.ok(withPlan.quality.structuredBytes < 8192);
+  assert.ok(withPlan.quality.renderedBytes < 8192);
+
+  const text = withPlan.renderedText;
+  const programIndex = text.indexOf('## 전체 목표');
+  const milestoneIndex = text.indexOf('## 이번 릴리즈');
+  const currentStateIndex = text.indexOf('## 현재 상태');
+  assert.ok(programIndex >= 0 && milestoneIndex > programIndex && currentStateIndex > milestoneIndex, 'plan blocks precede the rest of the report, in fixed order');
+  assert.match(text, /Ship the whole thing/u);
+  assert.match(text, /1\/3 완료/u);
+  assert.match(text, /Second stage work/u);
+  assert.match(text, /PROGRAM\(전체 목표\)에는 실행·승인 권한이 없습니다/u);
+  assert.doesNotMatch(text, /## 작은 수정/u);
+});
+
 test('shipping_start and shipping_status expose the same Shipping-generated beginner report before technical details', async () => {
   const fixture = await createFixtureRepo();
   try {

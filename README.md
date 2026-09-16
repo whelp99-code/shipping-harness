@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/whelp99-code/shipping-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/whelp99-code/shipping-harness/actions/workflows/ci.yml)
 
-**Version:** 1.11.3
+**Version:** 1.12.0
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
 
@@ -28,7 +28,7 @@ Recommended path — pack the tagged commit and install into a user-global prefi
 
 ```bash
 npm pack   # from a clean, tagged checkout
-npm install --global --prefix "$HOME/.local" ./shipping-harness-1.11.3.tgz \
+npm install --global --prefix "$HOME/.local" ./shipping-harness-1.12.0.tgz \
   --ignore-scripts --no-audit --no-fund
 ```
 
@@ -83,7 +83,7 @@ Shipping Harness runs only commands explicitly stored in a repository-owned cont
 
 | Role | Docs |
 |---|---|
-| Start | [`docs/MCP.md`](docs/MCP.md), [`docs/BEGINNER-QUICKSTART-KO.md`](docs/BEGINNER-QUICKSTART-KO.md) |
+| Start | [`docs/MCP.md`](docs/MCP.md), [`docs/BEGINNER-QUICKSTART-KO.md`](docs/BEGINNER-QUICKSTART-KO.md), [`docs/SHIPPING-PLAN.md`](docs/SHIPPING-PLAN.md) |
 | Operate | [`docs/ADAPTERS.md`](docs/ADAPTERS.md), [`docs/operations/INSTALL-UPGRADE-ROLLBACK.md`](docs/operations/INSTALL-UPGRADE-ROLLBACK.md), [`docs/operations/OMP-MAIN-HARNESS.md`](docs/operations/OMP-MAIN-HARNESS.md), [`docs/operations/AUTOPILOT-RUNBOOK.md`](docs/operations/AUTOPILOT-RUNBOOK.md), [`docs/internal-remote/README.md`](docs/internal-remote/README.md), [`docs/internal-runtime/README.md`](docs/internal-runtime/README.md), [`docs/HANDOVER.md`](docs/HANDOVER.md) |
 | Design | [`docs/planning/00-INTAKE.md`](docs/planning/00-INTAKE.md), [`01-CHARTER-AND-SCOPE.md`](docs/planning/01-CHARTER-AND-SCOPE.md), [`02-REQUIREMENTS.md`](docs/planning/02-REQUIREMENTS.md), [`03-SYSTEM-ARCHITECTURE.md`](docs/planning/03-SYSTEM-ARCHITECTURE.md), [`04-DEVELOPMENT-PLAN.md`](docs/planning/04-DEVELOPMENT-PLAN.md), [`05-TEST-AND-RELEASE-GATE.md`](docs/planning/05-TEST-AND-RELEASE-GATE.md), [`06-ADAPTER-INTEGRATION.md`](docs/planning/06-ADAPTER-INTEGRATION.md) |
 | Plans | [`08-V0.4-AUTO-DECISION-DIRECTION.md`](docs/planning/08-V0.4-AUTO-DECISION-DIRECTION.md), [`09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md`](docs/planning/09-SEQUENTIAL-ROADMAP-AND-DEVELOPMENT-PLAN.md), [`10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md`](docs/planning/10-INTERNAL-ONLY-UPSTREAM-RUNTIME-DIRECTION.md), [`11-V0.4.0-AUTO-DECISION-DEVELOPMENT-PLAN.md`](docs/planning/11-V0.4.0-AUTO-DECISION-DEVELOPMENT-PLAN.md), [`12-V0.5.0-GOAL-EVIDENCE-RUNTIME-DEVELOPMENT-PLAN.md`](docs/planning/12-V0.5.0-GOAL-EVIDENCE-RUNTIME-DEVELOPMENT-PLAN.md), [`13-V0.6.0-BEGINNER-PLUGIN-DEVELOPMENT-PLAN.md`](docs/planning/13-V0.6.0-BEGINNER-PLUGIN-DEVELOPMENT-PLAN.md), [`14-V0.7.0-INTERNAL-OMO-RUNTIME-DEVELOPMENT-PLAN.md`](docs/planning/14-V0.7.0-INTERNAL-OMO-RUNTIME-DEVELOPMENT-PLAN.md), [`15-V0.8.0-BOUNDED-TEAM-DAG-DEVELOPMENT-PLAN.md`](docs/planning/15-V0.8.0-BOUNDED-TEAM-DAG-DEVELOPMENT-PLAN.md), [`16-V0.9.0-INTERNAL-REMOTE-OPERATIONS-DEVELOPMENT-PLAN.md`](docs/planning/16-V0.9.0-INTERNAL-REMOTE-OPERATIONS-DEVELOPMENT-PLAN.md), [`17-V1.0.0-STABLE-INTERNAL-CONTROL-PLANE-DEVELOPMENT-PLAN.md`](docs/planning/17-V1.0.0-STABLE-INTERNAL-CONTROL-PLANE-DEVELOPMENT-PLAN.md), [`25-V1.4.0-EVIDENCE-FIRST-PLAIN-BRIEF-DEVELOPMENT-PLAN.md`](docs/planning/25-V1.4.0-EVIDENCE-FIRST-PLAIN-BRIEF-DEVELOPMENT-PLAN.md), [`26-V1.5.0-RELEASE-TRAIN-PLANNER-DEVELOPMENT-PLAN.md`](docs/planning/26-V1.5.0-RELEASE-TRAIN-PLANNER-DEVELOPMENT-PLAN.md), and the rest of `docs/planning/` in sequence; see [`CHANGELOG.md`](CHANGELOG.md) for what each version shipped |

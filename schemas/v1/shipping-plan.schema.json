@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "shipping-harness/plan-v1",
+  "title": "Shipping Harness stable project plan schema",
+  "description": "Internal stable v1 schema for a repository-owned project plan. Unknown fields fail closed. The document can never carry a command: command, shell, args, argv, env and environment keys are rejected anywhere by the loader, and stage acceptance only references analyzer-detected candidate command identifiers.",
+  "x-shipping-version": "1.0.0",
+  "x-owner": "Shipping Governance Core",
+  "x-unknown-field-policy": "reject",
+  "x-migration-owner": "packages/stable-control/migration.mjs",
+  "x-canonical-hashing": "UTF-8 canonical JSON with sorted object keys where authority hashes apply",
+  "x-redaction": "credentials, authorization, token, password, secret and cookie values must be redacted",
+  "type": "object",
+  "required": [
+    "schema",
+    "project",
+    "program",
+    "stages"
+  ],
+  "properties": {
+    "schema": {
+      "const": "shipping-harness/plan-v1",
+      "type": "string"
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "program": {
+      "type": "object",
+      "required": [
+        "title",
+        "outcome"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 8
+    },
+    "sources": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 8
+      }
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 24,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "outcome",
+          "size"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^S-[A-Za-z0-9_-]{1,32}$",
+            "maxLength": 40
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "outcome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "dependsOn": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+              "type": "string",
+              "pattern": "^S-[A-Za-z0-9_-]{1,32}$",
+              "maxLength": 40
+            }
+          },
+          "acceptanceRefs": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._:-]{1,80}$",
+              "maxLength": 80
+            }
+          },
+          "scopeInclude": {
+            "type": "array",
+            "maxItems": 24,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "scopeExclude": {
+            "type": "array",
+            "maxItems": 24,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "size": {
+            "type": "string",
+            "enum": [
+              "PATCH",
+              "MILESTONE"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 16
+      }
+    }
+  },
+  "additionalProperties": false,
+  "maxProperties": 16
+}

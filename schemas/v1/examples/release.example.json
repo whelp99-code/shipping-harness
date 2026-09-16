@@ -9,5 +9,8 @@
   "closedGitSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "closedAt": "2026-08-28T00:10:00.000Z",
   "blockers": 0,
-  "backlogItems": 0
+  "backlogItems": 0,
+  "planStageId": "S-01",
+  "planHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "tier": "MILESTONE"
 }

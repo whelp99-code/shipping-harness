@@ -1,6 +1,6 @@
 # Shipping Harness v1 Internal Handover
 
-**Current version:** 1.11.3
+**Current version:** 1.12.0
 
 ## Product promise
 
@@ -17,6 +17,8 @@ The user is the approver, not the technical interviewer.
 5. Host agent, adapters, and private OMO execution claims.
 
 No model, OMO task, remote client, or recovery routine can outrank the first four levels.
+
+When `shipping_start`/`shipping_refine` project a repository-owned `docs/shipping-plan.json`, the resulting `PROGRAM` view (the whole-project title, outcome, and progress) has no execution, approval, or closure authority of any kind — it is a read-only summary, never a proposal. Only the `MILESTONE` or `PATCH` layer derived from one plan stage can be approved with `shipping_approve_scope`, following the same exact-hash approval flow as a plan-less proposal.
 
 Evidence freshness is bound to the working tree, not only to `HEAD`. Every evidence manifest records `treeFingerprint` (sha256 over the HEAD sha plus each path changed relative to HEAD and the blob sha of its working copy, `.shipping/` excluded) and `dirtyPaths` (those paths). `assertFreshEvidence` compares that fingerprint as well as the contract hash and Git SHA, so acceptance results recorded against uncommitted work go stale the moment any file changes, even though `HEAD` never moved; `state.currentEvidenceFingerprint` carries the accepted run's fingerprint and `status` reports `evidence: dirty (N uncommitted paths)` whenever the tree holds uncommitted work. Manifests written before v1.10.0 carry no fingerprint and keep the old Git-SHA-only contract. `close` deliberately does not compare the fingerprint: in-scope uncommitted work is already refused with `ERR_CLOSE_UNCOMMITTED`, and committing it moves `HEAD` and fails the evidence-SHA check.
 
@@ -94,6 +96,10 @@ Operators retain the CLOSED receipt, annotated tag, `docs/reports/v1.7.0-goal-di
 For a new terse request, verify `intentGate` before interpreting baseline or Goal Discovery output. `CONFIRMATION_REQUIRED` means read-only analysis is complete and exactly one workflow-boundary answer remains. Preserve `ANALYZE_ONLY` as the default; do not create a Goal Charter, Release Train, approval, execution, verification command, commit, or close from that state. `ANALYSIS_COMPLETE` and `PLAN_COMPLETE` are non-approvable. Only `IMPLEMENT` or `AUTOPILOT` can enter the existing scope-approval flow. The intent answer must be appended through `shipping_refine`, never by editing the Proposal JSON.
 
 Operational verification is `npm run test:intent-gate` plus `npm run smoke:intent-gate`. The field smoke fingerprints the real Orca-JARVIS HEAD, porcelain, and all tracked bytes before and after bounded analysis. Any target mutation, extra MCP tool, model authority, premature planning, or premature implementation is a release blocker.
+
+## v1.12.0 plan-aware proposal authority
+
+`shipping_start`/`shipping_refine` may bind an optional repository-owned `docs/shipping-plan.json` (schema `shipping-harness/plan-v1`; see `docs/SHIPPING-PLAN.md`). The file is written and committed by a person (a host model may draft it, but never runs it), never by Shipping Harness, and can never carry a `command`/`shell`/`args`/`argv`/`env`/`environment` key anywhere in the document — stage acceptance only references a candidate command the deterministic project analyzer already detected. Progress (`DONE`/`ACTIVE`/`READY`/`BLOCKED_BY_DEPENDENCY`/`BLOCKED_BY_UNRESOLVED`) is computed only from `.shipping/releases/*.json` closure receipts carrying a matching `planStageId`, never from the plan file's own claims. `PROGRAM` (the whole-project projection) has no execution or approval authority; only `MILESTONE`/`PATCH` (one plan stage, or the existing small-patch fallback) is ever approvable, and `shipping_approve_scope` rejects any attempt to approve the `PROGRAM` projection's hash with `ERR_PLAN_PROGRAM_NOT_APPROVABLE`. A missing or invalid plan file changes nothing: the proposal degrades to the pre-v1.12.0 small-patch shape with a visible diagnostic. The CLI (`shipping-harness plan status`, `shipping-harness plan check`) is read-only and never mutates `.shipping/` or the plan file.
 
 ## v1.8.1 handover
 

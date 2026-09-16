@@ -123,3 +123,7 @@ candidate command IDs from `shipping-harness plan check --json`. Stop after writ
 See [`docs/MCP.md`](MCP.md#plan-aware-proposals) for the `tier`/`shippingPlan` output shape. In short: `program`
 is a read-only summary with no execution or approval authority; `milestone` (or `patch`, when no stage is
 ready) is the one proposal that can actually be approved with `shipping_approve_scope`.
+
+## Recommendation: one acceptance command per stage
+
+The analyzer only offers the commands your project already defines (for example `npm test`, `npm run lint`). If one `npm test` runs the tests of every stage, the first stage cannot close until all stages are implemented. Give each stage its own script (`test:stage-1`, `test:stage-2`, …) so `plan check` can offer one candidate id per stage and each stage closes on its own evidence.

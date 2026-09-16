@@ -33,7 +33,7 @@ The v1.6.1 field-hardening surface adds no authority. It proves the existing pol
 | Node.js | 22 or newer; 22.23.2 tested on Ubuntu | Startup or compatibility gate fails |
 | Git | 2.30 or newer | Git-bound evidence and locking are unavailable |
 | Shipping package upgrade | v0.6.0 through v1.6.0 | Earlier releases require manual export/reinitialization |
-| MCP | current `2026-07-28`; compatible initialize clients `2025-11-25` and `2025-03-26` | Unsupported versions fail clearly |
+| MCP | current `2026-07-28`; compatible initialize clients `2025-11-25`, `2025-06-18` (Claude Code), `2025-03-26` | Unsupported versions fail clearly |
 | OMP primary host | `18.0.10`, `omo-balance` wrapper + standalone `omp-core`, MCP `2025-03-26` | Version, worker smoke, nine-tool inventory, and status call must pass |
 | OMP compatibility host | source-linked `15.10.12`, MCP `2025-03-26` | Same protocol and nine-tool checks apply |
 | Local MCP transport | STDIO only | No local network listener is opened |

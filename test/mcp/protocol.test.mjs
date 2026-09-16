@@ -60,3 +60,27 @@ test('legacy initialize remains compatible while unsupported latest versions fai
     await fixture.cleanup();
   }
 });
+test('initialize accepts the Claude Code revision while unknown revisions still fail closed', async () => {
+  const fixture = await createFixtureRepo();
+  try {
+    const claude = createMcpProtocol(fixture.root);
+    const accepted = await claude.handle({
+      jsonrpc: '2.0', id: 'init', method: 'initialize',
+      params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'claude-code', version: '2.1.272' } },
+    });
+    assert.equal(accepted.result.protocolVersion, '2025-06-18');
+    const status = await claude.handle({ jsonrpc: '2.0', id: 'status', method: 'tools/call', params: { name: 'shipping_status', arguments: {} } });
+    assert.equal(status.error, undefined);
+    assert.ok(Array.isArray(status.result.content));
+
+    const future = createMcpProtocol(fixture.root);
+    const negotiated = await future.handle({
+      jsonrpc: '2.0', id: 'init', method: 'initialize',
+      params: { protocolVersion: '2099-01-01', capabilities: {}, clientInfo: { name: 'future', version: '1' } },
+    });
+    assert.equal(negotiated.error.code, -32022);
+    assert.deepEqual(negotiated.error.data.supported, ['2025-11-25', '2025-06-18', '2025-03-26']);
+  } finally {
+    await fixture.cleanup();
+  }
+});

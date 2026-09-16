@@ -84,3 +84,28 @@ test('initialize accepts the Claude Code revision while unknown revisions still 
     await fixture.cleanup();
   }
 });
+
+test('negotiated revision survives requests whose _meta carries only a progressToken', async () => {
+  const fixture = await createFixtureRepo();
+  try {
+    const claude = createMcpProtocol(fixture.root);
+    await claude.handle({
+      jsonrpc: '2.0', id: 'init', method: 'initialize',
+      params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'claude-code', version: '2.1.272' } },
+    });
+    const status = await claude.handle({
+      jsonrpc: '2.0', id: 'status', method: 'tools/call',
+      params: { name: 'shipping_status', arguments: {}, _meta: { progressToken: 1 } },
+    });
+    assert.equal(status.error, undefined);
+    assert.ok(Array.isArray(status.result.content));
+
+    const stale = await claude.handle({
+      jsonrpc: '2.0', id: 'stale', method: 'tools/list',
+      params: { _meta: { 'io.modelcontextprotocol/protocolVersion': '1900-01-01' } },
+    });
+    assert.equal(stale.error.code, -32022);
+  } finally {
+    await fixture.cleanup();
+  }
+});

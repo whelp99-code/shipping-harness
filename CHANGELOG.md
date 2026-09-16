@@ -2,7 +2,11 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.11.2] - Unreleased
+## [1.11.3] - Unreleased
+
+In progress: `requestProtocol` only enters the vendor-version branch when `_meta` actually carries `io.modelcontextprotocol/protocolVersion`. Claude Code attaches `_meta.progressToken` to every tool call, which previously hit that branch with `requested: missing` and made every call fail after a successful `initialize`. Found and fixed by the first Claude Code session to use the server; v1.11.2 had only fixed the handshake.
+
+## [1.11.2] - 2026-09-16
 
 In progress: MCP `initialize` accepts protocol version `2025-06-18` (what Claude Code 2.1.x sends) and, per the MCP specification, answers an unknown requested version with the newest version the server supports instead of an error. Found when the first Claude Code session called `shipping_status` and received `Unsupported protocol version`.
 

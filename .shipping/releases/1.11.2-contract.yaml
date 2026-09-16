@@ -1,16 +1,16 @@
 {
   "acceptance": [
     {
-      "id": "AC-111301",
-      "description": "A tool call whose _meta carries only a progressToken uses the negotiated revision; a bad vendor revision in _meta still fails closed.",
+      "id": "AC-111201",
+      "description": "MCP initialize accepts 2025-06-18 and negotiates unknown versions down to a supported one; existing protocol, OMP compatibility, and stdio suites pass.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/mcp/protocol.test.mjs test/mcp/omp-compatibility.test.mjs test/mcp/stdio.test.mjs",
+      "command": "node --test --test-reporter=spec test/mcp/protocol.test.mjs test/mcp/omp-compatibility.test.mjs test/mcp/stdio.test.mjs test/mcp/uninitialized-flow.test.mjs test/adversarial/plugin-attacks.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-111302",
+      "id": "AC-111202",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -19,7 +19,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-111303",
+      "id": "AC-111203",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -162,9 +162,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Keep the negotiated MCP revision for requests whose _meta carries only a progressToken, so Claude Code tool calls succeed after initialize",
+  "goal": "Accept the MCP protocol version Claude Code sends (2025-06-18) and negotiate down instead of rejecting unknown initialize versions, per the MCP specification",
   "project": "shipping-harness",
-  "release": "1.11.3",
+  "release": "1.11.2",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

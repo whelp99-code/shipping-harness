@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import { createFixtureRepo } from '../helpers/repo.mjs';
 import { runCli, parseCliJson } from '../helpers/cli.mjs';
 import { PLAN_SCHEMA } from '../../src/core/shipping-plan.mjs';
+import { sha256 } from '../../src/core/crypto.mjs';
 
 const THREE_STAGE_PLAN = {
   schema: PLAN_SCHEMA,
@@ -114,12 +117,12 @@ test('plan check on an invalid plan file exits 1 with the plan error code and to
   }
 });
 
-test('plan --plan accepts a repo-relative path override', async () => {
+test('plan --plan refuses any path other than the fixed one', async () => {
   const fixture = await createFixtureRepo({ files: { 'plans/custom.json': `${JSON.stringify(THREE_STAGE_PLAN, null, 2)}\n` } });
   try {
     const result = runCli(fixture.root, ['plan', 'status', '--plan', 'plans/custom.json', '--json']);
-    assert.equal(result.exitCode, 0);
-    assert.equal(parseCliJson(result).path, 'plans/custom.json');
+    assert.equal(result.exitCode, 1);
+    assert.equal(parseCliJson(result).error.code, 'ERR_PLAN_PATH_FIXED');
   } finally {
     await fixture.cleanup();
   }
@@ -137,6 +140,86 @@ test('plan check warns about acceptance references the analyzer cannot resolve',
     assert.deepEqual(parsed.unresolvedAcceptanceRefs, { [plan.stages[1].id]: ['not-a-detected-command'] });
     const text = runCli(fixture.root, ['plan', 'check']);
     assert.match(text.stdout, /WARNING: stage .* references undetected commands \(not-a-detected-command\)/u);
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('a plan with no revision and sources with no sha256 is legacy, but plan check still passes', async () => {
+  const fixture = await planFixture(THREE_STAGE_PLAN);
+  try {
+    const result = parseCliJson(runCli(fixture.root, ['plan', 'check', '--json']));
+    assert.equal(result.valid, true);
+    // THREE_STAGE_PLAN itself carries no `revision`, so it reads as legacy too.
+    assert.equal(result.legacyFormat, true);
+    assert.deepEqual(result.diagnostics, ['PLAN_LEGACY_FORMAT: plan carries no revision; set revision on the next update']);
+    assert.deepEqual(result.sourceDrift, []);
+    assert.deepEqual(result.history, { entries: 1, lastRevision: null, lastPlanHash: result.planHash });
+
+    const legacy = { ...THREE_STAGE_PLAN, sources: [{ path: 'README.md' }] };
+    const legacyFixture = await planFixture(legacy);
+    try {
+      const legacyResult = parseCliJson(runCli(legacyFixture.root, ['plan', 'check', '--json']));
+      assert.equal(legacyResult.legacyFormat, true);
+      assert.deepEqual(legacyResult.diagnostics, ['PLAN_LEGACY_FORMAT: sources carry no sha256; set revision and source hashes on the next update']);
+      const legacyStatus = runCli(legacyFixture.root, ['plan', 'status']);
+      assert.match(legacyStatus.stdout, /^WARNING: PLAN_LEGACY_FORMAT: sources carry no sha256/mu);
+      assert.match(legacyStatus.stdout, /^Revision: none \(history entries: 1\)$/mu);
+    } finally {
+      await legacyFixture.cleanup();
+    }
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('an edited source file is reported as drift and a missing one as PLAN_SOURCE_MISSING, both without blocking', async () => {
+  const content = '# Roadmap\n\nOriginal text.\n';
+  const plan = {
+    ...THREE_STAGE_PLAN,
+    sources: [{ path: 'docs/ROADMAP.md', sha256: sha256(content) }],
+    revision: 1,
+  };
+  const fixture = await createFixtureRepo({
+    files: {
+      'docs/ROADMAP.md': content,
+      'docs/shipping-plan.json': `${JSON.stringify(plan, null, 2)}\n`,
+    },
+  });
+  try {
+    const clean = parseCliJson(runCli(fixture.root, ['plan', 'check', '--json']));
+    assert.deepEqual(clean.sourceDrift, []);
+    assert.equal(clean.legacyFormat, false);
+
+    await writeFile(path.join(fixture.root, 'docs/ROADMAP.md'), '# Roadmap\n\nChanged text.\n', 'utf8');
+    const drifted = parseCliJson(runCli(fixture.root, ['plan', 'check', '--json']));
+    assert.equal(drifted.sourceDrift.length, 1);
+    assert.equal(drifted.sourceDrift[0].path, 'docs/ROADMAP.md');
+    assert.equal(drifted.sourceDrift[0].expected, sha256(content));
+
+    const { rm } = await import('node:fs/promises');
+    await rm(path.join(fixture.root, 'docs/ROADMAP.md'));
+    const missing = parseCliJson(runCli(fixture.root, ['plan', 'check', '--json']));
+    assert.equal(missing.sourceDrift.length, 1);
+    assert.equal(missing.sourceDrift[0].observed, null);
+    assert.match(missing.diagnostics.join('\n'), /^PLAN_SOURCE_MISSING: docs\/ROADMAP\.md$/mu);
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('plan check offers stage-scoped package scripts as candidate ids without changing proposal defaults', async () => {
+  const fixture = await createFixtureRepo({ packageScripts: { 'test:parse': 'node -e 0', 'test:totals': 'node -e 0', deploy: 'echo no' } });
+  try {
+    const result = runCli(fixture.root, ['plan', 'check', '--json']);
+    assert.equal(result.exitCode, 0);
+    const ids = parseCliJson(result).candidateCommandIds;
+    assert.ok(ids.includes('node-test-parse') && ids.includes('node-test-totals'), `stage scripts listed: ${ids}`);
+    assert.ok(!ids.includes('node-deploy'), 'non-verification scripts are not offered');
+    const { analyzeRepository } = await import('../../src/core/project-analysis.mjs');
+    const analysis = await analyzeRepository(fixture.root);
+    assert.ok(!analysis.candidateCommands.some((c) => c.stageScoped), 'stage scripts stay out of proposal defaults');
+    assert.equal(analysis.stageCommands.length, 2);
   } finally {
     await fixture.cleanup();
   }

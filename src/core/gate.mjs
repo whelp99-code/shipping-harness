@@ -23,6 +23,7 @@ import { invariant, ShippingError } from './errors.mjs';
 import { readState, readTrustedState, recordLedger, transitionState } from './state.mjs';
 import { goalStatusView } from './goals/status-view.mjs';
 import { assessStateIntegritySafe, stateIntegrityIssue } from './state-integrity.mjs';
+import { loadShippingPlan, planStageSnapshot } from './shipping-plan.mjs';
 
 /**
  * Per-criterion exit codes, sorted by criterion id, used to detect a verify run that
@@ -217,7 +218,7 @@ export async function finishAgentRun(root, runResult, telemetry = null) {
 /**
  * The closure receipt for one release. A plan-bound contract propagates its stage
  * identity here so plan progress is computable from closed receipts alone.
- * @param {{contract: Record<string, any>, lock: Record<string, any>, state: Record<string, any>, gitSha: string, manifest: Record<string, any>, counts: Record<string, number>, backlog: Record<string, any>, integrations: unknown, uncommitted: string[], closedAt: string}} input
+ * @param {{contract: Record<string, any>, lock: Record<string, any>, state: Record<string, any>, gitSha: string, manifest: Record<string, any>, counts: Record<string, number>, backlog: Record<string, any>, integrations: unknown, uncommitted: string[], closedAt: string, planStage: Record<string, any> | null}} input
  * @returns {Record<string, any> & {release: string, closedGitSha: string}}
  */
 function composeReleaseReceipt(input) {
@@ -242,8 +243,38 @@ function composeReleaseReceipt(input) {
     integrations: input.integrations,
     closedAt: input.closedAt,
     ...(contract.plan ? { planStageId: contract.plan.stageId, planHash: contract.plan.planHash, tier: contract.plan.tier } : {}),
+    ...(input.planStage ? { planStage: input.planStage } : {}),
     ...(input.uncommitted.length > 0 ? { uncommittedPaths: input.uncommitted } : {}),
   };
+}
+
+/**
+ * The stage definition a plan-bound release closes against. A stage cannot close without
+ * it: the receipt snapshot is the permanent record of what the stage said, so a missing or
+ * unreadable plan file at close time refuses the close rather than closing with nothing.
+ * @param {string} root
+ * @param {Record<string, any>} contract
+ * @returns {Promise<Record<string, any>>}
+ */
+async function closePlanStageSnapshot(root, contract) {
+  /** @type {Record<string, any> | null} */
+  let binding;
+  try {
+    binding = await loadShippingPlan(root, contract.plan.path, { auditHistory: true });
+  } catch (error) {
+    if (error?.code === 'ERR_PLAN_HISTORY_LOST' || error?.code === 'ERR_PLAN_SUPERSEDES_UNKNOWN') throw error;
+    throw new ShippingError('ERR_PLAN_UNAVAILABLE_AT_CLOSE', `The plan stage definition is unavailable at close: ${error?.message ?? 'the plan file could not be read'}`, {
+      path: contract.plan.path,
+      stageId: contract.plan.stageId,
+      cause: typeof error?.code === 'string' ? error.code : 'ERR_UNEXPECTED',
+    });
+  }
+  const stage = binding?.plan.stages.find((entry) => entry.id === contract.plan.stageId) ?? null;
+  invariant(stage, 'ERR_PLAN_UNAVAILABLE_AT_CLOSE', `The plan file no longer defines stage ${contract.plan.stageId}; a stage cannot close without its definition`, {
+    path: contract.plan.path,
+    stageId: contract.plan.stageId,
+  });
+  return planStageSnapshot(stage);
 }
 
 /**
@@ -295,7 +326,8 @@ export async function closeRelease(root, options = {}) {
   await writeJsonAtomic(paths.backlog, backlog);
 
   const closedAt = new Date().toISOString();
-  const receipt = composeReleaseReceipt({ contract, lock, state, gitSha, manifest, counts, backlog, integrations, uncommitted, closedAt });
+  const planStage = contract.plan ? await closePlanStageSnapshot(root, contract) : null;
+  const receipt = composeReleaseReceipt({ contract, lock, state, gitSha, manifest, counts, backlog, integrations, uncommitted, closedAt, planStage });
   const receiptPath = path.join(paths.releases, `${contract.release}.json`);
   const reportPath = path.join(paths.releases, `${contract.release}.md`);
   await writeJsonAtomic(receiptPath, receipt);

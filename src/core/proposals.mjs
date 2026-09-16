@@ -13,6 +13,7 @@ import { invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
 import { buildShortPlan } from './project-analysis.mjs';
 import { DEFAULT_PLAN_PATH, computePlanProgress, loadShippingPlan } from './shipping-plan.mjs';
+import { recordPlanHistory } from './plan-history.mjs';
 import { applyPlanStageToContract, compilePlanTiers } from './plan-proposal.mjs';
 import { buildDecisionEvidence } from './decision-evidence.mjs';
 import { compileDecisionContract, composeDefaultDecision, validateDecisionPackage } from './decision-package.mjs';
@@ -350,6 +351,19 @@ async function supersedeProposal(root, proposal, supersededBy) {
   return projected;
 }
 
+/** Plan errors that refuse the whole request instead of degrading it to a PATCH proposal. */
+const REFUSED_PLAN_ERRORS = new Set([
+  'ERR_PLAN_PATH',
+  'ERR_PLAN_PATH_FIXED',
+  'ERR_PLAN_FILE_MISSING',
+  'ERR_PATH_OUTSIDE_REPO',
+  'ERR_PLAN_HISTORY_LOST',
+  'ERR_PLAN_SUPERSEDES_UNKNOWN',
+  'ERR_PLAN_HISTORY_TAMPERED',
+  'ERR_PLAN_REVISION_REGRESSED',
+  'ERR_PLAN_REVISION_REUSED',
+]);
+
 /**
  * Load the repository plan file and compile the proposal tiers. A missing plan file is
  * not an error; a broken one degrades to PATCH with a visible diagnostic.
@@ -360,10 +374,18 @@ async function loadPlanTiers(root, input, analysis, goal) {
   /** @type {{code: string, message: string} | null} */
   let planError = null;
   try {
-    binding = await loadShippingPlan(root, input.planPath ?? DEFAULT_PLAN_PATH);
+    binding = await loadShippingPlan(root, input.planPath ?? DEFAULT_PLAN_PATH, { auditHistory: true });
+    // A new plan hash is recorded into `.shipping/plan-history.jsonl` the first time
+    // shipping_start/shipping_refine sees it; the same hash re-seen is a no-op.
+    if (binding) await recordPlanHistory(root, { plan: binding.plan, planHash: binding.planHash, sourceDrift: binding.sourceDrift });
   } catch (error) {
     // An unusable address is a request error; unusable content degrades to a visible PATCH.
-    if (error?.code === 'ERR_PLAN_PATH' || error?.code === 'ERR_PLAN_FILE_MISSING' || error?.code === 'ERR_PATH_OUTSIDE_REPO') throw error;
+    // A plan that fails the history audit is neither, and must never reach a proposal at
+    // all: ERR_PLAN_INVALID means the file has no authority, so falling back to a PATCH
+    // loses nothing, while ERR_PLAN_HISTORY_LOST means the file is trying to rewrite
+    // evidence that already exists. Degrading that to a PATCH with a diagnostic would let
+    // the rewrite stand and keep proposing work from it.
+    if (REFUSED_PLAN_ERRORS.has(error?.code)) throw error;
     planError = {
       code: typeof error?.code === 'string' ? error.code : 'ERR_PLAN_INVALID',
       message: String(error?.message ?? 'Plan file could not be loaded').slice(0, 300),
@@ -375,7 +397,7 @@ async function loadPlanTiers(root, input, analysis, goal) {
     analysis,
     goal,
     requestedStageId: input.stageId ?? null,
-    progressFor: (plan, unresolved) => computePlanProgress(root, plan, { unresolvedStageIds: unresolved }),
+    progressFor: (plan, unresolved) => computePlanProgress(root, plan, { unresolvedStageIds: unresolved, planHash: binding?.progressPlanHash ?? null }),
   });
 }
 

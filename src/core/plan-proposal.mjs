@@ -204,12 +204,13 @@ export function applyPlanStageToContract(contract, input) {
 /**
  * Load the plan, compute progress, choose the tier, and project it — never throwing for
  * a broken plan file: an invalid plan is reported as a diagnostic and degrades to PATCH.
- * @param {{binding: {path: string, planHash: string, plan: Record<string, any>} | null, planError: {code: string, message: string} | null, analysis: Record<string, any>, goal: string, requestedStageId?: string | null, progressFor: (plan: Record<string, any>, unresolved: string[]) => Promise<Record<string, any>>}} input
+ * @param {{binding: {path: string, planHash: string, plan: Record<string, any>, diagnostics?: string[]} | null, planError: {code: string, message: string} | null, analysis: Record<string, any>, goal: string, requestedStageId?: string | null, progressFor: (plan: Record<string, any>, unresolved: string[]) => Promise<Record<string, any>>}} input
  * @returns {Promise<{tier: string, projection: Record<string, any> | null, stage: Record<string, any> | null, resolved: Array<Record<string, any>>, diagnostics: string[]}>}
  */
 export async function compilePlanTiers(input) {
   const diagnostics = [];
   if (input.planError) diagnostics.push(`PLAN_FILE_INVALID: ${input.planError.code}: ${input.planError.message}`);
+  if (input.binding?.diagnostics) diagnostics.push(...input.binding.diagnostics);
   if (!input.binding) return { tier: 'PATCH', projection: null, stage: null, resolved: [], diagnostics };
   const { plan, planHash: hash, path: planPath } = input.binding;
   const resolution = resolveAcceptanceRefs(plan, input.analysis);

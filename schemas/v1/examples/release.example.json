@@ -12,5 +12,21 @@
   "backlogItems": 0,
   "planStageId": "S-01",
   "planHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-  "tier": "MILESTONE"
+  "tier": "MILESTONE",
+  "planStage": {
+    "id": "S-01",
+    "title": "Deliver the core flow",
+    "outcome": "Complete the core flow so it runs end to end on the current revision.",
+    "dependsOn": [],
+    "acceptanceRefs": [
+      "node-test"
+    ],
+    "scopeInclude": [
+      "Core flow implementation and its acceptance evidence."
+    ],
+    "scopeExclude": [
+      "Optional polish and future extensibility work."
+    ],
+    "size": "MILESTONE"
+  }
 }

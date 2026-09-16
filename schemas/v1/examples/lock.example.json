@@ -4,5 +4,21 @@
   "baselineSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "release": "1.0.0",
   "scopeRevision": 1,
-  "lockedAt": "2026-08-28T00:00:00.000Z"
+  "lockedAt": "2026-08-28T00:00:00.000Z",
+  "planStage": {
+    "id": "S-01",
+    "title": "Deliver the core flow",
+    "outcome": "Complete the core flow so it runs end to end on the current revision.",
+    "dependsOn": [],
+    "acceptanceRefs": [
+      "node-test"
+    ],
+    "scopeInclude": [
+      "Core flow implementation and its acceptance evidence."
+    ],
+    "scopeExclude": [
+      "Optional polish and future extensibility work."
+    ],
+    "size": "MILESTONE"
+  }
 }

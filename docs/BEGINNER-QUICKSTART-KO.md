@@ -216,3 +216,19 @@ shipping-harness plan status
 
 승인은 지금과 똑같이 정확히 하나의 제안(이번 릴리즈)에만 한다. 자세한 파일 형식과 예제는
 [`docs/SHIPPING-PLAN.md`](SHIPPING-PLAN.md)를 본다.
+
+### 계획 파일 갱신하기
+
+이미 `docs/shipping-plan.json`이 있고 로드맵 문서가 바뀌었다면, 모델에게 "덮어써라"가 아니라 "갱신해라"라고
+시켜야 한다. 이미 끝났거나(`DONE`, CLOSED release로 증명됨) 지금 진행 중인(`ACTIVE`, 현재 잠긴 계약으로 증명됨)
+단계는 id·제목·내용·의존관계 한 글자도 바꿀 수 없고 삭제할 수 없다 — 바뀐 로드맵 내용은 아직 시작하지 않은
+단계를 고치거나 새 단계를 추가하는 방식으로만 반영한다. 갱신할 때마다 `revision`을 1 올리고
+`sources[].sha256`을 다시 계산한다. 먼저 이렇게 확인한다.
+
+```bash
+shipping-harness plan check --json
+```
+
+`protectedStageIds`가 증거가 붙어 불변인 단계 목록이다. 이 단계를 건드린 갱신은 `ERR_PLAN_HISTORY_LOST`로
+거부되고 원래 파일은 그대로 남는다. 원본 문서가 바뀌었는데 아직 계획 파일을 갱신하지 않았다면 `plan status`에
+`WARNING: PLAN_SOURCE_DRIFT: ...` 줄이 보인다 — 막지는 않지만 갱신을 검토하라는 신호다.

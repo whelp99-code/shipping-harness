@@ -87,6 +87,82 @@
         "PATCH",
         "MILESTONE"
       ]
+    },
+    "planStage": {
+      "type": "object",
+      "description": "Immutable snapshot of the bound plan stage, taken from the plan file when the stage was authorized. It is the evidence the plan history audit compares the current plan file against.",
+      "required": [
+        "id",
+        "title",
+        "outcome",
+        "dependsOn",
+        "acceptanceRefs",
+        "scopeInclude",
+        "scopeExclude",
+        "size"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^S-[A-Za-z0-9_-]{1,32}$",
+          "maxLength": 40
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "dependsOn": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "pattern": "^S-[A-Za-z0-9_-]{1,32}$",
+            "maxLength": 40
+          }
+        },
+        "acceptanceRefs": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,80}$",
+            "maxLength": 80
+          }
+        },
+        "scopeInclude": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "scopeExclude": {
+          "type": "array",
+          "maxItems": 24,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "PATCH",
+            "MILESTONE"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "maxProperties": 16
     }
   },
   "additionalProperties": false,

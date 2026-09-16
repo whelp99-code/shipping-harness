@@ -76,9 +76,11 @@ test('plan paths cannot escape the repository, hide under .shipping/, or point o
   const fixture = await createFixtureRepo();
   try {
     for (const attack of ['../../etc/passwd.json', '/etc/passwd.json', '.shipping/contract.yaml', '.shipping/plan.json', 'docs/../../outside.json']) {
+      // v1.12.1 fixes the plan path, so an escape attempt is stopped by ERR_PLAN_PATH_FIXED
+      // before ERR_PLAN_PATH ever gets to resolve it. Neither is ever accepted.
       await assert.rejects(
         () => loadShippingPlan(fixture.root, attack),
-        (error) => error.code === 'ERR_PLAN_PATH',
+        (error) => error.code === 'ERR_PLAN_PATH_FIXED' || error.code === 'ERR_PLAN_PATH',
         `path ${attack} was accepted`,
       );
     }

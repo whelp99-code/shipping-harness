@@ -42,6 +42,12 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 1000
+        },
+        "supersedes": {
+          "type": "string",
+          "description": "SHA-256 hash of the plan this document replaces. Present only when closed stages are being abandoned: the harness then reports the uninherited stages and recounts progress from this plan alone.",
+          "pattern": "^[a-f0-9]{64}$",
+          "maxLength": 64
         }
       },
       "additionalProperties": false,
@@ -65,11 +71,22 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 500
+          },
+          "sha256": {
+            "type": "string",
+            "description": "SHA-256 hash of the source file's content when this plan was written. Compared against the file on disk at load time; a mismatch or missing file is reported as a diagnostic, never a block.",
+            "pattern": "^[a-f0-9]{64}$",
+            "maxLength": 64
           }
         },
         "additionalProperties": false,
         "maxProperties": 8
       }
+    },
+    "revision": {
+      "type": "integer",
+      "description": "The plan's monotonically increasing revision number, bumped by one on every update that changes the plan hash. Recorded into .shipping/plan-history.jsonl; a plan with no revision reads as legacy (pre-v1.12.1) and is warned, never blocked.",
+      "minimum": 1
     },
     "stages": {
       "type": "array",

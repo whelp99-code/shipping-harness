@@ -15,6 +15,7 @@ export function runtimePaths(root) {
     releaseTrain: path.join(directory, 'release-train.json'),
     goalCharter: path.join(directory, 'goal-charter.json'),
     decisionLedger: path.join(directory, 'decision-ledger.jsonl'),
+    planHistory: path.join(directory, 'plan-history.jsonl'),
     decisionLedgerLock: path.join(directory, '.decision-ledger.lock'),
     autopilotPolicy: path.join(directory, 'autopilot-policy.json'),
     autopilotState: path.join(directory, 'autopilot-state.json'),

@@ -297,6 +297,23 @@ function planProgressFact(shippingPlan) {
   return fact('PLAN_PROGRESS', `${done}/${total} 단계 완료, 다음: ${nextTitle}`, ['shippingPlan.progress', 'shippingPlan.program.stages'], 'mechanical', 'exact');
 }
 
+/** Count of `PLAN_SOURCE_DRIFT` diagnostics carried by the plan-proposal projection. */
+function planSourceDriftCount(shippingPlan) {
+  const diagnostics = Array.isArray(shippingPlan?.diagnostics) ? shippingPlan.diagnostics : [];
+  return diagnostics.filter((entry) => typeof entry === 'string' && entry.startsWith('PLAN_SOURCE_DRIFT')).length;
+}
+
+/**
+ * One bounded fact naming how many plan sources drifted since the plan file was written,
+ * derived only from the small `shippingPlan.diagnostics` projection.
+ * @param {Record<string, any> | null | undefined} shippingPlan
+ */
+function planSourceDriftFact(shippingPlan) {
+  const count = planSourceDriftCount(shippingPlan);
+  if (count === 0) return null;
+  return fact('PLAN_SOURCE_DRIFT', { count }, ['shippingPlan.diagnostics'], 'mechanical', 'exact');
+}
+
 /**
  * A tiny, budget-safe rendering summary derived from the plan-proposal projection: the
  * program headline, up to three remaining stages, and whichever tier is actually
@@ -415,6 +432,8 @@ export function buildBriefFactGraph(input = {}, actionEnvelope = buildActionEnve
   if (defects) facts.push(defects);
   const planProgress = planProgressFact(input.shippingPlan);
   if (planProgress) facts.push(planProgress);
+  const planSourceDrift = planSourceDriftFact(input.shippingPlan);
+  if (planSourceDrift) facts.push(planSourceDrift);
   const outsideScope = scopeWarningPaths(input);
   if (outsideScope.length > 0) {
     facts.push(fact('SCOPE_WARNING', {
@@ -817,6 +836,13 @@ export function compilePlainBrief(input = {}) {
   const actionEnvelope = buildActionEnvelope({ ...input, state, blockerCount });
   const factGraph = buildBriefFactGraph({ ...input, state, blockerCount, unknownCount }, actionEnvelope);
   const sections = buildBriefSections(input, state, blockerCount, unknownCount);
+  const driftCount = planSourceDriftCount(input.shippingPlan);
+  if (driftCount > 0) {
+    sections.improvements = [
+      item('PLAN_SOURCE_DRIFT', `계획 원본 ${driftCount}개가 바뀌었습니다. 계획 파일 갱신을 검토하세요.`, ['shippingPlan.diagnostics']),
+      ...(sections.improvements ?? []),
+    ];
+  }
   const body = {
     schema: 'shipping-harness/plain-brief-v1',
     language: 'ko',

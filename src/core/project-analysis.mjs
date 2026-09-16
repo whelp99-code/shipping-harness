@@ -107,6 +107,33 @@ function nodeCommands(scripts, manager, cwd) {
   }));
 }
 
+const STAGE_SCRIPT_PATTERN = /^(?:test|lint|typecheck|check|verify|e2e|smoke)[:._-][A-Za-z0-9._:-]{1,40}$/u;
+const MAX_STAGE_COMMANDS = 24;
+
+/**
+ * Stage-scoped package scripts (`test:parse`, `lint:api`, …). They are not proposal
+ * defaults — a shipping plan stage may reference them by id so each stage closes on its
+ * own evidence. Same manager mapping as nodeCommands.
+ * @param {Record<string, unknown>} scripts @param {string} manager @param {string} cwd
+ */
+function nodeStageCommands(scripts, manager, cwd) {
+  const commandFor = (name) => (manager === 'npm' ? `npm run ${name}` : manager === 'yarn' ? `yarn ${name}` : manager === 'pnpm' ? `pnpm ${name}` : manager === 'bun' ? `bun run ${name}` : `npm run ${name}`);
+  return Object.keys(scripts)
+    .filter((name) => STAGE_SCRIPT_PATTERN.test(name) && typeof scripts[name] === 'string' && String(scripts[name]).trim())
+    .sort()
+    .slice(0, MAX_STAGE_COMMANDS)
+    .map((name) => ({
+      id: `node-${name.replace(/[^A-Za-z0-9._-]/gu, '-')}`,
+      description: `Existing package script '${name}' passes.`,
+      command: commandFor(name),
+      cwd,
+      source: workspacePath(cwd, 'package.json'),
+      confidence: 'medium',
+      aggregate: false,
+      stageScoped: true,
+    }));
+}
+
 function makeTargets(text, cwd, source = 'Makefile') {
   if (!text) return [];
   const targets = new Set();
@@ -256,6 +283,7 @@ async function inspectWorkspace(root, workspaceRoot, allFiles) {
   const types = [];
   const manifests = [];
   const commands = [];
+  const stageCommands = [];
   const diagnostics = [];
   const versions = [];
   const sourceRootsRelative = detectSourceRoots(files);
@@ -271,6 +299,7 @@ async function inspectWorkspace(root, workspaceRoot, allFiles) {
       if (parseSemver(packageJson.version)) versions.push({ source: 'package-manifest', path: workspacePath(workspaceRoot, 'package.json'), version: packageJson.version, confidence: 'high', priority: 90 });
       const manager = has('pnpm-lock.yaml') ? 'pnpm' : has('yarn.lock') ? 'yarn' : has('bun.lock') || has('bun.lockb') ? 'bun' : 'npm';
       commands.push(...nodeCommands(packageJson.scripts ?? {}, manager, workspaceRoot));
+      stageCommands.push(...nodeStageCommands(packageJson.scripts ?? {}, manager, workspaceRoot));
     } catch (error) {
       diagnostics.push(`package.json could not be parsed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -348,6 +377,7 @@ async function inspectWorkspace(root, workspaceRoot, allFiles) {
     trackedFileCount: files.length,
     hasTests,
     candidateCommands: uniqueCommands,
+    stageCommands: [...new Map(stageCommands.map((entry) => [`${entry.cwd}\0${entry.command}`, entry])).values()].filter((entry) => !uniqueCommands.some((c) => c.command === entry.command && c.cwd === entry.cwd)),
     versions,
     readme: readmeName ? workspacePath(workspaceRoot, readmeName) : null,
     diagnostics,
@@ -386,7 +416,7 @@ function selectWorkspace(candidates, requestedId) {
 /**
  * @typedef {{id: string, description: string, command: string, cwd?: string, source?: string, confidence?: string, aggregate?: boolean, supplemental?: boolean, sideEffect?: string, isolationRequired?: boolean, deterministicOutputRequired?: boolean, automaticallyRunnable?: boolean}} CandidateCommand
  * @typedef {{name: string, type: string}} TopLevelEntry
- * @typedef {{schema: string, projectName: string, types: string[], manifests: string[], sourceRoots: string[], trackedFileCount: number, trackedFileCountTruncated: boolean, topLevel: TopLevelEntry[], candidateCommands: CandidateCommand[], readme: string|null, diagnostics: string[], workspace: {id: string, root: string, score: number, confidence: string, ambiguous: boolean, requested: boolean}, workspaceCandidates: Array<{id: string, root: string, projectName: string, score: number, types: string[], manifests: string[], commandCount: number, trackedFileCount: number}>, versionEvidence: Record<string, any>, intelligence?: Record<string, any>}} ProjectAnalysis
+ * @typedef {{schema: string, projectName: string, types: string[], manifests: string[], sourceRoots: string[], trackedFileCount: number, trackedFileCountTruncated: boolean, topLevel: TopLevelEntry[], candidateCommands: CandidateCommand[], stageCommands: CandidateCommand[], readme: string|null, diagnostics: string[], workspace: {id: string, root: string, score: number, confidence: string, ambiguous: boolean, requested: boolean}, workspaceCandidates: Array<{id: string, root: string, projectName: string, score: number, types: string[], manifests: string[], commandCount: number, trackedFileCount: number}>, versionEvidence: Record<string, any>, intelligence?: Record<string, any>}} ProjectAnalysis
  * @typedef {{id: string, description: string, type: string, command: string, cwd: string, required: boolean, timeoutSeconds: number, sideEffect: string, isolationRequired: boolean, deterministicOutputRequired: boolean, automaticallyRunnable: boolean}} AcceptanceCriterion
  */
 
@@ -441,6 +471,7 @@ export async function analyzeRepository(root, options = {}) {
     trackedFileCountTruncated: files.length >= MAX_TRACKED_FILES,
     topLevel: rootTopLevel,
     candidateCommands: commands,
+    stageCommands: selected.stageCommands ?? [],
     readme: selected.readme,
     diagnostics,
     workspace: {

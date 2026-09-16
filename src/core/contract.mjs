@@ -3,6 +3,7 @@ import { hashObject, stableStringify } from './crypto.mjs';
 import { ShippingError, invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
 import { loadShippingPlan, planStageSnapshot } from './shipping-plan.mjs';
+import { recordPlanHistory } from './plan-history.mjs';
 
 export const CONTRACT_SCHEMA = 'shipping-harness/v1';
 
@@ -203,6 +204,9 @@ export async function initializeContract(root, projectName) {
 async function lockPlanStageSnapshot(root, contract) {
   const binding = await loadShippingPlan(root, contract.plan.path, { auditHistory: true });
   invariant(binding, 'ERR_PLAN_FILE_MISSING', `The contract binds a plan stage but the plan file is missing: ${contract.plan.path}`, { path: contract.plan.path });
+  // Lock is one of the three points that records a newly-seen plan hash into
+  // .shipping/plan-history.jsonl (the others are `plan check` and shipping_start/refine).
+  await recordPlanHistory(root, { plan: binding.plan, planHash: binding.planHash, sourceDrift: binding.sourceDrift });
   const stage = binding.plan.stages.find((entry) => entry.id === contract.plan.stageId);
   invariant(stage, 'ERR_PLAN_STAGE_UNKNOWN', `The plan file no longer defines the bound stage ${contract.plan.stageId}`, { stageId: contract.plan.stageId, path: contract.plan.path });
   return planStageSnapshot(stage);

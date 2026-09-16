@@ -13,6 +13,7 @@ import { invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
 import { buildShortPlan } from './project-analysis.mjs';
 import { DEFAULT_PLAN_PATH, computePlanProgress, loadShippingPlan } from './shipping-plan.mjs';
+import { recordPlanHistory } from './plan-history.mjs';
 import { applyPlanStageToContract, compilePlanTiers } from './plan-proposal.mjs';
 import { buildDecisionEvidence } from './decision-evidence.mjs';
 import { compileDecisionContract, composeDefaultDecision, validateDecisionPackage } from './decision-package.mjs';
@@ -351,7 +352,17 @@ async function supersedeProposal(root, proposal, supersededBy) {
 }
 
 /** Plan errors that refuse the whole request instead of degrading it to a PATCH proposal. */
-const REFUSED_PLAN_ERRORS = new Set(['ERR_PLAN_PATH', 'ERR_PLAN_PATH_FIXED', 'ERR_PLAN_FILE_MISSING', 'ERR_PATH_OUTSIDE_REPO', 'ERR_PLAN_HISTORY_LOST', 'ERR_PLAN_SUPERSEDES_UNKNOWN']);
+const REFUSED_PLAN_ERRORS = new Set([
+  'ERR_PLAN_PATH',
+  'ERR_PLAN_PATH_FIXED',
+  'ERR_PLAN_FILE_MISSING',
+  'ERR_PATH_OUTSIDE_REPO',
+  'ERR_PLAN_HISTORY_LOST',
+  'ERR_PLAN_SUPERSEDES_UNKNOWN',
+  'ERR_PLAN_HISTORY_TAMPERED',
+  'ERR_PLAN_REVISION_REGRESSED',
+  'ERR_PLAN_REVISION_REUSED',
+]);
 
 /**
  * Load the repository plan file and compile the proposal tiers. A missing plan file is
@@ -364,6 +375,9 @@ async function loadPlanTiers(root, input, analysis, goal) {
   let planError = null;
   try {
     binding = await loadShippingPlan(root, input.planPath ?? DEFAULT_PLAN_PATH, { auditHistory: true });
+    // A new plan hash is recorded into `.shipping/plan-history.jsonl` the first time
+    // shipping_start/shipping_refine sees it; the same hash re-seen is a no-op.
+    if (binding) await recordPlanHistory(root, { plan: binding.plan, planHash: binding.planHash, sourceDrift: binding.sourceDrift });
   } catch (error) {
     // An unusable address is a request error; unusable content degrades to a visible PATCH.
     // A plan that fails the history audit is neither, and must never reach a proposal at

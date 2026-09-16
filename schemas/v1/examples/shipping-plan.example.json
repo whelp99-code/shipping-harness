@@ -9,9 +9,11 @@
   "sources": [
     {
       "path": "docs/planning/ROADMAP.md",
-      "note": "Read-only planning source the host model extracted this plan from."
+      "note": "Read-only planning source the host model extracted this plan from.",
+      "sha256": "34ddb2c12e8fc7db4e4bb89abcf57a1dcbf39f0cdffa4e7c84c9b70eed38aec1"
     }
   ],
+  "revision": 2,
   "stages": [
     {
       "id": "S-01",

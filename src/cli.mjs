@@ -20,6 +20,7 @@ import { VERSION } from './version.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from './core/goals/authority.mjs';
 import { analyzeRepository } from './core/project-analysis.mjs';
 import { DEFAULT_PLAN_PATH, auditPlanHistory, computePlanProgress, loadShippingPlan, resolveAcceptanceRefs } from './core/shipping-plan.mjs';
+import { planHistorySummary, recordPlanHistory } from './core/plan-history.mjs';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {
@@ -318,14 +319,32 @@ async function loadPlanForCli(root, options) {
   return { planPath, binding };
 }
 
+/** Diagnostic prefixes printed as `WARNING:` in `plan status`/`plan check` text output. */
+const PLAN_WARNING_DIAGNOSTIC_PREFIXES = ['PLAN_SOURCE_DRIFT', 'PLAN_SOURCE_MISSING', 'PLAN_LEGACY_FORMAT'];
+
+/** @param {string} diagnostic */
+function writePlanDiagnostic(diagnostic) {
+  const warn = PLAN_WARNING_DIAGNOSTIC_PREFIXES.some((prefix) => diagnostic.startsWith(prefix));
+  process.stdout.write(`${warn ? 'WARNING: ' : ''}${diagnostic}\n`);
+}
+
+/** Error codes a plan file (rather than a request) can be refused for; reported, not thrown. */
+const PLAN_REFUSAL_CODES = new Set([
+  'ERR_PLAN_HISTORY_LOST',
+  'ERR_PLAN_HISTORY_TAMPERED',
+  'ERR_PLAN_REVISION_REGRESSED',
+  'ERR_PLAN_REVISION_REUSED',
+]);
+
 /**
- * Report a plan file that contradicts the evidence on disk as one VIOLATION line per
- * rewritten stage, and exit 1. It is a refusal, not a crash, so no stack is printed.
+ * Report a plan file the harness refuses to act on: a history-violating rewrite (one
+ * VIOLATION line per rewritten stage), a broken history chain, or a revision mistake.
+ * It is a refusal, not a crash, so no stack is printed. Exits 1.
  * @param {Record<string, any>} error
  * @param {boolean} json
  * @returns {number}
  */
-function reportPlanHistoryViolations(error, json) {
+function reportPlanError(error, json) {
   if (json) {
     printJson({ ok: false, error: { code: error.code, message: error.message, details: error.details } });
     return 1;
@@ -336,6 +355,15 @@ function reportPlanHistoryViolations(error, json) {
   }
   process.stdout.write(`${error.message} [${error.code}]\n`);
   return 1;
+}
+
+/**
+ * `plan check`/`plan status` also record a newly-seen plan hash into
+ * `.shipping/plan-history.jsonl`; a stable hash across calls is a no-op.
+ * @param {string} root @param {Record<string, any>} binding
+ */
+async function recordPlanHistoryForCli(root, binding) {
+  return recordPlanHistory(root, { plan: binding.plan, planHash: binding.planHash, sourceDrift: binding.sourceDrift });
 }
 
 /** @param {CliContext} ctx */
@@ -355,13 +383,27 @@ async function planStatusCommand({ root, options, json }) {
     status: entry.state,
     next: entry.id === progress.nextStageId,
   }));
-  const result = { present: true, path: binding.path, planHash: binding.planHash, progress, stages: rows, diagnostics: binding.diagnostics };
+  const history = await planHistorySummary(root);
+  const revision = binding.plan.revision ?? history.lastRevision ?? null;
+  const result = {
+    present: true,
+    path: binding.path,
+    planHash: binding.planHash,
+    progress,
+    stages: rows,
+    diagnostics: binding.diagnostics,
+    sourceDrift: binding.sourceDrift,
+    legacyFormat: binding.legacyFormat,
+    revision,
+    history,
+  };
   if (json) printJson(result);
   else {
     process.stdout.write(`Plan: ${binding.path} (${binding.planHash})\n`);
     process.stdout.write(`Progress: ${progress.done}/${progress.total} (${progress.percent}%)\n`);
     process.stdout.write(`Next: ${progress.nextStageId ?? '-'}\n`);
-    for (const diagnostic of binding.diagnostics) process.stdout.write(`${diagnostic}\n`);
+    process.stdout.write(`Revision: ${revision ?? 'none'} (history entries: ${history.entries})\n`);
+    for (const diagnostic of binding.diagnostics) writePlanDiagnostic(diagnostic);
     process.stdout.write('\n');
     process.stdout.write(renderPlanTable(rows));
   }
@@ -385,13 +427,28 @@ async function planCheckCommand({ root, options, json }) {
     .filter(([, entry]) => entry.unresolved.length > 0)
     .map(([stageId, entry]) => [stageId, entry.unresolved]));
   const audit = await auditPlanHistory(root, binding.plan);
-  const result = { present: true, valid: true, path: binding.path, planHash: binding.planHash, stageCount: binding.plan.stages.length, candidateCommandIds, unresolvedAcceptanceRefs, protectedStageIds: audit.protectedStageIds, diagnostics: binding.diagnostics };
+  const recorded = await recordPlanHistoryForCli(root, binding);
+  const result = {
+    present: true,
+    valid: true,
+    path: binding.path,
+    planHash: binding.planHash,
+    stageCount: binding.plan.stages.length,
+    candidateCommandIds,
+    unresolvedAcceptanceRefs,
+    protectedStageIds: audit.protectedStageIds,
+    diagnostics: binding.diagnostics,
+    sourceDrift: binding.sourceDrift,
+    legacyFormat: binding.legacyFormat,
+    history: { entries: recorded.entries.length, lastRevision: recorded.entry.revision, lastPlanHash: recorded.entry.planHash },
+  };
   if (json) printJson(result);
   else {
     process.stdout.write(`Plan valid: ${binding.path} (${binding.planHash})\n`);
     process.stdout.write(`Stages: ${result.stageCount}\n${idsLine}`);
     process.stdout.write(`Stages already carrying evidence (immutable): ${audit.protectedStageIds.join(', ') || '(none)'}\n`);
-    for (const diagnostic of binding.diagnostics) process.stdout.write(`${diagnostic}\n`);
+    process.stdout.write(`History: ${result.history.entries} entries, last revision ${result.history.lastRevision ?? 'none'}\n`);
+    for (const diagnostic of binding.diagnostics) writePlanDiagnostic(diagnostic);
     for (const [stageId, refs] of Object.entries(unresolvedAcceptanceRefs)) {
       process.stdout.write(`WARNING: stage ${stageId} references undetected commands (${refs.join(', ')}); it cannot become READY.\n`);
     }
@@ -406,8 +463,8 @@ async function planCommand(ctx) {
   try {
     return action === 'status' ? await planStatusCommand(ctx) : await planCheckCommand(ctx);
   } catch (error) {
-    if (/** @type {Record<string, any>} */ (error)?.code !== 'ERR_PLAN_HISTORY_LOST') throw error;
-    return reportPlanHistoryViolations(/** @type {Record<string, any>} */ (error), ctx.json);
+    if (!PLAN_REFUSAL_CODES.has(/** @type {Record<string, any>} */ (error)?.code)) throw error;
+    return reportPlanError(/** @type {Record<string, any>} */ (error), ctx.json);
   }
 }
 

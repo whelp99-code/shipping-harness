@@ -6,7 +6,7 @@
 import path from 'node:path';
 import { readdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { hashObject, stableStringify } from './crypto.mjs';
+import { hashFile, hashObject, stableStringify } from './crypto.mjs';
 import { ShippingError, invariant } from './errors.mjs';
 import { assertContainedPath, exists, fileSize, readJson } from './fs.mjs';
 import { runtimePaths } from './paths.mjs';
@@ -130,24 +130,31 @@ function assertAcyclicStages(stages) {
 function validateSource(raw, index) {
   const label = `plan.sources[${index}]`;
   invariant(raw && typeof raw === 'object' && !Array.isArray(raw), 'ERR_PLAN_INVALID', `${label} must be an object`, { label });
-  rejectUnknownPlanKeys(raw, ['path', 'note'], label);
+  rejectUnknownPlanKeys(raw, ['path', 'note', 'sha256'], label);
   const source = { path: planText(raw.path, `${label}.path`, PLAN_LIMITS.maxPathLength) };
   invariant(!path.isAbsolute(source.path) && !source.path.split('/').includes('..'), 'ERR_PLAN_INVALID', `${label}.path must be a repository-relative path`, { label });
-  if (raw.note !== undefined) return { ...source, note: planText(raw.note, `${label}.note`, PLAN_LIMITS.maxNoteLength) };
+  if (raw.note !== undefined) source.note = planText(raw.note, `${label}.note`, PLAN_LIMITS.maxNoteLength);
+  if (raw.sha256 !== undefined) {
+    invariant(typeof raw.sha256 === 'string' && /^[a-f0-9]{64}$/u.test(raw.sha256), 'ERR_PLAN_INVALID', `${label}.sha256 must be a SHA-256 hex digest`, { label });
+    source.sha256 = raw.sha256;
+  }
   return source;
 }
 
 /**
  * Validate a parsed plan document and return its normalized form.
  * @param {unknown} document
- * @returns {{schema: string, project: string, program: {title: string, outcome: string}, sources: Array<{path: string, note?: string}>, stages: Array<Record<string, any>>}}
+ * @returns {{schema: string, project: string, program: {title: string, outcome: string}, sources: Array<{path: string, note?: string, sha256?: string}>, stages: Array<Record<string, any>>, revision?: number}}
  */
 export function validateShippingPlan(document) {
   assertNoRawCommandKeys(document);
   invariant(document && typeof document === 'object' && !Array.isArray(document), 'ERR_PLAN_INVALID', 'plan must be an object');
   const raw = /** @type {Record<string, any>} */ (document);
-  rejectUnknownPlanKeys(raw, ['schema', 'project', 'program', 'sources', 'stages'], 'plan');
+  rejectUnknownPlanKeys(raw, ['schema', 'project', 'program', 'sources', 'stages', 'revision'], 'plan');
   invariant(raw.schema === PLAN_SCHEMA, 'ERR_PLAN_INVALID', `plan.schema must equal ${PLAN_SCHEMA}`, { schema: raw.schema });
+  if (raw.revision !== undefined) {
+    invariant(Number.isInteger(raw.revision) && raw.revision >= 1, 'ERR_PLAN_INVALID', 'plan.revision must be a positive integer', { revision: raw.revision });
+  }
   invariant(raw.program && typeof raw.program === 'object' && !Array.isArray(raw.program), 'ERR_PLAN_INVALID', 'plan.program must be an object');
   rejectUnknownPlanKeys(raw.program, ['title', 'outcome', 'supersedes'], 'plan.program');
   if (raw.program.supersedes !== undefined) {
@@ -182,6 +189,7 @@ export function validateShippingPlan(document) {
     },
     sources: (raw.sources ?? []).map((source, index) => validateSource(source, index)),
     stages,
+    ...(raw.revision === undefined ? {} : { revision: raw.revision }),
   };
 }
 
@@ -206,13 +214,47 @@ async function resolvePlanPath(root, relativePath) {
 }
 
 /**
+ * Compare each source's recorded `sha256` against the file on disk. Never blocks: a
+ * changed or missing source file only ever produces a diagnostic. A source with no
+ * `sha256` (a v1.12.0 plan, or one written before its first update) is reported once as
+ * `PLAN_LEGACY_FORMAT` and otherwise left alone — there is nothing to compare it against.
+ * @param {string} root
+ * @param {Array<{path: string, sha256?: string}>} sources
+ * @returns {Promise<{diagnostics: string[], sourceDrift: Array<{path: string, expected: string, observed: string | null}>, legacyFormat: boolean}>}
+ */
+async function auditPlanSources(root, sources) {
+  const diagnostics = [];
+  const sourceDrift = [];
+  let legacySources = false;
+  for (const source of sources) {
+    if (typeof source.sha256 !== 'string') {
+      legacySources = true;
+      continue;
+    }
+    const absolute = path.join(root, source.path);
+    await assertContainedPath(root, absolute);
+    if (!(await exists(absolute))) {
+      diagnostics.push(`PLAN_SOURCE_MISSING: ${source.path}`);
+      sourceDrift.push({ path: source.path, expected: source.sha256, observed: null });
+      continue;
+    }
+    const observed = await hashFile(absolute);
+    if (observed !== source.sha256) {
+      diagnostics.push(`PLAN_SOURCE_DRIFT: ${source.path} changed since the plan was written (plan ${source.sha256.slice(0, 8)}, now ${observed.slice(0, 8)})`);
+      sourceDrift.push({ path: source.path, expected: source.sha256, observed });
+    }
+  }
+  return { diagnostics: legacySources ? [...diagnostics, 'PLAN_LEGACY_FORMAT: sources carry no sha256; set revision and source hashes on the next update'] : diagnostics, sourceDrift, legacyFormat: legacySources };
+}
+
+/**
  * Load, bound, and validate the repository plan file. The path is fixed: an update
  * rewrites `docs/shipping-plan.json` in place, it never adds a second plan file.
  * With `auditHistory`, a plan that contradicts the evidence already on disk is refused.
  * @param {string} root
  * @param {string} [relativePath]
  * @param {{auditHistory?: boolean}} [options]
- * @returns {Promise<{path: string, absolutePath: string, plan: Record<string, any>, planHash: string, diagnostics: string[], progressPlanHash: string | null} | null>}
+ * @returns {Promise<{path: string, absolutePath: string, plan: Record<string, any>, planHash: string, diagnostics: string[], progressPlanHash: string | null, sourceDrift: Array<{path: string, expected: string, observed: string | null}>, legacyFormat: boolean} | null>}
  */
 export async function loadShippingPlan(root, relativePath = DEFAULT_PLAN_PATH, options = {}) {
   invariant(relativePath === DEFAULT_PLAN_PATH, 'ERR_PLAN_PATH_FIXED', `The plan file path is fixed at ${DEFAULT_PLAN_PATH}; an update rewrites that file instead of adding another one: ${relativePath}`, { requested: relativePath, expected: DEFAULT_PLAN_PATH });
@@ -224,13 +266,20 @@ export async function loadShippingPlan(root, relativePath = DEFAULT_PLAN_PATH, o
   const hash = planHash(plan);
   const superseded = await resolvePlanSupersedes(root, plan, hash);
   if (options.auditHistory === true && !superseded.superseded) await assertPlanHistory(root, plan);
+  const sources = await auditPlanSources(root, plan.sources);
+  const legacyRevision = plan.revision === undefined;
+  const legacyFormat = sources.legacyFormat || legacyRevision;
+  const diagnostics = [...superseded.diagnostics, ...sources.diagnostics];
+  if (legacyRevision && !sources.legacyFormat) diagnostics.push('PLAN_LEGACY_FORMAT: plan carries no revision; set revision on the next update');
   return {
     path: normalized,
     absolutePath: absolute,
     plan,
     planHash: hash,
-    diagnostics: superseded.diagnostics,
+    diagnostics,
     progressPlanHash: superseded.progressPlanHash,
+    sourceDrift: sources.sourceDrift,
+    legacyFormat,
   };
 }
 

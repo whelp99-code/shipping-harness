@@ -88,7 +88,10 @@ test('plan check without a plan file reports absence and exits 0', async () => {
   try {
     const result = runCli(fixture.root, ['plan', 'check', '--json']);
     assert.equal(result.exitCode, 0);
-    assert.deepEqual(parseCliJson(result), { present: false, valid: null, path: 'docs/shipping-plan.json' });
+    const parsed = parseCliJson(result);
+    assert.equal(parsed.present, false);
+    assert.equal(parsed.valid, null);
+    assert.ok(Array.isArray(parsed.candidateCommandIds), 'ids are listed even before a plan file exists');
   } finally {
     await fixture.cleanup();
   }
@@ -117,6 +120,23 @@ test('plan --plan accepts a repo-relative path override', async () => {
     const result = runCli(fixture.root, ['plan', 'status', '--plan', 'plans/custom.json', '--json']);
     assert.equal(result.exitCode, 0);
     assert.equal(parseCliJson(result).path, 'plans/custom.json');
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('plan check warns about acceptance references the analyzer cannot resolve', async () => {
+  const plan = JSON.parse(JSON.stringify(THREE_STAGE_PLAN));
+  plan.stages[1].acceptanceRefs = ['not-a-detected-command'];
+  const fixture = await planFixture(plan);
+  try {
+    const result = runCli(fixture.root, ['plan', 'check', '--json']);
+    assert.equal(result.exitCode, 0);
+    const parsed = parseCliJson(result);
+    assert.equal(parsed.valid, true);
+    assert.deepEqual(parsed.unresolvedAcceptanceRefs, { [plan.stages[1].id]: ['not-a-detected-command'] });
+    const text = runCli(fixture.root, ['plan', 'check']);
+    assert.match(text.stdout, /WARNING: stage .* references undetected commands \(not-a-detected-command\)/u);
   } finally {
     await fixture.cleanup();
   }

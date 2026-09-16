@@ -19,7 +19,7 @@ import { prepareNextRelease } from './core/release-transition.mjs';
 import { VERSION } from './version.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from './core/goals/authority.mjs';
 import { analyzeRepository } from './core/project-analysis.mjs';
-import { DEFAULT_PLAN_PATH, computePlanProgress, loadShippingPlan } from './core/shipping-plan.mjs';
+import { DEFAULT_PLAN_PATH, computePlanProgress, loadShippingPlan, resolveAcceptanceRefs } from './core/shipping-plan.mjs';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {
@@ -349,20 +349,27 @@ async function planStatusCommand({ root, options, json }) {
 /** @param {CliContext} ctx */
 async function planCheckCommand({ root, options, json }) {
   const { planPath, binding } = await loadPlanForCli(root, options);
-  if (!binding) {
-    const result = { present: false, valid: null, path: planPath };
-    if (json) printJson(result);
-    else process.stdout.write(`No plan file at ${planPath}.\n`);
-    return 0;
-  }
   const analysis = await analyzeRepository(root);
   const candidateCommandIds = analysis.candidateCommands.map((candidate) => candidate.id);
-  const result = { present: true, valid: true, path: binding.path, planHash: binding.planHash, stageCount: binding.plan.stages.length, candidateCommandIds };
+  const idsLine = `Candidate command IDs (for stages[].acceptanceRefs): ${candidateCommandIds.join(', ') || '(none detected)'}\n`;
+  if (!binding) {
+    const result = { present: false, valid: null, path: planPath, candidateCommandIds };
+    if (json) printJson(result);
+    else process.stdout.write(`No plan file at ${planPath}.\n${idsLine}`);
+    return 0;
+  }
+  // A reference the analyzer cannot resolve keeps its stage out of READY; surface it here, before a proposal.
+  const unresolvedAcceptanceRefs = Object.fromEntries([...resolveAcceptanceRefs(binding.plan, analysis).entries()]
+    .filter(([, entry]) => entry.unresolved.length > 0)
+    .map(([stageId, entry]) => [stageId, entry.unresolved]));
+  const result = { present: true, valid: true, path: binding.path, planHash: binding.planHash, stageCount: binding.plan.stages.length, candidateCommandIds, unresolvedAcceptanceRefs };
   if (json) printJson(result);
   else {
     process.stdout.write(`Plan valid: ${binding.path} (${binding.planHash})\n`);
-    process.stdout.write(`Stages: ${result.stageCount}\n`);
-    process.stdout.write(`Candidate command IDs (for stages[].acceptanceRefs): ${candidateCommandIds.join(', ') || '(none detected)'}\n`);
+    process.stdout.write(`Stages: ${result.stageCount}\n${idsLine}`);
+    for (const [stageId, refs] of Object.entries(unresolvedAcceptanceRefs)) {
+      process.stdout.write(`WARNING: stage ${stageId} references undetected commands (${refs.join(', ')}); it cannot become READY.\n`);
+    }
   }
   return 0;
 }

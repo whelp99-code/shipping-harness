@@ -78,6 +78,8 @@ export function renderHelp() {
     `  issue add --title TEXT --class BLOCKER|NEXT|IGNORE|UNKNOWN [--basis ID] [--evidence REF]\n` +
     `  close [--allow-uncommitted]\n` +
     `  status [--json]\n` +
+    `  plan status [--plan PATH] [--json]\n` +
+    `  plan check [--plan PATH] [--json]\n` +
     `  doctor [--json]\n` +
     `  MCP server: shipping-harness-mcp --root /absolute/project/path\n` +
     `  version\n`;

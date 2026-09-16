@@ -42,7 +42,16 @@ const EXPECTED = {
   // change is recorded in section 6 of
   // docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md.
   // Previous (v1.8.2) hash: cf161627cf9c2d578f77069fd5d19b4b7911eca119cfe19ed5caf643d282419c
-  help: 'be5c0995563e66b8cf936cd7074b1279388e7b608aa42e061612f429b7332396',
+  //
+  // v1.12.0 Phase B (plan-aware proposals surface): the CLI gained `plan status
+  // [--plan PATH] [--json]` (progress table over the plan file) and `plan check
+  // [--plan PATH] [--json]` (validate the plan file only, printing resolvable
+  // candidate command IDs; exits 1 with the plan error code when invalid). Both
+  // default `--plan` to docs/shipping-plan.json and are read-only. Deliberate
+  // help-surface change, recorded in section 6 of
+  // docs/planning/36-V1.12.0-PLAN-AWARE-PROPOSALS-DEVELOPMENT-PLAN.md under "Phase B".
+  // Previous (v1.10.0 Phase B) hash: be5c0995563e66b8cf936cd7074b1279388e7b608aa42e061612f429b7332396
+  help: '5fe7d6db59280adcb85e1b4f3b12e5a669c8ee49ed1cc346a7d098e68b5b0cb2',
   // v1.10.0 dirty-tree fix pass: schemas/v1/evidence.schema.json gained the optional
   // `treeFingerprint` and `dirtyPaths` fields, schemas/v1/state.schema.json gained the
   // optional `currentEvidenceFingerprint`, and schemas/v1/contract.schema.json gained the

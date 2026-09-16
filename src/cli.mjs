@@ -18,6 +18,8 @@ import { decideStop, ingestLifecycleEvent } from './core/hooks.mjs';
 import { prepareNextRelease } from './core/release-transition.mjs';
 import { VERSION } from './version.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from './core/goals/authority.mjs';
+import { analyzeRepository } from './core/project-analysis.mjs';
+import { DEFAULT_PLAN_PATH, computePlanProgress, loadShippingPlan } from './core/shipping-plan.mjs';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {
@@ -300,6 +302,79 @@ async function statusCommand({ root, json }) {
   return result.state.state === 'BLOCKED' || result.state.blockerCount > 0 ? 2 : 0;
 }
 
+/** Fixed-width columns for the plain-text `plan status` table. @param {Array<{id: string, title: string, status: string, next: boolean}>} rows */
+function renderPlanTable(rows) {
+  const lines = ['ID       STATUS                    NEXT  TITLE'];
+  for (const row of rows) {
+    lines.push(`${row.id.padEnd(9)}${row.status.padEnd(26)}${row.next ? '<-- ' : '    '}${row.title}`);
+  }
+  return `${lines.join('\n')}\n`;
+}
+
+/** @param {string} root @param {Record<string, any>} options */
+async function loadPlanForCli(root, options) {
+  const planPath = stringOption(options, 'plan', DEFAULT_PLAN_PATH);
+  const binding = await loadShippingPlan(root, planPath);
+  return { planPath, binding };
+}
+
+/** @param {CliContext} ctx */
+async function planStatusCommand({ root, options, json }) {
+  const { planPath, binding } = await loadPlanForCli(root, options);
+  if (!binding) {
+    const result = { present: false, path: planPath };
+    if (json) printJson(result);
+    else process.stdout.write(`No plan file at ${planPath}.\n`);
+    return 0;
+  }
+  const progress = await computePlanProgress(root, binding.plan);
+  const titles = new Map(binding.plan.stages.map((stage) => [stage.id, stage.title]));
+  const rows = progress.stages.map((entry) => ({
+    id: entry.id,
+    title: titles.get(entry.id) ?? entry.id,
+    status: entry.state,
+    next: entry.id === progress.nextStageId,
+  }));
+  const result = { present: true, path: binding.path, planHash: binding.planHash, progress, stages: rows };
+  if (json) printJson(result);
+  else {
+    process.stdout.write(`Plan: ${binding.path} (${binding.planHash})\n`);
+    process.stdout.write(`Progress: ${progress.done}/${progress.total} (${progress.percent}%)\n`);
+    process.stdout.write(`Next: ${progress.nextStageId ?? '-'}\n\n`);
+    process.stdout.write(renderPlanTable(rows));
+  }
+  return 0;
+}
+
+/** @param {CliContext} ctx */
+async function planCheckCommand({ root, options, json }) {
+  const { planPath, binding } = await loadPlanForCli(root, options);
+  if (!binding) {
+    const result = { present: false, valid: null, path: planPath };
+    if (json) printJson(result);
+    else process.stdout.write(`No plan file at ${planPath}.\n`);
+    return 0;
+  }
+  const analysis = await analyzeRepository(root);
+  const candidateCommandIds = analysis.candidateCommands.map((candidate) => candidate.id);
+  const result = { present: true, valid: true, path: binding.path, planHash: binding.planHash, stageCount: binding.plan.stages.length, candidateCommandIds };
+  if (json) printJson(result);
+  else {
+    process.stdout.write(`Plan valid: ${binding.path} (${binding.planHash})\n`);
+    process.stdout.write(`Stages: ${result.stageCount}\n`);
+    process.stdout.write(`Candidate command IDs (for stages[].acceptanceRefs): ${candidateCommandIds.join(', ') || '(none detected)'}\n`);
+  }
+  return 0;
+}
+
+/** @param {CliContext} ctx */
+async function planCommand(ctx) {
+  const action = ctx.positionals[1] ?? 'status';
+  if (action === 'status') return planStatusCommand(ctx);
+  if (action === 'check') return planCheckCommand(ctx);
+  throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown plan action: ${action}`);
+}
+
 /** @param {CliContext} ctx */
 async function doctorCommand({ root, json }) {
   const result = await coreDoctor(root);
@@ -328,6 +403,7 @@ const COMMANDS = Object.freeze({
   issue: issueCommand,
   close: closeCommand,
   status: statusCommand,
+  plan: planCommand,
   doctor: doctorCommand,
 });
 

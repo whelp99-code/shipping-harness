@@ -222,6 +222,46 @@ test('a bound shippingPlan projection adds one bounded PLAN_PROGRESS fact and th
   assert.doesNotMatch(text, /## 작은 수정/u);
 });
 
+test('v1.12.1 Phase B: PLAN_SOURCE_DRIFT diagnostics add one bounded plain-brief line, absent without drift', () => {
+  const shippingPlan = {
+    tier: 'MILESTONE',
+    progress: { total: 2, done: 0, nextStageId: 'S-01' },
+    program: {
+      title: 'Ship the whole thing',
+      outcome: 'Deliver the product end to end so an operator can run it.',
+      stages: [
+        { id: 'S-01', title: 'First stage', state: 'READY' },
+        { id: 'S-02', title: 'Second stage', state: 'BLOCKED_BY_DEPENDENCY' },
+      ],
+    },
+    milestone: { stageId: 'S-01', title: 'First stage work', tier: 'MILESTONE' },
+    patch: null,
+    diagnostics: [
+      'PLAN_SOURCE_DRIFT: docs/planning/ROADMAP.md changed since the plan was written (plan aaaaaaaa, now bbbbbbbb)',
+      'PLAN_SOURCE_DRIFT: docs/planning/NOTES.md changed since the plan was written (plan cccccccc, now dddddddd)',
+    ],
+  };
+  const withDrift = compilePlainBrief(proposal('READY_FOR_APPROVAL', { shippingPlan }));
+  const driftFact = withDrift.factGraph.facts.find((entry) => entry.code === 'PLAN_SOURCE_DRIFT');
+  assert.ok(driftFact);
+  assert.deepEqual(driftFact.value, { count: 2 });
+  assert.equal(driftFact.authority, 'mechanical');
+  assert.ok(driftFact.evidenceRefs.length > 0);
+  assert.equal(
+    withDrift.improvements.filter((entry) => entry.code === 'PLAN_SOURCE_DRIFT').length,
+    1,
+  );
+  assert.match(withDrift.renderedText, /계획 원본 2개가 바뀌었습니다\. 계획 파일 갱신을 검토하세요\./u);
+  assert.equal(withDrift.quality.healthy, true, JSON.stringify(withDrift.quality.checks));
+  assert.ok(withDrift.quality.structuredBytes < 8192);
+  assert.ok(withDrift.quality.renderedBytes < 8192);
+  assert.ok(Buffer.byteLength(withDrift.renderedText) < 8192);
+
+  const withoutDrift = compilePlainBrief(proposal('READY_FOR_APPROVAL', { shippingPlan: { ...shippingPlan, diagnostics: [] } }));
+  assert.equal(withoutDrift.factGraph.facts.some((entry) => entry.code === 'PLAN_SOURCE_DRIFT'), false);
+  assert.doesNotMatch(withoutDrift.renderedText, /계획 원본/u);
+});
+
 test('shipping_start and shipping_status expose the same Shipping-generated beginner report before technical details', async () => {
   const fixture = await createFixtureRepo();
   try {

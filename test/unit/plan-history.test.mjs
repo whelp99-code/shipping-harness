@@ -252,7 +252,11 @@ test('program.supersedes skips the audit, restarts progress at zero, and reports
     ]);
     replacement.program.supersedes = loaded.planHash;
     const reloaded = await rewritePlan(fixture, replacement);
-    assert.deepEqual(reloaded.diagnostics, [`PLAN_SUPERSEDED: 1 completed stages from plan ${loaded.planHash.slice(0, 8)} are not inherited`]);
+    // v1.12.1 Phase B: this fixture plan carries no `revision`, so it also reads as legacy.
+    assert.deepEqual(reloaded.diagnostics, [
+      `PLAN_SUPERSEDED: 1 completed stages from plan ${loaded.planHash.slice(0, 8)} are not inherited`,
+      'PLAN_LEGACY_FORMAT: plan carries no revision; set revision on the next update',
+    ]);
     assert.equal(reloaded.progressPlanHash, reloaded.planHash);
 
     // The audit is skipped even though S-01 vanished, and progress restarts from zero.

@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import { createFixtureRepo } from '../helpers/repo.mjs';
 import { runCli, parseCliJson } from '../helpers/cli.mjs';
 import { PLAN_SCHEMA } from '../../src/core/shipping-plan.mjs';
+import { sha256 } from '../../src/core/crypto.mjs';
 
 const THREE_STAGE_PLAN = {
   schema: PLAN_SCHEMA,
@@ -137,6 +140,69 @@ test('plan check warns about acceptance references the analyzer cannot resolve',
     assert.deepEqual(parsed.unresolvedAcceptanceRefs, { [plan.stages[1].id]: ['not-a-detected-command'] });
     const text = runCli(fixture.root, ['plan', 'check']);
     assert.match(text.stdout, /WARNING: stage .* references undetected commands \(not-a-detected-command\)/u);
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('a plan with no revision and sources with no sha256 is legacy, but plan check still passes', async () => {
+  const fixture = await planFixture(THREE_STAGE_PLAN);
+  try {
+    const result = parseCliJson(runCli(fixture.root, ['plan', 'check', '--json']));
+    assert.equal(result.valid, true);
+    // THREE_STAGE_PLAN itself carries no `revision`, so it reads as legacy too.
+    assert.equal(result.legacyFormat, true);
+    assert.deepEqual(result.diagnostics, ['PLAN_LEGACY_FORMAT: plan carries no revision; set revision on the next update']);
+    assert.deepEqual(result.sourceDrift, []);
+    assert.deepEqual(result.history, { entries: 1, lastRevision: null, lastPlanHash: result.planHash });
+
+    const legacy = { ...THREE_STAGE_PLAN, sources: [{ path: 'README.md' }] };
+    const legacyFixture = await planFixture(legacy);
+    try {
+      const legacyResult = parseCliJson(runCli(legacyFixture.root, ['plan', 'check', '--json']));
+      assert.equal(legacyResult.legacyFormat, true);
+      assert.deepEqual(legacyResult.diagnostics, ['PLAN_LEGACY_FORMAT: sources carry no sha256; set revision and source hashes on the next update']);
+      const legacyStatus = runCli(legacyFixture.root, ['plan', 'status']);
+      assert.match(legacyStatus.stdout, /^WARNING: PLAN_LEGACY_FORMAT: sources carry no sha256/mu);
+      assert.match(legacyStatus.stdout, /^Revision: none \(history entries: 1\)$/mu);
+    } finally {
+      await legacyFixture.cleanup();
+    }
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('an edited source file is reported as drift and a missing one as PLAN_SOURCE_MISSING, both without blocking', async () => {
+  const content = '# Roadmap\n\nOriginal text.\n';
+  const plan = {
+    ...THREE_STAGE_PLAN,
+    sources: [{ path: 'docs/ROADMAP.md', sha256: sha256(content) }],
+    revision: 1,
+  };
+  const fixture = await createFixtureRepo({
+    files: {
+      'docs/ROADMAP.md': content,
+      'docs/shipping-plan.json': `${JSON.stringify(plan, null, 2)}\n`,
+    },
+  });
+  try {
+    const clean = parseCliJson(runCli(fixture.root, ['plan', 'check', '--json']));
+    assert.deepEqual(clean.sourceDrift, []);
+    assert.equal(clean.legacyFormat, false);
+
+    await writeFile(path.join(fixture.root, 'docs/ROADMAP.md'), '# Roadmap\n\nChanged text.\n', 'utf8');
+    const drifted = parseCliJson(runCli(fixture.root, ['plan', 'check', '--json']));
+    assert.equal(drifted.sourceDrift.length, 1);
+    assert.equal(drifted.sourceDrift[0].path, 'docs/ROADMAP.md');
+    assert.equal(drifted.sourceDrift[0].expected, sha256(content));
+
+    const { rm } = await import('node:fs/promises');
+    await rm(path.join(fixture.root, 'docs/ROADMAP.md'));
+    const missing = parseCliJson(runCli(fixture.root, ['plan', 'check', '--json']));
+    assert.equal(missing.sourceDrift.length, 1);
+    assert.equal(missing.sourceDrift[0].observed, null);
+    assert.match(missing.diagnostics.join('\n'), /^PLAN_SOURCE_MISSING: docs\/ROADMAP\.md$/mu);
   } finally {
     await fixture.cleanup();
   }

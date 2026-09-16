@@ -88,7 +88,17 @@ const EXPECTED = {
   // narrowed to the fixed default. Recorded in section 6 of
   // docs/planning/37-V1.12.1-PLAN-UPDATE-RULES-DEVELOPMENT-PLAN.md under "Phase A".
   // Previous (v1.12.0 Phase A) hash: 56c481e6a7b66e22a0150fd9a53a4b6dd8de2aead679316a26ac2abd94d1af83
-  schemas: '0b5ca73c8fb594644b29e8778c18491304565f7160292683ea491867a79de187',
+  //
+  // v1.12.1 Phase B (plan drift and history): schemas/v1/shipping-plan.schema.json gained
+  // the optional top-level `revision` (a positive integer bumped on every update that
+  // changes the plan hash) and `sources[].sha256` (the source file's content hash at
+  // write time, compared against the file on disk to report PLAN_SOURCE_DRIFT /
+  // PLAN_SOURCE_MISSING; never blocks). The example was updated to carry both. Purely
+  // additive, `additionalProperties: false` kept, no required field added or removed.
+  // `tools` and `help` are unchanged. Recorded in section 6 of
+  // docs/planning/37-V1.12.1-PLAN-UPDATE-RULES-DEVELOPMENT-PLAN.md under "Phase B".
+  // Previous (v1.12.1 Phase A) hash: 0b5ca73c8fb594644b29e8778c18491304565f7160292683ea491867a79de187
+  schemas: '51ee7657dcb759ab404c150b9c6f0a9939ed074e208710542761c431e153ec0e',
 };
 
 function sha256Hex(input) {

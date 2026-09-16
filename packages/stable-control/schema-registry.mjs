@@ -40,6 +40,7 @@ const descriptors = {
   goalDiscovery: ['shipping-harness/goal-discovery-v1', 'goal-discovery.schema.json', 'goal-discovery.example.json'],
   decisionLedgerEvent: ['shipping-harness/decision-ledger-event-v1', 'decision-ledger-event.schema.json', 'decision-ledger-event.example.json'],
   goalCharter: ['shipping-harness/goal-charter-v1', 'goal-charter.schema.json', 'goal-charter.example.json'],
+  shippingPlan: ['shipping-harness/plan-v1', 'shipping-plan.schema.json', 'shipping-plan.example.json'],
 };
 
 export const STABLE_SCHEMA_DESCRIPTORS = Object.freeze(Object.fromEntries(
@@ -92,6 +93,7 @@ const REQUIRED_FIELDS = Object.freeze({
   intentGate: ['requestText', 'status', 'defaultMode', 'inferredMode', 'selectedMode', 'effectiveMode', 'inferenceReason', 'confirmationSource', 'question', 'analysisComplete', 'planningAllowed', 'implementationAllowed', 'autopilotAllowed', 'modelAuthority', 'commandAuthority', 'approvalAuthority', 'closureAuthority', 'hash'],
   goalDiscovery: ['evidenceHash', 'gitSha', 'explicitGoal', 'round', 'maxRounds', 'status', 'questions', 'resolutions', 'candidates', 'recommendedCandidateId', 'critic', 'direction', 'nextAction', 'questionPolicy', 'modelAuthority', 'hash'],
   decisionLedgerEvent: ['sequence', 'occurredAt', 'proposalId', 'proposalRevision', 'proposalHash', 'gitSha', 'type', 'discoveryHash', 'provenance', 'evidenceRefs', 'eventKey', 'previousHash', 'modelAuthority', 'released', 'hash'],
+  shippingPlan: ['project', 'program', 'stages'],
   goalCharter: ['id', 'status', 'project', 'release', 'proposalId', 'proposalRevision', 'proposalHash', 'gitSha', 'discoveryHash', 'directionHash', 'candidateHash', 'criticHash', 'outcome', 'primaryUser', 'operatingBoundary', 'value', 'include', 'nonGoals', 'successCriteria', 'assumptions', 'rollback', 'replanTriggers', 'evidenceRefs', 'binding', 'commandAuthority', 'approvalAuthority', 'closureAuthority', 'deploymentAuthority', 'modelAuthority', 'released', 'hash'],
 });
 

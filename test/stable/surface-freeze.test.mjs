@@ -26,7 +26,16 @@ const EXPECTED = {
   // docs/planning/34-V1.10.0-STATE-INTEGRITY-AND-CONTRACT-DEFECT-DEVELOPMENT-PLAN.md
   // under "Merge of origin/main intent gate".
   // Previous (v1.8.2) hash: f4cf418cff5d25ea1c373021a9e3068a3851898a89b93fb55edf8e4a5cc0e8ab
-  tools: '2634c56694a462b373c12b9f153a4da5ac6290cb1a697f56f1c20fb1599bf26a',
+  //
+  // v1.12.0 Phase A (plan-aware proposals): shipping_start gained the optional `planPath`
+  // and `stageId` input properties and shipping_refine gained the optional `stageId`. The
+  // tool count stays nine, no tool was renamed or removed, every added property is
+  // optional, `additionalProperties: false` is kept, and no property is named
+  // command/shell/args/argv/env/environment. Deliberate tool-surface change, recorded in
+  // section 6 of
+  // docs/planning/36-V1.12.0-PLAN-AWARE-PROPOSALS-DEVELOPMENT-PLAN.md under "Phase A".
+  // Previous (v1.8.3 merge) hash: 2634c56694a462b373c12b9f153a4da5ac6290cb1a697f56f1c20fb1599bf26a
+  tools: '96807c58dc354de688d6fe4e66ae93dfa01b95ec03fa497bf755676f2a5a8792',
   // v1.10.0 Phase B: `lock`, `verify` and `close` gained the --skip-preflight,
   // --no-baseline-replay and --allow-uncommitted flags. A flag that cannot be discovered
   // from help is not a usable surface, so the baseline is updated deliberately and the
@@ -49,7 +58,16 @@ const EXPECTED = {
   // and schemas/v1/examples/intent-gate.example.json are new files. Purely additive; no
   // existing schema changed. Recorded in the same section 6 entry.
   // Previous (v1.10.0 dirty-tree) hash: 163a44c39f77bd0db7c050a38696caef95ba0714977d495bb0908fc3ce9f05d7
-  schemas: '947bde699a45beaf77ecb80a8575d47fba269c0c5d55fc3bba8ee1011dc0a101',
+  //
+  // v1.12.0 Phase A (plan-aware proposals): schemas/v1/shipping-plan.schema.json and its
+  // example are new files, schemas/v1/contract.schema.json gained the optional `plan`
+  // object ({path, planHash, stageId, tier}), and schemas/v1/release.schema.json gained
+  // the optional `planStageId`, `planHash` and `tier`. All additive,
+  // `additionalProperties: false` kept everywhere, examples updated, and README table
+  // extended. Recorded in section 6 of
+  // docs/planning/36-V1.12.0-PLAN-AWARE-PROPOSALS-DEVELOPMENT-PLAN.md under "Phase A".
+  // Previous (v1.8.3 merge) hash: 947bde699a45beaf77ecb80a8575d47fba269c0c5d55fc3bba8ee1011dc0a101
+  schemas: '56c481e6a7b66e22a0150fd9a53a4b6dd8de2aead679316a26ac2abd94d1af83',
 };
 
 function sha256Hex(input) {

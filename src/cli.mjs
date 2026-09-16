@@ -414,7 +414,7 @@ async function planStatusCommand({ root, options, json }) {
 async function planCheckCommand({ root, options, json }) {
   const { planPath, binding } = await loadPlanForCli(root, options);
   const analysis = await analyzeRepository(root);
-  const candidateCommandIds = analysis.candidateCommands.map((candidate) => candidate.id);
+  const candidateCommandIds = [...analysis.candidateCommands, ...(analysis.stageCommands ?? [])].map((candidate) => candidate.id);
   const idsLine = `Candidate command IDs (for stages[].acceptanceRefs): ${candidateCommandIds.join(', ') || '(none detected)'}\n`;
   if (!binding) {
     const result = { present: false, valid: null, path: planPath, candidateCommandIds };

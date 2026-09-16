@@ -301,7 +301,9 @@ export function candidateCommandRef(candidate) {
  * @returns {Map<string, {resolved: Array<Record<string, any>>, unresolved: string[]}>}
  */
 export function resolveAcceptanceRefs(plan, analysis) {
-  const candidates = analysis?.candidateCommands ?? [];
+  // Proposal-default candidates plus stage-scoped scripts (test:parse, lint:api, …), which
+  // never enter a default proposal but may be referenced by a plan stage.
+  const candidates = [...(analysis?.candidateCommands ?? []), ...(analysis?.stageCommands ?? [])];
   const index = new Map();
   for (const candidate of candidates) {
     if (typeof candidate?.id === 'string') index.set(candidate.id, candidate);

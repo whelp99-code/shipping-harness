@@ -207,3 +207,20 @@ test('an edited source file is reported as drift and a missing one as PLAN_SOURC
     await fixture.cleanup();
   }
 });
+
+test('plan check offers stage-scoped package scripts as candidate ids without changing proposal defaults', async () => {
+  const fixture = await createFixtureRepo({ packageScripts: { 'test:parse': 'node -e 0', 'test:totals': 'node -e 0', deploy: 'echo no' } });
+  try {
+    const result = runCli(fixture.root, ['plan', 'check', '--json']);
+    assert.equal(result.exitCode, 0);
+    const ids = parseCliJson(result).candidateCommandIds;
+    assert.ok(ids.includes('node-test-parse') && ids.includes('node-test-totals'), `stage scripts listed: ${ids}`);
+    assert.ok(!ids.includes('node-deploy'), 'non-verification scripts are not offered');
+    const { analyzeRepository } = await import('../../src/core/project-analysis.mjs');
+    const analysis = await analyzeRepository(fixture.root);
+    assert.ok(!analysis.candidateCommands.some((c) => c.stageScoped), 'stage scripts stay out of proposal defaults');
+    assert.equal(analysis.stageCommands.length, 2);
+  } finally {
+    await fixture.cleanup();
+  }
+});

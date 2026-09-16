@@ -59,7 +59,7 @@ test('OMP compatibility is explicit and unknown initialize versions still fail c
       clientInfo: { name: 'unknown-client', version: '1' },
     }));
     assert.equal(rejected.error.code, -32022);
-    assert.deepEqual(rejected.error.data.supported, ['2025-11-25', '2025-03-26']);
+    assert.deepEqual(rejected.error.data.supported, ['2025-11-25', '2025-06-18', '2025-03-26']);
   } finally {
     await fixture.cleanup();
   }

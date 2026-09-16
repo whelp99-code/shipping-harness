@@ -120,7 +120,7 @@ Shipping Harness is not a replacement coding model.
 
 ## Protocol compatibility
 
-The server implements newline-delimited JSON-RPC 2.0 over STDIO. It supports stateless discovery and tool requests for MCP `2026-07-28`, while retaining the `initialize` and `notifications/initialized` flow for clients using MCP `2025-11-25` and `2025-03-26`. OMP `18.0.10` and the source-linked `15.10.12` compatibility lane use `2025-03-26`; Shipping returns the negotiated version and accepts subsequent standard requests without proprietary metadata.
+The server implements newline-delimited JSON-RPC 2.0 over STDIO. It supports stateless discovery and tool requests for MCP `2026-07-28`, while retaining the `initialize` and `notifications/initialized` flow for clients using MCP `2025-11-25`, `2025-06-18` (Claude Code), and `2025-03-26`. Any other `initialize` revision fails closed with the supported list, so a client never runs against a lane that was not verified. OMP `18.0.10` and the source-linked `15.10.12` compatibility lane use `2025-03-26`; Shipping returns the negotiated version and accepts subsequent standard requests without proprietary metadata.
 
 Supported RPC methods:
 

@@ -1,0 +1,32 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "70a2bb2a0f63fe711ed90c47cd258e296a51d76c",
+  "closedAt": "2026-09-16T00:08:33.687Z",
+  "closedGitSha": "7cee7827e15aab231d2a36524fd8548df1071b76",
+  "contractHash": "2be3c244931ba21f95d22191051ddac6ac8f2ab34c571323068b7743e2cc9cf0",
+  "evidenceRunId": "run-2026-09-16T00-08-11-567Z-89628737",
+  "fixCycles": 0,
+  "goal": "Accept the MCP protocol version Claude Code sends (2025-06-18) and negotiate down instead of rejecting unknown initialize versions, per the MCP specification",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "project": "shipping-harness",
+  "release": "1.11.2",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

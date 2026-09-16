@@ -1,17 +1,17 @@
 {
   "acceptance": [
     {
-      "id": "AC-111201",
-      "description": "MCP initialize accepts 2025-06-18 and negotiates unknown versions down to a supported one; existing protocol, OMP compatibility, and stdio suites pass.",
+      "id": "AC-111101",
+      "description": "The private OMO bridge is absent from release:verify and its tests are excluded from every gate; the OMO Native adapter and nine MCP tools are unchanged.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/mcp/protocol.test.mjs test/mcp/omp-compatibility.test.mjs test/mcp/stdio.test.mjs test/mcp/uninitialized-flow.test.mjs test/adversarial/plugin-attacks.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/omo-bridge-retirement.test.mjs test/stable/surface-freeze.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-111202",
-      "description": "Full regression and release gates pass.",
+      "id": "AC-111102",
+      "description": "Full regression and release gates pass with zero skipped steps.",
       "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
@@ -19,7 +19,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-111203",
+      "id": "AC-111103",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -162,9 +162,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Accept the MCP protocol version Claude Code sends (2025-06-18) and negotiate down instead of rejecting unknown initialize versions, per the MCP specification",
+  "goal": "Retire the private OMO runtime bridge: remove it from the release gates, mark packages/internal-omo-bridge and the OMO pin as deprecated, and record the decision, without changing the nine MCP tools or the OMO Native adapter",
   "project": "shipping-harness",
-  "release": "1.11.2",
+  "release": "1.11.1",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

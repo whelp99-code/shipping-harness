@@ -6,7 +6,10 @@ import { listShippingResources, readShippingResource } from './resources.mjs';
 export const MCP_PROTOCOL_VERSION = '2026-07-28';
 export const MCP_LEGACY_VERSION = '2025-11-25';
 export const MCP_OMP_VERSION = '2025-03-26';
-export const MCP_SUPPORTED_VERSIONS = Object.freeze([MCP_PROTOCOL_VERSION, MCP_LEGACY_VERSION, MCP_OMP_VERSION]);
+// Claude Code 2.1.x initializes with this revision; it is wire-compatible with the legacy flow.
+export const MCP_CLAUDE_CODE_VERSION = '2025-06-18';
+export const MCP_INITIALIZE_VERSIONS = Object.freeze([MCP_LEGACY_VERSION, MCP_CLAUDE_CODE_VERSION, MCP_OMP_VERSION]);
+export const MCP_SUPPORTED_VERSIONS = Object.freeze([MCP_PROTOCOL_VERSION, ...MCP_INITIALIZE_VERSIONS]);
 export const MCP_SERVER_INFO = Object.freeze({ name: 'shipping-harness', version: VERSION });
 export const MCP_MAX_MESSAGE_BYTES = 1024 * 1024;
 export const MCP_MAX_TOOL_ARGUMENT_BYTES = 64 * 1024;
@@ -159,9 +162,9 @@ export function createMcpProtocol(root) {
       try {
         if (request.method === 'initialize') {
           const requested = request.params?.protocolVersion;
-          const supportedInitializeVersions = [MCP_LEGACY_VERSION, MCP_OMP_VERSION];
-          if (!supportedInitializeVersions.includes(requested)) {
-            throw new McpProtocolError(-32022, 'Unsupported protocol version', { supported: supportedInitializeVersions, requested: requested ?? 'missing' });
+          // Explicit compatibility lanes only: an unknown revision fails closed rather than negotiating.
+          if (!MCP_INITIALIZE_VERSIONS.includes(requested)) {
+            throw new McpProtocolError(-32022, 'Unsupported protocol version', { supported: MCP_INITIALIZE_VERSIONS, requested: requested ?? 'missing' });
           }
           state.legacyInitialized = true;
           state.negotiatedVersion = requested;

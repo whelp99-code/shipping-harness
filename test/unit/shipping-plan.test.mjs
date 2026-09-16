@@ -105,7 +105,7 @@ test('acceptance references resolve against candidate IDs and deterministic CMD-
   assert.deepEqual(resolution.get('S-02').unresolved, ['make-nope']);
 });
 
-test('loadShippingPlan reads the default path, bounds the file, and refuses unsafe paths', async () => {
+test('loadShippingPlan reads the fixed path and refuses every other path', async () => {
   const fixture = await createFixtureRepo({ files: { [DEFAULT_PLAN_PATH]: `${JSON.stringify(samplePlan(), null, 2)}\n` } });
   try {
     const loaded = await loadShippingPlan(fixture.root);
@@ -113,9 +113,10 @@ test('loadShippingPlan reads the default path, bounds the file, and refuses unsa
     assert.equal(loaded.plan.stages.length, 2);
     assert.equal(loaded.planHash, planHash(loaded.plan));
 
-    await assert.rejects(() => loadShippingPlan(fixture.root, 'docs/absent-plan.json'), /ERR_PLAN_FILE_MISSING|missing/u);
-    await assert.rejects(() => loadShippingPlan(fixture.root, '../outside.json'), /repository-relative/u);
-    await assert.rejects(() => loadShippingPlan(fixture.root, '.shipping/plan.json'), /cannot live under/u);
+    // v1.12.1: the plan path is fixed, so every other address is refused before it is resolved.
+    for (const other of ['docs/absent-plan.json', '../outside.json', '.shipping/plan.json']) {
+      await assert.rejects(() => loadShippingPlan(fixture.root, other), /ERR_PLAN_PATH_FIXED|path is fixed/u);
+    }
   } finally {
     await fixture.cleanup();
   }

@@ -19,7 +19,7 @@ import { prepareNextRelease } from './core/release-transition.mjs';
 import { VERSION } from './version.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from './core/goals/authority.mjs';
 import { analyzeRepository } from './core/project-analysis.mjs';
-import { DEFAULT_PLAN_PATH, computePlanProgress, loadShippingPlan, resolveAcceptanceRefs } from './core/shipping-plan.mjs';
+import { DEFAULT_PLAN_PATH, auditPlanHistory, computePlanProgress, loadShippingPlan, resolveAcceptanceRefs } from './core/shipping-plan.mjs';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {
@@ -314,8 +314,28 @@ function renderPlanTable(rows) {
 /** @param {string} root @param {Record<string, any>} options */
 async function loadPlanForCli(root, options) {
   const planPath = stringOption(options, 'plan', DEFAULT_PLAN_PATH);
-  const binding = await loadShippingPlan(root, planPath);
+  const binding = await loadShippingPlan(root, planPath, { auditHistory: true });
   return { planPath, binding };
+}
+
+/**
+ * Report a plan file that contradicts the evidence on disk as one VIOLATION line per
+ * rewritten stage, and exit 1. It is a refusal, not a crash, so no stack is printed.
+ * @param {Record<string, any>} error
+ * @param {boolean} json
+ * @returns {number}
+ */
+function reportPlanHistoryViolations(error, json) {
+  if (json) {
+    printJson({ ok: false, error: { code: error.code, message: error.message, details: error.details } });
+    return 1;
+  }
+  for (const violation of /** @type {Array<Record<string, any>>} */ (error.details?.violations ?? [])) {
+    const field = violation.field ? ` ${violation.field}` : '';
+    process.stdout.write(`VIOLATION: ${violation.stageId} ${violation.kind}${field} (evidence: ${violation.evidence})\n`);
+  }
+  process.stdout.write(`${error.message} [${error.code}]\n`);
+  return 1;
 }
 
 /** @param {CliContext} ctx */
@@ -327,7 +347,7 @@ async function planStatusCommand({ root, options, json }) {
     else process.stdout.write(`No plan file at ${planPath}.\n`);
     return 0;
   }
-  const progress = await computePlanProgress(root, binding.plan);
+  const progress = await computePlanProgress(root, binding.plan, { planHash: binding.progressPlanHash });
   const titles = new Map(binding.plan.stages.map((stage) => [stage.id, stage.title]));
   const rows = progress.stages.map((entry) => ({
     id: entry.id,
@@ -335,12 +355,14 @@ async function planStatusCommand({ root, options, json }) {
     status: entry.state,
     next: entry.id === progress.nextStageId,
   }));
-  const result = { present: true, path: binding.path, planHash: binding.planHash, progress, stages: rows };
+  const result = { present: true, path: binding.path, planHash: binding.planHash, progress, stages: rows, diagnostics: binding.diagnostics };
   if (json) printJson(result);
   else {
     process.stdout.write(`Plan: ${binding.path} (${binding.planHash})\n`);
     process.stdout.write(`Progress: ${progress.done}/${progress.total} (${progress.percent}%)\n`);
-    process.stdout.write(`Next: ${progress.nextStageId ?? '-'}\n\n`);
+    process.stdout.write(`Next: ${progress.nextStageId ?? '-'}\n`);
+    for (const diagnostic of binding.diagnostics) process.stdout.write(`${diagnostic}\n`);
+    process.stdout.write('\n');
     process.stdout.write(renderPlanTable(rows));
   }
   return 0;
@@ -362,11 +384,14 @@ async function planCheckCommand({ root, options, json }) {
   const unresolvedAcceptanceRefs = Object.fromEntries([...resolveAcceptanceRefs(binding.plan, analysis).entries()]
     .filter(([, entry]) => entry.unresolved.length > 0)
     .map(([stageId, entry]) => [stageId, entry.unresolved]));
-  const result = { present: true, valid: true, path: binding.path, planHash: binding.planHash, stageCount: binding.plan.stages.length, candidateCommandIds, unresolvedAcceptanceRefs };
+  const audit = await auditPlanHistory(root, binding.plan);
+  const result = { present: true, valid: true, path: binding.path, planHash: binding.planHash, stageCount: binding.plan.stages.length, candidateCommandIds, unresolvedAcceptanceRefs, protectedStageIds: audit.protectedStageIds, diagnostics: binding.diagnostics };
   if (json) printJson(result);
   else {
     process.stdout.write(`Plan valid: ${binding.path} (${binding.planHash})\n`);
     process.stdout.write(`Stages: ${result.stageCount}\n${idsLine}`);
+    process.stdout.write(`Stages already carrying evidence (immutable): ${audit.protectedStageIds.join(', ') || '(none)'}\n`);
+    for (const diagnostic of binding.diagnostics) process.stdout.write(`${diagnostic}\n`);
     for (const [stageId, refs] of Object.entries(unresolvedAcceptanceRefs)) {
       process.stdout.write(`WARNING: stage ${stageId} references undetected commands (${refs.join(', ')}); it cannot become READY.\n`);
     }
@@ -377,9 +402,13 @@ async function planCheckCommand({ root, options, json }) {
 /** @param {CliContext} ctx */
 async function planCommand(ctx) {
   const action = ctx.positionals[1] ?? 'status';
-  if (action === 'status') return planStatusCommand(ctx);
-  if (action === 'check') return planCheckCommand(ctx);
-  throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown plan action: ${action}`);
+  if (action !== 'status' && action !== 'check') throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown plan action: ${action}`);
+  try {
+    return action === 'status' ? await planStatusCommand(ctx) : await planCheckCommand(ctx);
+  } catch (error) {
+    if (/** @type {Record<string, any>} */ (error)?.code !== 'ERR_PLAN_HISTORY_LOST') throw error;
+    return reportPlanHistoryViolations(/** @type {Record<string, any>} */ (error), ctx.json);
+  }
 }
 
 /** @param {CliContext} ctx */

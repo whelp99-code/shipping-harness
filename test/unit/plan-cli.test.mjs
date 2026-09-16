@@ -114,12 +114,12 @@ test('plan check on an invalid plan file exits 1 with the plan error code and to
   }
 });
 
-test('plan --plan accepts a repo-relative path override', async () => {
+test('plan --plan refuses any path other than the fixed one', async () => {
   const fixture = await createFixtureRepo({ files: { 'plans/custom.json': `${JSON.stringify(THREE_STAGE_PLAN, null, 2)}\n` } });
   try {
     const result = runCli(fixture.root, ['plan', 'status', '--plan', 'plans/custom.json', '--json']);
-    assert.equal(result.exitCode, 0);
-    assert.equal(parseCliJson(result).path, 'plans/custom.json');
+    assert.equal(result.exitCode, 1);
+    assert.equal(parseCliJson(result).error.code, 'ERR_PLAN_PATH_FIXED');
   } finally {
     await fixture.cleanup();
   }

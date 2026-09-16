@@ -2,6 +2,7 @@ import { exists, readJson, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { hashObject, stableStringify } from './crypto.mjs';
 import { ShippingError, invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
+import { loadShippingPlan, planStageSnapshot } from './shipping-plan.mjs';
 
 export const CONTRACT_SCHEMA = 'shipping-harness/v1';
 
@@ -191,12 +192,29 @@ export async function initializeContract(root, projectName) {
   return { contract, path: paths.contract };
 }
 
+/**
+ * Freeze the bound plan stage into the lock: it is the only evidence of what the ACTIVE
+ * stage said when the work was authorized. The plan file is audited here too, so a lock
+ * can never be taken over a plan that already contradicts a closed receipt.
+ * @param {string} root
+ * @param {Record<string, any>} contract
+ * @returns {Promise<Record<string, any>>}
+ */
+async function lockPlanStageSnapshot(root, contract) {
+  const binding = await loadShippingPlan(root, contract.plan.path, { auditHistory: true });
+  invariant(binding, 'ERR_PLAN_FILE_MISSING', `The contract binds a plan stage but the plan file is missing: ${contract.plan.path}`, { path: contract.plan.path });
+  const stage = binding.plan.stages.find((entry) => entry.id === contract.plan.stageId);
+  invariant(stage, 'ERR_PLAN_STAGE_UNKNOWN', `The plan file no longer defines the bound stage ${contract.plan.stageId}`, { stageId: contract.plan.stageId, path: contract.plan.path });
+  return planStageSnapshot(stage);
+}
+
 /** @param {string} root @param {string} baselineSha */
 export async function lockContract(root, baselineSha) {
   const paths = runtimePaths(root);
   const contract = await loadContract(paths.contract);
   invariant(typeof baselineSha === 'string' && baselineSha.length >= 7, 'ERR_GIT_HEAD_REQUIRED', 'A valid Git HEAD is required before lock');
   const existing = await exists(paths.lock) ? await readJson(paths.lock) : null;
+  const planStage = contract.plan ? await lockPlanStageSnapshot(root, contract) : null;
   const lock = {
     schema: 'shipping-harness/lock-v1',
     contractHash: contractHash(contract),
@@ -204,6 +222,7 @@ export async function lockContract(root, baselineSha) {
     release: contract.release,
     scopeRevision: existing && typeof existing.scopeRevision === 'number' ? existing.scopeRevision + 1 : 1,
     lockedAt: new Date().toISOString(),
+    ...(planStage ? { planStage } : {}),
   };
   await writeJsonAtomic(paths.lock, lock);
   return { contract, lock };

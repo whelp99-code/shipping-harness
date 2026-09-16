@@ -76,7 +76,19 @@ const EXPECTED = {
   // extended. Recorded in section 6 of
   // docs/planning/36-V1.12.0-PLAN-AWARE-PROPOSALS-DEVELOPMENT-PLAN.md under "Phase A".
   // Previous (v1.8.3 merge) hash: 947bde699a45beaf77ecb80a8575d47fba269c0c5d55fc3bba8ee1011dc0a101
-  schemas: '56c481e6a7b66e22a0150fd9a53a4b6dd8de2aead679316a26ac2abd94d1af83',
+  //
+  // v1.12.1 Phase A (plan update rules): schemas/v1/release.schema.json and
+  // schemas/v1/lock.schema.json gained the optional `planStage` snapshot (the frozen
+  // stage definition a closed receipt and the current lock attest to), and
+  // schemas/v1/shipping-plan.schema.json gained the optional `program.supersedes`
+  // SHA-256 of the plan a new plan replaces. All three examples were updated. Purely
+  // additive, `additionalProperties: false` kept everywhere, no required field added or
+  // removed. `tools` and `help` are unchanged: no MCP tool definition and no CLI help
+  // line changed — `--plan` and `planPath` still exist, only their accepted value
+  // narrowed to the fixed default. Recorded in section 6 of
+  // docs/planning/37-V1.12.1-PLAN-UPDATE-RULES-DEVELOPMENT-PLAN.md under "Phase A".
+  // Previous (v1.12.0 Phase A) hash: 56c481e6a7b66e22a0150fd9a53a4b6dd8de2aead679316a26ac2abd94d1af83
+  schemas: '0b5ca73c8fb594644b29e8778c18491304565f7160292683ea491867a79de187',
 };
 
 function sha256Hex(input) {

@@ -42,6 +42,12 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 1000
+        },
+        "supersedes": {
+          "type": "string",
+          "description": "SHA-256 hash of the plan this document replaces. Present only when closed stages are being abandoned: the harness then reports the uninherited stages and recounts progress from this plan alone.",
+          "pattern": "^[a-f0-9]{64}$",
+          "maxLength": 64
         }
       },
       "additionalProperties": false,

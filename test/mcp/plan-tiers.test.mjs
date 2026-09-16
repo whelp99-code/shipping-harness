@@ -81,13 +81,13 @@ test('with a plan file the response shape is identical and only the added keys a
   assert.ok(Buffer.byteLength(JSON.stringify(data.shippingPlan), 'utf8') < 16 * 1024);
 });
 
-test('an unreachable plan path is a visible tool error, not a silent fallback', async () => {
+test('a plan path other than the fixed one is a visible tool error, not a silent fallback', async () => {
   const fixture = await createFixtureRepo();
   try {
     const protocol = createMcpProtocol(fixture.root);
     const started = await protocol.handle(call(1, 'shipping_start', { goal: 'Complete the fixture release', planPath: '../escape.json' }));
     assert.equal(started.result.isError, true);
-    assert.equal(started.result.structuredContent.error.code, 'ERR_PLAN_PATH');
+    assert.equal(started.result.structuredContent.error.code, 'ERR_PLAN_PATH_FIXED');
   } finally {
     await fixture.cleanup();
   }

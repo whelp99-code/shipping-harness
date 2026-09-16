@@ -3,7 +3,8 @@
   "project": "example-project",
   "program": {
     "title": "Example program",
-    "outcome": "Deliver the example product end to end so an internal operator can install it, use the core flow, and recover from failure."
+    "outcome": "Deliver the example product end to end so an internal operator can install it, use the core flow, and recover from failure.",
+    "supersedes": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
   },
   "sources": [
     {

@@ -2,7 +2,11 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.12.0] - Unreleased
+## [1.12.1] - Unreleased
+
+In progress: plan-file update rules. See `docs/planning/37-V1.12.1-PLAN-UPDATE-RULES-DEVELOPMENT-PLAN.md`.
+
+## [1.12.0] - 2026-09-16
 
 In progress: plan-aware proposals. See `docs/planning/36-V1.12.0-PLAN-AWARE-PROPOSALS-DEVELOPMENT-PLAN.md`.
 

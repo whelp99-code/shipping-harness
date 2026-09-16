@@ -1,25 +1,25 @@
 {
   "acceptance": [
     {
-      "id": "AC-112101",
-      "description": "Closed and active plan stages are immutable and snapshotted; history loss, path changes, revision regressions are refused; unstarted stages remain editable; legacy files warn only.",
+      "id": "AC-11201",
+      "description": "Plan file loading, progress from receipts, and the three-tier proposal behave as specified; command keys anywhere in a plan file are rejected.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/plan-history.test.mjs test/unit/plan-revision.test.mjs test/integration/plan-update.test.mjs test/adversarial/plan-rewrite-attacks.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/shipping-plan.test.mjs test/unit/plan-progress.test.mjs test/integration/plan-aware-proposal.test.mjs test/adversarial/plan-attacks.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-112102",
-      "description": "Existing plan, MCP, usability, and surface-freeze suites pass.",
+      "id": "AC-11202",
+      "description": "Projects without a plan file behave exactly as before; nine tools; surface freeze updated deliberately.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/shipping-plan.test.mjs test/unit/plan-progress.test.mjs test/unit/plan-cli.test.mjs test/integration/plan-aware-proposal.test.mjs test/adversarial/plan-attacks.test.mjs test/mcp/*.test.mjs test/usability/*.test.mjs test/stable/surface-freeze.test.mjs",
+      "command": "node --test --test-reporter=spec test/mcp/*.test.mjs test/usability/*.test.mjs test/stable/surface-freeze.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 600
     },
     {
-      "id": "AC-112103",
+      "id": "AC-11203",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -28,7 +28,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-112104",
+      "id": "AC-11204",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -171,9 +171,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Define and enforce plan-file updates: closed and active stages are immutable and snapshotted in receipts, history loss is refused, source drift is reported, revisions are logged, and the host-model prompt says update rather than rewrite",
+  "goal": "Plan-aware proposals: a reviewable shipping-plan file authored by the host model, deterministic stage progress from closure receipts, and a fixed PROGRAM / MILESTONE / PATCH proposal structure, without giving any model or the PROGRAM tier execution authority",
   "project": "shipping-harness",
-  "release": "1.12.1",
+  "release": "1.12.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

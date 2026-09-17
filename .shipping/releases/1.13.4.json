@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 4,
+    "requiredFailed": 0,
+    "total": 4
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "1440b5782bfc0e9286c138f2fb9e651aa1efd787",
+  "closedAt": "2026-09-17T07:10:59.425Z",
+  "closedGitSha": "f6ce469001a251d7791e908c2d77cdca692d94a2",
+  "contractHash": "cc0a359b1645c07774ea3f661c481ba9094158a79eeaf9e433fd570ff0720fbd",
+  "evidenceRunId": "run-2026-09-17T07-10-32-634Z-551cfe04",
+  "fixCycles": 0,
+  "goal": "Close four reported holes: an ungated plan stage must never be READY, the unproven-objective report must read the goal the approver stated, a proposal from another build must not be reused, and inline enumerations must be counted",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "f6ce469001a251d7791e908c2d77cdca692d94a2",
+      "subject": "chore: lock shipping-harness v1.13.4"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.4",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

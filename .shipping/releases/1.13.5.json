@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 4,
+    "requiredFailed": 0,
+    "total": 4
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "60602b91f33c37c815300353ff2759c3798c6725",
+  "closedAt": "2026-09-17T07:24:27.178Z",
+  "closedGitSha": "661062e325082391e235dbff85f7c7ea0f614405",
+  "contractHash": "de94d1301b03bfe00be632c8b79009f257661c62b06ae0b985de342a19766905",
+  "evidenceRunId": "run-2026-09-17T07-23-57-619Z-5b6c9a52",
+  "fixCycles": 0,
+  "goal": "Make plan status tell the truth: a stage that binding refuses must never be shown as READY, and say whether it is ungated or unresolved",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "661062e325082391e235dbff85f7c7ea0f614405",
+      "subject": "chore: lock shipping-harness v1.13.5"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.5",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

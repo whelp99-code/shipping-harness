@@ -72,7 +72,7 @@ This table is derived directly from `SHIPPING_TOOLS` in `src/mcp/tools.mjs`. "Re
 
 | Tool | Purpose | Required input | Precondition state | Result |
 |---|---|---|---|---|
-| `shipping_start` | Analyze the current Git repository without executing project code, then propose the smallest release scope, acceptance checks, and short plan. Does not approve or lock the release. Optional `planPath` (repo-relative, default `docs/shipping-plan.json`) and `stageId` bind the proposal to a repository-owned plan file; see [`docs/SHIPPING-PLAN.md`](SHIPPING-PLAN.md). | `goal` | No active proposal, or an identical AUTO request reuses the active one. | A canonical proposal (`NEEDS_INPUT`, `DIRTY_BASELINE`, `NEEDS_ACCEPTANCE`, or `READY_FOR_APPROVAL`) with ID, SHA-256 hash, scope, exclusions, acceptance checks, plain-language brief, `tier` (`PATCH` or `MILESTONE`), and `shippingPlan` (a bounded PROGRAM/MILESTONE/PATCH projection, or `null` when no plan file is bound). |
+| `shipping_start` | Analyze the current Git repository without executing project code, then propose the smallest release scope, acceptance checks, and short plan. Does not approve or lock the release. Optional `commitBaseline` (boolean, default `true`) commits the working tree as one local, undoable baseline commit before analyzing; see "Baseline auto-commit" below. Optional `planPath` (repo-relative, default `docs/shipping-plan.json`) and `stageId` bind the proposal to a repository-owned plan file; see [`docs/SHIPPING-PLAN.md`](SHIPPING-PLAN.md). | `goal` | No active proposal, or an identical AUTO request reuses the active one. | A canonical proposal (`NEEDS_INPUT`, `DIRTY_BASELINE`, `NEEDS_ACCEPTANCE`, or `READY_FOR_APPROVAL`) with ID, SHA-256 hash, scope, exclusions, acceptance checks, plain-language brief, `tier` (`PATCH` or `MILESTONE`), and `shippingPlan` (a bounded PROGRAM/MILESTONE/PATCH projection, or `null` when no plan file is bound). |
 | `shipping_refine` | Revise the active proposal identity using bounded structured answers, an existing workspace candidate, a rescan, an explicit user-authorized mode change, or a reviewed baseline-commit receipt. Never executes Git mutation or accepts commands, free-form paths, or credentials. Optional `stageId` selects a different plan stage. | `proposalId`, `proposalHash` | An active proposal matching the given ID/hash. | The same proposal identity with an incremented revision, updated canonical state, archived prior revision, and the same `tier`/`shippingPlan` projection as `shipping_start`. |
 | `shipping_approve_scope` | Approve exactly one Git-bound proposal and lock the contract. | `proposalId`, `proposalHash`, `confirm` | Proposal state is `READY_FOR_APPROVAL`; Git HEAD and source tree unchanged since the proposal was built. | `LOCKED` release state, persisted contract, and (optionally) a bound autopilot policy. |
 | `shipping_execute` | Run only an adapter command already stored in the locked contract. With no configured adapter, returns a work order to the MCP host agent instead of exposing a shell command field. | none | A `LOCKED` contract exists. | Either adapter execution evidence or a structured work order; release state may advance to `RUNNING`. |
@@ -95,9 +95,36 @@ Only `READY_FOR_APPROVAL` may be passed to `shipping_approve_scope`. Repeating t
 
 `confirm: true` proves that the caller submitted an explicit approval operation; a raw MCP server cannot cryptographically distinguish a human click from a model-generated call. Configure the MCP client to require user confirmation for `shipping_refine`, `shipping_approve_scope`, `shipping_execute`, `shipping_fix_blockers`, `shipping_pause`, and `shipping_close`. The tool annotations mark these operations as mutating or destructive hints, but client-side approval policy remains the enforcement point until a dedicated plugin UI is delivered.
 
+### Baseline auto-commit
+
+`shipping_start` commits the working tree for you, before it analyzes anything, so the proposal is bound to a revision that cannot move under it. Pass `commitBaseline: false` to keep the pre-v1.13.0 behavior described under "Dirty baseline preservation" below.
+
+The commit is made with a fixed message and no attribution line — it is the user's own work, not the harness's:
+
+```text
+chore: commit working tree before the shipping-harness proposal
+
+Recorded by shipping-harness <version> so the release baseline is one commit.
+Undo: git reset --soft HEAD~1
+```
+
+The response carries `structuredContent.baselineCommit` — `{ sha, filesCommitted, untrackedIncluded, undo }`, or `null` when the tree was already clean — and its first text line says the same thing in one sentence. `.shipping/ledger.jsonl` records one `baseline.autocommitted` event; it is not a state transition. To undo, run `git reset --soft HEAD~1` (then `git reset` if you also want the index back as it was).
+
+What is committed, and what never is:
+
+- Tracked modifications and deletions relative to `HEAD`.
+- Untracked files enumerated with `git ls-files --others --exclude-standard`, so anything the repository's own ignore rules exclude can never be staged.
+- `.shipping/**` runtime state is excluded in every case, even when the user staged it by hand.
+
+The commit is refused outright, with nothing staged and `HEAD` unmoved, when any file that `HEAD` does not already contain is credential-like (`.env`, `id_rsa`, `id_ed25519`, `auth.json`, `credentials`, `credentials.json`, `tokens.json`, or anything under `.git/`, `.shipping/`, `.ssh/`, `.aws/`, `.gnupg/`), larger than 8 MiB, or when there are more than 200 of them. The error is `ERR_BASELINE_UNSAFE_UNTRACKED` and it names the file; the harness never skips the offending file and commits the rest. A repository with no commit yet, or with `user.name`/`user.email` unset, fails as `ERR_BASELINE_COMMIT_FAILED` carrying git's own stderr.
+
+The harness never pushes, tags, amends, rebases, `reset --hard`s, or switches branches. Repository hooks and commit signing are bypassed for this one commit, so `shipping_start` still runs no repository code.
+
+When a commit was made, the acceptance preflight runs once against the committed tree. If every required criterion already passes, the proposal carries a `BASELINE_ALREADY_PASSING: …` diagnostic — the release would prove nothing, so either approve deliberately or undo the commit. It is a warning, never a block.
+
 ### Dirty baseline preservation
 
-`DIRTY_BASELINE` returns a bounded `baseline` object with categorized entries, exact blocking/non-blocking paths, a suggested host commit message, a file-set hash, and one next action: `REVIEW_BASELINE`. Shipping does not stage, commit, stash, reset, or delete files. After the user separately approves the displayed plan, the host agent may commit exactly the included paths, then call `shipping_refine` with `rescan: true`, the exact `baselinePlanHash`, current full `baselineCommit`, and `baselineAuthorizedByUser: true`. Baseline preservation approval is not release-scope approval.
+`DIRTY_BASELINE` is reachable with `commitBaseline: false`. It returns a bounded `baseline` object with categorized entries, exact blocking/non-blocking paths, a suggested host commit message, a file-set hash, and one next action: `REVIEW_BASELINE`. Shipping does not stage, commit, stash, reset, or delete files. After the user separately approves the displayed plan, the host agent may commit exactly the included paths, then call `shipping_refine` with `rescan: true`, the exact `baselinePlanHash`, current full `baselineCommit`, and `baselineAuthorizedByUser: true`. Baseline preservation approval is not release-scope approval.
 
 ### Intent gate and analysis mode
 
@@ -112,6 +139,23 @@ Intent confirmation precedes `DIRTY_BASELINE` in the proposal projection, so a d
 If `docs/shipping-plan.json` (or the repo-relative path passed as `planPath`) exists and validates, `shipping_start`/`shipping_refine` also return `tier` and `shippingPlan`. `shippingPlan.program` is a read-only, no-authority projection of the whole plan (title, outcome, per-stage progress, and a bounded release train); `shippingPlan.milestone` is the one plan stage actually proposed for this release (`tier: MILESTONE`, or `PATCH` when the stage is sized `PATCH`); `shippingPlan.patch` is set instead of `milestone` when no plan stage is ready or the plan is already complete. Only `milestone` or `patch` — never `program` — can be approved with `shipping_approve_scope`; approving a `program` projection's hash is rejected with `ERR_PLAN_PROGRAM_NOT_APPROVABLE`. See [`docs/SHIPPING-PLAN.md`](SHIPPING-PLAN.md) for the file format, how to discover stage acceptance reference IDs (`shipping-harness plan check --json`), and the CLI (`shipping-harness plan status`, `shipping-harness plan check`).
 
 `shippingPlan.diagnostics` (v1.12.1) additionally carries, when applicable: `PLAN_SOURCE_DRIFT: <path> changed since the plan was written (plan <hash8>, now <hash8>)` and `PLAN_SOURCE_MISSING: <path>` for each `sources[]` entry whose recorded `sha256` no longer matches the file on disk (or the file is gone), and `PLAN_LEGACY_FORMAT: …` once when the plan or a source entry predates v1.12.1's `revision`/`sha256` fields. None of these ever block the call. Every call that sees a new plan hash (`shipping_start`, `shipping_refine`, `plan check`, and `lock`) also records one entry into the append-only, hash-chained `.shipping/plan-history.jsonl`; a plan file that contradicts already-evidenced stages, that reuses or regresses a `revision`, or whose history file has been tampered with is refused rather than silently degraded, with `ERR_PLAN_HISTORY_LOST`, `ERR_PLAN_REVISION_REGRESSED`, `ERR_PLAN_REVISION_REUSED`, or `ERR_PLAN_HISTORY_TAMPERED` respectively (`ERR_PLAN_SUPERSEDES_UNKNOWN` when `program.supersedes` names no closed release). See "Updating an existing plan" in [`docs/SHIPPING-PLAN.md`](SHIPPING-PLAN.md#updating-an-existing-plan).
+
+### Goal-named scope paths
+
+The goal sentence is read for path-like tokens, and each one widens the proposed `scope.paths.include` — so "implement `hello()` in a new file `src/index.mjs`" puts `src/**` in scope even when the baseline has no `src/` directory at all, instead of blocking the implementation as scope drift on the first verify. A file directly at the repository root contributes only itself; a nested file contributes its parent directory as `<dir>/**`.
+
+The goal text is untrusted input and is the only thing that can widen a scope, so every decision is visible in the proposal's `diagnostics`:
+
+- `GOAL_PATH_ADDED: <glob> (goal named "<token>")` for each addition.
+- `GOAL_PATH_REFUSED: <token> (<reason>)` for each refusal. Reasons are `absolute-path`, `parent-traversal`, `home-directory-path`, `over-length`, `excluded-path` (it matches `scope.paths.exclude`), `shipping-runtime` (`.shipping/…`), `repository-internals` (`.git/…`), `outside-repository`, and `invalid-repository-path`.
+
+At most eight tokens of at most 200 characters each are considered. A path already covered by the derived scope is neither added nor reported.
+
+### Commits made after the lock
+
+A closed release receipt carries `postLockCommits`: every commit between the locked baseline and the closed revision, as `{ sha, subject, paths }`, bounded to 50 commits, 20 paths per commit and 120-character subjects (`postLockCommitsTruncated` / `pathsTruncated` count what did not fit; `.shipping/` paths are omitted). The release report renders them under "Commits after lock", and `shipping_status` reports `commitsSinceLock`.
+
+This is evidence, never a gate. Whether a commit made after approval belongs to the approved goal cannot be decided mechanically, so the harness records it and lets a human look.
 
 ### Goal discovery, charter, train, and autopilot
 

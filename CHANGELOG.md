@@ -2,7 +2,11 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.5] - Unreleased
+## [1.13.6] - Unreleased
+
+In progress: documentation only. Records BACKLOG-013, the CLI release path's missing approval artifact. The MCP flow binds an exact proposal hash and records who approved so a model cannot approve its own proposal; the CLI path treats whoever runs `lock` as the operator, so a model driving it closes a release with no record that a human authorised the scope. Noticed while closing this repository's own releases that way. Not a blocker, and closing it needs a decision about what "operator" means when the hands are a model.
+
+## [1.13.5] - 2026-09-17
 
 In progress. Reported from a live session that verified the v1.13.4 fixes and found the display still lying.
 

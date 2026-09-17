@@ -1,25 +1,25 @@
 {
   "acceptance": [
     {
-      "id": "AC-11351",
-      "description": "plan status never shows READY for a stage binding refuses, says why it is blocked, and the baseline commit names what it swallowed.",
+      "id": "AC-11341",
+      "description": "An ungated plan stage is never READY, inline enumerations are counted, and the unproven-objective report reads the stated goal.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/plan-cli.test.mjs test/unit/baseline-commit.test.mjs test/integration/baseline-autocommit-flow.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/plan-progress.test.mjs test/unit/goal-objectives.test.mjs test/unit/shipping-plan.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-11352",
-      "description": "Plan, MCP, usability, and surface-freeze suites pass.",
+      "id": "AC-11342",
+      "description": "Proposal, plan, MCP, usability, and surface-freeze suites pass.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/mcp/*.test.mjs test/usability/*.test.mjs test/stable/surface-freeze.test.mjs test/unit/plan-progress.test.mjs",
+      "command": "node --test --test-reporter=spec test/mcp/*.test.mjs test/usability/*.test.mjs test/stable/surface-freeze.test.mjs test/integration/plan-aware-proposal.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 600
     },
     {
-      "id": "AC-11353",
+      "id": "AC-11343",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -28,7 +28,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-11354",
+      "id": "AC-11344",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -171,9 +171,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Make plan status tell the truth: a stage that binding refuses must never be shown as READY, and say whether it is ungated or unresolved",
+  "goal": "Close four reported holes: an ungated plan stage must never be READY, the unproven-objective report must read the goal the approver stated, a proposal from another build must not be reused, and inline enumerations must be counted",
   "project": "shipping-harness",
-  "release": "1.13.5",
+  "release": "1.13.4",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

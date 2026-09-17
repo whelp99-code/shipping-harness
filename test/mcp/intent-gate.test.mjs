@@ -17,8 +17,11 @@ test('terse analysis request finishes read-only analysis, asks one intent questi
   try {
     const beforeHead = currentGitSha(fixture.root);
     const beforeReadme = await fixture.read('README.md');
+    // v1.13.0 Phase A: this test asserts the tree is untouched, so it opts out of the
+    // baseline auto-commit; the intent gate itself is unchanged by that choice.
     const started = await callShippingTool(fixture.root, 'shipping_start', {
       goal: '이 프로젝트 분석해. 쉬핑하네스로',
+      commitBaseline: false,
     });
     const data = started.structuredContent;
     assert.equal(data.proposalState, 'INTENT_CONFIRMATION_REQUIRED');

@@ -19,6 +19,7 @@ export function renderStatus(status) {
     `Evidence fresh    ${status.evidenceFresh ? 'YES' : 'NO'}`,
     `Agent runs        ${status.state.agentRuns}`,
     `Fix cycles        ${status.state.fixCycles}`,
+    `Post-lock commits ${status.commitsSinceLock ?? '-'}`,
     '',
     'Issues',
     `  BLOCKER         ${counts.BLOCKER}`,

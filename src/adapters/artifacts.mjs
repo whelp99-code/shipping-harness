@@ -6,8 +6,14 @@ import { assertContainedPath, exists } from '../core/fs.mjs';
 import { ShippingError, invariant } from '../core/errors.mjs';
 import { adapterConfiguration } from './sdk.mjs';
 
-const BLOCKED_SEGMENTS = new Set(['.git', '.shipping', '.ssh', '.aws', '.gnupg']);
-const BLOCKED_BASENAMES = new Set([
+/**
+ * Directory segments that must never appear in a path the harness stages, copies, or
+ * reports: repository internals, harness runtime state, and credential stores.
+ */
+export const BLOCKED_SEGMENTS = new Set(['.git', '.shipping', '.ssh', '.aws', '.gnupg']);
+
+/** File names that are credential material by convention. */
+export const BLOCKED_BASENAMES = new Set([
   '.env',
   'auth.json',
   'credentials',

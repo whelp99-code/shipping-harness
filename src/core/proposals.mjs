@@ -6,12 +6,15 @@ import { createDefaultContract, loadContract, lockContract, validateContract } f
 import { hashObject, stableStringify } from './crypto.mjs';
 import { assertContainedPath, ensureDir, exists, readJson, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { currentGitSha, gitStatus } from './git.mjs';
+import { BASELINE_UNDO_COMMAND, baselineCommitSummary, commitBaseline } from './baseline-commit.mjs';
+import { goalPathDiagnostics } from './goal-paths.mjs';
+import { runAcceptancePreflight } from './contract-defect.mjs';
 import { analyzeBaseline, verifyBaselinePreservation } from './baseline.mjs';
 import { buildOneScreenApproval } from './project-intelligence.mjs';
 import { compilePlainBriefSafe } from './plain-brief.mjs';
 import { invariant } from './errors.mjs';
 import { runtimePaths } from './paths.mjs';
-import { buildShortPlan } from './project-analysis.mjs';
+import { buildShortPlan, goalScopePaths } from './project-analysis.mjs';
 import { DEFAULT_PLAN_PATH, computePlanProgress, loadShippingPlan } from './shipping-plan.mjs';
 import { recordPlanHistory } from './plan-history.mjs';
 import { applyPlanStageToContract, compilePlanTiers } from './plan-proposal.mjs';
@@ -401,8 +404,8 @@ async function loadPlanTiers(root, input, analysis, goal) {
   });
 }
 
-/** @param {string} root @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, workspaceCandidateId?: string | null, planPath?: string | null, stageId?: string | null}} input */
-async function loadProposalContext(root, input) {
+/** @param {string} root @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, workspaceCandidateId?: string | null, planPath?: string | null, stageId?: string | null}} input @param {{sha: string, files: string[], untrackedIncluded: string[], undo: string} | null} [baselineCommit] */
+async function loadProposalContext(root, input, baselineCommit = null) {
   const context = await currentReleaseContext(root);
   if (context.state) {
     invariant(['DRAFT', 'CLOSED'].includes(context.state.state), 'ERR_PROPOSAL_ACTIVE_RELEASE', `Cannot propose a new scope while release state is ${context.state.state}`);
@@ -432,7 +435,9 @@ async function loadProposalContext(root, input) {
   });
   const planTiers = await loadPlanTiers(root, input, analysis, goal);
   const planRequest = { path: input.planPath ?? null, stageId: input.stageId ?? null };
-  return { context, evidence, analysis, release, goal, projectName, fingerprint, planTiers, planRequest };
+  const goalPaths = goalScopePaths(analysis, goal);
+  for (const entry of goalPaths.added) await assertContainedPath(root, path.resolve(root, entry.token));
+  return { context, evidence, analysis, release, goal, projectName, fingerprint, planTiers, planRequest, goalPaths, baselineCommit };
 }
 
 /** @param {string} root @param {Record<string, any>} ctx */
@@ -504,11 +509,12 @@ function composeProposalDecision(base, ctx, input) {
   return { decision, intentGate, goalDiscovery, approvalBrief, contract };
 }
 
-/** @param {Record<string, any>} analysis @param {Record<string, any>} decision @param {Record<string, any>} acceptanceStrength @param {string[]} inheritedCommands @param {string[]} sourceChanges @param {Record<string, any> | null} [intentGate] @param {string[]} [planDiagnostics] */
-function buildProposalDiagnostics(analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate = null, planDiagnostics = []) {
+/** @param {Record<string, any>} analysis @param {Record<string, any>} decision @param {Record<string, any>} acceptanceStrength @param {string[]} inheritedCommands @param {string[]} sourceChanges @param {Record<string, any> | null} [intentGate] @param {string[]} [planDiagnostics] @param {string[]} [scopeDiagnostics] */
+function buildProposalDiagnostics(analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate = null, planDiagnostics = [], scopeDiagnostics = []) {
   return [
     ...analysis.diagnostics,
     ...planDiagnostics,
+    ...scopeDiagnostics,
     ...(intentGate?.status === 'CONFIRMATION_REQUIRED' ? ['Read-only analysis is complete; confirm whether to stop at analysis, plan, implement, or run policy Autopilot.'] : []),
     ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
     ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
@@ -562,7 +568,8 @@ function assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, 
     tier: ctx.planTiers.tier,
     shippingPlan: ctx.planTiers.projection,
     planRequest: ctx.planRequest,
-    diagnostics: buildProposalDiagnostics(ctx.analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate, ctx.planTiers.diagnostics),
+    diagnostics: buildProposalDiagnostics(ctx.analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate, ctx.planTiers.diagnostics, goalPathDiagnostics(ctx.goalPaths)),
+    baselineCommit: baselineCommitSummary(ctx.baselineCommit),
   };
 }
 
@@ -586,15 +593,59 @@ async function persistProposal(root, proposal, active) {
 }
 
 /**
+ * Commit the user's working tree as one baseline commit, before anything is analyzed, so
+ * the proposal is bound to a commit that cannot move under it. Off unless the caller asks
+ * for it; `shipping_start` asks for it by default.
+ * @param {string} root
+ * @param {boolean} requested
+ */
+async function autoCommitBaseline(root, requested) {
+  if (!requested) return null;
+  const result = commitBaseline(root);
+  if (!result) return null;
+  await recordLedger(root, {
+    type: 'baseline.autocommitted',
+    sha: result.sha,
+    filesCommitted: result.files.length,
+    untrackedIncluded: result.untrackedIncluded.length,
+    undo: result.undo,
+  });
+  return result;
+}
+
+/**
+ * v1.13.0 Phase A.6: an auto-commit that swept the implementation into the baseline would
+ * let a release close having proved nothing. When (and only when) a commit was made, run
+ * the v1.12.1 lock preflight once and warn if every required criterion already passes.
+ * Advisory: it never blocks, and a preflight that cannot run is simply not reported.
+ * @param {string} root
+ * @param {Record<string, any>} contract
+ * @returns {Promise<string[]>}
+ */
+async function baselineAlreadyPassingDiagnostics(root, contract) {
+  try {
+    const rows = await runAcceptancePreflight(root, contract);
+    const required = rows.filter((row) => row.required === true);
+    if (required.length === 0 || !required.every((row) => row.verdict === 'ALREADY_PASSING')) return [];
+    return [`BASELINE_ALREADY_PASSING: every required acceptance criterion (${required.map((row) => row.id).join(', ')}) already passes on the committed baseline, so this release would prove nothing. Approve only if that is what you intend, or undo the baseline commit with \`${BASELINE_UNDO_COMMAND}\` and start again.`];
+  } catch {
+    // The preflight is evidence, not a gate: an unrunnable command must not fail a proposal.
+    return [];
+  }
+}
+
+/**
  * Create a reviewable, Git-bound release proposal without locking a release.
  * @param {string} root
- * @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, proposerId?: string | null, workspaceCandidateId?: string | null, planPath?: string | null, stageId?: string | null}} input
+ * @param {{goal: string, release?: string | null, projectName?: string | null, mode?: string | null, proposerId?: string | null, workspaceCandidateId?: string | null, planPath?: string | null, stageId?: string | null, commitBaseline?: boolean}} input
  */
 export async function createScopeProposal(root, input) {
   invariant(typeof input.goal === 'string' && input.goal.trim().length >= 5, 'ERR_PROPOSAL_GOAL', 'A concrete goal of at least 5 characters is required');
   invariant(input.goal.length <= 4000, 'ERR_PROPOSAL_GOAL', 'Goal exceeds 4000 characters');
   return withProposalLock(root, async () => {
-    const ctx = await loadProposalContext(root, input);
+    // Before repository analysis, so the proposal's baselineSha is the new commit.
+    const baselineCommit = await autoCommitBaseline(root, input.commitBaseline === true);
+    const ctx = await loadProposalContext(root, input, baselineCommit);
     const { active, reused } = await reuseMatchingProposal(root, ctx);
     if (reused) return reused;
 
@@ -604,6 +655,9 @@ export async function createScopeProposal(root, input) {
       .map(([name]) => name);
     const decisionBundle = composeProposalDecision(base, ctx, input);
     const proposal = assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, input);
+    if (baselineCommit) {
+      proposal.diagnostics = [...proposal.diagnostics, ...(await baselineAlreadyPassingDiagnostics(root, decisionBundle.contract))];
+    }
     return persistProposal(root, proposal, active);
   });
 }

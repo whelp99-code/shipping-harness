@@ -1,34 +1,25 @@
 {
   "acceptance": [
     {
-      "id": "AC-11301",
-      "description": "Baseline auto-commit, its safety screen, and the dirty-tree-to-approval flow behave as specified.",
+      "id": "AC-112101",
+      "description": "Closed and active plan stages are immutable and snapshotted; history loss, path changes, revision regressions are refused; unstarted stages remain editable; legacy files warn only.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/baseline-commit.test.mjs test/adversarial/baseline-commit-attacks.test.mjs test/integration/baseline-autocommit-flow.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/plan-history.test.mjs test/unit/plan-revision.test.mjs test/integration/plan-update.test.mjs test/adversarial/plan-rewrite-attacks.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-11302",
-      "description": "Commits made after lock are recorded, and paths named in the goal enter scope without allowing path escape.",
+      "id": "AC-112102",
+      "description": "Existing plan, MCP, usability, and surface-freeze suites pass.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/post-lock-commits.test.mjs test/unit/goal-scope-paths.test.mjs test/adversarial/goal-scope-attacks.test.mjs",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 300
-    },
-    {
-      "id": "AC-11303",
-      "description": "Existing MCP, plan, usability, and surface-freeze suites pass.",
-      "type": "command",
-      "command": "node --test --test-reporter=spec test/mcp/*.test.mjs test/usability/*.test.mjs test/stable/surface-freeze.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/shipping-plan.test.mjs test/unit/plan-progress.test.mjs test/unit/plan-cli.test.mjs test/integration/plan-aware-proposal.test.mjs test/adversarial/plan-attacks.test.mjs test/mcp/*.test.mjs test/usability/*.test.mjs test/stable/surface-freeze.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 600
     },
     {
-      "id": "AC-11304",
+      "id": "AC-112103",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -37,7 +28,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-11305",
+      "id": "AC-112104",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -180,9 +171,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Remove the decision friction around a dirty working tree: commit the baseline before proposing, record commits made after lock in the receipt, and put paths named in the goal into the proposed scope",
+  "goal": "Define and enforce plan-file updates: closed and active stages are immutable and snapshotted in receipts, history loss is refused, source drift is reported, revisions are logged, and the host-model prompt says update rather than rewrite",
   "project": "shipping-harness",
-  "release": "1.13.0",
+  "release": "1.12.1",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

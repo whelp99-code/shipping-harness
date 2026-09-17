@@ -1,6 +1,6 @@
 # Shipping Harness v1 Internal Handover
 
-**Current version:** 1.12.1
+**Current version:** 1.13.0
 
 ## Product promise
 
@@ -19,6 +19,10 @@ The user is the approver, not the technical interviewer.
 No model, OMO task, remote client, or recovery routine can outrank the first four levels.
 
 When `shipping_start`/`shipping_refine` project a repository-owned `docs/shipping-plan.json`, the resulting `PROGRAM` view (the whole-project title, outcome, and progress) has no execution, approval, or closure authority of any kind — it is a read-only summary, never a proposal. Only the `MILESTONE` or `PATCH` layer derived from one plan stage can be approved with `shipping_approve_scope`, following the same exact-hash approval flow as a plan-less proposal.
+
+Shipping Harness writes Git history in exactly one place, and it is `src/core/baseline-commit.mjs`. Before `shipping_start` analyzes anything, it commits the user's working tree as one local commit so the release baseline is a revision that cannot move under the proposal (`commitBaseline: false` opts out and restores the pre-v1.13.0 dirty-baseline review flow). That commit is the boundary: no push, no tag, no amend, no rebase, no `reset --hard`, no branch switch, and one documented undo (`git reset --soft HEAD~1`). Repository hooks are bypassed for it, so the analysis path still runs no repository code; commit signing is not overridden, so a repository that signs every commit keeps signing this one and a signing failure surfaces as `ERR_BASELINE_COMMIT_FAILED`. Untracked files are enumerated with `git ls-files --others --exclude-standard` — never `git add -A`/`git add .` — so an ignored file cannot be staged, `.shipping/**` is excluded unconditionally, and one credential-like, oversized, or over-count file refuses the WHOLE commit with `ERR_BASELINE_UNSAFE_UNTRACKED`, leaving the tree, the index and `HEAD` byte-identical. The file is never silently skipped so the rest can be committed. Approving a baseline commit is not approving release scope, and the auto-commit grants no other authority: it appends a `baseline.autocommitted` ledger event and no state transition.
+
+`postLockCommits` in a closed release receipt is the commits made between the locked baseline and the closed revision, with `commitsSinceLock` reported by `status`. It is evidence, not a gate: whether a commit made after approval belongs to the approved goal is not mechanically decidable, so the harness records it (bounded to 50 commits, 20 paths, 120-character subjects) and a human reads it. Nothing in this path may ever block a close, and a release that shows unexpected commits is a question for the reviewer, not a refusal by the engine.
 
 Evidence freshness is bound to the working tree, not only to `HEAD`. Every evidence manifest records `treeFingerprint` (sha256 over the HEAD sha plus each path changed relative to HEAD and the blob sha of its working copy, `.shipping/` excluded) and `dirtyPaths` (those paths). `assertFreshEvidence` compares that fingerprint as well as the contract hash and Git SHA, so acceptance results recorded against uncommitted work go stale the moment any file changes, even though `HEAD` never moved; `state.currentEvidenceFingerprint` carries the accepted run's fingerprint and `status` reports `evidence: dirty (N uncommitted paths)` whenever the tree holds uncommitted work. Manifests written before v1.10.0 carry no fingerprint and keep the old Git-SHA-only contract. `close` deliberately does not compare the fingerprint: in-scope uncommitted work is already refused with `ERR_CLOSE_UNCOMMITTED`, and committing it moves `HEAD` and fails the evidence-SHA check.
 

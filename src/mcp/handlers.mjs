@@ -157,7 +157,7 @@ async function statusOrUninitialized(root) {
 
 /** @param {Record<string, any>} args */
 function validateStartArgs(args) {
-  rejectUnknownKeys(args, ['goal', 'release', 'projectName', 'mode', 'proposerId', 'planPath', 'stageId']);
+  rejectUnknownKeys(args, ['goal', 'release', 'projectName', 'mode', 'proposerId', 'planPath', 'stageId', 'commitBaseline']);
   const goal = requiredString(args.goal, 'goal', 5, 4000);
   if (args.release !== undefined) requiredString(args.release, 'release', 5, 80);
   if (args.projectName !== undefined) requiredString(args.projectName, 'projectName', 1, 120);
@@ -168,6 +168,7 @@ function validateStartArgs(args) {
     requiredString(args.stageId, 'stageId', 3, 40);
     invariant(/^S-[A-Za-z0-9_-]{1,32}$/u.test(args.stageId), 'ERR_MCP_ARGUMENTS', 'stageId must look like S-01');
   }
+  invariant(args.commitBaseline === undefined || typeof args.commitBaseline === 'boolean', 'ERR_MCP_ARGUMENTS', 'commitBaseline must be boolean');
   return goal;
 }
 
@@ -203,6 +204,15 @@ function startNextStep(proposal) {
     NEEDS_ACCEPTANCE: 'A repository-owned build, test, verify, check, package, or equivalent acceptance command must be detected before approval.',
   };
   return steps[proposal.canonicalState] ?? 'Resolve the grouped exception questions before approval.';
+}
+
+/**
+ * The one line a user sees first when the harness committed their working tree for them.
+ * @param {{sha: string, filesCommitted: number, untrackedIncluded: number, undo: string}} summary
+ * @returns {string}
+ */
+function baselineCommitLine(summary) {
+  return `Committed your working tree as the release baseline: ${summary.sha.slice(0, 12)} (${summary.filesCommitted} file(s), ${summary.untrackedIncluded} new). Repository hooks were skipped for it. Undo with: ${summary.undo}`;
 }
 
 /** @param {Record<string, any>} proposal @param {string} root */
@@ -246,6 +256,7 @@ async function buildStartData(proposal, root) {
     shippingPlan: proposal.shippingPlan ?? null,
     detected: proposal.analysis,
     diagnostics: proposal.diagnostics,
+    baselineCommit: proposal.baselineCommit ?? null,
     approvalRequired: proposal.intentGate?.implementationAllowed === true,
     userView: {
       schema: 'shipping-harness/approval-user-view-v1',
@@ -276,10 +287,12 @@ export async function handleStart(root, args) {
     proposerId: args.proposerId ?? 'mcp-host-agent',
     planPath: args.planPath,
     stageId: args.stageId,
+    commitBaseline: args.commitBaseline !== false,
   });
   const data = { ...(await buildStartData(proposal, root)), reused, supersededProposalId, proposalPath };
   const next = startNextStep(proposal);
-  return complete(data, proposal.plainBriefText ?? `${reused ? 'Reused' : 'Proposed'} ${proposal.release} in ${proposal.mode} mode. State: ${proposal.canonicalState}. ${next}`);
+  const body = proposal.plainBriefText ?? `${reused ? 'Reused' : 'Proposed'} ${proposal.release} in ${proposal.mode} mode. State: ${proposal.canonicalState}. ${next}`;
+  return complete(data, data.baselineCommit ? `${baselineCommitLine(data.baselineCommit)}\n${body}` : body);
 }
 
 /** @param {Record<string, any>} args */

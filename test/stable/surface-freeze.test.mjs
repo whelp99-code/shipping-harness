@@ -35,7 +35,16 @@ const EXPECTED = {
   // section 6 of
   // docs/planning/36-V1.12.0-PLAN-AWARE-PROPOSALS-DEVELOPMENT-PLAN.md under "Phase A".
   // Previous (v1.8.3 merge) hash: 2634c56694a462b373c12b9f153a4da5ac6290cb1a697f56f1c20fb1599bf26a
-  tools: '96807c58dc354de688d6fe4e66ae93dfa01b95ec03fa497bf755676f2a5a8792',
+  //
+  // v1.13.0 Phase A (baseline auto-commit): shipping_start gained the optional
+  // `commitBaseline` boolean (default true), which commits the user's working tree as one
+  // local, undoable baseline commit before analysis. The tool count stays nine, no tool was
+  // renamed or removed, the added property is optional, `additionalProperties: false` is
+  // kept, and no property is named command/shell/args/argv/env/environment. Deliberate
+  // tool-surface change, recorded in section 6 of
+  // docs/planning/38-V1.13.0-DIRTY-TREE-FRICTION-DEVELOPMENT-PLAN.md under "Phase A".
+  // Previous (v1.12.0 Phase A) hash: 96807c58dc354de688d6fe4e66ae93dfa01b95ec03fa497bf755676f2a5a8792
+  tools: 'a8038208c25805a295802e2cdcef6bec0136afe2a5ec3075b35a8e6b8137eca0',
   // v1.10.0 Phase B: `lock`, `verify` and `close` gained the --skip-preflight,
   // --no-baseline-replay and --allow-uncommitted flags. A flag that cannot be discovered
   // from help is not a usable surface, so the baseline is updated deliberately and the
@@ -98,7 +107,16 @@ const EXPECTED = {
   // `tools` and `help` are unchanged. Recorded in section 6 of
   // docs/planning/37-V1.12.1-PLAN-UPDATE-RULES-DEVELOPMENT-PLAN.md under "Phase B".
   // Previous (v1.12.1 Phase A) hash: 0b5ca73c8fb594644b29e8778c18491304565f7160292683ea491867a79de187
-  schemas: '51ee7657dcb759ab404c150b9c6f0a9939ed074e208710542761c431e153ec0e',
+  //
+  // v1.13.0 Phase B (post-lock commit evidence): schemas/v1/release.schema.json gained the
+  // optional `postLockCommits` (bounded {sha, subject, paths} rows for every commit between
+  // the locked baseline and the closed revision) and `postLockCommitsTruncated`, and the
+  // example was updated to carry one row. Purely additive, `additionalProperties: false`
+  // kept, no required field added or removed, and the field never blocks a close.
+  // `help` is unchanged: v1.13.0 adds no CLI command or flag. Recorded in section 6 of
+  // docs/planning/38-V1.13.0-DIRTY-TREE-FRICTION-DEVELOPMENT-PLAN.md under "Phase B".
+  // Previous (v1.12.1 Phase B) hash: 51ee7657dcb759ab404c150b9c6f0a9939ed074e208710542761c431e153ec0e
+  schemas: 'faec1160a58ad1dfcab9f613973faced4401cfe61a07752cec9a3af589c11c29',
 };
 
 function sha256Hex(input) {

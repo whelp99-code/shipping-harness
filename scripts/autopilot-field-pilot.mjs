@@ -207,10 +207,14 @@ async function dirtyNestedPilot() {
     await put(root, '.omo/session.json', '{"runtime":true}\n');
 
     const before = statusFingerprint(root, { ignoreShipping: true });
+    // v1.13.0 Phase A: this lane's subject is the reviewed baseline-preservation flow and
+    // it asserts the working tree is byte-identical afterwards, so it opts out of the
+    // baseline auto-commit. The auto-commit lane has its own suites.
     const started = await callShippingTool(root, 'shipping_start', {
       goal: 'Preserve the current nested runtime work and define the smallest verified patch without executing it.',
       release: '1.1.1',
       proposerId: 'field-pilot-dirty-host',
+      commitBaseline: false,
     });
     const proposal = started.structuredContent;
     const after = statusFingerprint(root, { ignoreShipping: true });

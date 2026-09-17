@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 5,
+    "requiredFailed": 0,
+    "total": 5
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "f5a828fbab05d744a67bf3f9d875b6375916062b",
+  "closedAt": "2026-09-17T04:24:07.194Z",
+  "closedGitSha": "509ef921ce43a4c96cbb53fe9d6cdf3d857c087e",
+  "contractHash": "dcaf460bb334f4a855deaffd8e67dea6aa45b50f25f7bc4d5f111047bbfe2e9e",
+  "evidenceRunId": "run-2026-09-17T04-23-37-457Z-30fd4065",
+  "fixCycles": 0,
+  "goal": "Remove the decision friction around a dirty working tree: commit the baseline before proposing, record commits made after lock in the receipt, and put paths named in the goal into the proposed scope",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "509ef921ce43a4c96cbb53fe9d6cdf3d857c087e",
+      "subject": "chore: lock shipping-harness v1.13.0"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.0",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

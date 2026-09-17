@@ -1,8 +1,8 @@
 {
   "agentRuns": 0,
-  "baselineSha": null,
+  "baselineSha": "efaee7ad46680b1e4f27128d87c24351f3a5314e",
   "blockerCount": 0,
-  "contractHash": null,
+  "contractHash": "887b039bf0f00a502feefc439e7372621ebbcafb5b2d5270fa51629a1dc8d0b5",
   "createdAt": "2026-09-17T06:49:46.548Z",
   "currentEvidenceFingerprint": null,
   "currentEvidenceSha": null,
@@ -11,8 +11,8 @@
   "ignoreCount": 0,
   "integrity": {
     "algorithm": "sha256",
-    "digest": "52f75ec250aae867b05df448401766cc0796e66ba399c33b0c037cceea19ec1a",
-    "ledgerHead": "ca511766-7ad1-47c2-8e6b-5a6e13782eea"
+    "digest": "41647cad274230da3b92788745fc9db081d2a0f5fe5317c4d58cd39ef814f542",
+    "ledgerHead": "f6139229-b253-442a-912d-4b80b9a7fae3"
   },
   "lastRunId": null,
   "nextCount": 0,
@@ -21,8 +21,8 @@
   "release": "1.13.3",
   "resumeState": null,
   "schema": "shipping-harness/state-v1",
-  "state": "DRAFT",
+  "state": "LOCKED",
   "unknownCount": 0,
-  "updatedAt": "2026-09-17T06:49:46.548Z",
+  "updatedAt": "2026-09-17T06:51:53.382Z",
   "verifyRuns": 0
 }

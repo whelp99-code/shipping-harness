@@ -106,7 +106,7 @@ test('an untracked file over the 8 MiB budget refuses the whole commit', async (
       fixture,
       () => commitBaseline(fixture.root),
       'ERR_BASELINE_UNSAFE_UNTRACKED',
-      /huge\.bin is over size budget/u,
+      /huge\.bin is larger than the baseline size budget/u,
     );
   } finally {
     await fixture.cleanup();

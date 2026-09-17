@@ -118,6 +118,16 @@ export function collectBaselineChanges(root) {
 }
 
 /** @param {string} root @param {string} filePath */
+/** Human wording for each refusal reason. The code stays machine-readable in details. */
+const REFUSAL_SENTENCE = Object.freeze({
+  'protected-directory': 'sits in a protected directory',
+  'credential-like-name': 'has a credential-like name',
+  unreadable: 'cannot be read',
+  'not-a-regular-file': 'is not a regular file',
+  'over-size-budget': 'is larger than the baseline size budget',
+  'over-file-count-budget': 'exceeds the untracked file-count budget',
+});
+
 function untrackedRefusal(root, filePath) {
   const segments = filePath.split('/').filter(Boolean);
   if (segments.some((segment) => BLOCKED_SEGMENTS.has(segment))) return 'protected-directory';
@@ -151,7 +161,7 @@ export function screenUntracked(root, paths) {
   for (const filePath of paths) {
     const reason = untrackedRefusal(root, filePath);
     if (reason) {
-      throw new ShippingError('ERR_BASELINE_UNSAFE_UNTRACKED', `Refusing to commit the working tree: untracked file ${filePath} is ${reason.replaceAll('-', ' ')}. Nothing was staged or committed; handle this file yourself and start again`, {
+      throw new ShippingError('ERR_BASELINE_UNSAFE_UNTRACKED', `Refusing to commit the working tree: untracked file ${filePath} ${REFUSAL_SENTENCE[reason] ?? `was refused (${reason})`}. Nothing was staged or committed. Commit, ignore, or remove that file yourself, then start again.`, {
         reason,
         path: filePath,
       });

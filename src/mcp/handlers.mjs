@@ -212,7 +212,7 @@ function startNextStep(proposal) {
  * @returns {string}
  */
 function baselineCommitLine(summary) {
-  return `Committed your working tree as the release baseline: ${summary.sha.slice(0, 12)} (${summary.filesCommitted} file(s), ${summary.untrackedIncluded} new). Undo with: ${summary.undo}`;
+  return `Committed your working tree as the release baseline: ${summary.sha.slice(0, 12)} (${summary.filesCommitted} file(s), ${summary.untrackedIncluded} new). Repository hooks were skipped for it. Undo with: ${summary.undo}`;
 }
 
 /** @param {Record<string, any>} proposal @param {string} root */

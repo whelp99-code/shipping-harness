@@ -174,10 +174,12 @@ function stagePaths(root, paths) {
  * Commit the whole working tree as one local baseline commit, or do nothing when the tree
  * is already clean.
  *
- * Hooks are bypassed (`--no-verify`) and signing is disabled for this one commit: the
- * proposal path promises to analyze a repository without running its code, and a commit
- * that runs a repository hook or waits on a signing prompt would break both that promise
- * and the determinism of the baseline.
+ * Repository hooks are bypassed (`--no-verify`) because the proposal path promises to
+ * analyze a repository without running its code, and a pre-commit hook is repository code.
+ * Commit signing is NOT overridden: the signing policy is the user's, so a repository that
+ * signs every commit keeps signing this one. A signing prompt cannot hang the server
+ * because runGit bounds every invocation; a signing failure surfaces as
+ * ERR_BASELINE_COMMIT_FAILED with git's own stderr, which the user can act on.
  * @param {string} root
  * @returns {{sha: string, files: string[], untrackedIncluded: string[], undo: string} | null}
  */
@@ -192,7 +194,7 @@ export function commitBaseline(root) {
   runGit(root, ['reset', '-q']);
   try {
     stagePaths(root, files);
-    const committed = runGit(root, ['-c', 'commit.gpgsign=false', 'commit', '--no-verify', '-m', baselineCommitMessage()], { allowFailure: true });
+    const committed = runGit(root, ['commit', '--no-verify', '-m', baselineCommitMessage()], { allowFailure: true });
     if (committed.exitCode !== 0) {
       throw new ShippingError('ERR_BASELINE_COMMIT_FAILED', 'git refused to commit the working-tree baseline', {
         exitCode: committed.exitCode,

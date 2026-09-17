@@ -151,3 +151,23 @@ test('the undo command restores exactly the pre-commit tree', async () => {
     await fixture.cleanup();
   }
 });
+
+test('the baseline commit keeps the repository signing policy instead of overriding it', async () => {
+  const fixture = await createFixtureRepo();
+  try {
+    // A signing policy the environment cannot satisfy must fail loudly rather than
+    // silently inserting an unsigned commit into a signed history.
+    runGit(fixture.root, ['config', 'commit.gpgsign', 'true']);
+    runGit(fixture.root, ['config', 'gpg.program', '/nonexistent-signing-program']);
+    await writeFile(path.join(fixture.root, 'README.md'), '# changed\n', 'utf8');
+    const before = runGit(fixture.root, ['rev-parse', 'HEAD']).stdout.trim();
+    assert.throws(() => commitBaseline(fixture.root), (error) => {
+      assert.equal(error.code, 'ERR_BASELINE_COMMIT_FAILED');
+      return true;
+    });
+    assert.equal(runGit(fixture.root, ['rev-parse', 'HEAD']).stdout.trim(), before, 'HEAD must not move');
+    assert.equal(runGit(fixture.root, ['diff', '--cached', '--name-only']).stdout.trim(), '', 'index must be clean');
+  } finally {
+    await fixture.cleanup();
+  }
+});

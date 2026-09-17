@@ -118,7 +118,7 @@ What is committed, and what never is:
 
 The commit is refused outright, with nothing staged and `HEAD` unmoved, when any file that `HEAD` does not already contain is credential-like (`.env`, `id_rsa`, `id_ed25519`, `auth.json`, `credentials`, `credentials.json`, `tokens.json`, or anything under `.git/`, `.shipping/`, `.ssh/`, `.aws/`, `.gnupg/`), larger than 8 MiB, or when there are more than 200 of them. The error is `ERR_BASELINE_UNSAFE_UNTRACKED` and it names the file; the harness never skips the offending file and commits the rest. A repository with no commit yet, or with `user.name`/`user.email` unset, fails as `ERR_BASELINE_COMMIT_FAILED` carrying git's own stderr.
 
-The harness never pushes, tags, amends, rebases, `reset --hard`s, or switches branches. Repository hooks and commit signing are bypassed for this one commit, so `shipping_start` still runs no repository code.
+The harness never pushes, tags, amends, rebases, `reset --hard`s, or switches branches. Repository hooks are bypassed for this one commit, so `shipping_start` still runs no repository code. Commit signing is not overridden: a repository that signs every commit keeps signing this one, and a signing failure is reported as `ERR_BASELINE_COMMIT_FAILED` rather than producing an unsigned commit.
 
 When a commit was made, the acceptance preflight runs once against the committed tree. If every required criterion already passes, the proposal carries a `BASELINE_ALREADY_PASSING: …` diagnostic — the release would prove nothing, so either approve deliberately or undo the commit. It is a warning, never a block.
 

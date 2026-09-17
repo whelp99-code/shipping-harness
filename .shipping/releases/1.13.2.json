@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "b39e7ed85c38b0ed57f85a2dadf5d2964c090228",
+  "closedAt": "2026-09-17T06:39:40.855Z",
+  "closedGitSha": "072ce8c942138efba43461ebac478207b9a2112b",
+  "contractHash": "67674715d7d6c041a936728d39148cc4faafee35ea6106e7f62132042bcb4e76",
+  "evidenceRunId": "run-2026-09-17T06-39-16-353Z-73ec7210",
+  "fixCycles": 0,
+  "goal": "Require real path evidence before a goal sentence widens scope, so branch names, URLs, and fractions are no longer read as repository paths",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "072ce8c942138efba43461ebac478207b9a2112b",
+      "subject": "chore: lock shipping-harness v1.13.2"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.2",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

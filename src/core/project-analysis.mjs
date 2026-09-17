@@ -185,14 +185,17 @@ async function workspaceTopLevel(root, workspaceRoot) {
   const target = workspaceRoot === '.' ? root : path.join(root, workspaceRoot);
   await assertContainedPath(root, target);
   try {
-    return (await readdir(target, { withFileTypes: true }))
+    const entries = (await readdir(target, { withFileTypes: true }))
       .filter((entry) => !IGNORED_ROOTS.has(entry.name))
       .map((entry) => ({ name: entry.name, type: entry.isDirectory() ? 'directory' : 'file' }))
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .slice(0, 200);
+      .sort((a, b) => a.name.localeCompare(b.name));
+    // The listing is truncated for the human-readable analysis, but detection must
+    // see every entry: a repository with hundreds of root files would otherwise lose
+    // its lockfile past the cutoff and be verified with the wrong commands.
+    return { entries: entries.slice(0, 200), names: new Set(entries.map((entry) => entry.name)) };
   } catch {
     // Best-effort listing for the human-readable analysis; an unreadable directory yields an empty list, not a failed scan.
-    return [];
+    return { entries: [], names: new Set() };
   }
 }
 
@@ -274,8 +277,8 @@ function buildVersionEvidence(root, goal, candidates) {
 
 async function inspectWorkspace(root, workspaceRoot, allFiles) {
   const files = filesInWorkspace(allFiles, workspaceRoot);
-  const topLevel = await workspaceTopLevel(root, workspaceRoot);
-  const has = (name) => topLevel.some((entry) => entry.name === name);
+  const { names: topLevelNames } = await workspaceTopLevel(root, workspaceRoot);
+  const has = (name) => topLevelNames.has(name);
   const read = (name) => boundedText(root, workspacePath(workspaceRoot, name));
   const makeName = has('Makefile') ? 'Makefile' : has('GNUmakefile') ? 'GNUmakefile' : has('makefile') ? 'makefile' : null;
   const [packageText, pyproject, cargo, goMod, makefile, taskfileYml, taskfileYaml, justfile, releaseText] = await Promise.all([
@@ -311,11 +314,14 @@ async function inspectWorkspace(root, workspaceRoot, allFiles) {
   if (pyproject) {
     manifests.push('pyproject.toml');
     types.push('python');
+    // A uv project installs its tools into .venv, so the ambient interpreter cannot
+    // run them; `uv run --frozen` uses the locked environment without resolving.
+    const pythonRunner = has('uv.lock') ? 'uv run --frozen ' : 'python -m ';
     const version = pyprojectVersion(pyproject);
     if (version && parseSemver(version)) versions.push({ source: 'pyproject', path: workspacePath(workspaceRoot, 'pyproject.toml'), version, confidence: 'high', priority: 90 });
-    if (/\[tool\.ruff\]|\bruff\b/u.test(pyproject)) commands.push({ id: 'python-ruff', description: 'Configured Ruff checks pass.', command: 'python -m ruff check .', cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
-    if (/\[tool\.mypy\]|\bmypy\b/u.test(pyproject)) commands.push({ id: 'python-mypy', description: 'Configured mypy checks pass.', command: 'python -m mypy .', cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
-    if (/\[tool\.pytest\]|pytest/u.test(pyproject) || files.some((file) => file.startsWith('tests/'))) commands.push({ id: 'python-pytest', description: 'Python tests pass.', command: 'python -m pytest', cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
+    if (/\[tool\.ruff\]|\bruff\b/u.test(pyproject)) commands.push({ id: 'python-ruff', description: 'Configured Ruff checks pass.', command: `${pythonRunner}ruff check .`, cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
+    if (/\[tool\.mypy\]|\bmypy\b/u.test(pyproject)) commands.push({ id: 'python-mypy', description: 'Configured mypy checks pass.', command: `${pythonRunner}mypy .`, cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
+    if (/\[tool\.pytest\]|pytest/u.test(pyproject) || files.some((file) => file.startsWith('tests/'))) commands.push({ id: 'python-pytest', description: 'Python tests pass.', command: `${pythonRunner}pytest`, cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
   }
   if (cargo) {
     manifests.push('Cargo.toml'); types.push('rust');
@@ -436,7 +442,7 @@ export async function analyzeRepository(root, options = {}) {
   for (const workspaceRoot of roots) inspected.push(await inspectWorkspace(root, workspaceRoot, files));
   const selection = selectWorkspace(inspected, options.workspaceCandidateId);
   const selected = selection.selected;
-  const rootTopLevel = await workspaceTopLevel(root, '.');
+  const { entries: rootTopLevel } = await workspaceTopLevel(root, '.');
   const diagnostics = [...selected.diagnostics];
   let commands = selected.candidateCommands;
   if (commands.length === 0) {

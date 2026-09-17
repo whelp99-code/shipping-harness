@@ -2,7 +2,15 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.1] - Unreleased
+## [1.13.2] - Unreleased
+
+In progress. Three fixes found by running the harness against real repositories.
+
+- A goal sentence only widens scope for a token carrying real path evidence: a filename extension or an explicit trailing slash. A slash alone is not evidence, so a branch name (`codex/shared-memory-completion-20260907`), a URL, and a fraction (`3/4`) are no longer read as repository paths and no longer add globs to the approved scope. A path-shaped escape attempt stays reportable as `GOAL_PATH_REFUSED`; ordinary prose is skipped in silence.
+- A pyproject naming ruff or pytest produced ambient interpreter commands. Where `uv.lock` is present the acceptance commands now run through `uv run --frozen`, so a uv project is verified in its locked environment instead of stalling on a contract defect.
+- Root manifest detection read the listing capped at 200 entries, so `uv.lock` sorted past the cutoff in a large repository and the uv fix never fired. Detection now reads the full name set while the reported listing stays capped.
+
+## [1.13.1] - 2026-09-17
 
 In progress: workspace detection accepts product directories whose names contain interior spaces (for example an umbrella checkout holding "JM-AI Action Hub/.../server"). Leading and trailing spaces stay rejected so a workspace root remains one unambiguous token in evidence, scope globs, and receipts. Found while running the harness against a real umbrella repository.
 

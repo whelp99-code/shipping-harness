@@ -9,6 +9,8 @@
 // goal text is untrusted user input and is the one thing in the system that can WIDEN an
 // approved scope, so every addition is bounded, refusable, and visible:
 //
+//   - a token must carry real path evidence (a file extension, or a trailing slash), so a
+//     branch name, a URL, or a fraction is never read as a path;
 //   - absolute paths, `..`, `~`, anything matching `scope.paths.exclude`, and anything
 //     under `.shipping/` or `.git/` are refused, never added;
 //   - at most 8 tokens of at most 200 characters each are considered at all;
@@ -25,7 +27,10 @@ export const MAX_GOAL_PATHS = 8;
 /** Largest goal-named path token considered. */
 export const MAX_GOAL_PATH_LENGTH = 200;
 
-const SOURCE_EXTENSION = /\.(?:mjs|cjs|js|jsx|ts|tsx|mts|cts|json|jsonc|py|rb|rs|go|java|kt|kts|swift|c|h|cc|cpp|hpp|cs|php|sh|bash|zsh|sql|css|scss|less|html|htm|vue|svelte|md|mdx|rst|txt|yml|yaml|toml|ini|cfg|proto|graphql|gradle|tf)$/iu;
+// A filename ends in a short alphabetic extension. Enumerating extensions missed real
+// files (coverage/lcov.info); requiring the extension to START with a letter keeps a
+// version-shaped branch name (release/v1.2.3) from reading as one.
+const FILENAME_EXTENSION = /\.[A-Za-z][A-Za-z0-9]{0,9}$/u;
 const TRAILING_PUNCTUATION = /[.,;:!?)\]}>"'`]+$/u;
 const LEADING_PUNCTUATION = /^[([{<"'`]+/u;
 
@@ -42,9 +47,29 @@ function candidateTokens(goalText) {
     .filter(Boolean);
 }
 
-/** @param {string} token */
-function looksLikePath(token) {
-  return token.includes('/') || SOURCE_EXTENSION.test(token);
+const URL_LIKE = /^[A-Za-z][A-Za-z0-9+.-]*:\/\//u;
+
+/**
+ * A slash alone does not make a path. Branch names (`codex/shared-memory-20260907`),
+ * URLs, and fractions (`3/4`) all carry one, and reading them as paths silently widened
+ * the approved scope. A token must carry real path evidence: a file extension on its last
+ * segment, or an explicit trailing slash. Naming a directory that already exists needs no
+ * goal token, because the analyzer already found it; the goal only has to speak for paths
+ * the baseline does not have yet, and those are written as files or with a trailing slash.
+ * @param {string} token
+ */
+function hasPathEvidence(token) {
+  return token.endsWith('/') || FILENAME_EXTENSION.test(token);
+}
+
+/**
+ * Whether a token is shaped enough like a path to be worth judging at all. A refusal is
+ * only reportable for these; ordinary prose is skipped in silence.
+ * @param {string} token
+ */
+function pathShaped(token) {
+  if (URL_LIKE.test(token)) return false;
+  return token.includes('/') || FILENAME_EXTENSION.test(token);
 }
 
 /**
@@ -59,6 +84,10 @@ function syntacticRefusal(token) {
   if (path.isAbsolute(token) || /^[A-Za-z]:[\\/]/u.test(token) || token.startsWith('\\\\')) return 'absolute-path';
   const segments = token.replaceAll('\\', '/').split('/');
   if (segments.includes('..')) return 'parent-traversal';
+  // `.git` and `.shipping` are fixed names, not repository policy, so refusing them here
+  // keeps the refusal reportable even for a token that carries no path evidence.
+  if (segments[0] === '.git') return 'repository-internals';
+  if (segments[0] === '.shipping') return 'shipping-runtime';
   return null;
 }
 
@@ -74,7 +103,7 @@ export function extractGoalPaths(goalText) {
   const refused = [];
   const seen = new Set();
   for (const token of candidateTokens(goalText)) {
-    if (!looksLikePath(token)) continue;
+    if (!pathShaped(token)) continue;
     const key = token.slice(0, MAX_GOAL_PATH_LENGTH + 1);
     if (seen.has(key)) continue;
     seen.add(key);
@@ -83,6 +112,9 @@ export function extractGoalPaths(goalText) {
       if (refused.length < MAX_GOAL_PATHS) refused.push({ token: key, reason });
       continue;
     }
+    // A branch name or a fraction is path-shaped but carries no path evidence. It is
+    // prose, so it is skipped rather than reported: nothing was asked for and refused.
+    if (!hasPathEvidence(token)) continue;
     accepted.push(token.replaceAll('\\', '/').replace(/^\.\//u, ''));
     if (accepted.length >= MAX_GOAL_PATHS) break;
   }

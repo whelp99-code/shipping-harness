@@ -82,6 +82,19 @@ This table is derived directly from `SHIPPING_TOOLS` in `src/mcp/tools.mjs`. "Re
 | `shipping_pause` | Exercise human authority over automation. Pause and abort outrank every agent continuation request. | none (`action` defaults to `pause`) | An active release (any non-terminal state). | Updated state reflecting `PAUSED`, resumed, or `ABORTED`. |
 | `shipping_close` | Close only a `SHIPPABLE` release with fresh evidence and zero blockers, generating a release receipt, report, and backlog. | none | Release state is `SHIPPABLE` with fresh, unstale evidence. | `CLOSED` state, release receipt, report, and backlog entries. `CLOSED` never means `RELEASED`. |
 
+### What the harness cannot prove
+
+The contract locks only what a repository-owned command can prove. A goal often also names
+work no such command reaches: an external database, a home-directory configuration, a
+third-party collector. Those outcomes are absent from the gate, so the release can close
+with no evidence for them.
+
+Two facts reach the approval brief so the approver sees the shape before deciding. Neither
+blocks. `UNPROVEN_OBJECTIVES` states how many outcomes the goal enumerates against how many
+required acceptance checks the contract locks. `EXTERNAL_REFERENCE` names what the goal
+points at outside the repository. An ordinary one-sentence goal reports neither. Deciding
+whether the gap matters stays with the person approving; the harness will not guess.
+
 ## Approval flow
 
 `shipping_start` returns detected project type and manifest files, proposed release version and goal, included behavior and explicit exclusions, allowed and denied paths, existing build/test/lint commands selected as acceptance criteria, short execution steps, and a proposal ID and SHA-256 hash. It also returns one canonical proposal state:

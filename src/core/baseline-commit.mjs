@@ -232,10 +232,15 @@ export function commitBaseline(root) {
  */
 export function baselineCommitSummary(result) {
   if (!result) return null;
+  // Naming the files matters: a caller who did not expect the commit needs to see what it
+  // swallowed before deciding whether to undo it.
+  const shown = result.files.slice(0, 10);
   return {
     sha: result.sha,
     filesCommitted: result.files.length,
     untrackedIncluded: result.untrackedIncluded.length,
+    files: shown,
+    filesTruncated: Math.max(0, result.files.length - shown.length),
     undo: result.undo,
   };
 }

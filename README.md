@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/whelp99-code/shipping-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/whelp99-code/shipping-harness/actions/workflows/ci.yml)
 
-**Version:** 1.13.4
+**Version:** 1.13.5
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
 
@@ -28,7 +28,7 @@ Recommended path — pack the tagged commit and install into a user-global prefi
 
 ```bash
 npm pack   # from a clean, tagged checkout
-npm install --global --prefix "$HOME/.local" ./shipping-harness-1.13.4.tgz \
+npm install --global --prefix "$HOME/.local" ./shipping-harness-1.13.5.tgz \
   --ignore-scripts --no-audit --no-fund
 ```
 

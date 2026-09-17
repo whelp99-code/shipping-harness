@@ -20,6 +20,7 @@ import { VERSION } from './version.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from './core/goals/authority.mjs';
 import { analyzeRepository } from './core/project-analysis.mjs';
 import { DEFAULT_PLAN_PATH, auditPlanHistory, computePlanProgress, loadShippingPlan, resolveAcceptanceRefs } from './core/shipping-plan.mjs';
+import { ungatedStageIds, unresolvedStageIds } from './core/plan-proposal.mjs';
 import { planHistorySummary, recordPlanHistory } from './core/plan-history.mjs';
 
 /** @param {string | null} requested */
@@ -375,12 +376,22 @@ async function planStatusCommand({ root, options, json }) {
     else process.stdout.write(`No plan file at ${planPath}.\n`);
     return 0;
   }
-  const progress = await computePlanProgress(root, binding.plan, { planHash: binding.progressPlanHash });
+  // The status table must agree with what binding will do. Resolving acceptance against the
+  // repository is what tells an ungated or unresolved stage apart from a ready one; without
+  // it this command reported READY for a stage `shipping_start` refuses.
+  const analysis = await analyzeRepository(root);
+  const resolution = resolveAcceptanceRefs(binding.plan, analysis);
+  const ungated = new Set(ungatedStageIds(binding.plan));
+  const progress = await computePlanProgress(root, binding.plan, {
+    planHash: binding.progressPlanHash,
+    unresolvedStageIds: unresolvedStageIds(resolution),
+  });
   const titles = new Map(binding.plan.stages.map((stage) => [stage.id, stage.title]));
   const rows = progress.stages.map((entry) => ({
     id: entry.id,
     title: titles.get(entry.id) ?? entry.id,
     status: entry.state,
+    reason: entry.state !== 'BLOCKED_BY_UNRESOLVED' ? null : ungated.has(entry.id) ? 'no-acceptance-reference' : 'undetected-acceptance-command',
     next: entry.id === progress.nextStageId,
   }));
   const history = await planHistorySummary(root);

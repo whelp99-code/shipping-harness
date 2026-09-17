@@ -81,6 +81,9 @@ test('safe untracked files are included and reported separately', async () => {
       sha: result.sha,
       filesCommitted: 2,
       untrackedIncluded: 1,
+      // The summary names what the commit swallowed so a caller can judge it before undoing.
+      files: ['README.md', 'src/index.mjs'],
+      filesTruncated: 0,
       undo: BASELINE_UNDO_COMMAND,
     });
     assert.equal(baselineCommitSummary(null), null);

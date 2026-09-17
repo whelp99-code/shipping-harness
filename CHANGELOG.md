@@ -2,7 +2,14 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.4] - Unreleased
+## [1.13.5] - Unreleased
+
+In progress. Reported from a live session that verified the v1.13.4 fixes and found the display still lying.
+
+- `plan status` resolved nothing against the repository, so it printed READY for a stage `shipping_start` refuses to bind. The gate was right and the table was wrong, which is the false user state this product exists to prevent. The command now resolves acceptance the way binding does, and says why a blocked stage is blocked: `no-acceptance-reference` or `undetected-acceptance-command`.
+- The baseline auto-commit reported a count but not the paths, so a caller who did not expect the commit could not see what it swallowed before undoing it. The summary and the first response line now name the files, bounded to ten with a remainder count.
+
+## [1.13.4] - 2026-09-17
 
 In progress. Four holes reported from a live session, all of them ours.
 

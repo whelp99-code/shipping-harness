@@ -38,7 +38,9 @@ test('a dirty tree reaches approval in one pass, with baselineSha equal to the a
     assert.equal(data.detected.gitSha ?? data.baselineCommit.sha, data.baselineCommit.sha);
 
     // The user is told, on the first line, before anything else.
-    assert.match(started.content[0].text.split('\n')[0], /^Committed your working tree as the release baseline: [a-f0-9]{12} \(2 file\(s\), 1 new\)\. Repository hooks were skipped for it\. Undo with: git reset --soft HEAD~1$/u);
+    assert.match(started.content[0].text.split('\n')[0], /^Committed your working tree as the release baseline: [a-f0-9]{12} \(2 file\(s\), 1 new\): .+\. Repository hooks were skipped for it\. Undo with: git reset --soft HEAD~1$/u);
+    // A caller who did not expect the commit must see what it swallowed before undoing it.
+    assert.match(started.content[0].text.split('\n')[0], /README\.md/u);
 
     // The dirty-baseline review state is gone; approval is reachable without a rescan.
     assert.notEqual(data.proposalState, 'DIRTY_BASELINE');

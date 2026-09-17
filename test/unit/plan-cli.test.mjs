@@ -15,8 +15,8 @@ const THREE_STAGE_PLAN = {
     outcome: 'Deliver the fixture product end to end so an operator can run it and recover from failure.',
   },
   stages: [
-    { id: 'S-01', title: 'Deliver the core flow', outcome: 'Complete the core fixture flow end to end.', dependsOn: [], acceptanceRefs: [], size: 'MILESTONE' },
-    { id: 'S-02', title: 'Operate and recover', outcome: 'Complete install, health check, and rollback.', dependsOn: ['S-01'], acceptanceRefs: [], size: 'MILESTONE' },
+    { id: 'S-01', title: 'Deliver the core flow', outcome: 'Complete the core fixture flow end to end.', dependsOn: [], acceptanceRefs: ['node-test'], size: 'MILESTONE' },
+    { id: 'S-02', title: 'Operate and recover', outcome: 'Complete install, health check, and rollback.', dependsOn: ['S-01'], acceptanceRefs: ['node-test'], size: 'MILESTONE' },
   ],
 };
 
@@ -220,6 +220,28 @@ test('plan check offers stage-scoped package scripts as candidate ids without ch
     const analysis = await analyzeRepository(fixture.root);
     assert.ok(!analysis.candidateCommands.some((c) => c.stageScoped), 'stage scripts stay out of proposal defaults');
     assert.equal(analysis.stageCommands.length, 2);
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+// v1.13.5: reported from a live session. `plan status` resolved nothing, so it printed
+// READY for a stage that `shipping_start` refuses to bind. The table and the gate must
+// agree; a status that contradicts the gate is exactly the false user state this product
+// exists to prevent.
+test('plan status never shows READY for a stage that binding would refuse', async () => {
+  const plan = JSON.parse(JSON.stringify(THREE_STAGE_PLAN));
+  plan.stages[0].acceptanceRefs = [];
+  plan.stages[1].acceptanceRefs = ['not-a-detected-command'];
+  const fixture = await planFixture(plan);
+  try {
+    const parsed = parseCliJson(runCli(fixture.root, ['plan', 'status', '--json']));
+    const byId = new Map(parsed.stages.map((stage) => [stage.id, stage]));
+    assert.equal(byId.get('S-01').status, 'BLOCKED_BY_UNRESOLVED');
+    assert.equal(byId.get('S-01').reason, 'no-acceptance-reference');
+    assert.equal(byId.get('S-02').reason, 'undetected-acceptance-command');
+    assert.equal(parsed.progress.nextStageId, null, 'no stage is next when none can be proven');
+    for (const stage of parsed.stages) assert.notEqual(stage.status, 'READY');
   } finally {
     await fixture.cleanup();
   }

@@ -208,11 +208,12 @@ function startNextStep(proposal) {
 
 /**
  * The one line a user sees first when the harness committed their working tree for them.
- * @param {{sha: string, filesCommitted: number, untrackedIncluded: number, undo: string}} summary
+ * @param {{sha: string, filesCommitted: number, untrackedIncluded: number, files: string[], filesTruncated: number, undo: string}} summary
  * @returns {string}
  */
 function baselineCommitLine(summary) {
-  return `Committed your working tree as the release baseline: ${summary.sha.slice(0, 12)} (${summary.filesCommitted} file(s), ${summary.untrackedIncluded} new). Repository hooks were skipped for it. Undo with: ${summary.undo}`;
+  const named = summary.files.join(', ') + (summary.filesTruncated > 0 ? ` and ${summary.filesTruncated} more` : '');
+  return `Committed your working tree as the release baseline: ${summary.sha.slice(0, 12)} (${summary.filesCommitted} file(s), ${summary.untrackedIncluded} new): ${named}. Repository hooks were skipped for it. Undo with: ${summary.undo}`;
 }
 
 /** @param {Record<string, any>} proposal @param {string} root */

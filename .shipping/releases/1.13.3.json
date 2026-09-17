@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 4,
+    "requiredFailed": 0,
+    "total": 4
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "efaee7ad46680b1e4f27128d87c24351f3a5314e",
+  "closedAt": "2026-09-17T06:52:20.511Z",
+  "closedGitSha": "f70a31880a731499cfead8d9bcb0e2abdc3375fa",
+  "contractHash": "887b039bf0f00a502feefc439e7372621ebbcafb5b2d5270fa51629a1dc8d0b5",
+  "evidenceRunId": "run-2026-09-17T06-51-53-489Z-7f153bdd",
+  "fixCycles": 0,
+  "goal": "Warn when a goal enumerates more objectives than the locked acceptance can prove, and when a goal points outside the repository, so an approver sees what will close without evidence",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "f70a31880a731499cfead8d9bcb0e2abdc3375fa",
+      "subject": "chore: lock shipping-harness v1.13.3"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.3",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

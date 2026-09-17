@@ -2,7 +2,11 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.0] - Unreleased
+## [1.13.1] - Unreleased
+
+In progress: workspace detection accepts product directories whose names contain interior spaces (for example an umbrella checkout holding "JM-AI Action Hub/.../server"). Leading and trailing spaces stay rejected so a workspace root remains one unambiguous token in evidence, scope globs, and receipts. Found while running the harness against a real umbrella repository.
+
+## [1.13.0] - 2026-09-17
 
 In progress: dirty-tree friction. See `docs/planning/38-V1.13.0-DIRTY-TREE-FRICTION-DEVELOPMENT-PLAN.md`.
 

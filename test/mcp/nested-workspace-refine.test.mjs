@@ -203,3 +203,35 @@ test('v1.1 MCP surface contains exactly nine bounded beginner tools', () => {
     assert.equal(Object.hasOwn(refine.inputSchema.properties, forbidden), false);
   }
 });
+
+test('umbrella product directories containing spaces are selectable workspaces', async () => {
+  const product = 'JM-AI Action Hub/jm-ai-action-hub-focus-suite-v0.9.0/server';
+  const fixture = await nestedRepo(['evoharvest-runtime-v1.1.0', product]);
+  try {
+    const analysis = await analyzeRepository(fixture.root, { goal: outcome });
+    const roots = analysis.workspaceCandidates.map((entry) => entry.root);
+    assert.ok(roots.includes(product), `spaced product root missing from ${JSON.stringify(roots)}`);
+
+    const spaced = analysis.workspaceCandidates.find((entry) => entry.root === product);
+    const selected = await analyzeRepository(fixture.root, { goal: outcome, workspaceCandidateId: spaced.id });
+    assert.equal(selected.workspace.root, product);
+    assert.deepEqual(
+      selected.candidateCommands.filter((entry) => !entry.supplemental).map((entry) => entry.cwd),
+      [product, product],
+    );
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('path segments with leading or trailing spaces are still rejected as workspaces', async () => {
+  const fixture = await nestedRepo([' leading-space-product', 'trailing-space-product ']);
+  try {
+    const analysis = await analyzeRepository(fixture.root, { goal: outcome });
+    const roots = analysis.workspaceCandidates.map((entry) => entry.root);
+    assert.ok(!roots.includes(' leading-space-product'), `leading space root accepted in ${JSON.stringify(roots)}`);
+    assert.ok(!roots.includes('trailing-space-product '), `trailing space root accepted in ${JSON.stringify(roots)}`);
+  } finally {
+    await fixture.cleanup();
+  }
+});

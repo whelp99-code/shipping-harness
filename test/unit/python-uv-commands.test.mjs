@@ -42,3 +42,18 @@ test('a python project without a uv lockfile keeps the interpreter commands', as
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('a uv lockfile past the truncated root listing is still detected', async () => {
+  // The root listing is capped for display. A repository with hundreds of root
+  // files pushes uv.lock past that cap, and detection must not read the cap.
+  const root = await pythonProject('uv.lock');
+  try {
+    await Promise.all(Array.from({ length: 400 }, (_, index) => (
+      writeFile(path.join(root, `NOTE-${String(index).padStart(4, '0')}.md`), 'note\n', 'utf8')
+    )));
+    const analysis = await analyzeRepository(root);
+    assert.equal(commandFor(analysis, 'python-pytest'), 'uv run --frozen pytest');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

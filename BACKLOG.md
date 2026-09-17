@@ -16,6 +16,7 @@ Shipping Harness v1 deliberately closes with a small internal product surface. I
 - [ ] BACKLOG-010: Team/DAG reconsideration only after a real coordination bottleneck and measurable completion benefit are proven.
 - [ ] BACKLOG-011: Additional agent-host profiles and native integrations after the stable MCP interface proves insufficient.
 - [ ] BACKLOG-012: Optional internal UI for approval, progress, blockers, completion, backup, and incident status.
+- [ ] BACKLOG-013: An approval artifact for the CLI release path. `shipping_approve_scope` binds an exact proposal hash and records who approved, so a model cannot approve its own proposal. The CLI path has no equivalent: whoever runs `lock` is treated as the operator, and a model driving the CLI therefore closes a release with no record that a human authorised the scope. Every release from v1.9.0 to v1.13.5 was closed this way under an explicit instruction to proceed, so the authorisation existed but left no evidence. Options include a `--approved-by` receipt field, requiring an approval file before `lock`, or routing model-driven CLI use through the MCP proposal flow. Not a blocker: the CLI is an operator surface by design, and closing this needs a decision about what "operator" means when the hands are a model.
 - [x] BACKLOG-013: Deterministic Intent Gate and read-only Analysis Mode, completed in v1.8.3 without a model classifier or tenth MCP tool.
 
 ## Completed roadmap items

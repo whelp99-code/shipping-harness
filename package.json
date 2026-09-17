@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "1.13.3",
+  "version": "1.13.4",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,

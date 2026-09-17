@@ -2,7 +2,16 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.3] - Unreleased
+## [1.13.4] - Unreleased
+
+In progress. Four holes reported from a live session, all of them ours.
+
+- A plan stage naming no acceptance reference reached READY, so it could be bound to a release and closed with nothing proving it. An empty `acceptanceRefs` is now ungated rather than ready, reported as `UNGATED_STAGE`.
+- The v1.13.3 unproven-objective report read `contract.goal`, which a plan-driven milestone rewrites to the stage outcome. It now reads the goal the approver stated, so the enumerated objectives are measured again.
+- A proposal stored by an earlier build was reused without regard for the build that made it, serving stale analysis after an upgrade. A proposal records the harness version and a different version regenerates.
+- Outcomes listed inside one sentence counted as none. A parenthesised letter list is now counted wherever it appears.
+
+## [1.13.3] - 2026-09-17
 
 In progress: a goal that claims more than the contract can prove now says so.
 

@@ -1,25 +1,25 @@
 {
   "acceptance": [
     {
-      "id": "AC-11341",
-      "description": "An ungated plan stage is never READY, inline enumerations are counted, and the unproven-objective report reads the stated goal.",
+      "id": "AC-11331",
+      "description": "A goal claiming more outcomes than the contract proves, or naming anything outside the repository, is reported to the approver.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/plan-progress.test.mjs test/unit/goal-objectives.test.mjs test/unit/shipping-plan.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/goal-objectives.test.mjs test/unit/goal-scope-paths.test.mjs test/adversarial/goal-scope-attacks.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-11342",
-      "description": "Proposal, plan, MCP, usability, and surface-freeze suites pass.",
+      "id": "AC-11332",
+      "description": "Existing MCP, plan, usability, and surface-freeze suites pass.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/mcp/*.test.mjs test/usability/*.test.mjs test/stable/surface-freeze.test.mjs test/integration/plan-aware-proposal.test.mjs",
+      "command": "node --test --test-reporter=spec test/mcp/*.test.mjs test/usability/*.test.mjs test/stable/surface-freeze.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 600
     },
     {
-      "id": "AC-11343",
+      "id": "AC-11333",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -28,7 +28,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-11344",
+      "id": "AC-11334",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -171,9 +171,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Close four reported holes: an ungated plan stage must never be READY, the unproven-objective report must read the goal the approver stated, a proposal from another build must not be reused, and inline enumerations must be counted",
+  "goal": "Warn when a goal enumerates more objectives than the locked acceptance can prove, and when a goal points outside the repository, so an approver sees what will close without evidence",
   "project": "shipping-harness",
-  "release": "1.13.4",
+  "release": "1.13.3",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

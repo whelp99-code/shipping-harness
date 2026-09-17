@@ -132,6 +132,13 @@ closure receipts. A stage is `DONE` only when a closed receipt carries a matchin
 its `acceptanceRefs` don't resolve against the current analyzer output). This is exactly what
 `shipping-harness plan status` prints and what `shipping_start` projects as `shippingPlan.progress`.
 
+## A stage must name something that can prove it
+
+`acceptanceRefs` may not be left empty. A stage with no reference has nothing that can
+prove it, so it never becomes READY: it is reported as `UNGATED_STAGE` and stays blocked
+until it references a command the analyzer detected. This is deliberate. A stage the
+harness cannot prove is work for a person to judge, not a gate to pass.
+
 ## Discovering candidate command IDs
 
 A stage's `acceptanceRefs` must reference a command the project analyzer can already detect in your

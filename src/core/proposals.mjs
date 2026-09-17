@@ -9,6 +9,7 @@ import { currentGitSha, gitStatus } from './git.mjs';
 import { BASELINE_UNDO_COMMAND, baselineCommitSummary, commitBaseline } from './baseline-commit.mjs';
 import { goalPathDiagnostics } from './goal-paths.mjs';
 import { unprovenObjectiveDiagnostics } from './goal-objectives.mjs';
+import { VERSION } from '../version.mjs';
 import { runAcceptancePreflight } from './contract-defect.mjs';
 import { analyzeBaseline, verifyBaselinePreservation } from './baseline.mjs';
 import { buildOneScreenApproval } from './project-intelligence.mjs';
@@ -448,7 +449,10 @@ async function reuseMatchingProposal(root, ctx) {
     invariant(active.proposal.mode === ctx.evidence.mode, 'ERR_PROPOSAL_MODE_CHANGE', `Active proposal mode is ${active.proposal.mode}; create or refine it without silently switching mode`);
     const samePlanBinding = (active.proposal.shippingPlan?.planHash ?? null) === (ctx.planTiers.projection?.planHash ?? null)
       && (active.proposal.shippingPlan?.milestone?.stageId ?? null) === (ctx.planTiers.projection?.milestone?.stageId ?? null);
-    if (active.proposal.fingerprint === ctx.fingerprint && samePlanBinding) {
+    // A proposal stored by another build describes that build's judgement. Reusing it
+    // silently served stale analysis after an upgrade, so a version change regenerates.
+    const sameBuild = (active.proposal.harnessVersion ?? null) === VERSION;
+    if (active.proposal.fingerprint === ctx.fingerprint && samePlanBinding && sameBuild) {
       return {
         active,
         reused: {
@@ -538,6 +542,8 @@ function assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, 
     schema: 'shipping-harness/proposal-v1',
     id,
     revision: 1,
+    // The build that judged this repository. A later build regenerates instead of reusing.
+    harnessVersion: VERSION,
     fingerprint: ctx.fingerprint,
     projectRoot: path.resolve(root),
     gitSha: ctx.evidence.gitSha,
@@ -571,8 +577,13 @@ function assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, 
     shippingPlan: ctx.planTiers.projection,
     planRequest: ctx.planRequest,
     diagnostics: buildProposalDiagnostics(ctx.analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate, ctx.planTiers.diagnostics, goalPathDiagnostics(ctx.goalPaths),
-      // What the goal claims, measured against what this contract can actually prove.
-      unprovenObjectiveDiagnostics({ goalText: contract.goal, requiredAcceptanceCount: acceptance.filter((entry) => entry.required !== false).length })),
+      // Measured against the goal the approver stated, not the one the contract derived:
+      // a plan-driven milestone rewrites contract.goal to the stage outcome, which hid the
+      // enumerated objectives the person actually asked for.
+      unprovenObjectiveDiagnostics({
+        goalText: typeof input?.goal === 'string' && input.goal.trim() ? input.goal : contract.goal,
+        requiredAcceptanceCount: acceptance.filter((entry) => entry.required !== false).length,
+      })),
     baselineCommit: baselineCommitSummary(ctx.baselineCommit),
   };
 }

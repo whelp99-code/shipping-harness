@@ -8,6 +8,7 @@ import { assertContainedPath, ensureDir, exists, readJson, writeAtomic, writeJso
 import { currentGitSha, gitStatus } from './git.mjs';
 import { BASELINE_UNDO_COMMAND, baselineCommitSummary, commitBaseline } from './baseline-commit.mjs';
 import { goalPathDiagnostics } from './goal-paths.mjs';
+import { unprovenObjectiveDiagnostics } from './goal-objectives.mjs';
 import { runAcceptancePreflight } from './contract-defect.mjs';
 import { analyzeBaseline, verifyBaselinePreservation } from './baseline.mjs';
 import { buildOneScreenApproval } from './project-intelligence.mjs';
@@ -510,11 +511,12 @@ function composeProposalDecision(base, ctx, input) {
 }
 
 /** @param {Record<string, any>} analysis @param {Record<string, any>} decision @param {Record<string, any>} acceptanceStrength @param {string[]} inheritedCommands @param {string[]} sourceChanges @param {Record<string, any> | null} [intentGate] @param {string[]} [planDiagnostics] @param {string[]} [scopeDiagnostics] */
-function buildProposalDiagnostics(analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate = null, planDiagnostics = [], scopeDiagnostics = []) {
+function buildProposalDiagnostics(analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate = null, planDiagnostics = [], scopeDiagnostics = [], objectiveDiagnostics = []) {
   return [
     ...analysis.diagnostics,
     ...planDiagnostics,
     ...scopeDiagnostics,
+    ...objectiveDiagnostics,
     ...(intentGate?.status === 'CONFIRMATION_REQUIRED' ? ['Read-only analysis is complete; confirm whether to stop at analysis, plan, implement, or run policy Autopilot.'] : []),
     ...(sourceChanges.length > 0 ? ['Review and preserve the exact baseline plan before approval.'] : []),
     ...(decision.questions.length > 0 ? ['Mandatory risks or interview questions must be resolved before approval.'] : []),
@@ -568,7 +570,9 @@ function assembleProposal(root, ctx, decisionBundle, active, inheritedCommands, 
     tier: ctx.planTiers.tier,
     shippingPlan: ctx.planTiers.projection,
     planRequest: ctx.planRequest,
-    diagnostics: buildProposalDiagnostics(ctx.analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate, ctx.planTiers.diagnostics, goalPathDiagnostics(ctx.goalPaths)),
+    diagnostics: buildProposalDiagnostics(ctx.analysis, decision, acceptanceStrength, inheritedCommands, sourceChanges, intentGate, ctx.planTiers.diagnostics, goalPathDiagnostics(ctx.goalPaths),
+      // What the goal claims, measured against what this contract can actually prove.
+      unprovenObjectiveDiagnostics({ goalText: contract.goal, requiredAcceptanceCount: acceptance.filter((entry) => entry.required !== false).length })),
     baselineCommit: baselineCommitSummary(ctx.baselineCommit),
   };
 }

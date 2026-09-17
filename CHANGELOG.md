@@ -2,7 +2,13 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.2] - Unreleased
+## [1.13.3] - Unreleased
+
+In progress: a goal that claims more than the contract can prove now says so.
+
+The harness locks only what a repository-owned command can prove, which is correct, but it said nothing when a goal also named work no command reaches: an external database, a home-directory configuration, a third-party collector. Those outcomes were silently absent from the gate and the release closed without evidence for them. Two facts now reach the approval brief and neither blocks. `UNPROVEN_OBJECTIVES` states how many outcomes the goal enumerates against how many required acceptance checks the contract locks. `EXTERNAL_REFERENCE` names the URLs, home paths, absolute system paths, and host:port targets the goal points at outside the repository. An ordinary one-sentence goal reports neither.
+
+## [1.13.2] - 2026-09-17
 
 In progress. Three fixes found by running the harness against real repositories.
 

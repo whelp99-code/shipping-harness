@@ -168,3 +168,42 @@ function splitNul(value) {
 function normalizeGitPath(value) {
   return value.replaceAll('\\', '/').replace(/^\.\//u, '');
 }
+
+/**
+ * Commits on the current branch after `baselineSha`, up to and including `headSha`.
+ * Bounded by construction: at most `maxCommits` rows, `maxPaths` paths per row, and a
+ * `maxSubject`-character subject, with `truncated` counting what did not fit.
+ *
+ * v1.13.0 Phase B: this is evidence, never a gate. Whether a commit made after the scope
+ * was locked belongs to the approved goal is not decidable mechanically, so the harness
+ * records it in the release receipt and lets a human look.
+ * @param {string} root
+ * @param {string} baselineSha
+ * @param {string} headSha
+ * @param {{maxCommits?: number, maxPaths?: number, maxSubject?: number}} [limits]
+ * @returns {{commits: Array<{sha: string, subject: string, paths: string[], pathsTruncated?: number}>, truncated: number}}
+ */
+export function commitsBetween(root, baselineSha, headSha, limits = {}) {
+  const maxCommits = limits.maxCommits ?? 50;
+  const maxPaths = limits.maxPaths ?? 20;
+  const maxSubject = limits.maxSubject ?? 120;
+  const listed = runGit(root, ['rev-list', `${baselineSha}..${headSha}`], { allowFailure: true });
+  if (listed.exitCode !== 0) return { commits: [], truncated: 0 };
+  const shas = listed.stdout.split(/\r?\n/u).filter(Boolean);
+  const commits = shas.slice(0, maxCommits).map((sha) => {
+    const subject = runGit(root, ['log', '-1', '--format=%s', sha], { allowFailure: true }).stdout.trim();
+    const changed = runGit(root, ['show', '--name-only', '--format=', '-z', '--no-renames', sha], { allowFailure: true });
+    // `.shipping/` is the harness's own runtime state, never goal work, and it is already
+    // ignored everywhere else scope is analyzed; listing it here would bury the real paths.
+    const paths = [...new Set(splitNul(changed.stdout).map(normalizeGitPath))]
+      .filter((filePath) => !isShippingRuntimePath(filePath))
+      .sort();
+    return {
+      sha,
+      subject: subject.slice(0, maxSubject),
+      paths: paths.slice(0, maxPaths),
+      ...(paths.length > maxPaths ? { pathsTruncated: paths.length - maxPaths } : {}),
+    };
+  });
+  return { commits, truncated: Math.max(0, shas.length - commits.length) };
+}

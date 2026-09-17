@@ -49,7 +49,9 @@ test('dirty proposal exposes one bounded preservation plan and one non-destructi
     await writeFile(path.join(fixture.root, 'README.md'), '# existing product work\n', 'utf8');
     await mkdir(path.join(fixture.root, '.omo'), { recursive: true });
     await writeFile(path.join(fixture.root, '.omo', 'session.json'), '{}\n', 'utf8');
-    const started = await callShippingTool(fixture.root, 'shipping_start', { goal, release: '0.1.0' });
+    // v1.13.0 Phase A: the reviewed baseline-preservation flow is what commitBaseline:false
+    // preserves, so this steward test opts out of the auto-commit deliberately.
+    const started = await callShippingTool(fixture.root, 'shipping_start', { goal, release: '0.1.0', commitBaseline: false });
     const proposal = started.structuredContent;
     assert.equal(proposal.proposalState, 'DIRTY_BASELINE');
     assert.equal(proposal.nextAction, 'REVIEW_BASELINE');

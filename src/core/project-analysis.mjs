@@ -3,6 +3,7 @@ import path from 'node:path';
 import { hashObject } from './crypto.mjs';
 import { assertContainedPath, exists, fileSize } from './fs.mjs';
 import { runGit } from './git.mjs';
+import { scopePathsForGoal } from './goal-paths.mjs';
 
 const MAX_MANIFEST_BYTES = 1024 * 1024;
 const MAX_TRACKED_FILES = 10000;
@@ -497,11 +498,11 @@ export async function analyzeRepository(root, options = {}) {
 }
 
 /**
+ * The path policy derived from the repository alone, before the goal sentence is read.
  * @param {ProjectAnalysis} analysis
- * @param {string} goal
- * @returns {{include: string[], exclude: string[], paths: {include: string[], exclude: string[]}}}
+ * @returns {{include: string[], exclude: string[]}}
  */
-export function buildMinimalScope(analysis, goal) {
+function repositoryScopePaths(analysis) {
   const includePaths = new Set([
     ...analysis.sourceRoots.map((root) => `${root}/**`),
     ...analysis.manifests,
@@ -516,6 +517,34 @@ export function buildMinimalScope(analysis, goal) {
     for (const extension of SOURCE_EXTENSIONS) includePaths.add(`${prefix}*${extension}`);
   }
   return {
+    include: [...includePaths].filter(Boolean).sort(),
+    exclude: ['.shipping/contract.yaml', '.shipping/contract.lock', '.git/**', 'node_modules/**', 'dist/**', 'coverage/**', 'target/**'],
+  };
+}
+
+/**
+ * v1.13.0 Phase C: what the goal sentence adds to, or is refused from, the derived path
+ * scope. Exported so a proposal can report the same decision as a diagnostic without
+ * recomputing it differently from the scope it actually locks.
+ * @param {ProjectAnalysis} analysis
+ * @param {string} goal
+ * @returns {{added: Array<{glob: string, token: string}>, refused: Array<{token: string, reason: string}>}}
+ */
+export function goalScopePaths(analysis, goal) {
+  return scopePathsForGoal(goal, repositoryScopePaths(analysis));
+}
+
+/**
+ * @param {ProjectAnalysis} analysis
+ * @param {string} goal
+ * @returns {{include: string[], exclude: string[], paths: {include: string[], exclude: string[]}}}
+ */
+export function buildMinimalScope(analysis, goal) {
+  const paths = repositoryScopePaths(analysis);
+  // The goal sentence is the only evidence that can widen the derived scope, and it does
+  // so here — the single place a proposal builds `scope.paths.include`.
+  paths.include = [...new Set([...paths.include, ...goalScopePaths(analysis, goal).added.map((entry) => entry.glob)])].sort();
+  return {
     include: [
       `Deliver the stated release goal: ${goal.trim()}`,
       'Preserve existing behavior outside the stated goal.',
@@ -526,10 +555,7 @@ export function buildMinimalScope(analysis, goal) {
       'Speculative architecture rewrites and refactors not required by a failing acceptance criterion.',
       'Optional polish, additional integrations, and future extensibility work.',
     ],
-    paths: {
-      include: [...includePaths].filter(Boolean).sort(),
-      exclude: ['.shipping/contract.yaml', '.shipping/contract.lock', '.git/**', 'node_modules/**', 'dist/**', 'coverage/**', 'target/**'],
-    },
+    paths,
   };
 }
 

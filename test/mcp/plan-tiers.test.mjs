@@ -20,7 +20,9 @@ const V1_11_3_START_KEYS = [
   'supersededProposalId', 'userView', 'versionEvidence', 'workspace', 'workspaceCandidates',
 ];
 
-const ADDED_KEYS = ['shippingPlan', 'tier'];
+// v1.13.0 Phase A adds one more optional key: `baselineCommit`, the receipt for the
+// baseline auto-commit (null when nothing was committed).
+const ADDED_KEYS = ['shippingPlan', 'tier', 'baselineCommit'];
 
 const meta = {
   'io.modelcontextprotocol/protocolVersion': MCP_PROTOCOL_VERSION,
@@ -62,9 +64,11 @@ test('without a plan file shipping_start adds exactly two keys and changes nothi
   const data = await startedContent({});
   assert.equal(data.tier, 'PATCH');
   assert.equal(data.shippingPlan, null);
+  // A clean fixture tree has nothing to auto-commit, so the receipt is null.
+  assert.equal(data.baselineCommit, null);
   assert.deepEqual(Object.keys(data).sort(), [...V1_11_3_START_KEYS, ...ADDED_KEYS].sort());
 
-  const { tier: _tier, shippingPlan: _shippingPlan, ...withoutPlanKeys } = data;
+  const { tier: _tier, shippingPlan: _shippingPlan, baselineCommit: _baselineCommit, ...withoutPlanKeys } = data;
   assert.deepEqual(Object.keys(withoutPlanKeys).sort(), [...V1_11_3_START_KEYS].sort());
   // The pre-existing `plan` key still carries the four-step short plan, not the new projection.
   assert.deepEqual(withoutPlanKeys.plan.map((entry) => entry.id), ['PLAN-001', 'PLAN-002', 'PLAN-003', 'PLAN-004']);

@@ -165,6 +165,7 @@ export function buildUserStatusView(status) {
     goalCharterSummary: status.goalCharterSummary ?? null,
     integrity: status.integrity ?? null,
     scopeWarning: status.scopeWarning ?? null,
+    commitsSinceLock: status.commitsSinceLock ?? null,
     verifyBudget: status.verifyBudget ?? null,
     evidenceDirty: status.evidenceDirty ?? null,
     plainBriefError: compiled.error ?? null,

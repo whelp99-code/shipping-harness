@@ -266,9 +266,12 @@ test('shipping_start and shipping_status expose the same Shipping-generated begi
   const fixture = await createFixtureRepo();
   try {
     await writeFile(new URL('README.md', `file://${fixture.root}/`), '# existing unfinished work\n', 'utf8');
+    // v1.13.0 Phase A: the DIRTY_BASELINE beginner report is still reachable, through
+    // commitBaseline:false; the auto-commit path is covered by the Phase A suites.
     const started = await callShippingTool(fixture.root, 'shipping_start', {
       goal: 'Finish the smallest verified patch without adding unrelated product features',
       release: '0.1.0',
+      commitBaseline: false,
     });
     const startData = started.structuredContent;
     assert.equal(startData.proposalState, 'DIRTY_BASELINE');

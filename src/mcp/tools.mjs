@@ -18,6 +18,7 @@ export const SHIPPING_TOOLS = Object.freeze([
         proposerId: { type: 'string', minLength: 1, maxLength: 160, description: 'Optional stable identity of the host agent proposing the decision. It cannot approve the same proposal.' },
         planPath: { type: 'string', minLength: 1, maxLength: 300, description: 'Optional repository-relative path of the reviewed plan file. Defaults to docs/shipping-plan.json. The plan file can never contain a command.' },
         stageId: { type: 'string', pattern: '^S-[A-Za-z0-9_-]{1,32}$', description: 'Optional plan stage to propose. A stage whose dependencies are unmet is rejected.' },
+        commitBaseline: { type: 'boolean', default: true, description: 'Commit the current working tree as one local, undoable baseline commit before analyzing, so the proposal binds to a stable revision. Ignored files and .shipping/ state are never staged, and a credential-like untracked file refuses the whole commit. Set false to keep the pre-v1.13.0 dirty-baseline review flow.' },
       },
       required: ['goal'],
       additionalProperties: false,

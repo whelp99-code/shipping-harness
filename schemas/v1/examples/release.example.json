@@ -28,5 +28,15 @@
       "Optional polish and future extensibility work."
     ],
     "size": "MILESTONE"
-  }
+  },
+  "postLockCommits": [
+    {
+      "sha": "dddddddddddddddddddddddddddddddddddddddd",
+      "subject": "feat: implement the approved core flow",
+      "paths": [
+        "src/core/flow.mjs",
+        "test/unit/flow.test.mjs"
+      ]
+    }
+  ]
 }

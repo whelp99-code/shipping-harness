@@ -84,7 +84,9 @@ test('dirty baseline cannot hide the one intent question or trigger baseline mut
   const fixture = await createFixtureRepo();
   try {
     await writeFile(path.join(fixture.root, 'README.md'), '# dirty\n', 'utf8');
-    const started = await callShippingTool(fixture.root, 'shipping_start', { goal: '이 프로젝트 분석해. 쉬핑하네스로' });
+    // v1.13.0 Phase A: commitBaseline:false keeps the pre-auto-commit dirty-baseline path,
+    // which is what this attack is about — the intent question must come first either way.
+    const started = await callShippingTool(fixture.root, 'shipping_start', { goal: '이 프로젝트 분석해. 쉬핑하네스로', commitBaseline: false });
     const data = started.structuredContent;
     assert.equal(data.proposalState, 'INTENT_CONFIRMATION_REQUIRED');
     assert.equal(data.baseline.blockingCount, 1);

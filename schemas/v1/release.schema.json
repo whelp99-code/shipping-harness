@@ -163,6 +163,51 @@
       },
       "additionalProperties": false,
       "maxProperties": 16
+    },
+    "postLockCommits": {
+      "type": "array",
+      "description": "v1.13.0 Phase B: commits made between the locked baseline and the closed revision. Evidence only: it never blocks a close; it exists so a human can see work that entered the release after the scope was approved.",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "required": [
+          "sha",
+          "subject",
+          "paths"
+        ],
+        "properties": {
+          "sha": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{7,40}$",
+            "maxLength": 40
+          },
+          "subject": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "paths": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          "pathsTruncated": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "additionalProperties": false,
+        "maxProperties": 8
+      }
+    },
+    "postLockCommitsTruncated": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
     }
   },
   "additionalProperties": false,

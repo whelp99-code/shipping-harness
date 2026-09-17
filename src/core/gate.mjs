@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { assertLockedContract } from './contract.mjs';
-import { currentGitSha, changedPathsSince, gitStatus, treeFingerprint } from './git.mjs';
+import { commitsBetween, currentGitSha, changedPathsSince, gitStatus, runGit, treeFingerprint } from './git.mjs';
 import { analyzeScope } from './glob.mjs';
 import { runAcceptance, loadEvidence, assertFreshEvidence, recordBaselineReplays } from './evidence.mjs';
 import {
@@ -218,7 +218,7 @@ export async function finishAgentRun(root, runResult, telemetry = null) {
 /**
  * The closure receipt for one release. A plan-bound contract propagates its stage
  * identity here so plan progress is computable from closed receipts alone.
- * @param {{contract: Record<string, any>, lock: Record<string, any>, state: Record<string, any>, gitSha: string, manifest: Record<string, any>, counts: Record<string, number>, backlog: Record<string, any>, integrations: unknown, uncommitted: string[], closedAt: string, planStage: Record<string, any> | null}} input
+ * @param {{contract: Record<string, any>, lock: Record<string, any>, state: Record<string, any>, gitSha: string, manifest: Record<string, any>, counts: Record<string, number>, backlog: Record<string, any>, integrations: unknown, uncommitted: string[], closedAt: string, planStage: Record<string, any> | null, postLockCommits: {commits: Array<Record<string, any>>, truncated: number}}} input
  * @returns {Record<string, any> & {release: string, closedGitSha: string}}
  */
 function composeReleaseReceipt(input) {
@@ -244,6 +244,10 @@ function composeReleaseReceipt(input) {
     closedAt: input.closedAt,
     ...(contract.plan ? { planStageId: contract.plan.stageId, planHash: contract.plan.planHash, tier: contract.plan.tier } : {}),
     ...(input.planStage ? { planStage: input.planStage } : {}),
+    // v1.13.0 Phase B: every commit made between the lock baseline and the closed
+    // revision, recorded so a human can see work that entered the release after approval.
+    postLockCommits: input.postLockCommits.commits,
+    ...(input.postLockCommits.truncated > 0 ? { postLockCommitsTruncated: input.postLockCommits.truncated } : {}),
     ...(input.uncommitted.length > 0 ? { uncommittedPaths: input.uncommitted } : {}),
   };
 }
@@ -327,7 +331,8 @@ export async function closeRelease(root, options = {}) {
 
   const closedAt = new Date().toISOString();
   const planStage = contract.plan ? await closePlanStageSnapshot(root, contract) : null;
-  const receipt = composeReleaseReceipt({ contract, lock, state, gitSha, manifest, counts, backlog, integrations, uncommitted, closedAt, planStage });
+  const postLockCommits = commitsBetween(root, lock.baselineSha, gitSha);
+  const receipt = composeReleaseReceipt({ contract, lock, state, gitSha, manifest, counts, backlog, integrations, uncommitted, closedAt, planStage, postLockCommits });
   const receiptPath = path.join(paths.releases, `${contract.release}.json`);
   const reportPath = path.join(paths.releases, `${contract.release}.md`);
   await writeJsonAtomic(receiptPath, receipt);
@@ -355,6 +360,23 @@ function scopeWarningFor(root, contract, baselineSha) {
     outside: analyzed.violations.map((violation) => violation.path),
     include: contract.scope.paths.include,
   };
+}
+
+/**
+ * v1.13.0 Phase B: how many commits the branch has taken since the scope was locked.
+ * Reported, never judged: `null` before LOCKED, because there is no baseline to count from.
+ * @param {string} root
+ * @param {Record<string, any>} state
+ * @param {string | null} baselineSha
+ * @param {string} headSha
+ * @returns {number | null}
+ */
+function commitsSinceLockFor(root, state, baselineSha, headSha) {
+  if (!baselineSha || ['DRAFT', 'ABORTED'].includes(state.state)) return null;
+  const counted = runGit(root, ['rev-list', '--count', `${baselineSha}..${headSha}`], { allowFailure: true });
+  if (counted.exitCode !== 0) return null;
+  const value = Number.parseInt(counted.stdout.trim(), 10);
+  return Number.isFinite(value) ? value : null;
 }
 
 /**
@@ -420,6 +442,7 @@ export async function releaseStatus(root) {
   }
   const goals = await goalStatusView(root);
   const tree = treeFingerprint(root, contract?.scope?.paths ?? null);
+  const commitsSinceLock = commitsSinceLockFor(root, state, lock?.baselineSha ?? state.baselineSha ?? null, git.sha);
   return {
     state,
     git,
@@ -429,6 +452,7 @@ export async function releaseStatus(root) {
     issues: { counts: countIssues(reportedIssues), items: reportedIssues },
     integrity,
     scopeWarning: scopeWarningFor(root, contract, lock?.baselineSha ?? state.baselineSha ?? null),
+    commitsSinceLock,
     verifyBudget: verifyBudgetFor(state, contract),
     // Evidence recorded against a dirty tree is only fresh while that tree is unchanged.
     evidenceFresh: Boolean(state.currentEvidenceSha && state.currentEvidenceSha === git.sha && contractValid
@@ -458,6 +482,9 @@ function renderReleaseReport(receipt, manifest, issues, backlog) {
   const backlogRows = backlog.length
     ? backlog.map((item) => `- ${item.id}: ${item.title}`).join('\n')
     : '- None';
+  const postLockRows = receipt.postLockCommits.length
+    ? receipt.postLockCommits.map((entry) => `| \`${entry.sha.slice(0, 12)}\` | ${entry.subject.replaceAll('|', '\\|')} | ${entry.paths.join(', ') || '-'} |`).join('\n')
+    : '| - | No commit was made after the scope was locked | - |';
   return `# Release ${receipt.release}\n\n` +
     `- Project: ${receipt.project}\n` +
     `- Worker: ${receipt.worker}\n` +
@@ -469,9 +496,11 @@ function renderReleaseReport(receipt, manifest, issues, backlog) {
     `- Fix cycles: ${receipt.fixCycles}\n` +
     `- Agent runs: ${receipt.agentRuns}\n` +
     `- Verify runs: ${receipt.verifyRuns}\n` +
+    `- Commits after lock: ${receipt.postLockCommits.length}${receipt.postLockCommitsTruncated ? ` (+${receipt.postLockCommitsTruncated} not listed)` : ''}\n` +
     `- Total agent duration: ${receipt.telemetry.totalAgentDurationMs} ms\n\n` +
     `## Goal\n\n${receipt.goal}\n\n` +
     `## Acceptance evidence\n\n| Criterion | Requirement | Result | Exit | Duration |\n|---|---|---|---:|---:|\n${resultRows}\n\n` +
     `## Findings\n\n| ID | Class | Basis | Title |\n|---|---|---|---|\n${issueRows}\n\n` +
+    `## Commits after lock\n\n| Commit | Subject | Paths |\n|---|---|---|\n${postLockRows}\n\n` +
     `## Migrated backlog\n\n${backlogRows}\n`;
 }

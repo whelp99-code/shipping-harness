@@ -1,16 +1,16 @@
 {
   "acceptance": [
     {
-      "id": "AC-11321",
-      "description": "A goal sentence widens scope only for tokens carrying real path evidence; escapes stay reportable; uv-locked python detection holds.",
+      "id": "AC-11311",
+      "description": "A workspace directory with interior spaces is selectable; leading or trailing spaces are still rejected.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/goal-scope-paths.test.mjs test/adversarial/goal-scope-attacks.test.mjs test/unit/python-uv-commands.test.mjs",
+      "command": "node --test --test-reporter=spec test/mcp/nested-workspace-refine.test.mjs test/unit/goal-scope-paths.test.mjs test/adversarial/goal-scope-attacks.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-11322",
+      "id": "AC-11312",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -19,7 +19,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-11323",
+      "id": "AC-11313",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -162,9 +162,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Require real path evidence before a goal sentence widens scope, so branch names, URLs, and fractions are no longer read as repository paths",
+  "goal": "Accept umbrella product directories whose names contain interior spaces as selectable workspaces, while still rejecting leading or trailing spaces",
   "project": "shipping-harness",
-  "release": "1.13.2",
+  "release": "1.13.1",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

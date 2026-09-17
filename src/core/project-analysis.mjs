@@ -277,7 +277,7 @@ function buildVersionEvidence(root, goal, candidates) {
 
 async function inspectWorkspace(root, workspaceRoot, allFiles) {
   const files = filesInWorkspace(allFiles, workspaceRoot);
-  const { entries: topLevel, names: topLevelNames } = await workspaceTopLevel(root, workspaceRoot);
+  const { names: topLevelNames } = await workspaceTopLevel(root, workspaceRoot);
   const has = (name) => topLevelNames.has(name);
   const read = (name) => boundedText(root, workspacePath(workspaceRoot, name));
   const makeName = has('Makefile') ? 'Makefile' : has('GNUmakefile') ? 'GNUmakefile' : has('makefile') ? 'makefile' : null;

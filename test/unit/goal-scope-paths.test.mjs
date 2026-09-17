@@ -80,3 +80,35 @@ test('an empty or non-string goal yields nothing rather than throwing', () => {
   assert.deepEqual(extractGoalPaths(''), { accepted: [], refused: [] });
   assert.deepEqual(extractGoalPaths(/** @type {any} */ (null)), { accepted: [], refused: [] });
 });
+
+// v1.13.2 regression: a slash alone is not path evidence. Reported from a live session
+// where the branch name codex/shared-memory-completion-20260907 in a goal sentence added
+// codex/** to the approved scope.
+test('tokens that merely contain a slash are not read as repository paths', () => {
+  const notPaths = [
+    'Publish the branch codex/shared-memory-completion-20260907 and finish the rollout',
+    'Refactor the feature/login-redesign work',
+    'Fix the bug reported at https://github.com/owner/repo/issues/12',
+    'Scale the column by the ratio 3/4 before rendering',
+    'Follow the guidance in ftp://example.invalid/a/b',
+  ];
+  for (const goal of notPaths) {
+    const extracted = extractGoalPaths(goal);
+    assert.deepEqual(extracted.accepted, [], `no path may be taken from: ${goal}`);
+    assert.deepEqual(extracted.refused, [], 'prose that is not path-shaped is skipped, not reported');
+  }
+});
+
+test('path evidence is a file extension or an explicit trailing slash', () => {
+  assert.deepEqual(extractGoalPaths('Implement hello() in a new file src/index.mjs').accepted, ['src/index.mjs']);
+  assert.deepEqual(extractGoalPaths('Add the packages/newthing/ directory').accepted, ['packages/newthing/']);
+  assert.deepEqual(extractGoalPaths('Update README.md with the new flow').accepted, ['README.md']);
+  // A URL that ends in a source extension is still a URL.
+  assert.deepEqual(extractGoalPaths('Copy https://example.invalid/vendor/lib.mjs into place').accepted, []);
+});
+
+test('a refusable path-shaped token is still reported rather than skipped', () => {
+  const extracted = extractGoalPaths('Read ~/.config/second-brain/jarvis-provider.toml before starting');
+  assert.deepEqual(extracted.accepted, []);
+  assert.deepEqual(extracted.refused.map((entry) => entry.reason), ['home-directory-path']);
+});

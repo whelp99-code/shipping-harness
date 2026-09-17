@@ -2,7 +2,11 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.12.1] - Unreleased
+## [1.13.0] - Unreleased
+
+In progress: dirty-tree friction. See `docs/planning/38-V1.13.0-DIRTY-TREE-FRICTION-DEVELOPMENT-PLAN.md`.
+
+## [1.12.1] - 2026-09-16
 
 In progress: plan-file update rules. See `docs/planning/37-V1.12.1-PLAN-UPDATE-RULES-DEVELOPMENT-PLAN.md`.
 

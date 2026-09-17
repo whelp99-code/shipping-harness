@@ -17,12 +17,27 @@ function shortText(value, max = PLAN_LIMITS.projectionOutcomeLength) {
 }
 
 /**
- * Stage IDs whose acceptance references the analyzer could not resolve.
+ * Stage IDs that cannot gate a release: one whose acceptance references the analyzer could
+ * not resolve, and one that carries no acceptance reference at all. An empty
+ * `acceptanceRefs` used to leave a stage READY with nothing to prove it, which let a stage
+ * close on review alone. A stage with no gate is not ready; it is ungated.
  * @param {Map<string, {resolved: Array<Record<string, any>>, unresolved: string[]}>} resolution
  * @returns {string[]}
  */
 export function unresolvedStageIds(resolution) {
-  return [...resolution.entries()].filter(([, entry]) => entry.unresolved.length > 0).map(([id]) => id);
+  return [...resolution.entries()]
+    .filter(([, entry]) => entry.unresolved.length > 0 || entry.resolved.length === 0)
+    .map(([id]) => id);
+}
+
+/**
+ * Stage IDs that name no acceptance reference at all, separated from unresolved ones so
+ * the diagnostic can say which of the two problems a stage has.
+ * @param {Record<string, any>} plan
+ * @returns {string[]}
+ */
+export function ungatedStageIds(plan) {
+  return (plan?.stages ?? []).filter((stage) => (stage.acceptanceRefs ?? []).length === 0).map((stage) => stage.id);
 }
 
 /**
@@ -79,6 +94,7 @@ export function selectPlanTier(input) {
   const diagnostics = [];
   for (const [stageId, entry] of resolution.entries()) {
     if (entry.unresolved.length > 0) diagnostics.push(`UNRESOLVED_ACCEPTANCE: stage ${stageId} references undetected acceptance commands (${entry.unresolved.join(', ')}); the stage stays BLOCKED_BY_UNRESOLVED.`);
+    else if (entry.resolved.length === 0) diagnostics.push(`UNGATED_STAGE: stage ${stageId} names no acceptance reference, so nothing can prove it. It stays BLOCKED_BY_UNRESOLVED until it references a detected command.`);
   }
   const requested = input.requestedStageId ?? null;
   if (requested) {

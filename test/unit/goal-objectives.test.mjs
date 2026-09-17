@@ -50,3 +50,18 @@ test('references outside the repository are named, because no repository command
 test('a goal that stays inside the repository names no external reference', () => {
   assert.deepEqual(externalReferences('Update docs/spec.md and src/core/gate.mjs'), []);
 });
+
+// v1.13.4: reported from a live session. A goal listing its outcomes inside one sentence
+// counted as zero, so the gap went unreported exactly where it was easiest to miss.
+test('outcomes listed inside one sentence are counted like outcomes on their own lines', () => {
+  assert.equal(countEnumeratedObjectives('Finish (a) the resume point, (b) the collection demo, and (c) the collectors'), 3);
+  const [first] = unprovenObjectiveDiagnostics({
+    goalText: 'Finish (a) the resume point, (b) the collection demo, and (c) the collectors',
+    requiredAcceptanceCount: 2,
+  });
+  assert.match(first, /^UNPROVEN_OBJECTIVES: the goal enumerates 3 outcomes/u);
+});
+
+test('prose that merely uses a parenthesis is not a list', () => {
+  assert.equal(countEnumeratedObjectives('Implement slugify(input) in src/index.mjs so the suite passes'), 0);
+});

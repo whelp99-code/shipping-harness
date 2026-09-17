@@ -18,8 +18,11 @@ export const MAX_COUNTED_OBJECTIVES = 32;
 /** Largest number of external references reported. */
 export const MAX_EXTERNAL_REFERENCES = 6;
 
-// `(a)` `a)` `1.` `2)` `-` `*` `•` at the start of a line or after a separator.
-const ENUMERATION_MARKER = /(?:^|\n)\s*(?:\(?[a-z]\)|\(?\d{1,2}[.)]|[-*•])\s+\S/giu;
+// A list marker opening a line: `(a)` `a)` `1.` `2)` `-` `*` `•`.
+const LINE_MARKER = /(?:^|\n)\s*(?:\(?[a-z]\)|\(?\d{1,2}[.)]|[-*•])\s+\S/giu;
+// A parenthesised letter anywhere, so one sentence listing "(a) x, (b) y, (c) z" counts as
+// three outcomes rather than none. Requiring the parentheses keeps ordinary prose out.
+const INLINE_MARKER = /\([a-z]\)\s+\S/giu;
 const URL_LIKE = /\b[A-Za-z][A-Za-z0-9+.-]*:\/\/\S+/gu;
 const HOME_PATH = /(?:^|\s)~\/\S+/gu;
 const ABSOLUTE_PATH = /(?:^|\s)\/(?:etc|var|usr|opt|home|Users|Volumes)\/\S+/gu;
@@ -33,7 +36,9 @@ const HOST_PORT = /\b(?:[A-Za-z][A-Za-z0-9.-]*|\d{1,3}(?:\.\d{1,3}){3}):\d{2,5}\
  */
 export function countEnumeratedObjectives(goalText) {
   if (typeof goalText !== 'string' || !goalText.trim()) return 0;
-  return Math.min(MAX_COUNTED_OBJECTIVES, [...goalText.matchAll(ENUMERATION_MARKER)].length);
+  const lineMarkers = [...goalText.matchAll(LINE_MARKER)].length;
+  const inlineMarkers = [...goalText.matchAll(INLINE_MARKER)].length;
+  return Math.min(MAX_COUNTED_OBJECTIVES, Math.max(lineMarkers, inlineMarkers));
 }
 
 /**

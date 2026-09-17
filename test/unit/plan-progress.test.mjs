@@ -116,3 +116,36 @@ test('every stage done reports 100 percent and no next stage', async () => {
     await fixture.cleanup();
   }
 });
+
+// v1.13.4: reported from a live session. A stage naming no acceptance reference reached
+// READY, so it could be bound to a release and closed with nothing proving it.
+test('a stage that names no acceptance reference is never READY', async () => {
+  const { unresolvedStageIds, ungatedStageIds } = await import('../../src/core/plan-proposal.mjs');
+  const { resolveAcceptanceRefs } = await import('../../src/core/shipping-plan.mjs');
+  const plan = {
+    schema: PLAN_SCHEMA,
+    project: 'fixture',
+    program: { title: 'Fixture', outcome: 'Ship the fixture.' },
+    sources: [{ path: 'docs/plan.md' }],
+    stages: [
+      { id: 'S-01', title: 'Gated', outcome: 'Proven by a detected command.', dependsOn: [], acceptanceRefs: ['node-test'], size: 'MILESTONE' },
+      { id: 'S-02', title: 'Ungated', outcome: 'Nothing can prove this.', dependsOn: [], acceptanceRefs: [], size: 'MILESTONE' },
+    ],
+  };
+  validateShippingPlan(plan);
+  const analysis = { candidateCommands: [{ id: 'node-test', command: 'npm test', cwd: '.' }], stageCommands: [] };
+  const resolution = resolveAcceptanceRefs(plan, analysis);
+  assert.deepEqual(ungatedStageIds(plan), ['S-02']);
+  assert.deepEqual(unresolvedStageIds(resolution), ['S-02'], 'an ungated stage cannot gate a release');
+
+  const fixture = await createFixtureRepo();
+  try {
+    const progress = await computePlanProgress(fixture.root, plan, { unresolvedStageIds: unresolvedStageIds(resolution) });
+    const byId = new Map(progress.stages.map((entry) => [entry.id, entry.state]));
+    assert.equal(byId.get('S-01'), 'READY');
+    assert.notEqual(byId.get('S-02'), 'READY');
+    assert.equal(progress.nextStageId, 'S-01');
+  } finally {
+    await fixture.cleanup();
+  }
+});

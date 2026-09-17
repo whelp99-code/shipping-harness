@@ -16,7 +16,10 @@ const SOURCE_EXTENSIONS = new Set([
 const IGNORED_ROOTS = new Set([
   '.git', '.shipping', 'build', 'coverage', 'dist', 'node_modules', 'target', 'vendor', '.venv', 'venv',
 ]);
-const SAFE_PATH_SEGMENT = /^[A-Za-z0-9._-]+$/u;
+// Umbrella checkouts keep product directories with spaces ("JM-AI Action Hub"). A segment may
+// contain interior spaces but never a leading or trailing one, so a workspace root stays a
+// single unambiguous token in evidence, scope globs, and receipts.
+const SAFE_PATH_SEGMENT = /^[A-Za-z0-9._-](?:[A-Za-z0-9._ -]*[A-Za-z0-9._-])?$/u;
 const WORKSPACE_MARKERS = new Set([
   'package.json', 'pyproject.toml', 'Cargo.toml', 'go.mod', 'Makefile', 'makefile', 'GNUmakefile',
   'Taskfile.yml', 'Taskfile.yaml', 'justfile', 'docker-compose.yml', 'compose.yml', 'RELEASE_MANIFEST.json',

@@ -311,11 +311,14 @@ async function inspectWorkspace(root, workspaceRoot, allFiles) {
   if (pyproject) {
     manifests.push('pyproject.toml');
     types.push('python');
+    // A uv project installs its tools into .venv, so the ambient interpreter cannot
+    // run them; `uv run --frozen` uses the locked environment without resolving.
+    const pythonRunner = has('uv.lock') ? 'uv run --frozen ' : 'python -m ';
     const version = pyprojectVersion(pyproject);
     if (version && parseSemver(version)) versions.push({ source: 'pyproject', path: workspacePath(workspaceRoot, 'pyproject.toml'), version, confidence: 'high', priority: 90 });
-    if (/\[tool\.ruff\]|\bruff\b/u.test(pyproject)) commands.push({ id: 'python-ruff', description: 'Configured Ruff checks pass.', command: 'python -m ruff check .', cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
-    if (/\[tool\.mypy\]|\bmypy\b/u.test(pyproject)) commands.push({ id: 'python-mypy', description: 'Configured mypy checks pass.', command: 'python -m mypy .', cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
-    if (/\[tool\.pytest\]|pytest/u.test(pyproject) || files.some((file) => file.startsWith('tests/'))) commands.push({ id: 'python-pytest', description: 'Python tests pass.', command: 'python -m pytest', cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
+    if (/\[tool\.ruff\]|\bruff\b/u.test(pyproject)) commands.push({ id: 'python-ruff', description: 'Configured Ruff checks pass.', command: `${pythonRunner}ruff check .`, cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
+    if (/\[tool\.mypy\]|\bmypy\b/u.test(pyproject)) commands.push({ id: 'python-mypy', description: 'Configured mypy checks pass.', command: `${pythonRunner}mypy .`, cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
+    if (/\[tool\.pytest\]|pytest/u.test(pyproject) || files.some((file) => file.startsWith('tests/'))) commands.push({ id: 'python-pytest', description: 'Python tests pass.', command: `${pythonRunner}pytest`, cwd: workspaceRoot, source: workspacePath(workspaceRoot, 'pyproject.toml'), confidence: 'medium', aggregate: false });
   }
   if (cargo) {
     manifests.push('Cargo.toml'); types.push('rust');

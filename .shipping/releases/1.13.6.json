@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 2,
+    "requiredFailed": 0,
+    "total": 2
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "6d3c6fc8981ba086b56d3b028d8ad94e5ff8cdd9",
+  "closedAt": "2026-09-17T07:36:40.081Z",
+  "closedGitSha": "6d1587da95729f9731ef07e757f6c2907cb4cf85",
+  "contractHash": "72652d03eb74777949f2c5c7866893380a854a218ed6a7bd4d10badadddf7fee",
+  "evidenceRunId": "run-2026-09-17T07-36-12-730Z-f0526761",
+  "fixCycles": 0,
+  "goal": "Record that the CLI release path has no approval artifact, so a model driving the CLI closes a release without the evidence of human approval the MCP path produces",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "6d1587da95729f9731ef07e757f6c2907cb4cf85",
+      "subject": "chore: lock shipping-harness v1.13.6"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.6",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

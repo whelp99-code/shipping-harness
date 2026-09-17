@@ -1,16 +1,34 @@
 {
   "acceptance": [
     {
-      "id": "AC-11311",
-      "description": "A workspace directory with interior spaces is selectable; leading or trailing spaces are still rejected.",
+      "id": "AC-11301",
+      "description": "Baseline auto-commit, its safety screen, and the dirty-tree-to-approval flow behave as specified.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/mcp/nested-workspace-refine.test.mjs test/unit/goal-scope-paths.test.mjs test/adversarial/goal-scope-attacks.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/baseline-commit.test.mjs test/adversarial/baseline-commit-attacks.test.mjs test/integration/baseline-autocommit-flow.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-11312",
+      "id": "AC-11302",
+      "description": "Commits made after lock are recorded, and paths named in the goal enter scope without allowing path escape.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/unit/post-lock-commits.test.mjs test/unit/goal-scope-paths.test.mjs test/adversarial/goal-scope-attacks.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-11303",
+      "description": "Existing MCP, plan, usability, and surface-freeze suites pass.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/mcp/*.test.mjs test/usability/*.test.mjs test/stable/surface-freeze.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 600
+    },
+    {
+      "id": "AC-11304",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -19,7 +37,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-11313",
+      "id": "AC-11305",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -162,9 +180,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Accept umbrella product directories whose names contain interior spaces as selectable workspaces, while still rejecting leading or trailing spaces",
+  "goal": "Remove the decision friction around a dirty working tree: commit the baseline before proposing, record commits made after lock in the receipt, and put paths named in the goal into the proposed scope",
   "project": "shipping-harness",
-  "release": "1.13.1",
+  "release": "1.13.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

@@ -122,6 +122,13 @@ async function nestedPlanningPilot(ompVersion) {
 /** @param {{ompCommand?: string, project?: string, check?: boolean}} [input] */
 export async function runFieldSmoke(input = {}) {
   const omp = resolveOnPath(input.ompCommand ?? 'omp');
+  // v1.13.9: this smoke drives the real OMP host, which is not installed everywhere --
+  // a stock CI runner has no `omp`. Crashing with spawnSync ENOENT told nobody anything.
+  // It reports a skip instead, on a line release:verify counts and prints as a WARNING,
+  // so a smoke that did not run is visible rather than either red or silently green.
+  if (!path.isAbsolute(omp)) {
+    return { schema: 'shipping-harness/omp-field-smoke-v1', skipped: true, reason: `the omp executable was not found on PATH (looked for ${input.ompCommand ?? 'omp'})` };
+  }
   const versionOutput = runCommand(omp, ['--version'], { timeoutMs: 60000 }).stdout.trim();
   const ompVersion = parseOmpVersion(versionOutput);
   const host = TESTED_OMP_HOSTS.find((entry) => entry.version === ompVersion);
@@ -171,6 +178,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     project: option('--project'),
     check: process.argv.includes('--check'),
   }).then((result) => {
+    // release:verify counts this line and prints it as a WARNING, the same way it
+    // surfaces skipped tests. A smoke that did not run must never read as green.
+    if (result.skipped) process.stdout.write(`SKIPPED: ${result.reason}\n`);
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   }).catch((error) => {
     const code = error && typeof error === 'object' && 'code' in error ? ` [${error.code}]` : '';

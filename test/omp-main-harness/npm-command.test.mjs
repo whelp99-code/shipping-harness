@@ -23,7 +23,16 @@ test('the absolute /usr/bin/npm still wins where it exists, so behaviour is unch
   assert.equal(defaultNpmCommand({ PATH: '' }), '/usr/bin/npm', 'the preferred absolute path does not depend on PATH');
 });
 
-test('an empty PATH cannot make the resolver return a bare name when npm is absolute', () => {
-  const resolved = defaultNpmCommand({ PATH: '' });
-  assert.ok(path.isAbsolute(resolved) || resolved === 'npm', 'a bare name is only acceptable when nothing was found');
+test('with the preferred path absent it falls back to PATH and still finds a real npm', () => {
+  // v1.13.9: the fallback is the branch a CI runner actually takes, and it was shipped
+  // untested -- release:verify went red on GitHub with spawnSync /usr/bin/npm ENOENT
+  // while every local gate was green. Passing the preferred path in exercises it here.
+  const resolved = defaultNpmCommand(process.env, '/nonexistent/bin/npm');
+  assert.notEqual(resolved, '/nonexistent/bin/npm');
+  assert.ok(path.isAbsolute(resolved), `PATH resolution must yield an absolute path, got ${resolved}`);
+  assert.ok(existsSync(resolved), `${resolved} must exist`);
+});
+
+test('with neither the preferred path nor PATH it returns the bare name rather than inventing one', () => {
+  assert.equal(defaultNpmCommand({ PATH: '' }, '/nonexistent/bin/npm'), 'npm');
 });

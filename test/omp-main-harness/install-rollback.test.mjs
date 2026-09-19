@@ -8,13 +8,14 @@ import { installOmpMainHarness, planOmpMainHarness, rollbackOmpMainHarness } fro
 import { installedShippingVersion, packShippingSource, shippingPrefixPaths } from '../../packages/omp-main-harness/package.mjs';
 import { ompMainPaths } from '../../packages/omp-main-harness/paths.mjs';
 import { createFakeOmpEnvironment, createOldShippingPackage, installPackage } from './helpers.mjs';
+import { defaultNpmCommand } from '../../packages/omp-main-harness/io.mjs';
 
 const CURRENT_VERSION = JSON.parse(await readFile(new URL('../../package.json', import.meta.url), 'utf8')).version;
 
 async function currentPackage(environment) {
   const destination = path.join(environment.root, 'current-pack');
   await mkdir(destination, { recursive: true });
-  return packShippingSource({ destination, npmCommand: '/usr/bin/npm' });
+  return packShippingSource({ destination, npmCommand: defaultNpmCommand() });
 }
 
 test('user-local upgrade installs the current package, merges OMP safely, passes doctor, and rolls back exactly', async () => {
@@ -32,7 +33,7 @@ test('user-local upgrade installs the current package, merges OMP safely, passes
       agentDir: environment.agentDir,
       shippingPrefix: environment.prefix,
       ompCommand: environment.omp,
-      npmCommand: '/usr/bin/npm',
+      npmCommand: defaultNpmCommand(),
       packagePath: packed.path,
       sourceTag: `v${CURRENT_VERSION}-test`,
       dryRun: false,
@@ -81,7 +82,7 @@ test('user-local upgrade installs the current package, merges OMP safely, passes
       agentDir: environment.agentDir,
       shippingPrefix: environment.prefix,
       ompCommand: environment.omp,
-      npmCommand: '/usr/bin/npm',
+      npmCommand: defaultNpmCommand(),
       backupId: installed.backup.id,
       dryRun: false,
     });

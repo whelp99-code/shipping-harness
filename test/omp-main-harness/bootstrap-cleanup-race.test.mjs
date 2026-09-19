@@ -8,6 +8,7 @@ import {
   rollbackOmpMainHarness,
 } from '../../packages/omp-main-harness/install.mjs';
 import { installedShippingVersion } from '../../packages/omp-main-harness/package.mjs';
+import { defaultNpmCommand } from '../../packages/omp-main-harness/io.mjs';
 import {
   createFakeOmpEnvironment,
   createOldShippingPackage,
@@ -39,7 +40,7 @@ test('bootstrap waits for the complete install before removing its temporary pac
       agentDir: environment.agentDir,
       shippingPrefix: environment.prefix,
       ompCommand: environment.omp,
-      npmCommand: '/usr/bin/npm',
+      npmCommand: defaultNpmCommand(),
       dryRun: false,
       requireTag: false,
       tag: `v${CURRENT_VERSION}-bootstrap-test`,
@@ -79,7 +80,7 @@ test('bootstrap waits for the complete install before removing its temporary pac
       agentDir: environment.agentDir,
       shippingPrefix: environment.prefix,
       ompCommand: environment.omp,
-      npmCommand: '/usr/bin/npm',
+      npmCommand: defaultNpmCommand(),
       backupId: installed.backup.id,
       dryRun: false,
     });

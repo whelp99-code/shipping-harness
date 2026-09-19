@@ -224,10 +224,10 @@ export function resolveOnPath(command, env = process.env) {
  * behaviour is unchanged wherever it already worked; otherwise this falls back to the
  * same PATH resolution the omp command already uses.
  * @param {NodeJS.ProcessEnv} [env] Environment to read PATH from.
+ * @param {string} [preferred] Absolute path tried first; a parameter so the fallback is testable on a machine that has it.
  * @returns {string} An npm executable path.
  */
-export function defaultNpmCommand(env = process.env) {
-  const preferred = '/usr/bin/npm';
+export function defaultNpmCommand(env = process.env, preferred = '/usr/bin/npm') {
   try {
     if (spawnSync('/usr/bin/test', ['-x', preferred]).status === 0) return preferred;
   } catch {

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
-import { runCommand } from '../../packages/omp-main-harness/io.mjs';
+import { defaultNpmCommand, runCommand } from '../../packages/omp-main-harness/io.mjs';
 
 export async function createFakeOmpEnvironment() {
   const root = await mkdtemp(path.join(os.tmpdir(), 'shipping-omp-main-test-'));
@@ -121,13 +121,13 @@ export async function createOldShippingPackage(root, version = '1.0.1') {
   await writeFile(path.join(bin, 'shipping-harness-mcp.mjs'), '#!/usr/bin/env node\nprocess.stdin.resume();\n', 'utf8');
   await chmod(path.join(bin, 'shipping-harness.mjs'), 0o755);
   await chmod(path.join(bin, 'shipping-harness-mcp.mjs'), 0o755);
-  const output = runCommand('/usr/bin/npm', ['pack', '--json', '--pack-destination', pack], { cwd: source, timeoutMs: 120000 }).stdout;
+  const output = runCommand(defaultNpmCommand(), ['pack', '--json', '--pack-destination', pack], { cwd: source, timeoutMs: 120000 }).stdout;
   const filename = JSON.parse(output)[0].filename;
   return path.join(pack, filename);
 }
 
 export function installPackage(prefix, archive) {
-  runCommand('/usr/bin/npm', [
+  runCommand(defaultNpmCommand(), [
     'install', '--offline', '--global', '--prefix', prefix, archive,
     '--ignore-scripts', '--no-audit', '--no-fund',
   ], { timeoutMs: 180000 });

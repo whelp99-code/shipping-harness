@@ -1,31 +1,22 @@
 {
   "acceptance": [
     {
-      "id": "AC-11371",
-      "description": "Commits after a close no longer block the next release, uncommitted work still does and is named, and the version recommendation chooses the next number.",
+      "id": "AC-11361",
+      "description": "Documentation audit passes, the backlog records the CLI approval gap, and no whitespace errors remain.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/release-prepare-drift.test.mjs test/unit/post-lock-commits.test.mjs test/unit/state-integrity.test.mjs",
+      "command": "npm run verify:docs && grep -q BACKLOG-013 BACKLOG.md && git diff --check",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 300
+      "timeoutSeconds": 120
     },
     {
-      "id": "AC-11372",
+      "id": "AC-11362",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 900
-    },
-    {
-      "id": "AC-11373",
-      "description": "Documentation audit passes and no whitespace errors remain.",
-      "type": "command",
-      "command": "npm run verify:docs && git diff --check",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 120
     }
   ],
   "adapters": {
@@ -162,9 +153,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Stop treating commits made after a close as drift, so the basic cycle of close, commit, prepare works; name the offending paths in the error; and let the analyzer version recommendation choose the next release number",
+  "goal": "Record that the CLI release path has no approval artifact, so a model driving the CLI closes a release without the evidence of human approval the MCP path produces",
   "project": "shipping-harness",
-  "release": "1.13.7",
+  "release": "1.13.6",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

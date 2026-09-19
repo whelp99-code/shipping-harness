@@ -2,7 +2,7 @@ import path from 'node:path';
 import { rm } from 'node:fs/promises';
 import { loadContract, validateContract } from './contract.mjs';
 import { stableStringify } from './crypto.mjs';
-import { changedPathsSince } from './git.mjs';
+import { uncommittedPaths } from './git.mjs';
 import { exists, readText, writeAtomic, writeJsonAtomic } from './fs.mjs';
 import { runtimePaths } from './paths.mjs';
 import { invariant } from './errors.mjs';
@@ -47,9 +47,12 @@ export async function prepareNextRelease(root, input) {
     current: current.release,
     requested: input.release,
   });
-  const changed = changedPathsSince(root, state.closedGitSha ?? state.baselineSha)
-    .filter((candidate) => !candidate.startsWith('.shipping/'));
-  invariant(changed.length === 0, 'ERR_RELEASE_DRIFT', 'Commit or discard source changes before preparing the next release', { changed });
+  // Only UNCOMMITTED work blocks the next release. Commits made after the close are the
+  // next release's contents, not drift: closing, committing the next piece of work, and
+  // preparing the next release is this product's basic cycle, and comparing the closed SHA
+  // against the working tree made that cycle stop after one turn.
+  const changed = uncommittedPaths(root).filter((candidate) => !candidate.startsWith('.shipping/'));
+  invariant(changed.length === 0, 'ERR_RELEASE_DRIFT', `Commit or discard these source changes before preparing the next release: ${changed.slice(0, 20).join(', ')}${changed.length > 20 ? ` and ${changed.length - 20} more` : ''}`, { changed });
 
   const archivedContract = path.join(paths.releases, `${current.release}-contract.yaml`);
   const archivedLock = path.join(paths.releases, `${current.release}-contract.lock.json`);

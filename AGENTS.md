@@ -84,20 +84,18 @@ The exact command sequence for closing one version end to end, in order, with th
 11. Commit the receipt (`chore: close shipping-harness X.Y.Z`) → inspect `git status` clean.
 12. `git tag -a vX.Y.Z -m "…"` → inspect `git tag -l vX.Y.Z` and that it points at the close commit.
 
-### Gotcha: `release prepare` vs. post-close commits
+### Commits after a close are the next release, not drift
 
-`release prepare` diffs the current working tree against `state.closedGitSha` for everything **outside** `.shipping/` and refuses to run if that tree has drifted (`ERR_RELEASE_DRIFT`). A commit made *after* `close` that touches non-`.shipping/` files (for example, a docs cleanup commit landed after `chore: close …`) therefore blocks the next `release prepare` even though it is unrelated to the closed release's scope.
+`release prepare` refuses only when the working tree has **uncommitted** source changes
+outside `.shipping/`. Commits made after `close` are the next release's contents and do
+not block it, so the ordinary cycle works: close, commit the receipt, do the next piece of
+work, commit it, prepare the next release.
 
-Workaround used in this session: check out the close commit into a detached worktree, run `release prepare` there (where the tree exactly matches `closedGitSha`), then copy the resulting `.shipping/` directory back onto the branch tip before committing.
-
-```bash
-git worktree add /tmp/prepare-at-close <close-commit-sha>
-cd /tmp/prepare-at-close && node bin/shipping-harness.mjs release prepare --version X.Y.Z --goal "…"
-cp -r .shipping /path/to/main/checkout/.shipping
-cd /path/to/main/checkout && git worktree remove /tmp/prepare-at-close
-```
-
-Prefer running `release prepare` immediately after the close commit, before any further commit touches non-`.shipping/` files, so this workaround is not needed.
+Before v1.13.7 this check compared the working tree against `state.closedGitSha`, so any
+post-close source commit blocked the next `release prepare` with `ERR_RELEASE_DRIFT` and a
+message telling you to commit work that was already committed. If you meet that error on an
+older build, the workaround is a detached worktree at the close commit; on v1.13.7 and
+later, the error means what it says and names the paths.
 
 ## Language rule
 

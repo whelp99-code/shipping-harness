@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "3f0c06112cb127025bbd1eee049851b873916833",
+  "closedAt": "2026-09-19T13:27:50.424Z",
+  "closedGitSha": "3f2509b1d7bbd28e32f2987343116337f941a41a",
+  "contractHash": "3301358d52574171dbc59df9398b7b40f72b5724f30d02e3990709c0175f3d2e",
+  "evidenceRunId": "run-2026-09-19T13-27-23-755Z-a503b5aa",
+  "fixCycles": 0,
+  "goal": "Stop treating commits made after a close as drift, so the basic cycle of close, commit, prepare works; name the offending paths in the error; and let the analyzer version recommendation choose the next release number",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "3f2509b1d7bbd28e32f2987343116337f941a41a",
+      "subject": "chore: lock shipping-harness v1.13.7"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.7",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

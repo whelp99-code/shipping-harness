@@ -2,7 +2,16 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.6] - Unreleased
+## [1.13.7] - Unreleased
+
+In progress. A blocking defect reported from a live release, and the version-number bug found beside it.
+
+- **Closing a release then committing anything made the next release impossible.** `release prepare` compared the closed Git SHA against the working tree, so every commit landed after the close counted as drift and the command refused with `ERR_RELEASE_DRIFT`, telling the user to commit work that was already committed. Close, commit the next piece of work, prepare the next release is this product's basic cycle, and it stopped after one turn. Only uncommitted source changes outside `.shipping/` block now, which is what the error always claimed to mean, and the message names the paths instead of leaving them in an unprinted details field.
+- **The next release number ignored the analyzer.** With no explicit version the harness bumped the minor, discarding a version recommendation it had already derived with a change kind and a confidence: after closing 1.0.2 a patch-sized change was proposed as 1.1.0 while the evidence said 1.0.3. The recommendation is used whenever it is ahead of the closed release, with the minor bump as the fallback.
+
+The workaround this repository had written into `AGENTS.md` for the first defect is removed. It should have been a fix.
+
+## [1.13.6] - 2026-09-17
 
 In progress: documentation only. Records BACKLOG-013, the CLI release path's missing approval artifact. The MCP flow binds an exact proposal hash and records who approved so a model cannot approve its own proposal; the CLI path treats whoever runs `lock` as the operator, so a model driving it closes a release with no record that a human authorised the scope. Noticed while closing this repository's own releases that way. Not a blocker, and closing it needs a decision about what "operator" means when the hands are a model.
 

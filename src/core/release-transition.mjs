@@ -34,6 +34,47 @@ export function compareSemver(left, right) {
 }
 
 /**
+ * The scope a freshly prepared draft starts with: nothing stated about this release, and
+ * the structural denial list kept.
+ *
+ * v1.13.10: `release prepare` used to copy the previous release's scope forward, so every
+ * draft was born describing the release before it. This repository carried v1.8.2's scope
+ * statements and path allowlist as far as v1.13.8, where work done after the lock finally
+ * made it visible as seven scope blockers and an amendment. The symptom is invisible
+ * whenever implementation precedes the lock, which is how this repository works.
+ *
+ * The denial list (`.shipping/contract.yaml`, `.git/**`, `node_modules/**
+ * The issue register a freshly prepared draft starts with.
+ * @param {string} now ISO timestamp.
+ * @returns {Record<string, any>} An empty issues document.
+ */
+function emptyIssues(now) {
+  return {
+    schema: 'shipping-harness/issues-v1',
+    issues: [],
+    counts: { BLOCKER: 0, NEXT: 0, IGNORE: 0, UNKNOWN: 0 },
+    updatedAt: now,
+  };
+}
+
+/**` and friends)
+ * is structural, not release-specific, and stays. What the release may touch and what it
+ * is for must be stated again. `lockContract` refuses a draft that leaves them empty,
+ * which is what keeps this from turning a stale scope into an absent one: `analyzeScope`
+ * reads an empty include list as no restriction, not as a narrow one.
+ * @param {Record<string, any>} scope The closed release's scope.
+ * @returns {Record<string, any>} A scope stating nothing about the next release.
+ */
+function unstatedScope(scope) {
+  return {
+    ...scope,
+    include: [],
+    exclude: [],
+    paths: { ...scope.paths, include: [] },
+  };
+}
+
+/**
  * Archive the closed contract and create a clean DRAFT for the next release.
  * @param {string} root
  * @param {{release: string, goal?: string | null}} input
@@ -68,6 +109,7 @@ export async function prepareNextRelease(root, input) {
   };
   // A plan stage binding belongs to the closed release only; the next DRAFT starts unbound.
   delete next.plan;
+  next.scope = unstatedScope(next.scope);
   validateContract(next);
   await writeAtomic(paths.contract, stableStringify(next));
   await rm(paths.lock, { force: true });
@@ -95,12 +137,7 @@ export async function prepareNextRelease(root, input) {
     createdAt: now,
     updatedAt: now,
   };
-  await writeJsonAtomic(paths.issues, {
-    schema: 'shipping-harness/issues-v1',
-    issues: [],
-    counts: { BLOCKER: 0, NEXT: 0, IGNORE: 0, UNKNOWN: 0 },
-    updatedAt: now,
-  });
+  await writeJsonAtomic(paths.issues, emptyIssues(now));
   await writeSignedState(root, draft, {
     type: 'release.prepared',
     to: 'DRAFT',

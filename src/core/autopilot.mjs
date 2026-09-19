@@ -242,7 +242,13 @@ export async function activateAutopilot(root, input) {
     const spent = await isSpentAutopilotBinding(root, existingState?.currentRelease, input.releaseTrain.currentRelease);
     invariant(!existingState || TERMINAL_PHASES.has(existingState.phase) || spent, 'ERR_AUTOPILOT_ACTIVE', 'A different autopilot policy is already active');
     const now = new Date().toISOString();
-    const event = createEvent(null, {
+    // v1.13.8: this used to pass null, restarting the ledger at sequence 1 with a null
+    // previousHash. The autopilot ledger is one append-only chain for the whole
+    // repository, so a re-activation that resets it leaves "...#4, #1" on disk and every
+    // later read throws ERR_AUTOPILOT_SEQUENCE. It stayed latent while re-activation was
+    // refused outright; allowing a spent policy to be replaced made it reachable, and it
+    // moved the reported deadlock from approve to verify instead of removing it.
+    const event = createEvent(existingState ?? null, {
       occurredAt: now,
       type: 'autopilot.activated',
       policyHash: policy.hash,

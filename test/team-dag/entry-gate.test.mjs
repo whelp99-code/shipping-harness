@@ -2,6 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { buildTeamDagDecision, decideTeamDagActivation, verifyCriterion } from '../../scripts/team-dag-entry-gate.mjs';
+import { privateOmoRuntimeAvailability } from '../omo/helpers.mjs';
+
+// v1.13.8: buildTeamDagDecision() reads the promotion evidence of the private OMO
+// runtime, which is pinned to an absolute path outside this repo and is not installed
+// on every machine. Same rule as test/omo/: skip, never fail, when it is absent. The
+// two pure-logic tests below do not touch it and always run.
+const runtime = privateOmoRuntimeAvailability();
+const skip = runtime.available ? {} : { skip: runtime.reason };
 
 const pilot = JSON.parse(readFileSync(new URL('../../docs/internal-runtime/v0.7-pilot.json', import.meta.url), 'utf8'));
 const benefitSignal = Object.keys(pilot.entryGate).find((key) => ![
@@ -36,7 +44,7 @@ test('even proven entry signals cannot self-enable Team/DAG without a new contra
   assert.equal(decision.enabled, false);
 });
 
-test('the locked v0.8 evidence report proves DISABLED without invented benchmark claims', async () => {
+test('the locked v0.8 evidence report proves DISABLED without invented benchmark claims', skip, async () => {
   const report = await buildTeamDagDecision();
   assert.equal(report.decision, 'DISABLED');
   assert.equal(report.enabled, false);

@@ -95,9 +95,18 @@ test('dirty nested project produces an exact preservation plan without changing 
     await put(fixture.root, 'runtime-v1.1.0/RELEASE_MANIFEST.json', '{"version":"1.1.0","validated":true}\n');
     await put(fixture.root, '.omo/session.json', '{"runtime":true}\n');
     const before = productFingerprint(fixture.root, 'runtime-v1.1.0');
+    // v1.13.8: this is the fifth DIRTY_BASELINE test. The other four were switched to
+    // commitBaseline:false in v1.13.0; this one was missed because test/autopilot/ was
+    // gated by nothing (see scripts/release-verify.mjs). productFingerprint hashes HEAD
+    // plus the diffs, so the v1.13.0 baseline auto-commit moves it even though the working
+    // tree bytes are untouched -- the commit's parent is the previous HEAD and
+    // `git reset --soft HEAD~1` restores the dirty tree exactly. The auto-commit path is
+    // covered by test/integration/baseline-autocommit-flow.test.mjs; what this test is for
+    // is the pre-auto-commit review flow, which is what commitBaseline:false preserves.
     const started = await callShippingTool(fixture.root, 'shipping_start', {
       goal: 'Preserve the current nested runtime work and define the smallest verified patch without executing it.',
       release: '1.1.1',
+      commitBaseline: false,
     });
     const proposal = started.structuredContent;
     const after = productFingerprint(fixture.root, 'runtime-v1.1.0');

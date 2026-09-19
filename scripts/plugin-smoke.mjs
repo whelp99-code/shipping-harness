@@ -6,6 +6,7 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { hashFile } from '../src/core/crypto.mjs';
+import { singleNpmPackEntry } from '../src/core/npm-pack.mjs';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const tmp = await mkdtemp(path.join(os.tmpdir(), 'shipping-plugin-smoke-'));
@@ -73,7 +74,7 @@ const tool = (name, argumentsValue = {}) => ({ _meta: meta, name, arguments: arg
 
 try {
   const packOutput = run('npm', ['pack', '--json', '--pack-destination', packDir], { cwd: projectRoot });
-  const packed = JSON.parse(packOutput)[0];
+  const packed = singleNpmPackEntry(JSON.parse(packOutput));
   const tarball = path.join(packDir, packed.filename);
   run('npm', ['install', '--prefix', envRoot, '--ignore-scripts', '--no-audit', '--no-fund', tarball], { cwd: tmp });
   const installedRoot = path.join(envRoot, 'node_modules', 'shipping-harness');

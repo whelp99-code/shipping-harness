@@ -2,7 +2,7 @@
   "acceptance": [
     {
       "id": "AC-11381",
-      "description": "A policy bound to a closed release is spent and gates nothing; a binding without a closure receipt still fails closed; an impossible activation is refused before anything is locked.",
+      "description": "A policy bound to a closed release is spent and gates nothing; a binding without a closure receipt still fails closed; an impossible activation is refused before anything is locked; re-activating on a new train continues the one autopilot ledger chain instead of restarting it.",
       "type": "command",
       "command": "node --test --test-reporter=spec test/adversarial/autopilot-spent-policy.test.mjs test/autopilot/*.test.mjs",
       "cwd": ".",
@@ -23,6 +23,24 @@
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-11384",
+      "description": "Every test/<suite>/ directory and every test:*/smoke:* script is reachable from release:verify or excluded with a written reason, and the audit reproduces the v1.13.0 hole rather than agreeing with itself.",
+      "type": "command",
+      "command": "npm run verify:gate-coverage && node --test --test-reporter=spec test/unit/gate-coverage.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "AC-11385",
+      "description": "Both the pre-npm-12 array and the npm 12 name-keyed object forms of npm pack --json are handled, and an ambiguous or filename-less result is refused rather than read as undefined.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/unit/npm-pack.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 120
@@ -162,7 +180,7 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "A policy bound to a release that has already closed is spent: it must gate nothing and must never make a human approval fail after the scope is already locked",
+  "goal": "A policy bound to a release that has already closed is spent: it must gate nothing and must never make a human approval fail after the scope is already locked. The release also closes the gap that let this ship: four test directories were reachable from no release gate, and every defect they were hiding is fixed.",
   "project": "shipping-harness",
   "release": "1.13.8",
   "releasePolicy": {

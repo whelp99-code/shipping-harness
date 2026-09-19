@@ -17,28 +17,7 @@
 import { spawn } from 'node:child_process';
 import os from 'node:os';
 
-/** @typedef {{ name: string, script: string }} ReleaseVerifyStep */
-
-/** @type {ReleaseVerifyStep[]} */
-const STEPS = [
-  { name: 'check', script: 'check' },
-  { name: 'test:plugin', script: 'test:plugin' },
-  { name: 'test:remote', script: 'test:remote' },
-  { name: 'test:stable', script: 'test:stable' },
-  { name: 'security', script: 'security' },
-  { name: 'security:inventory', script: 'security:inventory' },
-  { name: 'license:check', script: 'license:check' },
-  { name: 'verify:docs', script: 'verify:docs' },
-  { name: 'smoke:release-train', script: 'smoke:release-train' },
-  { name: 'smoke:autopilot', script: 'smoke:autopilot' },
-  { name: 'smoke:autopilot:field', script: 'smoke:autopilot:field' },
-  { name: 'smoke:goal-discovery', script: 'smoke:goal-discovery' },
-  { name: 'smoke:goal-charter', script: 'smoke:goal-charter' },
-  { name: 'test:goal-charter:field', script: 'test:goal-charter:field' },
-  { name: 'smoke:goal-charter:field', script: 'smoke:goal-charter:field' },
-  { name: 'test:intent-gate', script: 'test:intent-gate' },
-  { name: 'smoke:intent-gate', script: 'smoke:intent-gate' },
-];
+import { STEPS } from './release-verify-steps.mjs';
 
 const args = process.argv.slice(2);
 if (args.includes('--list')) {

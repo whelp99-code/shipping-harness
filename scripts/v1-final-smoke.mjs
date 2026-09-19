@@ -5,6 +5,8 @@ import readline from 'node:readline';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { verifyPrivateOmoPromotion } from '../packages/internal-omo-bridge/index.mjs';
+import { singleNpmPackEntry } from '../src/core/npm-pack.mjs';
+import { VERSION } from '../src/version.mjs';
 
 const repo = process.cwd();
 const root = await mkdtemp(path.join(os.tmpdir(), 'shipping-v1-final-'));
@@ -120,8 +122,8 @@ async function installedMcpFlow(mcpBinary, projectRoot) {
 try {
   const packDir = path.join(root, 'packs');
   await mkdir(packDir);
-  const pack = JSON.parse(exec('npm', ['pack', '--json', '--pack-destination', packDir]));
-  const tgz = path.join(packDir, pack[0].filename);
+  const pack = singleNpmPackEntry(JSON.parse(exec('npm', ['pack', '--json', '--pack-destination', packDir])));
+  const tgz = path.join(packDir, pack.filename);
   const packageSha = sha256(tgz);
 
   const cleanPrefix = path.join(root, 'clean-install');
@@ -131,14 +133,17 @@ try {
   const installedMcp = path.join(binRoot, 'shipping-harness-mcp');
   const installedPlugin = path.join(binRoot, 'shipping-harness-plugin');
   const installedVersion = exec(installedCli, ['version']);
-  if (!installedVersion.includes('1.0.0')) throw new Error(`clean install version mismatch: ${installedVersion}`);
+  // v1.13.8: this was pinned to the literal '1.0.0'. The check means "the clean install
+  // reports the version we just packed", so it must follow package.json, not the release
+  // this script was first written for.
+  if (!installedVersion.includes(VERSION)) throw new Error(`clean install version mismatch: ${installedVersion} (expected ${VERSION})`);
 
   exec('git', ['worktree', 'add', '--detach', v06, 'v0.6.0']);
   worktree = true;
   const v06PackDir = path.join(root, 'v06-pack');
   await mkdir(v06PackDir);
-  const oldPack = JSON.parse(exec('npm', ['pack', '--json', '--pack-destination', v06PackDir], { cwd: v06 }));
-  const oldTgz = path.join(v06PackDir, oldPack[0].filename);
+  const oldPack = singleNpmPackEntry(JSON.parse(exec('npm', ['pack', '--json', '--pack-destination', v06PackDir], { cwd: v06 })));
+  const oldTgz = path.join(v06PackDir, oldPack.filename);
   const upgradePrefix = path.join(root, 'upgrade-install');
   exec('npm', ['install', '--prefix', upgradePrefix, oldTgz, '--ignore-scripts', '--no-audit', '--no-fund']);
   const upgradeBin = path.join(upgradePrefix, 'node_modules', '.bin', 'shipping-harness');
@@ -146,7 +151,7 @@ try {
   if (!before.includes('0.6.0')) throw new Error(`expected v0.6 before upgrade: ${before}`);
   exec('npm', ['install', '--prefix', upgradePrefix, tgz, '--ignore-scripts', '--no-audit', '--no-fund']);
   const after = exec(upgradeBin, ['version']);
-  if (!after.includes('1.0.0')) throw new Error(`expected v1 after upgrade: ${after}`);
+  if (!after.includes(VERSION)) throw new Error(`expected ${VERSION} after upgrade: ${after}`);
 
   const pluginProject = path.join(root, 'plugin-project');
   await mkdir(pluginProject, { recursive: true });
@@ -191,7 +196,7 @@ try {
     schema: 'shipping-harness/final-smoke-v1',
     status: 'PASS',
     package: {
-      file: pack[0].filename,
+      file: pack.filename,
       sha256: packageSha,
       cleanInstallVersion: installedVersion.trim(),
       upgradeFrom: before.trim(),

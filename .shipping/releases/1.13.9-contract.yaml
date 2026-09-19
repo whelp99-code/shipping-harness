@@ -1,25 +1,25 @@
 {
   "acceptance": [
     {
-      "id": "AC-113101",
-      "description": "A prepared release does not inherit the previous release scope, an empty allowlist is proven to mean no restriction, and a draft that never states its scope cannot be locked.",
+      "id": "AC-11391",
+      "description": "The OMP package and its tests resolve npm through one resolver, and the PATH fallback that a runner takes is exercised rather than assumed.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/scope-carry-forward.test.mjs",
+      "command": "node --test --test-reporter=spec test/omp-main-harness/*.test.mjs",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 300
+      "timeoutSeconds": 600
     },
     {
-      "id": "AC-113102",
-      "description": "The two smokes that need the retired private OMO runtime report a countable skip and are release:verify steps rather than exclusions.",
+      "id": "AC-11392",
+      "description": "A smoke script that cannot run reports a skip that release:verify counts and prints as a WARNING, instead of crashing or reading as a plain PASS.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/gate-skip-reporting.test.mjs test/unit/gate-coverage.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/gate-skip-reporting.test.mjs",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 300
+      "timeoutSeconds": 120
     },
     {
-      "id": "AC-113103",
+      "id": "AC-11393",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -28,7 +28,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-113104",
+      "id": "AC-11394",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -171,9 +171,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "A release must state its own scope: prepare no longer copies the previous release's scope forward, and a draft that never says which paths it may change cannot be locked. Two smokes that need a retired runtime are gated as skips instead of excluded.",
+  "goal": "A gate step must behave the same on a contributor machine and on a runner: resolve npm the same way everywhere, and let a smoke that cannot run report a skip instead of crashing or reading green.",
   "project": "shipping-harness",
-  "release": "1.13.10",
+  "release": "1.13.9",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -191,15 +191,15 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Reopening a closed release.",
-      "Letting a step that did not run report a plain PASS, or letting a release lock without saying what it may change.",
-      "Rebuilding or reactivating the retired private OMO runtime.",
+      "Reopening v1.13.8 or any closed release.",
+      "Weakening a gate, or letting a step that did not run report a plain PASS.",
+      "Installing or reactivating the OMP host or the retired private OMO runtime in CI.",
       "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
     ],
     "include": [
-      "A prepared draft states its own scope: prepare resets the scope statements and the path allowlist, and keeps only the structural denial list.",
-      "A draft that never states what it may touch cannot be locked, because an empty allowlist is no restriction rather than a narrow one.",
-      "A smoke that needs the retired private OMO runtime reports a countable skip and is a gate step instead of an exclusion."
+      "Every pack and install call site, in the package and in its tests, resolves npm through one resolver whose PATH fallback is tested.",
+      "A smoke script that declines to run reports a countable skip; release:verify prints it as a WARNING.",
+      "No gate step behaves differently on a contributor machine and on a runner for reasons nobody can see."
     ],
     "paths": {
       "exclude": [
@@ -214,16 +214,17 @@
         "CHANGELOG.md",
         "README.md",
         "docs/HANDOVER.md",
-        "docs/planning/41-V1.13.10-SCOPE-STATED-PER-RELEASE-DEVELOPMENT-PLAN.md",
+        "docs/planning/40-V1.13.9-GATE-PORTABILITY-DEVELOPMENT-PLAN.md",
         "package.json",
-        "packages/internal-omo-bridge/availability.mjs",
+        "packages/omp-main-harness/field-smoke.mjs",
+        "packages/omp-main-harness/io.mjs",
         "scripts/release-verify-steps.mjs",
-        "scripts/remote-gateway-smoke.mjs",
-        "scripts/v1-final-smoke.mjs",
-        "src/core/contract.mjs",
-        "src/core/release-transition.mjs",
-        "test/omo/helpers.mjs",
-        "test/unit/scope-carry-forward.test.mjs"
+        "scripts/release-verify.mjs",
+        "test/omp-main-harness/bootstrap-cleanup-race.test.mjs",
+        "test/omp-main-harness/helpers.mjs",
+        "test/omp-main-harness/install-rollback.test.mjs",
+        "test/omp-main-harness/npm-command.test.mjs",
+        "test/unit/gate-skip-reporting.test.mjs"
       ]
     }
   },

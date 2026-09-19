@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 5,
+    "requiredFailed": 0,
+    "total": 5
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "fb524a299f8141177cccc26d2b41dac2cd143ae1",
+  "closedAt": "2026-09-19T14:05:22.357Z",
+  "closedGitSha": "b10cc25c2191204ef345c109fc047364bda493a9",
+  "contractHash": "4a6dcb952f1173b6b3dcce4992a2e99868580c07a19de5aa14dccc6a7b427cf7",
+  "evidenceRunId": "run-2026-09-19T14-04-48-929Z-b9385242",
+  "fixCycles": 0,
+  "goal": "A policy bound to a release that has already closed is spent: it must gate nothing and must never make a human approval fail after the scope is already locked. The release also closes the gap that let this ship: four test directories were reachable from no release gate, and every defect they were hiding is fixed.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "b10cc25c2191204ef345c109fc047364bda493a9",
+      "subject": "chore: re-lock shipping-harness v1.13.8 after AMEND-1.13.8-001"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.8",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 4,
+  "worker": "shipping-harness"
+}

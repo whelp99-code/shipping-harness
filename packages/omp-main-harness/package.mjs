@@ -1,7 +1,8 @@
 import { readFile, realpath } from 'node:fs/promises';
 import path from 'node:path';
-import { exists, invariant, parseJsonOutput, runCommand, sha256, validateAbsoluteRoot } from './io.mjs';
+import { defaultNpmCommand, exists, invariant, parseJsonOutput, runCommand, sha256, validateAbsoluteRoot } from './io.mjs';
 import { packageRoot } from './paths.mjs';
+import { singleNpmPackEntry } from '../../src/core/npm-pack.mjs';
 
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u;
 
@@ -61,29 +62,29 @@ function existsSyncExecutable(target) {
 export async function packShippingSource(input) {
   const sourceRoot = path.resolve(input.sourceRoot ?? packageRoot());
   const destination = validateAbsoluteRoot(input.destination, 'package destination');
-  const npm = input.npmCommand ?? '/usr/bin/npm';
+  const npm = input.npmCommand ?? defaultNpmCommand();
   const result = runCommand(npm, ['pack', '--json', '--pack-destination', destination], {
     cwd: sourceRoot,
     timeoutMs: 180000,
   });
   const parsed = parseJsonOutput(result.stdout, 'npm pack');
-  invariant(Array.isArray(parsed) && parsed.length === 1 && typeof parsed[0]?.filename === 'string', 'ERR_OMP_PACKAGE_PACK', 'npm pack returned an unexpected result');
-  return inspectPackageArchive(path.join(destination, parsed[0].filename));
+  const packed = singleNpmPackEntry(parsed, 'ERR_OMP_PACKAGE_PACK');
+  return inspectPackageArchive(path.join(destination, packed.filename));
 }
 
 /** @param {{prefix: string, destination: string, npmCommand?: string}} input */
 export async function backupInstalledShippingPackage(input) {
   const prefix = shippingPrefixPaths(input.prefix);
   if (!(await exists(prefix.package))) return null;
-  const npm = input.npmCommand ?? '/usr/bin/npm';
+  const npm = input.npmCommand ?? defaultNpmCommand();
   const destination = validateAbsoluteRoot(input.destination, 'package backup destination');
   const result = runCommand(npm, ['pack', '--json', '--pack-destination', destination, prefix.package], {
     cwd: prefix.package,
     timeoutMs: 180000,
   });
   const parsed = parseJsonOutput(result.stdout, 'npm pack installed shipping-harness');
-  invariant(Array.isArray(parsed) && parsed.length === 1 && typeof parsed[0]?.filename === 'string', 'ERR_OMP_PACKAGE_BACKUP', 'Installed package backup returned an unexpected result');
-  const receipt = await inspectPackageArchive(path.join(destination, parsed[0].filename));
+  const packed = singleNpmPackEntry(parsed, 'ERR_OMP_PACKAGE_BACKUP');
+  const receipt = await inspectPackageArchive(path.join(destination, packed.filename));
   return {
     ...receipt,
     installedRoot: await realpath(prefix.package),
@@ -95,7 +96,7 @@ export async function installShippingPackage(input) {
   const prefix = shippingPrefixPaths(input.prefix);
   const archive = await inspectPackageArchive(input.archive);
   if (input.expectedVersion) invariant(archive.version === input.expectedVersion, 'ERR_OMP_PACKAGE_VERSION', `Expected Shipping ${input.expectedVersion}, package contains ${archive.version}`);
-  const npm = input.npmCommand ?? '/usr/bin/npm';
+  const npm = input.npmCommand ?? defaultNpmCommand();
   runCommand(npm, [
     'install', '--offline', '--global', '--prefix', prefix.root, archive.path,
     '--ignore-scripts', '--no-audit', '--no-fund',

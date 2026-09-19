@@ -31,7 +31,11 @@ node --test --test-reporter=spec test/unit/contract.test.mjs
 node --test --test-reporter=spec --test-name-pattern="lock" test/unit/contract.test.mjs
 ```
 
-Suites outside `npm test` (plugin, remote, stable, autopilot, goal-*, release-train, omp-main) have their own `test:*` scripts and are pulled in by `release:verify`. `smoke:*` scripts run pilot scenarios against temp repos with `--check`. `omo` (`test:omo-bridge`) is deprecated as of v1.11.1 and is a manual-only script, not pulled into `release:verify` — see `packages/internal-omo-bridge/DEPRECATED.md`.
+Suites outside `npm test` (plugin, remote, stable, autopilot, usability, omp-main, team-dag, goal-*, release-train) have their own `test:*` scripts and are pulled in by `release:verify`. `smoke:*` scripts run pilot scenarios against temp repos with `--check`.
+
+The step list lives in `scripts/release-verify-steps.mjs`, not in `release-verify.mjs`, together with `UNGATED_SUITES` and `UNGATED_SCRIPTS` — every deliberate exclusion with its reason. `npm run verify:gate-coverage` (`scripts/test-suite-coverage.mjs`, itself a step) fails if a `test/<suite>/` directory or a `test:*`/`smoke:*` script is reachable from no step and has no written reason, and also fails on a stale exclusion. **Adding a test directory or a test script means adding a step or an exclusion reason; there is no third option.** Until v1.13.8 there was: `test/autopilot`, `test/usability`, `test/omp-main-harness` and `test/team-dag` were run by nothing, and a v1.13.0 regression rode five green releases inside `test/autopilot`.
+
+`omo` (`test:omo-bridge`) is deprecated as of v1.11.1 and is manual-only — see `packages/internal-omo-bridge/DEPRECATED.md`. `smoke:remote` and `smoke:stable` are excluded for the same reason: both need the retired private OMO runtime at its pinned absolute path. A test that needs that runtime must skip, never fail — use `privateOmoRuntimeAvailability()` from `test/omo/helpers.mjs`. `release:verify` prints skips as a WARNING, so a skip is visible, not hidden.
 
 `scripts/run-tests.mjs` only discovers `*.test.mjs` under `test/<suite>/`, so new tests must follow that name and location.
 

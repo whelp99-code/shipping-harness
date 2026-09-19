@@ -1,6 +1,6 @@
 {
   "name": "shipping-harness",
-  "version": "1.13.7",
+  "version": "1.13.9",
   "description": "A local-first shipping governance layer for coding agents.",
   "type": "module",
   "private": true,
@@ -56,6 +56,7 @@
     "test:adversarial": "node scripts/run-tests.mjs adversarial",
     "test:omp-main": "node --test --test-reporter=spec test/omp-main-harness/*.test.mjs",
     "smoke:omp-main": "node packages/omp-main-harness/field-smoke.mjs --check",
+    "test:team-dag": "node --test --test-reporter=spec test/team-dag/*.test.mjs",
     "check": "npm run lint && npm run typecheck && npm run build && npm test",
     "security": "node scripts/security-check.mjs",
     "license:check": "node scripts/license-check.mjs",
@@ -68,6 +69,7 @@
     "smoke:stable": "node scripts/v1-final-smoke.mjs --check",
     "security:inventory": "node scripts/v1-security-inventory.mjs --check",
     "verify:docs": "node scripts/v1-doc-audit.mjs",
+    "verify:gate-coverage": "node scripts/test-suite-coverage.mjs",
     "acceptance:v1": "node scripts/v1-acceptance.mjs --all",
     "status:v1": "node scripts/v1-status-report.mjs",
     "test:release-train": "node --test --test-reporter=spec test/mcp/release-train.test.mjs test/adversarial/release-train-attacks.test.mjs",

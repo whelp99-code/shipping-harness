@@ -239,9 +239,16 @@ export async function activateAutopilot(root, input) {
     if (existingPolicy?.hash === policy.hash && existingState?.policyHash === policy.hash) {
       return { policy: existingPolicy, state: existingState, reused: true };
     }
-    invariant(!existingState || TERMINAL_PHASES.has(existingState.phase), 'ERR_AUTOPILOT_ACTIVE', 'A different autopilot policy is already active');
+    const spent = await isSpentAutopilotBinding(root, existingState?.currentRelease, input.releaseTrain.currentRelease);
+    invariant(!existingState || TERMINAL_PHASES.has(existingState.phase) || spent, 'ERR_AUTOPILOT_ACTIVE', 'A different autopilot policy is already active');
     const now = new Date().toISOString();
-    const event = createEvent(null, {
+    // v1.13.8: this used to pass null, restarting the ledger at sequence 1 with a null
+    // previousHash. The autopilot ledger is one append-only chain for the whole
+    // repository, so a re-activation that resets it leaves "...#4, #1" on disk and every
+    // later read throws ERR_AUTOPILOT_SEQUENCE. It stayed latent while re-activation was
+    // refused outright; allowing a spent policy to be replaced made it reachable, and it
+    // moved the reported deadlock from approve to verify instead of removing it.
+    const event = createEvent(existingState ?? null, {
       occurredAt: now,
       type: 'autopilot.activated',
       policyHash: policy.hash,
@@ -283,6 +290,51 @@ export async function activateAutopilot(root, input) {
  * @param {string} root
  * @returns {Promise<{current: boolean, reason: string, policy: AutopilotPolicy|null, state: AutopilotState|null, train: ReleaseTrain|null, contract?: Record<string, any>, lock?: Record<string, any>}>}
  */
+/**
+ * Whether a policy still bound to `boundRelease` is spent: the release it authorised has
+ * already closed and the repository has moved to a different one.
+ *
+ * A policy authorises automation for one release. Closing that release spends it. Before
+ * v1.13.8 the spent policy stayed "active" forever, which had two consequences: a human
+ * approving the next release got ERR_AUTOPILOT_ACTIVE *after* the scope had already been
+ * locked, and `verify` on that next release was stopped with STALE_POLICY_BINDING by a
+ * policy that had no authority over it. A release could end up with no way out.
+ *
+ * Only this exact shape is forgiven. A binding that disagrees while naming the CURRENT
+ * release is still stale and still fails closed, because that is tampering, not lifecycle.
+ * @param {string} root
+ * @param {string | null | undefined} boundRelease
+ * @param {string | null | undefined} currentRelease
+ * @returns {Promise<boolean>}
+ */
+export async function isSpentAutopilotBinding(root, boundRelease, currentRelease) {
+  if (!boundRelease || !currentRelease || boundRelease === currentRelease) return false;
+  return exists(path.join(runtimePaths(root).releases, `${boundRelease}.json`));
+}
+
+/**
+ * Refuse an activation that cannot possibly succeed, before the approval it belongs to
+ * mutates anything.
+ *
+ * Only the certain case is refused here. When the existing policy is bound to the same
+ * release the activation may legitimately reuse it, so that decision is left to
+ * `activateAutopilot`; this check exists so a human approval never fails *after* the
+ * scope has already been locked, which left the caller unable to tell what happened.
+ * @param {string} root
+ * @param {string} nextRelease the release the approval is about to lock
+ */
+export async function assertAutopilotActivatable(root, nextRelease) {
+  const existingState = await loadAutopilotState(root);
+  if (!existingState || TERMINAL_PHASES.has(existingState.phase)) return;
+  if (existingState.currentRelease === nextRelease) return;
+  if (await isSpentAutopilotBinding(root, existingState.currentRelease, nextRelease)) return;
+  invariant(false, 'ERR_AUTOPILOT_ACTIVE', `An autopilot policy for release ${existingState.currentRelease} is still active; nothing was approved or locked`, {
+    activeRelease: existingState.currentRelease,
+    requestedRelease: nextRelease,
+    phase: existingState.phase,
+  });
+}
+
 export async function assertAutopilotBindingCurrent(root) {
   const policy = await loadAutopilotPolicy(root);
   const state = await loadAutopilotState(root);
@@ -302,9 +354,11 @@ export async function assertAutopilotBindingCurrent(root) {
     && state.policyHash === policy.hash
     && state.releaseTrainHash === trainEnvelope.train.hash
     && state.currentRelease === locked.contract.release;
+  const spent = current ? false : await isSpentAutopilotBinding(root, state.currentRelease, locked.contract.release);
   return {
     current,
-    reason: current ? 'CURRENT' : 'BINDING_MISMATCH',
+    spent,
+    reason: current ? 'CURRENT' : spent ? 'SUPERSEDED_BY_CLOSED_RELEASE' : 'BINDING_MISMATCH',
     policy,
     state,
     train: trainEnvelope.train,
@@ -706,7 +760,7 @@ export function verifyAutopilotMutationReceipt(receipt, input) {
 
 /**
  * @param {string} root
- * @returns {Promise<{schema: string, enabled: boolean, policy: ReturnType<typeof autopilotPolicySummary>, state: AutopilotState, bindingCurrent: boolean, bindingReason: string, eventCount: number, released: boolean}|null>}
+ * @returns {Promise<{schema: string, enabled: boolean, spent: boolean, policy: ReturnType<typeof autopilotPolicySummary>, state: AutopilotState, bindingCurrent: boolean, bindingReason: string, eventCount: number, released: boolean}|null>}
  */
 export async function autopilotStatus(root) {
   const policy = await loadAutopilotPolicy(root);
@@ -718,7 +772,9 @@ export async function autopilotStatus(root) {
   const binding = await assertAutopilotBindingCurrent(root);
   return {
     schema: 'shipping-harness/autopilot-status-v1',
-    enabled: policy.enabled,
+    // A spent policy authorises nothing, so it must not gate the release that superseded it.
+    enabled: policy.enabled && !binding.spent,
+    spent: binding.spent === true,
     policy: autopilotPolicySummary(policy),
     state,
     bindingCurrent: binding.current,

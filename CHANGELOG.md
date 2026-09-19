@@ -2,7 +2,25 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.7] - Unreleased
+## [1.13.9] - Unreleased
+
+In progress. v1.13.8 put `test:omp-main` and `smoke:omp-main` into the gate for the first time, and both went red on GitHub while every local gate was green.
+
+- **A fix that stopped at the production code.** v1.13.8 routed the OMP package's four npm defaults through one resolver and left seven call sites in the tests still spawning the literal `/usr/bin/npm`, which a stock runner does not have. They use the resolver now. Its PATH fallback is the only branch a runner takes and had never executed anywhere, because this machine has `/usr/bin/npm` and always took the other one; the preferred path is a parameter now, so the fallback is exercised rather than assumed.
+- **A smoke that could not run had no way to say so.** `smoke:omp-main` drives the real OMP host, absent on a runner, and crashed with `spawnSync omp ENOENT`. Exiting zero quietly would have been worse, because a step that did not run reading as a plain PASS is the failure v1.13.8 existed to remove, and `release:verify` only counted a test runner's `ℹ skipped N`. A script reports `SKIPPED: <reason>` on its own line, that line counts as one skip, and it is printed as a WARNING like any other.
+
+## [1.13.8] - Unreleased
+
+In progress. A live release reached a state with no way out, reported with the exact sequence.
+
+- **A policy outlived the release it authorised.** An autopilot policy approved for 1.0.2 stayed active after that release closed. Approving 1.0.3 then failed with `ERR_AUTOPILOT_ACTIVE`, and `verify` on 1.0.3 was stopped with `STALE_POLICY_BINDING` by a policy that had no authority over it. `approve` refused because the state was `LOCKED` and `verify` refused because of the spent policy, so the release was trapped. A policy whose bound release has a closure receipt and is not the current release is now spent: it reports `enabled: false`, gates nothing, and is replaced by the next activation. A binding that disagrees while naming the current release, or one whose release never closed, still fails closed, because that is tampering rather than lifecycle.
+- **A failed approval had already changed the state.** The approval committed the contract, the lock, the release train, the charter and three ledger events, and only then attempted the activation that threw. The caller saw a failure and the scope was locked, and the retry was refused with `ERR_APPROVAL_STATE`. An activation that cannot succeed is now refused before the approval mutates anything, and its message says that nothing was approved or locked.
+- **Allowing the replacement moved the deadlock instead of removing it.** Activating a policy on a new train wrote its first ledger event with sequence 1 and a null previous hash, but the autopilot ledger is one append-only chain for the whole repository. The chain became `…#4, #1` on disk and every later read failed with `ERR_AUTOPILOT_SEQUENCE`, so the release that could not be approved became the release that could not be verified. Activation now continues the existing chain. This was unreachable while re-activation was refused outright, and was found by replaying the reported sequence end to end rather than by testing the fix in isolation.
+- **Four test directories were run by nothing.** `npm test` walks five suite roots and `release:verify` had no step for `test/autopilot`, `test/usability` or `test/omp-main-harness`; `test/team-dag` had no npm script at all. A regression introduced in v1.13.0 sat in `test/autopilot/field-matrix.test.mjs` through five releases while `release:verify` reported every one of them green. All four are now steps, and `npm run verify:gate-coverage` fails if any test directory or `test:*`/`smoke:*` script is reachable from no step and has no written reason, or if an exclusion goes stale. Exclusions and their reasons live in `scripts/release-verify-steps.mjs`.
+- **Defects the closed gap was hiding.** `npm pack --json` returns a name-keyed object on npm 12 rather than an array, and all five call sites read `[0].filename` — including the OMP install and backup paths, not only smoke scripts. Both shapes are handled now, and an ambiguous or filename-less result is refused instead of read as `undefined`. The packaged-install smoke also still required the installed version to be `1.0.0`; it follows `package.json` now. The v1.13.0 regression itself was the fifth dirty-baseline test, which never received the `commitBaseline: false` its four siblings did: the working-tree bytes were never touched, only committed, and the fingerprint the test compares covers `HEAD`.
+- **A test that needs a retired runtime now skips instead of failing.** `test/team-dag/entry-gate.test.mjs` reads the promotion evidence of the private OMO runtime retired in v1.11.1, which is pinned to an absolute path outside this repository. It follows the same rule as `test/omo/`, and `release:verify` prints the skip as a WARNING.
+
+## [1.13.7] - 2026-09-19
 
 In progress. A blocking defect reported from a live release, and the version-number bug found beside it.
 

@@ -18,6 +18,7 @@ import { goalCharterSummary, loadGoalCharter } from '../core/goal-charter.mjs';
 import { AUTOPILOT_PROFILES, autopilotPolicySummary } from '../core/autopilot-policy.mjs';
 import {
   activateAutopilot,
+  assertAutopilotActivatable,
   autopilotStatus,
   completeAutopilotClosure,
   completeManualAutopilotClosure,
@@ -28,7 +29,7 @@ import {
   rotateAutopilotPolicy,
   setAutopilotHumanControl,
 } from '../core/autopilot.mjs';
-import { approveScopeProposal, createScopeProposal, findActiveScopeProposal, refineScopeProposal } from '../core/proposals.mjs';
+import { approveScopeProposal, createScopeProposal, findActiveScopeProposal, refineScopeProposal, loadScopeProposal } from '../core/proposals.mjs';
 import { abort, pause, readTrustedState, resume } from '../core/state.mjs';
 import { buildBlockerView, buildUserStatusView } from './user-view.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from '../core/goals/authority.mjs';
@@ -504,6 +505,11 @@ async function approveManually(root, proposalId, proposalHash, args) {
   if (profile === 'LOCAL_REVERSIBLE') {
     invariant(args.confirmAutopilot === true, 'ERR_AUTOPILOT_CONFIRMATION', 'LOCAL_REVERSIBLE requires one explicit confirmAutopilot=true authorization');
   }
+  // Refuse a certain-to-fail activation before the approval locks anything. A failure
+  // after the lock left the caller with an error response and a locked scope.
+  const { proposal: pending } = await loadScopeProposal(root, proposalId);
+  await assertAutopilotActivatable(root, pending.releaseTrain?.currentRelease ?? pending.release);
+
   const result = await approveScopeProposal(root, {
     proposalId,
     proposalHash,

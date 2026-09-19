@@ -1,25 +1,16 @@
 {
   "acceptance": [
     {
-      "id": "AC-11391",
-      "description": "The OMP package and its tests resolve npm through one resolver, and the PATH fallback that a runner takes is exercised rather than assumed.",
+      "id": "AC-11371",
+      "description": "Commits after a close no longer block the next release, uncommitted work still does and is named, and the version recommendation chooses the next number.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/omp-main-harness/*.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/release-prepare-drift.test.mjs test/unit/post-lock-commits.test.mjs test/unit/state-integrity.test.mjs",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 600
+      "timeoutSeconds": 300
     },
     {
-      "id": "AC-11392",
-      "description": "A smoke script that cannot run reports a skip that release:verify counts and prints as a WARNING, instead of crashing or reading as a plain PASS.",
-      "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/gate-skip-reporting.test.mjs",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 120
-    },
-    {
-      "id": "AC-11393",
+      "id": "AC-11372",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -28,7 +19,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-11394",
+      "id": "AC-11373",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -171,9 +162,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "A gate step must behave the same on a contributor machine and on a runner: resolve npm the same way everywhere, and let a smoke that cannot run report a skip instead of crashing or reading green.",
+  "goal": "Stop treating commits made after a close as drift, so the basic cycle of close, commit, prepare works; name the offending paths in the error; and let the analyzer version recommendation choose the next release number",
   "project": "shipping-harness",
-  "release": "1.13.9",
+  "release": "1.13.7",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -191,15 +182,18 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Reopening v1.13.8 or any closed release.",
-      "Weakening a gate, or letting a step that did not run report a plain PASS.",
-      "Installing or reactivating the OMP host or the retired private OMO runtime in CI.",
-      "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
+      "Increasing the 8192-byte product limit or weakening the quality gate.",
+      "Removing the Action Envelope, forbidden action set, evidence references, or Shipping authority checks.",
+      "Changing Goal Discovery, Goal Charter, Release Train, Autopilot, OMO runtime, model routing, or approval behavior.",
+      "Publishing, deployment, customer contact, purchase, credential changes, or external writes.",
+      "Mutating Orca-JARVIS product files or accepting its current baseline."
     ],
     "include": [
-      "Every pack and install call site, in the package and in its tests, resolves npm through one resolver whose PATH fallback is tested.",
-      "A smoke script that declines to run reports a countable skip; release:verify prints it as a WARNING.",
-      "No gate step behaves differently on a contributor machine and on a runner for reasons nobody can see."
+      "Remove only plain-brief fact projections that are zero-valued or mechanically derivable from canonical state, action envelope, or the separate Release Train summary.",
+      "Preserve the full Action Envelope, exact next action, forbidden actions, mechanical evidence binding, fixed Korean sections, and modelAuthority=false.",
+      "Add a regression fixture matching the Orca-JARVIS dirty baseline plus three unresolved Goal Discovery questions and four-release train.",
+      "Require the real-world-shaped beginner report to remain healthy at no more than 7680 structured bytes while the hard product limit remains 8192 bytes.",
+      "Keep the existing nine-tool MCP surface, OMP 18.0.10 compatibility, CLOSED != RELEASED, and all external-consequence boundaries."
     ],
     "paths": {
       "exclude": [
@@ -211,20 +205,11 @@
         "coverage/**"
       ],
       "include": [
-        "CHANGELOG.md",
-        "README.md",
-        "docs/HANDOVER.md",
-        "docs/planning/40-V1.13.9-GATE-PORTABILITY-DEVELOPMENT-PLAN.md",
         "package.json",
-        "packages/omp-main-harness/field-smoke.mjs",
-        "packages/omp-main-harness/io.mjs",
-        "scripts/release-verify-steps.mjs",
-        "scripts/release-verify.mjs",
-        "test/omp-main-harness/bootstrap-cleanup-race.test.mjs",
-        "test/omp-main-harness/helpers.mjs",
-        "test/omp-main-harness/install-rollback.test.mjs",
-        "test/omp-main-harness/npm-command.test.mjs",
-        "test/unit/gate-skip-reporting.test.mjs"
+        "src/core/plain-brief.mjs",
+        "test/mcp/plain-brief.test.mjs",
+        "test/integration/plain-brief-budget.test.mjs",
+        "docs/planning/32-V1.8.2-PLAIN-BRIEF-BUDGET-HOTFIX.md"
       ]
     }
   },

@@ -2,7 +2,14 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.7] - Unreleased
+## [1.13.8] - Unreleased
+
+In progress. A live release reached a state with no way out, reported with the exact sequence.
+
+- **A policy outlived the release it authorised.** An autopilot policy approved for 1.0.2 stayed active after that release closed. Approving 1.0.3 then failed with `ERR_AUTOPILOT_ACTIVE`, and `verify` on 1.0.3 was stopped with `STALE_POLICY_BINDING` by a policy that had no authority over it. `approve` refused because the state was `LOCKED` and `verify` refused because of the spent policy, so the release was trapped. A policy whose bound release has a closure receipt and is not the current release is now spent: it reports `enabled: false`, gates nothing, and is replaced by the next activation. A binding that disagrees while naming the current release, or one whose release never closed, still fails closed, because that is tampering rather than lifecycle.
+- **A failed approval had already changed the state.** The approval committed the contract, the lock, the release train, the charter and three ledger events, and only then attempted the activation that threw. The caller saw a failure and the scope was locked, and the retry was refused with `ERR_APPROVAL_STATE`. An activation that cannot succeed is now refused before the approval mutates anything, and its message says that nothing was approved or locked.
+
+## [1.13.7] - 2026-09-19
 
 In progress. A blocking defect reported from a live release, and the version-number bug found beside it.
 

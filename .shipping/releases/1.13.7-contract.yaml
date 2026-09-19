@@ -1,16 +1,16 @@
 {
   "acceptance": [
     {
-      "id": "AC-11381",
-      "description": "A policy bound to a closed release is spent and gates nothing; a binding without a closure receipt still fails closed; an impossible activation is refused before anything is locked.",
+      "id": "AC-11371",
+      "description": "Commits after a close no longer block the next release, uncommitted work still does and is named, and the version recommendation chooses the next number.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/adversarial/autopilot-spent-policy.test.mjs test/autopilot/*.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/release-prepare-drift.test.mjs test/unit/post-lock-commits.test.mjs test/unit/state-integrity.test.mjs",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 600
+      "timeoutSeconds": 300
     },
     {
-      "id": "AC-11382",
+      "id": "AC-11372",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -19,7 +19,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-11383",
+      "id": "AC-11373",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -162,9 +162,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "A policy bound to a release that has already closed is spent: it must gate nothing and must never make a human approval fail after the scope is already locked",
+  "goal": "Stop treating commits made after a close as drift, so the basic cycle of close, commit, prepare works; name the offending paths in the error; and let the analyzer version recommendation choose the next release number",
   "project": "shipping-harness",
-  "release": "1.13.8",
+  "release": "1.13.7",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,

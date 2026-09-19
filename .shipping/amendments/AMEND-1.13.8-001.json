@@ -1,0 +1,134 @@
+{
+  "actor": "human-approved-sequential-build",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": ".github/workflows/ci.yml"
+    },
+    {
+      "field": "scope.paths.include",
+      "value": "docs/planning/39-V1.13.8-SPENT-AUTOPILOT-AND-GATE-COVERAGE-DEVELOPMENT-PLAN.md"
+    },
+    {
+      "field": "scope.paths.include",
+      "value": "packages/omp-main-harness/install.mjs"
+    },
+    {
+      "field": "scope.paths.include",
+      "value": "packages/omp-main-harness/io.mjs"
+    },
+    {
+      "field": "scope.paths.include",
+      "value": "packages/omp-main-harness/package.mjs"
+    },
+    {
+      "field": "scope.paths.include",
+      "value": "test/autopilot/spent-policy-recovery.test.mjs"
+    },
+    {
+      "field": "scope.paths.include",
+      "value": "test/omp-main-harness/npm-command.test.mjs"
+    },
+    {
+      "field": "scope.include",
+      "value": "A policy bound to a release that has a closure receipt and is not the current release is spent: it reports enabled=false and gates nothing."
+    },
+    {
+      "field": "scope.include",
+      "value": "An activation that cannot succeed is refused before the approval mutates anything, and says that nothing was approved or locked."
+    },
+    {
+      "field": "scope.include",
+      "value": "Activating a policy on a new train continues the single append-only autopilot ledger chain instead of restarting it at sequence 1."
+    },
+    {
+      "field": "scope.include",
+      "value": "Every test/<suite>/ directory and every test:*/smoke:* script is reachable from a release:verify step or excluded with a written reason, enforced by a gate step."
+    },
+    {
+      "field": "scope.include",
+      "value": "The defects that the ungated suites were hiding: the npm pack --json shape, the hardcoded npm path in the OMP package, the frozen version literal in the packaged-install smoke, and the fifth dirty-baseline test."
+    },
+    {
+      "field": "scope.include",
+      "value": "A pull request runs the same gate list as a release."
+    },
+    {
+      "field": "scope.exclude",
+      "value": "Reopening a closed release, or letting a model approve, close, or mark RELEASED."
+    },
+    {
+      "field": "scope.exclude",
+      "value": "Weakening any acceptance gate, budget, or output bound to make a step pass."
+    },
+    {
+      "field": "scope.exclude",
+      "value": "Changing what the nine MCP tools are, or the frozen v1 schemas and surface hashes."
+    },
+    {
+      "field": "scope.exclude",
+      "value": "Rebuilding or reactivating the retired private OMO runtime, or making a test that needs it fail instead of skip."
+    },
+    {
+      "field": "scope.exclude",
+      "value": "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
+    }
+  ],
+  "correctedContractHash": "4a6dcb952f1173b6b3dcce4992a2e99868580c07a19de5aa14dccc6a7b427cf7",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-1.13.8-001",
+  "kind": "stale-carried-scope-correction-and-expansion",
+  "previousContractHash": "e2716b5b4cef6751db2f7d6d518df9d2097084361852528aa3120e496aabbff2",
+  "previousScopeRevision": 1,
+  "previousState": "TRIAGE",
+  "productionCodeChanged": true,
+  "project": "shipping-harness",
+  "reason": "The locked contract still carried v1.8.2 scope statements and path allowlist, because release prepare copies the previous release forward and this repository implements before it locks, so a stale scope stays inert until work happens after the lock. Closing the release:verify coverage hole surfaced defects in packages/omp-main-harness and in the pull-request CI gate, and fixing them changed seven paths outside the allowlist. This amendment states the real v1.13.8 scope and adds those seven paths. It expands scope over production code and is recorded as such.",
+  "recordedAt": "2026-09-19T14:04:08.965Z",
+  "release": "1.13.8",
+  "removed": [
+    {
+      "field": "scope.include",
+      "value": "Remove only plain-brief fact projections that are zero-valued or mechanically derivable from canonical state, action envelope, or the separate Release Train summary."
+    },
+    {
+      "field": "scope.include",
+      "value": "Preserve the full Action Envelope, exact next action, forbidden actions, mechanical evidence binding, fixed Korean sections, and modelAuthority=false."
+    },
+    {
+      "field": "scope.include",
+      "value": "Add a regression fixture matching the Orca-JARVIS dirty baseline plus three unresolved Goal Discovery questions and four-release train."
+    },
+    {
+      "field": "scope.include",
+      "value": "Require the real-world-shaped beginner report to remain healthy at no more than 7680 structured bytes while the hard product limit remains 8192 bytes."
+    },
+    {
+      "field": "scope.include",
+      "value": "Keep the existing nine-tool MCP surface, OMP 18.0.10 compatibility, CLOSED != RELEASED, and all external-consequence boundaries."
+    },
+    {
+      "field": "scope.exclude",
+      "value": "Increasing the 8192-byte product limit or weakening the quality gate."
+    },
+    {
+      "field": "scope.exclude",
+      "value": "Removing the Action Envelope, forbidden action set, evidence references, or Shipping authority checks."
+    },
+    {
+      "field": "scope.exclude",
+      "value": "Changing Goal Discovery, Goal Charter, Release Train, Autopilot, OMO runtime, model routing, or approval behavior."
+    },
+    {
+      "field": "scope.exclude",
+      "value": "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
+    },
+    {
+      "field": "scope.exclude",
+      "value": "Mutating Orca-JARVIS product files or accepting its current baseline."
+    }
+  ],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticProductScopeExpansion": true,
+  "sourceGitSha": "6f210345e455c189b31609f16cd4eaa6df7753fa"
+}

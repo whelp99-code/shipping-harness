@@ -1,49 +1,49 @@
 {
   "acceptance": [
     {
+      "id": "AC-11381",
+      "description": "A policy bound to a closed release is spent and gates nothing; a binding without a closure receipt still fails closed; an impossible activation is refused before anything is locked; re-activating on a new train continues the one autopilot ledger chain instead of restarting it.",
+      "type": "command",
       "command": "node --test --test-reporter=spec test/adversarial/autopilot-spent-policy.test.mjs test/autopilot/*.test.mjs",
       "cwd": ".",
-      "description": "A policy bound to a closed release is spent and gates nothing; a binding without a closure receipt still fails closed; an impossible activation is refused before anything is locked; re-activating on a new train continues the one autopilot ledger chain instead of restarting it.",
-      "id": "AC-11381",
       "required": true,
-      "timeoutSeconds": 600,
-      "type": "command"
+      "timeoutSeconds": 600
     },
     {
+      "id": "AC-11382",
+      "description": "Full regression and release gates pass.",
+      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Full regression and release gates pass.",
-      "id": "AC-11382",
       "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     },
     {
+      "id": "AC-11383",
+      "description": "Documentation audit passes and no whitespace errors remain.",
+      "type": "command",
       "command": "npm run verify:docs && git diff --check",
       "cwd": ".",
-      "description": "Documentation audit passes and no whitespace errors remain.",
-      "id": "AC-11383",
       "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
+      "timeoutSeconds": 120
     },
     {
+      "id": "AC-11384",
+      "description": "Every test/<suite>/ directory and every test:*/smoke:* script is reachable from release:verify or excluded with a written reason, and the audit reproduces the v1.13.0 hole rather than agreeing with itself.",
+      "type": "command",
       "command": "npm run verify:gate-coverage && node --test --test-reporter=spec test/unit/gate-coverage.test.mjs",
       "cwd": ".",
-      "description": "Every test/<suite>/ directory and every test:*/smoke:* script is reachable from release:verify or excluded with a written reason, and the audit reproduces the v1.13.0 hole rather than agreeing with itself.",
-      "id": "AC-11384",
       "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
+      "timeoutSeconds": 120
     },
     {
+      "id": "AC-11385",
+      "description": "Both the pre-npm-12 array and the npm 12 name-keyed object forms of npm pack --json are handled, and an ambiguous or filename-less result is refused rather than read as undefined.",
+      "type": "command",
       "command": "node --test --test-reporter=spec test/unit/npm-pack.test.mjs",
       "cwd": ".",
-      "description": "Both the pre-npm-12 array and the npm 12 name-keyed object forms of npm pack --json are handled, and an ambiguous or filename-less result is refused rather than read as undefined.",
-      "id": "AC-11385",
       "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
+      "timeoutSeconds": 120
     }
   ],
   "adapters": {
@@ -200,19 +200,18 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Reopening a closed release, or letting a model approve, close, or mark RELEASED.",
-      "Weakening any acceptance gate, budget, or output bound to make a step pass.",
-      "Changing what the nine MCP tools are, or the frozen v1 schemas and surface hashes.",
-      "Rebuilding or reactivating the retired private OMO runtime, or making a test that needs it fail instead of skip.",
-      "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
+      "Increasing the 8192-byte product limit or weakening the quality gate.",
+      "Removing the Action Envelope, forbidden action set, evidence references, or Shipping authority checks.",
+      "Changing Goal Discovery, Goal Charter, Release Train, Autopilot, OMO runtime, model routing, or approval behavior.",
+      "Publishing, deployment, customer contact, purchase, credential changes, or external writes.",
+      "Mutating Orca-JARVIS product files or accepting its current baseline."
     ],
     "include": [
-      "A policy bound to a release that has a closure receipt and is not the current release is spent: it reports enabled=false and gates nothing.",
-      "An activation that cannot succeed is refused before the approval mutates anything, and says that nothing was approved or locked.",
-      "Activating a policy on a new train continues the single append-only autopilot ledger chain instead of restarting it at sequence 1.",
-      "Every test/<suite>/ directory and every test:*/smoke:* script is reachable from a release:verify step or excluded with a written reason, enforced by a gate step.",
-      "The defects that the ungated suites were hiding: the npm pack --json shape, the hardcoded npm path in the OMP package, the frozen version literal in the packaged-install smoke, and the fifth dirty-baseline test.",
-      "A pull request runs the same gate list as a release."
+      "Remove only plain-brief fact projections that are zero-valued or mechanically derivable from canonical state, action envelope, or the separate Release Train summary.",
+      "Preserve the full Action Envelope, exact next action, forbidden actions, mechanical evidence binding, fixed Korean sections, and modelAuthority=false.",
+      "Add a regression fixture matching the Orca-JARVIS dirty baseline plus three unresolved Goal Discovery questions and four-release train.",
+      "Require the real-world-shaped beginner report to remain healthy at no more than 7680 structured bytes while the hard product limit remains 8192 bytes.",
+      "Keep the existing nine-tool MCP surface, OMP 18.0.10 compatibility, CLOSED != RELEASED, and all external-consequence boundaries."
     ],
     "paths": {
       "exclude": [
@@ -224,18 +223,11 @@
         "coverage/**"
       ],
       "include": [
-        ".github/workflows/ci.yml",
-        "docs/planning/32-V1.8.2-PLAIN-BRIEF-BUDGET-HOTFIX.md",
-        "docs/planning/39-V1.13.8-SPENT-AUTOPILOT-AND-GATE-COVERAGE-DEVELOPMENT-PLAN.md",
         "package.json",
-        "packages/omp-main-harness/install.mjs",
-        "packages/omp-main-harness/io.mjs",
-        "packages/omp-main-harness/package.mjs",
         "src/core/plain-brief.mjs",
-        "test/autopilot/spent-policy-recovery.test.mjs",
-        "test/integration/plain-brief-budget.test.mjs",
         "test/mcp/plain-brief.test.mjs",
-        "test/omp-main-harness/npm-command.test.mjs"
+        "test/integration/plain-brief-budget.test.mjs",
+        "docs/planning/32-V1.8.2-PLAIN-BRIEF-BUDGET-HOTFIX.md"
       ]
     }
   },

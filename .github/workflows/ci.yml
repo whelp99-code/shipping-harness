@@ -23,15 +23,12 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci --ignore-scripts
-      - name: Lint and typecheck and build and test (npm run check)
-        run: npm run check
-      - name: ESLint
-        run: npm run lint:eslint
-      - name: TypeScript typecheck
-        run: npm run typecheck:tsc
+      # v1.13.8: this used to be a hand-listed subset, so a pull request was gated by a
+      # weaker list than a release. That is the same defect release:verify itself had --
+      # a gate that does not run everything reports green anyway -- so the pull request
+      # now runs the one list, and `verify:gate-coverage` inside it fails if a suite or
+      # script is reachable from no step.
+      - name: Release verification (the one gate list)
+        run: npm run release:verify
       - name: Coverage-gated test run
         run: npm run test:coverage
-      - name: Security check
-        run: npm run security
-      - name: License check
-        run: npm run license:check

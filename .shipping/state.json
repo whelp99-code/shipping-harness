@@ -4,25 +4,26 @@
   "blockerCount": 0,
   "contractHash": "e2716b5b4cef6751db2f7d6d518df9d2097084361852528aa3120e496aabbff2",
   "createdAt": "2026-09-19T13:32:23.648Z",
-  "currentEvidenceFingerprint": null,
-  "currentEvidenceSha": null,
+  "currentEvidenceFingerprint": "bb84cffe605135d208ead6a8030d3e915d122004ff6ff5e955d02aa053b67f6d",
+  "currentEvidenceSha": "356d801c22cb28ad120933ae188e7c0e3270a3e2",
   "fixCycles": 0,
   "humanStop": false,
   "ignoreCount": 0,
   "integrity": {
     "algorithm": "sha256",
-    "digest": "2f705f85a619468e9c65ec8865dc3a570007ef67279fea31870e4d2124515d46",
-    "ledgerHead": "a2f75dcc-7b26-49e6-93aa-ca0d04afa834"
+    "digest": "65ce9b18a83b60d594affc0bc4361ce44e39bd52c6a0b831bde864dec1732f7c",
+    "ledgerHead": "82270978-d06f-4a4b-a8b6-15881a78d606"
   },
-  "lastRunId": null,
+  "lastRunId": "run-2026-09-19T13-57-00-908Z-d09b682f",
+  "lastVerifiedAt": "2026-09-19T13:57:30.854Z",
   "nextCount": 0,
   "previousRelease": "1.13.7",
   "redundantVerifyRuns": 0,
   "release": "1.13.8",
   "resumeState": null,
   "schema": "shipping-harness/state-v1",
-  "state": "LOCKED",
+  "state": "SHIPPABLE",
   "unknownCount": 0,
-  "updatedAt": "2026-09-19T13:56:56.599Z",
-  "verifyRuns": 0
+  "updatedAt": "2026-09-19T13:57:30.856Z",
+  "verifyRuns": 1
 }

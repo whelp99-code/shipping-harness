@@ -5,13 +5,7 @@ import { createOmpBackup, restoreOmpBackup } from './backup.mjs';
 import { applyOmpConfiguration } from './config.mjs';
 import { SHIPPING_TOOL_NAMES, TESTED_OMP_HOSTS } from './constants.mjs';
 import { doctorOmpMainHarness } from './doctor.mjs';
-import {
-  invariant,
-  parseOmpVersion,
-  resolveOnPath,
-  runCommand,
-  writeJsonAtomic,
-} from './io.mjs';
+import { defaultNpmCommand, invariant, parseOmpVersion, resolveOnPath, runCommand, writeJsonAtomic } from './io.mjs';
 import {
   inspectPackageArchive,
   installShippingPackage,
@@ -28,7 +22,7 @@ async function resolvedInput(input = {}) {
   const shippingPrefix = path.resolve(input.shippingPrefix ?? path.join(paths.home, '.local'));
   const prefix = shippingPrefixPaths(shippingPrefix);
   const omp = resolveOnPath(input.ompCommand ?? 'omp');
-  const npmCommand = input.npmCommand ?? '/usr/bin/npm';
+  const npmCommand = input.npmCommand ?? defaultNpmCommand();
   const manifest = JSON.parse(await readFile(path.join(packageRoot(), 'package.json'), 'utf8'));
   return { paths, prefix, omp, npmCommand, manifest };
 }

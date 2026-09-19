@@ -1,6 +1,6 @@
 import { readFile, realpath } from 'node:fs/promises';
 import path from 'node:path';
-import { exists, invariant, parseJsonOutput, runCommand, sha256, validateAbsoluteRoot } from './io.mjs';
+import { defaultNpmCommand, exists, invariant, parseJsonOutput, runCommand, sha256, validateAbsoluteRoot } from './io.mjs';
 import { packageRoot } from './paths.mjs';
 import { singleNpmPackEntry } from '../../src/core/npm-pack.mjs';
 
@@ -62,7 +62,7 @@ function existsSyncExecutable(target) {
 export async function packShippingSource(input) {
   const sourceRoot = path.resolve(input.sourceRoot ?? packageRoot());
   const destination = validateAbsoluteRoot(input.destination, 'package destination');
-  const npm = input.npmCommand ?? '/usr/bin/npm';
+  const npm = input.npmCommand ?? defaultNpmCommand();
   const result = runCommand(npm, ['pack', '--json', '--pack-destination', destination], {
     cwd: sourceRoot,
     timeoutMs: 180000,
@@ -76,7 +76,7 @@ export async function packShippingSource(input) {
 export async function backupInstalledShippingPackage(input) {
   const prefix = shippingPrefixPaths(input.prefix);
   if (!(await exists(prefix.package))) return null;
-  const npm = input.npmCommand ?? '/usr/bin/npm';
+  const npm = input.npmCommand ?? defaultNpmCommand();
   const destination = validateAbsoluteRoot(input.destination, 'package backup destination');
   const result = runCommand(npm, ['pack', '--json', '--pack-destination', destination, prefix.package], {
     cwd: prefix.package,
@@ -96,7 +96,7 @@ export async function installShippingPackage(input) {
   const prefix = shippingPrefixPaths(input.prefix);
   const archive = await inspectPackageArchive(input.archive);
   if (input.expectedVersion) invariant(archive.version === input.expectedVersion, 'ERR_OMP_PACKAGE_VERSION', `Expected Shipping ${input.expectedVersion}, package contains ${archive.version}`);
-  const npm = input.npmCommand ?? '/usr/bin/npm';
+  const npm = input.npmCommand ?? defaultNpmCommand();
   runCommand(npm, [
     'install', '--offline', '--global', '--prefix', prefix.root, archive.path,
     '--ignore-scripts', '--no-audit', '--no-fund',

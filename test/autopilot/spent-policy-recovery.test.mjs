@@ -8,7 +8,7 @@
 // approve said ERR_APPROVAL_STATE, verify said STALE_POLICY_BINDING.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { callShippingTool } from '../../src/mcp/tools.mjs';
 import { isSpentAutopilotBinding, loadAutopilotState, readAutopilotLedger } from '../../src/core/autopilot.mjs';
@@ -141,6 +141,62 @@ test('re-activating on a new train continues the one ledger chain instead of res
     assert.equal(activation.release, '1.0.3');
     assert.equal(activation.sequence, beforeActivation.at(-1).sequence + 1, 'activation must not restart the ledger at 1');
     assert.equal(activation.previousHash, beforeActivation.at(-1).hash, 'activation must chain to the last event, not to null');
+    for (const [index, event] of events.entries()) {
+      assert.equal(event.sequence, index + 1);
+      assert.equal(event.previousHash, index === 0 ? null : events[index - 1].hash);
+    }
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('a release already LOCKED against a spent binding still reaches CLOSED, with no autopilot authority', async () => {
+  // The shape the reported worktree was left in, which the fixed code can no longer
+  // produce: 1.0.3 is LOCKED, the binding still names the closed 1.0.2, and no activation
+  // event exists for 1.0.3, because the old approve locked the scope and only then threw.
+  // A plain approve will not reproduce it -- it rotates the binding -- so the fixture
+  // restores the genuine autopilot state and ledger bytes the harness itself wrote before
+  // the approval, as one matching pair. Nothing here is hand-computed. The same sequence
+  // was replayed for real on harness 800d01b and this build then recovered the resulting
+  // fixture; see docs/planning/39-....md section 6.
+  const { fixture } = await closedFirstRelease('1.0.2');
+  try {
+    const statePath = path.join(fixture.root, '.shipping', 'autopilot-state.json');
+    const ledgerPath = path.join(fixture.root, '.shipping', 'autopilot-ledger.jsonl');
+    const beforeState = await readFile(statePath, 'utf8');
+    const beforeLedger = await readFile(ledgerPath, 'utf8');
+    const beforeEvents = await readAutopilotLedger(fixture.root);
+
+    const next = await callShippingTool(fixture.root, 'shipping_start', {
+      goal: 'Replace the truncation in the top-level report with a bounded, complete rendering.',
+      release: '1.0.3',
+    });
+    await callShippingTool(fixture.root, 'shipping_approve_scope', {
+      proposalId: next.structuredContent.proposalId,
+      proposalHash: next.structuredContent.proposalHash,
+      confirm: true,
+    });
+    await writeFile(statePath, beforeState, 'utf8');
+    await writeFile(ledgerPath, beforeLedger, 'utf8');
+
+    const stuck = await loadAutopilotState(fixture.root);
+    assert.equal(stuck.currentRelease, '1.0.2', 'the binding still names the closed release');
+    assert.equal(stuck.phase, 'RELEASE_CLOSED');
+    assert.equal((await readTrustedState(fixture.root)).release, '1.0.3');
+    assert.equal((await readAutopilotLedger(fixture.root)).length, beforeEvents.length, 'no activation event exists for 1.0.3');
+
+    const status = await callShippingTool(fixture.root, 'shipping_status', {});
+    assert.equal(status.structuredContent.autopilot.spent, true);
+    assert.equal(status.structuredContent.autopilot.enabled, false);
+
+    assert.equal((await callShippingTool(fixture.root, 'shipping_verify', {})).structuredContent.decision, 'SHIPPABLE', 'a spent binding must not raise STALE_POLICY_BINDING');
+    const closed = await callShippingTool(fixture.root, 'shipping_close', {});
+    assert.equal(closed.structuredContent.state, 'CLOSED');
+    assert.equal(closed.structuredContent.released, false);
+
+    const events = await readAutopilotLedger(fixture.root);
+    assert.equal(events.at(-1).release, '1.0.3');
+    assert.match(events.at(-1).type, /^human\./u, 'a spent policy closes nothing; the close belongs to the human');
     for (const [index, event] of events.entries()) {
       assert.equal(event.sequence, index + 1);
       assert.equal(event.previousHash, index === 0 ? null : events[index - 1].hash);

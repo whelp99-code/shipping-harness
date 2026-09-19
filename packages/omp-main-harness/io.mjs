@@ -218,6 +218,25 @@ export function resolveOnPath(command, env = process.env) {
 }
 
 /**
+ * The npm executable to use when the caller did not name one. Every call site used to
+ * hardcode /usr/bin/npm, which does not exist on a stock GitHub runner, so nothing that
+ * packs or installs could run in CI. The absolute path still wins when it is there, so
+ * behaviour is unchanged wherever it already worked; otherwise this falls back to the
+ * same PATH resolution the omp command already uses.
+ * @param {NodeJS.ProcessEnv} [env] Environment to read PATH from.
+ * @returns {string} An npm executable path.
+ */
+export function defaultNpmCommand(env = process.env) {
+  const preferred = '/usr/bin/npm';
+  try {
+    if (spawnSync('/usr/bin/test', ['-x', preferred]).status === 0) return preferred;
+  } catch {
+    // Fall through to PATH resolution.
+  }
+  return resolveOnPath('npm', env);
+}
+
+/**
  * @typedef {{existed: boolean, sha256: string|null, mode: number|null, bytes: number}} FileReceipt
  */
 

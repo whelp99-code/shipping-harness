@@ -31,7 +31,7 @@ import {
   proposalFingerprint,
   proposalSummary,
 } from './proposal-state.mjs';
-import { prepareNextRelease } from './release-transition.mjs';
+import { prepareNextRelease, compareSemver } from './release-transition.mjs';
 import { buildReleaseTrain, persistApprovedReleaseTrain, releaseTrainSummary } from './release-train.mjs';
 import { acceptGoalCharter, compileGoalCharterPreview, persistAcceptedGoalCharter, validateGoalCharter } from './goal-charter.mjs';
 import { validateAutopilotDecision } from './autopilot-policy.mjs';
@@ -87,6 +87,25 @@ async function withProposalLock(root, operation) {
 function nextMinor(version) {
   const match = /^(\d+)\.(\d+)\.\d+/u.exec(version);
   return match ? `${match[1]}.${Number(match[2]) + 1}.0` : '0.1.0';
+}
+
+/**
+ * The release number for the next contract when the caller named none.
+ *
+ * The analyzer already derives a recommendation from the repository's own version
+ * evidence, including whether the change reads as a patch or a minor. Hardcoding a minor
+ * bump threw that away: a patch-sized stage after 1.0.2 was proposed as 1.1.0 while the
+ * evidence said 1.0.3 with high confidence. Prefer the recommendation whenever it is
+ * actually ahead of the closed release, and keep the minor bump as the fallback.
+ * @param {Record<string, any> | null | undefined} contract
+ * @param {Record<string, any>} analysis
+ * @returns {string}
+ */
+function nextReleaseAfter(contract, analysis) {
+  const recommended = analysis?.versionEvidence?.recommendedVersion ?? null;
+  if (!contract) return recommended ?? '0.1.0';
+  const valid = typeof recommended === 'string' && SEMVER.test(recommended);
+  return valid && compareSemver(recommended, contract.release) > 0 ? recommended : nextMinor(contract.release);
 }
 
 /** @param {string} root */
@@ -421,9 +440,7 @@ async function loadProposalContext(root, input, baselineCommit = null) {
   const release = input.release?.trim()
     || (context.state?.state === 'DRAFT'
       ? (context.state.release || context.contract?.release || '0.1.0')
-      : context.contract
-        ? nextMinor(context.contract.release)
-        : (analysis.versionEvidence?.recommendedVersion ?? '0.1.0'));
+      : nextReleaseAfter(context.contract, analysis));
   invariant(SEMVER.test(release), 'ERR_RELEASE_VERSION', `Invalid semantic version: ${release}`);
   const goal = input.goal.trim();
   const projectName = safeProjectName(input.projectName, safeProjectName(analysis.projectName, path.basename(root)));

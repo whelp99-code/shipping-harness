@@ -5,6 +5,22 @@
 // (autopilot, usability, omp-main-harness, team-dag) were run by nothing for five
 // releases. See docs/planning/39-V1.13.8-....md.
 
+/**
+ * How many skips a step's output reported. Test runners print "ℹ skipped N"; a smoke
+ * script is not a test runner and cannot, so one that declines to run (no OMP host, no
+ * private runtime) used to print nothing countable and read as a plain PASS. A line of
+ * the form `SKIPPED: <reason>` counts as one skip, and release:verify prints it as a
+ * WARNING like any other. A step that did not run must read as neither red nor green.
+ * @param {string} text Combined stdout and stderr of the step.
+ * @returns {number} Number of skips reported.
+ */
+export function countSkipped(text) {
+  let total = 0;
+  for (const match of text.matchAll(/ℹ\s+skipped\s+(\d+)/gu)) total += Number(match[1]);
+  for (const _ of text.matchAll(/^SKIPPED: .+$/gmu)) total += 1;
+  return total;
+}
+
 /** @typedef {{ name: string, script: string }} ReleaseVerifyStep */
 
 /** @type {ReleaseVerifyStep[]} */

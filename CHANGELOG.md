@@ -2,6 +2,13 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.9] - Unreleased
+
+In progress. v1.13.8 put `test:omp-main` and `smoke:omp-main` into the gate for the first time, and both went red on GitHub while every local gate was green.
+
+- **A fix that stopped at the production code.** v1.13.8 routed the OMP package's four npm defaults through one resolver and left seven call sites in the tests still spawning the literal `/usr/bin/npm`, which a stock runner does not have. They use the resolver now. Its PATH fallback is the only branch a runner takes and had never executed anywhere, because this machine has `/usr/bin/npm` and always took the other one; the preferred path is a parameter now, so the fallback is exercised rather than assumed.
+- **A smoke that could not run had no way to say so.** `smoke:omp-main` drives the real OMP host, absent on a runner, and crashed with `spawnSync omp ENOENT`. Exiting zero quietly would have been worse, because a step that did not run reading as a plain PASS is the failure v1.13.8 existed to remove, and `release:verify` only counted a test runner's `ℹ skipped N`. A script reports `SKIPPED: <reason>` on its own line, that line counts as one skip, and it is printed as a WARNING like any other.
+
 ## [1.13.8] - Unreleased
 
 In progress. A live release reached a state with no way out, reported with the exact sequence.

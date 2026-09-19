@@ -17,7 +17,7 @@
 import { spawn } from 'node:child_process';
 import os from 'node:os';
 
-import { STEPS } from './release-verify-steps.mjs';
+import { STEPS, countSkipped } from './release-verify-steps.mjs';
 
 const args = process.argv.slice(2);
 if (args.includes('--list')) {
@@ -25,16 +25,6 @@ if (args.includes('--list')) {
   process.exit(0);
 }
 
-/** @param {string} text @returns {number} */
-function countSkipped(text) {
-  let total = 0;
-  for (const match of text.matchAll(/ℹ\s+skipped\s+(\d+)/gu)) total += Number(match[1]);
-  // v1.13.9: a smoke script is not a test runner and cannot report "ℹ skipped N", so one
-  // that declines to run (no OMP host, no private runtime) printed nothing countable and
-  // read as a plain PASS. A `SKIPPED: <reason>` line on its own counts as one skip.
-  for (const _ of text.matchAll(/^SKIPPED: .+$/gmu)) total += 1;
-  return total;
-}
 
 /** @param {ReleaseVerifyStep} step */
 function runStep(step) {

@@ -1,40 +1,49 @@
 {
   "acceptance": [
     {
-      "id": "AC-11391",
-      "description": "The OMP package and its tests resolve npm through one resolver, and the PATH fallback that a runner takes is exercised rather than assumed.",
-      "type": "command",
-      "command": "node --test --test-reporter=spec test/omp-main-harness/*.test.mjs",
+      "command": "node --test --test-reporter=spec test/adversarial/autopilot-spent-policy.test.mjs test/autopilot/*.test.mjs",
       "cwd": ".",
+      "description": "A policy bound to a closed release is spent and gates nothing; a binding without a closure receipt still fails closed; an impossible activation is refused before anything is locked; re-activating on a new train continues the one autopilot ledger chain instead of restarting it.",
+      "id": "AC-11381",
       "required": true,
-      "timeoutSeconds": 600
+      "timeoutSeconds": 600,
+      "type": "command"
     },
     {
-      "id": "AC-11392",
-      "description": "A smoke script that cannot run reports a skip that release:verify counts and prints as a WARNING, instead of crashing or reading as a plain PASS.",
-      "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/gate-skip-reporting.test.mjs",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 120
-    },
-    {
-      "id": "AC-11393",
-      "description": "Full regression and release gates pass.",
-      "type": "command",
       "command": "npm run release:verify",
       "cwd": ".",
+      "description": "Full regression and release gates pass.",
+      "id": "AC-11382",
       "required": true,
-      "timeoutSeconds": 900
+      "timeoutSeconds": 900,
+      "type": "command"
     },
     {
-      "id": "AC-11394",
-      "description": "Documentation audit passes and no whitespace errors remain.",
-      "type": "command",
       "command": "npm run verify:docs && git diff --check",
       "cwd": ".",
+      "description": "Documentation audit passes and no whitespace errors remain.",
+      "id": "AC-11383",
       "required": true,
-      "timeoutSeconds": 120
+      "timeoutSeconds": 120,
+      "type": "command"
+    },
+    {
+      "command": "npm run verify:gate-coverage && node --test --test-reporter=spec test/unit/gate-coverage.test.mjs",
+      "cwd": ".",
+      "description": "Every test/<suite>/ directory and every test:*/smoke:* script is reachable from release:verify or excluded with a written reason, and the audit reproduces the v1.13.0 hole rather than agreeing with itself.",
+      "id": "AC-11384",
+      "required": true,
+      "timeoutSeconds": 120,
+      "type": "command"
+    },
+    {
+      "command": "node --test --test-reporter=spec test/unit/npm-pack.test.mjs",
+      "cwd": ".",
+      "description": "Both the pre-npm-12 array and the npm 12 name-keyed object forms of npm pack --json are handled, and an ambiguous or filename-less result is refused rather than read as undefined.",
+      "id": "AC-11385",
+      "required": true,
+      "timeoutSeconds": 120,
+      "type": "command"
     }
   ],
   "adapters": {
@@ -171,9 +180,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "A gate step must behave the same on a contributor machine and on a runner: resolve npm the same way everywhere, and let a smoke that cannot run report a skip instead of crashing or reading green.",
+  "goal": "A policy bound to a release that has already closed is spent: it must gate nothing and must never make a human approval fail after the scope is already locked. The release also closes the gap that let this ship: four test directories were reachable from no release gate, and every defect they were hiding is fixed.",
   "project": "shipping-harness",
-  "release": "1.13.9",
+  "release": "1.13.8",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -191,15 +200,19 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Reopening v1.13.8 or any closed release.",
-      "Weakening a gate, or letting a step that did not run report a plain PASS.",
-      "Installing or reactivating the OMP host or the retired private OMO runtime in CI.",
+      "Reopening a closed release, or letting a model approve, close, or mark RELEASED.",
+      "Weakening any acceptance gate, budget, or output bound to make a step pass.",
+      "Changing what the nine MCP tools are, or the frozen v1 schemas and surface hashes.",
+      "Rebuilding or reactivating the retired private OMO runtime, or making a test that needs it fail instead of skip.",
       "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
     ],
     "include": [
-      "Every pack and install call site, in the package and in its tests, resolves npm through one resolver whose PATH fallback is tested.",
-      "A smoke script that declines to run reports a countable skip; release:verify prints it as a WARNING.",
-      "No gate step behaves differently on a contributor machine and on a runner for reasons nobody can see."
+      "A policy bound to a release that has a closure receipt and is not the current release is spent: it reports enabled=false and gates nothing.",
+      "An activation that cannot succeed is refused before the approval mutates anything, and says that nothing was approved or locked.",
+      "Activating a policy on a new train continues the single append-only autopilot ledger chain instead of restarting it at sequence 1.",
+      "Every test/<suite>/ directory and every test:*/smoke:* script is reachable from a release:verify step or excluded with a written reason, enforced by a gate step.",
+      "The defects that the ungated suites were hiding: the npm pack --json shape, the hardcoded npm path in the OMP package, the frozen version literal in the packaged-install smoke, and the fifth dirty-baseline test.",
+      "A pull request runs the same gate list as a release."
     ],
     "paths": {
       "exclude": [
@@ -211,20 +224,18 @@
         "coverage/**"
       ],
       "include": [
-        "CHANGELOG.md",
-        "README.md",
-        "docs/HANDOVER.md",
-        "docs/planning/40-V1.13.9-GATE-PORTABILITY-DEVELOPMENT-PLAN.md",
+        ".github/workflows/ci.yml",
+        "docs/planning/32-V1.8.2-PLAIN-BRIEF-BUDGET-HOTFIX.md",
+        "docs/planning/39-V1.13.8-SPENT-AUTOPILOT-AND-GATE-COVERAGE-DEVELOPMENT-PLAN.md",
         "package.json",
-        "packages/omp-main-harness/field-smoke.mjs",
+        "packages/omp-main-harness/install.mjs",
         "packages/omp-main-harness/io.mjs",
-        "scripts/release-verify-steps.mjs",
-        "scripts/release-verify.mjs",
-        "test/omp-main-harness/bootstrap-cleanup-race.test.mjs",
-        "test/omp-main-harness/helpers.mjs",
-        "test/omp-main-harness/install-rollback.test.mjs",
-        "test/omp-main-harness/npm-command.test.mjs",
-        "test/unit/gate-skip-reporting.test.mjs"
+        "packages/omp-main-harness/package.mjs",
+        "src/core/plain-brief.mjs",
+        "test/autopilot/spent-policy-recovery.test.mjs",
+        "test/integration/plain-brief-budget.test.mjs",
+        "test/mcp/plain-brief.test.mjs",
+        "test/omp-main-harness/npm-command.test.mjs"
       ]
     }
   },

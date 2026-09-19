@@ -217,6 +217,13 @@ export async function lockContract(root, baselineSha) {
   const paths = runtimePaths(root);
   const contract = await loadContract(paths.contract);
   invariant(typeof baselineSha === 'string' && baselineSha.length >= 7, 'ERR_GIT_HEAD_REQUIRED', 'A valid Git HEAD is required before lock');
+  // v1.13.10: an empty scope.paths.include means "no path restriction" to analyzeScope,
+  // not "nothing allowed". `release prepare` used to copy the previous release's scope
+  // forward, so a draft was always born describing someone else's release; emptying it
+  // on prepare without this check would have turned a stale allowlist into no allowlist.
+  // A release that does not say which paths it may change cannot be locked.
+  invariant(Array.isArray(contract.scope?.paths?.include) && contract.scope.paths.include.length > 0, 'ERR_SCOPE_UNSTATED', 'This release does not say which paths it may change. An empty scope.paths.include is not a narrow scope, it is no restriction at all: list the paths this release may touch in .shipping/contract.yaml before locking.');
+  invariant(Array.isArray(contract.scope?.include) && contract.scope.include.length > 0, 'ERR_SCOPE_UNSTATED', 'This release does not say what is in scope. Add at least one scope.include statement to .shipping/contract.yaml before locking.');
   const existing = await exists(paths.lock) ? await readJson(paths.lock) : null;
   const planStage = contract.plan ? await lockPlanStageSnapshot(root, contract) : null;
   const lock = {

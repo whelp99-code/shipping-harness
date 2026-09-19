@@ -48,6 +48,8 @@ export const STEPS = [
   { name: 'test:intent-gate', script: 'test:intent-gate' },
   { name: 'smoke:intent-gate', script: 'smoke:intent-gate' },
   { name: 'smoke:omp-main', script: 'smoke:omp-main' },
+  { name: 'smoke:remote', script: 'smoke:remote' },
+  { name: 'smoke:stable', script: 'smoke:stable' },
 ];
 
 /**
@@ -68,8 +70,6 @@ export const UNGATED_SUITES = {
  */
 export const UNGATED_SCRIPTS = {
   'test:omo-bridge': 'Runs test/omo; see UNGATED_SUITES for the retired private OMO runtime.',
-  'smoke:remote': 'scripts/remote-gateway-smoke.mjs needs the retired private OMO runtime at its pinned absolute path. test:remote covers the gateway logic and is a step.',
-  'smoke:stable': 'scripts/v1-final-smoke.mjs calls verifyPrivateOmoPromotion() and shells out to smoke:remote, so it needs the same retired runtime. It also rewrites docs/reports/v1-final-smoke.json, which AGENTS.md says must not be regenerated casually. test:stable covers the frozen v1 surface and is a step.',
   'test:decision': 'Alias: every file it names lives under test/unit, test/adversarial, and is already run by `npm test` inside the check step.',
   'test:goals': 'Alias for files already under test/unit, test/integration, test/adversarial.',
   'test:release-train': 'Alias for files already under test/mcp, test/adversarial.',

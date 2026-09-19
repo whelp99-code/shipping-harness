@@ -7,6 +7,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { verifyPrivateOmoPromotion } from '../packages/internal-omo-bridge/index.mjs';
 import { singleNpmPackEntry } from '../src/core/npm-pack.mjs';
 import { VERSION } from '../src/version.mjs';
+import { skipWithoutPrivateOmoRuntime } from '../packages/internal-omo-bridge/availability.mjs';
 
 const repo = process.cwd();
 const root = await mkdtemp(path.join(os.tmpdir(), 'shipping-v1-final-'));
@@ -117,6 +118,14 @@ async function installedMcpFlow(mcpBinary, projectRoot) {
   } finally {
     await client.close();
   }
+}
+
+// v1.13.10: this smoke calls verifyPrivateOmoPromotion() and shells out to
+// remote-gateway-smoke, so it needs the private OMO runtime retired in v1.11.1. Same
+// rule as everywhere else: report a skip, never crash and never quietly pass.
+if (skipWithoutPrivateOmoRuntime(repo)) {
+  await rm(root, { recursive: true, force: true });
+  process.exit(0);
 }
 
 try {

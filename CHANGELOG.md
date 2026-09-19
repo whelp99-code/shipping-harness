@@ -2,6 +2,13 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.10] - Unreleased
+
+In progress. Two things v1.13.9 left open, both of which its own §6 had filed as decisions for later.
+
+- **Every draft was born describing the release before it.** `release prepare` built the next contract as `{...current, release, goal}`, carrying the previous release's scope statements and path allowlist forward. This repository carried v1.8.2's scope as far as v1.13.8, where work done after the lock finally surfaced it as seven scope blockers and an amendment; the symptom is invisible whenever implementation precedes the lock, which is how this repository works. A prepared draft now states nothing about itself and keeps only the structural denial list. Emptying the allowlist alone would have been worse, because `analyzeScope` reads an empty include list as no restriction rather than a narrow one, so `lock` refuses a draft that never says what it may change.
+- **The skip convention was not applied to the two cases that motivated it.** v1.13.9 added `SKIPPED:` so a step that cannot run could be gated instead of excluded, and `smoke:remote` and `smoke:stable` stayed excluded anyway. Both need the private OMO runtime retired in v1.11.1. The availability probe moved out of `test/omo/helpers.mjs` into the bridge package so a script can ask the same question a test could, and both are steps now: 23 become 25, with three honest WARNINGs.
+
 ## [1.13.9] - Unreleased
 
 In progress. v1.13.8 put `test:omp-main` and `smoke:omp-main` into the gate for the first time, and both went red on GitHub while every local gate was green.

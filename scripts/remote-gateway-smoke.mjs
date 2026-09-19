@@ -23,6 +23,7 @@ import {
   validateRemoteConfig,
 } from '../packages/internal-remote/index.mjs';
 import { callShippingTool } from '../src/mcp/tools.mjs';
+import { skipWithoutPrivateOmoRuntime } from '../packages/internal-omo-bridge/availability.mjs';
 
 const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const reportJsonPath = path.join(sourceRoot, 'docs', 'reports', 'v0.9-remote-pilot.json');
@@ -354,6 +355,12 @@ function markdown(report) {
     `- Duration: ${report.metrics.durationMs} ms\n\n` +
     `No public listener, raw shell field, public tenant, deployment, or customer endpoint was used.\n`;
 }
+
+// v1.13.10: this pilot needs the private OMO runtime retired in v1.11.1, which is
+// pinned to an absolute path outside this repository and is absent on every CI runner.
+// It used to die with ENOENT, which is why smoke:remote was excluded from the gate.
+// It reports a countable skip now and is a step.
+if (skipWithoutPrivateOmoRuntime()) process.exit(0);
 
 const report = await runPilot();
 if (process.argv.includes('--record')) {

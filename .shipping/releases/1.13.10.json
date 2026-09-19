@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 4,
+    "requiredFailed": 0,
+    "total": 4
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "695c9861bf12753430d9c88c72b028b6a909816d",
+  "closedAt": "2026-09-19T14:19:07.952Z",
+  "closedGitSha": "6d3df4e20f6b9c89309c8eb20a52601f5cbb9682",
+  "contractHash": "85794bb5eeaac2c130fd850b0b7fe6b3801c16db178d90b3f200457ee8d182d7",
+  "evidenceRunId": "run-2026-09-19T14-18-37-778Z-b724f849",
+  "fixCycles": 0,
+  "goal": "A release must state its own scope: prepare no longer copies the previous release's scope forward, and a draft that never says which paths it may change cannot be locked. Two smokes that need a retired runtime are gated as skips instead of excluded.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "6d3df4e20f6b9c89309c8eb20a52601f5cbb9682",
+      "subject": "chore: lock shipping-harness v1.13.10"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.10",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

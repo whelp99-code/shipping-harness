@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 4,
+    "requiredFailed": 0,
+    "total": 4
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "41467ce2d305aaac00c3ca43942a314f146756f3",
+  "closedAt": "2026-09-19T14:10:49.207Z",
+  "closedGitSha": "3f3fb3a546039ff75d24d3168a5b9e4aa244e4c8",
+  "contractHash": "a00131efdb6ef57dc9da2735ec9b97f2a5d4ee114ef155e4976a4455dac84e51",
+  "evidenceRunId": "run-2026-09-19T14-10-11-930Z-a400c185",
+  "fixCycles": 0,
+  "goal": "A gate step must behave the same on a contributor machine and on a runner: resolve npm the same way everywhere, and let a smoke that cannot run report a skip instead of crashing or reading green.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "3f3fb3a546039ff75d24d3168a5b9e4aa244e4c8",
+      "subject": "chore: lock shipping-harness v1.13.9"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.9",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

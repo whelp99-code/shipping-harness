@@ -1,8 +1,8 @@
 {
   "acceptance": [
     {
-      "id": "AC-113181",
-      "description": "A preflight row carries the budget it was measured against; a command at or above 80% of it is named with both numbers, what to do and what it costs, independently of its verdict; a command with room left, one that already timed out, and a row with no usable budget produce no such line.",
+      "id": "AC-113171",
+      "description": "The already-passing preflight warning states the measured fact and names both the expected implement-then-lock reading and the stale lock-then-implement one; the timeout warning states what it costs at verify; a criterion failing as expected warns nothing.",
       "type": "command",
       "command": "node --test --test-reporter=spec test/unit/lock-preflight.test.mjs",
       "cwd": ".",
@@ -10,7 +10,7 @@
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-113182",
+      "id": "AC-113172",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -19,7 +19,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-113183",
+      "id": "AC-113173",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -162,9 +162,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "The preflight already measures how long every acceptance command takes and knows its budget. A command near that budget is named before the lock, because a suite grows and crossing it at verify fails the release for the timeout rather than for the work.",
+  "goal": "A warning that fires on every correct release teaches the reader to skip warnings. The acceptance preflight states its measured fact once and names both readings, because which workflow produced the tree cannot be told from it.",
   "project": "shipping-harness",
-  "release": "1.13.18",
+  "release": "1.13.17",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -182,14 +182,13 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Blocking a lock because a command is near its budget; this is a warning, not a gate.",
-      "Changing the budgets themselves, what the preflight runs, or how a verdict is decided.",
+      "Detecting which workflow produced the tree, or suppressing the warning in either case.",
+      "Changing what the preflight runs, how it judges a criterion, or whether lock refuses.",
       "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
     ],
     "include": [
-      "Each preflight row carries the timeout budget its duration was measured against.",
-      "A command using 80% or more of that budget is warned about before the lock, with the measured and budgeted seconds side by side, what to do, and what crossing it costs at verify.",
-      "The warning does not depend on the verdict, and a command that already timed out is reported once."
+      "The acceptance preflight warning names both readings of an already-passing criterion rather than asserting the stale one.",
+      "The timeout warning says the criterion may be unrunnable and that verify would then fail for the environment rather than the work."
     ],
     "paths": {
       "exclude": [
@@ -204,7 +203,7 @@
         "CHANGELOG.md",
         "README.md",
         "docs/HANDOVER.md",
-        "docs/planning/49-V1.13.18-NEAR-THE-BUDGET-DEVELOPMENT-PLAN.md",
+        "docs/planning/48-V1.13.17-A-WARNING-THAT-ALWAYS-FIRES-DEVELOPMENT-PLAN.md",
         "package.json",
         "src/core/contract-defect.mjs",
         "test/unit/lock-preflight.test.mjs"

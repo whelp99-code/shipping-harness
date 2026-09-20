@@ -1,22 +1,31 @@
 {
   "acceptance": [
     {
-      "id": "AC-113191",
+      "id": "AC-113181",
+      "description": "A preflight row carries the budget it was measured against; a command at or above 80% of it is named with both numbers, what to do and what it costs, independently of its verdict; a command with room left, one that already timed out, and a row with no usable budget produce no such line.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/unit/lock-preflight.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-113182",
+      "description": "Full regression and release gates pass.",
+      "type": "command",
+      "command": "npm run release:verify",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 900
+    },
+    {
+      "id": "AC-113183",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 120
-    },
-    {
-      "id": "AC-113192",
-      "description": "Full regression and release gates pass, proving this release changes no behaviour.",
-      "type": "command",
-      "command": "npm run release:verify",
-      "cwd": ".",
-      "required": true,
-      "timeoutSeconds": 900
     }
   ],
   "adapters": {
@@ -153,9 +162,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "The v1.13.18 record states as fact that a reporting session's suite was about to exceed its timeout. It was not: the measurement is 386s against a 600s budget. Correct the record without rewriting it.",
+  "goal": "The preflight already measures how long every acceptance command takes and knows its budget. A command near that budget is named before the lock, because a suite grows and crossing it at verify fails the release for the timeout rather than for the work.",
   "project": "shipping-harness",
-  "release": "1.13.19",
+  "release": "1.13.18",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -173,14 +182,14 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Editing or deleting what a closed release recorded.",
-      "Changing the near-budget threshold, the preflight, or any other behaviour.",
+      "Blocking a lock because a command is near its budget; this is a warning, not a gate.",
+      "Changing the budgets themselves, what the preflight runs, or how a verdict is decided.",
       "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
     ],
     "include": [
-      "The CHANGELOG records that the v1.13.18 entry stated as fact something about a reporting repository that its own measurement disproved.",
-      "The correction is added; the v1.13.18 entry and its plan document are left as written.",
-      "No source changes: the behaviour v1.13.18 shipped is confirmed correct at the measured 386s of 600s."
+      "Each preflight row carries the timeout budget its duration was measured against.",
+      "A command using 80% or more of that budget is warned about before the lock, with the measured and budgeted seconds side by side, what to do, and what crossing it costs at verify.",
+      "The warning does not depend on the verdict, and a command that already timed out is reported once."
     ],
     "paths": {
       "exclude": [
@@ -195,8 +204,10 @@
         "CHANGELOG.md",
         "README.md",
         "docs/HANDOVER.md",
-        "docs/planning/50-V1.13.19-CORRECT-THE-V1-13-18-RECORD-DEVELOPMENT-PLAN.md",
-        "package.json"
+        "docs/planning/49-V1.13.18-NEAR-THE-BUDGET-DEVELOPMENT-PLAN.md",
+        "package.json",
+        "src/core/contract-defect.mjs",
+        "test/unit/lock-preflight.test.mjs"
       ]
     }
   },

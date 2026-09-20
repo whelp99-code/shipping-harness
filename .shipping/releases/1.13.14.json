@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "0ac2e851a3820b243a988e7b69ae15ca6dba8067",
+  "closedAt": "2026-09-20T06:17:01.044Z",
+  "closedGitSha": "8adef341643a2099e2919f5b8366e267735e7ac7",
+  "contractHash": "9baae81c61b1a71a6dc83cf99a9205426adc017c8b409f9940b68225cb0fc6ae",
+  "evidenceRunId": "run-2026-09-20T06-16-31-622Z-884e64cf",
+  "fixCycles": 0,
+  "goal": "A session must be able to tell which build is answering it: a long-lived MCP server keeps serving the modules it loaded, and no response said which ones those were.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "8adef341643a2099e2919f5b8366e267735e7ac7",
+      "subject": "chore: lock shipping-harness v1.13.14"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.14",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

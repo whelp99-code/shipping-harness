@@ -1,16 +1,25 @@
 {
   "acceptance": [
     {
-      "id": "AC-113111",
-      "description": "Closing a release that a spent policy never authorised leaves the binding naming the release it did authorise, still spent, still reporting enabled false, and internally consistent.",
+      "id": "AC-113101",
+      "description": "A prepared release does not inherit the previous release scope, an empty allowlist is proven to mean no restriction, and a draft that never states its scope cannot be locked.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/adversarial/autopilot-spent-policy.test.mjs test/autopilot/*.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/scope-carry-forward.test.mjs",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 600
+      "timeoutSeconds": 300
     },
     {
-      "id": "AC-113112",
+      "id": "AC-113102",
+      "description": "The two smokes that need the retired private OMO runtime report a countable skip and are release:verify steps rather than exclusions.",
+      "type": "command",
+      "command": "node --test --test-reporter=spec test/unit/gate-skip-reporting.test.mjs test/unit/gate-coverage.test.mjs",
+      "cwd": ".",
+      "required": true,
+      "timeoutSeconds": 300
+    },
+    {
+      "id": "AC-113103",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -19,7 +28,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-113113",
+      "id": "AC-113104",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -162,9 +171,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "A close records that a release closed; it never decides which release an autopilot policy is bound to. A policy that authorised nothing here must keep saying so.",
+  "goal": "A release must state its own scope: prepare no longer copies the previous release's scope forward, and a draft that never says which paths it may change cannot be locked. Two smokes that need a retired runtime are gated as skips instead of excluded.",
   "project": "shipping-harness",
-  "release": "1.13.11",
+  "release": "1.13.10",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -182,14 +191,15 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Reopening a closed release, or changing what a close does to the release state machine.",
-      "Changing autopilot authority, profiles, or letting a model approve or close.",
+      "Reopening a closed release.",
+      "Letting a step that did not run report a plain PASS, or letting a release lock without saying what it may change.",
+      "Rebuilding or reactivating the retired private OMO runtime.",
       "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
     ],
     "include": [
-      "A close records that a release closed and never rewrites which release an autopilot policy is bound to.",
-      "A policy that authorised nothing for the closing release keeps reporting spent and enabled false afterwards.",
-      "The close record stays idempotent when the binding names an older release than the one closing."
+      "A prepared draft states its own scope: prepare resets the scope statements and the path allowlist, and keeps only the structural denial list.",
+      "A draft that never states what it may touch cannot be locked, because an empty allowlist is no restriction rather than a narrow one.",
+      "A smoke that needs the retired private OMO runtime reports a countable skip and is a gate step instead of an exclusion."
     ],
     "paths": {
       "exclude": [
@@ -204,11 +214,16 @@
         "CHANGELOG.md",
         "README.md",
         "docs/HANDOVER.md",
-        "docs/planning/42-V1.13.11-A-CLOSE-DOES-NOT-REBIND-DEVELOPMENT-PLAN.md",
-        "docs/reports/v1-security-inventory.json",
+        "docs/planning/41-V1.13.10-SCOPE-STATED-PER-RELEASE-DEVELOPMENT-PLAN.md",
         "package.json",
-        "src/core/autopilot.mjs",
-        "test/autopilot/spent-policy-recovery.test.mjs"
+        "packages/internal-omo-bridge/availability.mjs",
+        "scripts/release-verify-steps.mjs",
+        "scripts/remote-gateway-smoke.mjs",
+        "scripts/v1-final-smoke.mjs",
+        "src/core/contract.mjs",
+        "src/core/release-transition.mjs",
+        "test/omo/helpers.mjs",
+        "test/unit/scope-carry-forward.test.mjs"
       ]
     }
   },

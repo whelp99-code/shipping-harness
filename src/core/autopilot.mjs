@@ -657,7 +657,15 @@ export async function completeManualAutopilotClosure(root, closeResult) {
   return withAutopilotLock(root, async () => {
     const current = await loadAutopilotState(root);
     invariant(current, 'ERR_AUTOPILOT_STATE_MISSING', 'Autopilot state disappeared while awaiting the lock');
-    if (current.phase === 'RELEASE_CLOSED' && current.currentRelease === closeResult.receipt.release) return { state: current, duplicate: true };
+    // v1.13.11: the binding may name an older release than the one closing -- a policy
+    // that was spent before this close authorised nothing here. Its own currentRelease is
+    // then not the idempotency key, so the ledger is: a close already recorded for this
+    // release is this same close.
+    const lastEvent = (await readAutopilotLedger(root)).at(-1) ?? null;
+    const alreadyRecorded = current.phase === 'RELEASE_CLOSED'
+      && (current.currentRelease === closeResult.receipt.release
+        || (lastEvent?.type === 'human.release-closed' && lastEvent.release === closeResult.receipt.release));
+    if (alreadyRecorded) return { state: current, duplicate: true };
     const now = new Date().toISOString();
     const event = createEvent(current, {
       occurredAt: now,
@@ -672,9 +680,17 @@ export async function completeManualAutopilotClosure(root, closeResult) {
       details: { receipt: path.relative(root, closeResult.receiptPath).replaceAll('\\', '/'), closedGitSha: closeResult.receipt.closedGitSha, released: false },
     });
     await appendEvent(root, event);
+    // v1.13.11: this used to stamp the closing release onto the binding. When the policy
+    // was spent that rewrote history: the binding stopped naming the release it actually
+    // authorised, so `spent` went false (bound == current) while releaseTrainHash and
+    // baselineSha still belonged to the older train, and a dead policy reported
+    // `enabled: true` for a release it never authorised. Behaviour stayed fail-closed --
+    // the six-way check reported BINDING_MISMATCH -- but the surface lied, which is the
+    // false user state this product exists to prevent. Which release a policy is bound to
+    // is decided at activation and never by a close. In the ordinary case the two are
+    // already equal, so nothing changes there.
     const next = await writeState(root, {
       ...current,
-      currentRelease: closeResult.receipt.release,
       phase: 'RELEASE_CLOSED',
       resumePhase: null,
       sequence: event.sequence,

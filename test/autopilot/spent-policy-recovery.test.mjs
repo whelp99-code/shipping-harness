@@ -11,7 +11,7 @@ import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { callShippingTool } from '../../src/mcp/tools.mjs';
-import { isSpentAutopilotBinding, loadAutopilotState, readAutopilotLedger } from '../../src/core/autopilot.mjs';
+import { autopilotStatus, isSpentAutopilotBinding, loadAutopilotState, readAutopilotLedger } from '../../src/core/autopilot.mjs';
 import { readTrustedState } from '../../src/core/state.mjs';
 import { createFixtureRepo } from '../helpers/repo.mjs';
 
@@ -201,6 +201,64 @@ test('a release already LOCKED against a spent binding still reaches CLOSED, wit
       assert.equal(event.sequence, index + 1);
       assert.equal(event.previousHash, index === 0 ? null : events[index - 1].hash);
     }
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('closing a release a spent policy never authorised does not rewrite the binding', async () => {
+  // v1.13.11: reported from the live 1.0.3 recovery. The close stamped the closing
+  // release onto the binding, so a policy bound to the closed 1.0.2 stopped reading as
+  // spent -- bound now equalled current -- while its releaseTrainHash and baselineSha
+  // still belonged to the 1.0.2 train. A dead policy then reported `enabled: true` for a
+  // release it never authorised. Behaviour stayed fail-closed, the surface did not.
+  const { fixture } = await closedFirstRelease('1.0.2');
+  try {
+    const directory = path.join(fixture.root, '.shipping');
+    const names = ['autopilot-state.json', 'autopilot-ledger.jsonl', 'autopilot-policy.json'];
+    const snapshot = Object.fromEntries(await Promise.all(names.map(async (name) => [name, await readFile(path.join(directory, name), 'utf8')])));
+
+    const next = await callShippingTool(fixture.root, 'shipping_start', {
+      goal: 'Replace the truncation in the top-level report with a bounded, complete rendering.',
+      release: '1.0.3',
+    });
+    await callShippingTool(fixture.root, 'shipping_approve_scope', {
+      proposalId: next.structuredContent.proposalId,
+      proposalHash: next.structuredContent.proposalHash,
+      confirm: true,
+    });
+    for (const name of names) await writeFile(path.join(directory, name), snapshot[name], 'utf8');
+
+    const before = await autopilotStatus(fixture.root);
+    assert.equal(before.spent, true);
+    assert.equal(before.enabled, false);
+    assert.equal(before.state.currentRelease, '1.0.2');
+
+    assert.equal((await callShippingTool(fixture.root, 'shipping_verify', {})).structuredContent.decision, 'SHIPPABLE');
+    assert.equal((await callShippingTool(fixture.root, 'shipping_close', {})).structuredContent.state, 'CLOSED');
+
+    const after = await autopilotStatus(fixture.root);
+    assert.equal(after.state.currentRelease, '1.0.2', 'a close never decides which release a policy is bound to');
+    assert.equal(after.spent, true, 'the policy is still spent after the release it did not authorise closed');
+    assert.equal(after.enabled, false, 'a dead policy must never report itself enabled');
+    assert.equal(after.bindingReason, 'SUPERSEDED_BY_CLOSED_RELEASE');
+    const stale = JSON.parse(snapshot['autopilot-state.json']);
+    assert.equal(after.state.releaseTrainHash, stale.releaseTrainHash, 'the binding stays internally consistent rather than half-updated');
+    assert.equal(after.state.baselineSha, stale.baselineSha);
+    assert.equal(after.state.phase, 'RELEASE_CLOSED');
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('the close record stays idempotent when the binding names an older release', async () => {
+  const { fixture } = await closedFirstRelease('1.0.2');
+  try {
+    const events = await readAutopilotLedger(fixture.root);
+    // The ordinary path: the binding authorised the release it closes, so a second close
+    // is refused by the state machine and nothing is appended twice.
+    await assert.rejects(async () => callShippingTool(fixture.root, 'shipping_close', {}), (error) => error.code === 'ERR_NOT_SHIPPABLE');
+    assert.equal((await readAutopilotLedger(fixture.root)).length, events.length);
   } finally {
     await fixture.cleanup();
   }

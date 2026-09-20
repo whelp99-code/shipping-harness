@@ -2,6 +2,12 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.11] - Unreleased
+
+In progress. Found by the session that used v1.13.8 to escape the reported 1.0.3 deadlock, which noticed the closed train's hashes still sitting in the binding and asked whether that was intended. Measuring it showed one layer more.
+
+- **A close rewrote which release a policy was bound to.** `completeManualAutopilotClosure` stamped the closing release onto the autopilot binding. Harmless when the policy authorised that release, because the two already matched; when the policy was spent it inverted the judgement. Spent means bound release is not the current one, and the close made them equal while `releaseTrainHash` and `baselineSha` stayed with the older train, producing a binding that never existed. A policy that authorised 1.0.2 and gates nothing then reported `enabled: true` for a 1.0.3 it never authorised. Behaviour stayed fail-closed the whole time, since the six-way check reported `BINDING_MISMATCH`, but the surface lied, and an untruthful surface is the false user state this product exists to prevent. Which release a policy is bound to is decided at activation. The close record's idempotency key reads the ledger now, because a spent binding's own `currentRelease` is not one.
+
 ## [1.13.10] - Unreleased
 
 In progress. Two things v1.13.9 left open, both of which its own §6 had filed as decisions for later.

@@ -28,11 +28,34 @@ test('a policy bound to a release that has closed is spent', async () => {
   }
 });
 
-test('a binding that names the current release is never treated as spent', async () => {
+test('a binding that names a closed release is spent even when it names the current one', async () => {
+  // v1.13.12: this asserted the opposite. v1.13.8 treated a binding naming the current
+  // release as tampering rather than lifecycle, which was right until v1.13.11 showed
+  // that a close had been stamping the closing release onto spent bindings all along.
+  // Those bindings name a closed release *because* of the stamp, and under the old rule
+  // they never recovered: the dead policy read live forever and the next autopilot
+  // approval was refused. A write-side fix cannot heal disk state.
+  //
+  // Nothing is forgiven that was not already closed. Acting on a release that has a
+  // closure receipt is impossible anyway, so widening this does not widen what automation
+  // can touch; the receipt-less case below is the guard that matters.
   const fixture = await createFixtureRepo();
   try {
     await writeReceipt(fixture.root, '1.0.2');
-    assert.equal(await isSpentAutopilotBinding(fixture.root, '1.0.2', '1.0.2'), false, 'same release is not a lifecycle move');
+    assert.equal(await isSpentAutopilotBinding(fixture.root, '1.0.2', '1.0.2'), true, 'the release it authorised has closed');
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('a binding whose release never closed is not spent, whatever it is named', async () => {
+  const fixture = await createFixtureRepo();
+  try {
+    await writeReceipt(fixture.root, '1.0.2');
+    assert.equal(await isSpentAutopilotBinding(fixture.root, '1.0.3', '1.0.3'), false, 'a receipt for a different release proves nothing');
+    assert.equal(await isSpentAutopilotBinding(fixture.root, '1.0.3', '1.0.4'), false);
+    assert.equal(await isSpentAutopilotBinding(fixture.root, null, '1.0.4'), false);
+    assert.equal(await isSpentAutopilotBinding(fixture.root, '1.0.2', null), false);
   } finally {
     await fixture.cleanup();
   }

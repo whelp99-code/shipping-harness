@@ -43,11 +43,11 @@ test('a new train after a closed autopilot release approves, verifies and closes
     const spent = await loadAutopilotState(fixture.root);
     assert.equal(spent.phase, 'RELEASE_CLOSED', 'the reported case starts from a non-terminal phase, not TRAIN_COMPLETE');
     assert.equal(spent.currentRelease, '1.0.2');
-    // "Spent" is a statement about a *newer* release: while 1.0.2 is still the current
-    // release the binding is simply current, and it becomes spent the moment 1.0.3 is the
-    // release being approved -- which is exactly when the old code raised
-    // ERR_AUTOPILOT_ACTIVE, after the lock.
-    assert.equal(await isSpentAutopilotBinding(fixture.root, '1.0.2', '1.0.2'), false);
+    // v1.13.12: the closure receipt is the whole test. v1.13.8 also required the bound
+    // release to differ from the current one, which left every binding written by an
+    // older build -- where the close stamped the closing release onto it -- reading live
+    // forever, because the names matched. A write-side fix cannot heal disk state.
+    assert.equal(await isSpentAutopilotBinding(fixture.root, '1.0.2', '1.0.2'), true, 'the release it authorised has closed, whatever the current release is called');
     assert.equal(await isSpentAutopilotBinding(fixture.root, '1.0.2', '1.0.3'), true);
     assert.equal(await isSpentAutopilotBinding(fixture.root, '9.9.9', '1.0.3'), false, 'a binding with no closure receipt is not lifecycle and still fails closed');
 
@@ -259,6 +259,55 @@ test('the close record stays idempotent when the binding names an older release'
     // is refused by the state machine and nothing is appended twice.
     await assert.rejects(async () => callShippingTool(fixture.root, 'shipping_close', {}), (error) => error.code === 'ERR_NOT_SHIPPABLE');
     assert.equal((await readAutopilotLedger(fixture.root)).length, events.length);
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
+test('a binding an older build already stamped with the closing release recovers on read', async () => {
+  // v1.13.12: reported from the live worktree after v1.13.11 shipped. That fix stops a
+  // close from stamping the closing release onto a spent binding, but it cannot undo a
+  // stamp already written: every repository that closed under an earlier build carries a
+  // binding naming a release it never authorised. Under the v1.13.8 rule those never
+  // recover, because bound and current match, so the dead policy reads enabled forever
+  // and the next autopilot approval is refused. The judgement has to heal them.
+  const { fixture } = await closedFirstRelease('1.0.2');
+  try {
+    // The reported shape: 1.0.3 was LOCKED with no activation of its own, then closed.
+    const directory = path.join(fixture.root, '.shipping');
+    const names = ['autopilot-state.json', 'autopilot-ledger.jsonl', 'autopilot-policy.json'];
+    const snapshot = Object.fromEntries(await Promise.all(names.map(async (name) => [name, await readFile(path.join(directory, name), 'utf8')])));
+    const next = await callShippingTool(fixture.root, 'shipping_start', {
+      goal: 'Replace the truncation in the top-level report with a bounded, complete rendering.',
+      release: '1.0.3',
+    });
+    await callShippingTool(fixture.root, 'shipping_approve_scope', {
+      proposalId: next.structuredContent.proposalId,
+      proposalHash: next.structuredContent.proposalHash,
+      confirm: true,
+    });
+    for (const name of names) await writeFile(path.join(directory, name), snapshot[name], 'utf8');
+    await callShippingTool(fixture.root, 'shipping_verify', {});
+    await callShippingTool(fixture.root, 'shipping_close', {});
+
+    // What every pre-v1.13.11 close wrote at this point: the closing release stamped onto
+    // the binding, every other field left with the train it really authorised. Hashed
+    // with the function the loader verifies against, so this exercises the production
+    // validation path rather than a file the loader would reject.
+    const statePath = path.join(directory, 'autopilot-state.json');
+    const closed = JSON.parse(await readFile(statePath, 'utf8'));
+    assert.equal(closed.currentRelease, '1.0.2', 'v1.13.11 leaves the binding naming what it authorised');
+    const { writeJsonAtomic } = await import('../../src/core/fs.mjs');
+    const { hashObject } = await import('../../src/core/crypto.mjs');
+    const { hash: _ignored, ...body } = { ...closed, currentRelease: '1.0.3' };
+    await writeJsonAtomic(statePath, { ...body, hash: hashObject(body) });
+
+    const healed = await autopilotStatus(fixture.root);
+    assert.equal(healed.state.currentRelease, '1.0.3', 'the stamped value is still on disk; nothing rewrites it');
+    assert.equal(healed.spent, true, 'the release it names has a closure receipt, so the policy is spent');
+    assert.equal(healed.enabled, false, 'a dead policy must not read as live just because a close renamed it');
+    assert.equal(healed.bindingReason, 'SUPERSEDED_BY_CLOSED_RELEASE');
+    assert.equal(healed.state.releaseTrainHash, JSON.parse(snapshot['autopilot-state.json']).releaseTrainHash, 'the stamp is the only thing that differs');
   } finally {
     await fixture.cleanup();
   }

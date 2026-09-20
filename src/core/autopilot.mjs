@@ -300,15 +300,24 @@ export async function activateAutopilot(root, input) {
  * locked, and `verify` on that next release was stopped with STALE_POLICY_BINDING by a
  * policy that had no authority over it. A release could end up with no way out.
  *
- * Only this exact shape is forgiven. A binding that disagrees while naming the CURRENT
- * release is still stale and still fails closed, because that is tampering, not lifecycle.
+ * The closure receipt is the whole test. v1.13.8 also required the bound release to differ
+ * from the current one, reading a binding that named the current release as tampering
+ * rather than lifecycle. v1.13.11 then stopped a close from stamping the closing release
+ * onto a spent binding -- but only for closes that had not happened yet. Every repository
+ * that closed under an earlier build carries a binding naming a release it never
+ * authorised, and under the narrower rule those never recover: the names match, so the
+ * policy reads live forever and the next autopilot approval is refused. A write-side fix
+ * cannot heal state already on disk; the judgement has to.
+ *
+ * A binding whose release has no closure receipt is still not spent and still fails
+ * closed, which is the tampering case this must not forgive.
  * @param {string} root
  * @param {string | null | undefined} boundRelease
- * @param {string | null | undefined} currentRelease
+ * @param {string | null | undefined} currentRelease Kept for call-site clarity; the receipt decides.
  * @returns {Promise<boolean>}
  */
 export async function isSpentAutopilotBinding(root, boundRelease, currentRelease) {
-  if (!boundRelease || !currentRelease || boundRelease === currentRelease) return false;
+  if (!boundRelease || !currentRelease) return false;
   return exists(path.join(runtimePaths(root).releases, `${boundRelease}.json`));
 }
 

@@ -35,6 +35,7 @@ import { buildBlockerView, buildUserStatusView } from './user-view.mjs';
 import { abortGoalRuntime, pauseGoalRuntime, resumeGoalRuntime } from '../core/goals/authority.mjs';
 import { ADAPTERS } from './constants.mjs';
 import { complete, rejectUnknownKeys, requiredString } from './validation.mjs';
+import { VERSION } from '../version.mjs';
 
 /** @param {Record<string, any>} contract */
 function workOrder(contract) {
@@ -569,7 +570,14 @@ export async function handleStatus(root, args) {
   const status = await statusOrUninitialized(root);
   const userView = buildUserStatusView(status);
   const blockerView = status.initialized ? buildBlockerView(status) : { schema: 'shipping-harness/blocker-view-v1', blockers: [], remainingFixCycles: 0 };
-  return complete({ ...status, userView, blockerView }, userView.plainBriefText ?? (userView.summary + ` Next: ${userView.nextAction}`));
+  // v1.13.14: the build that is answering, not the one installed on disk. A STDIO server
+  // loads its modules once and keeps serving them, so replacing the installed package
+  // leaves every attached session on the old code with nothing in any response to say so.
+  // Six servers were running against this repository, three of them started days earlier;
+  // a session that had already initialized had no way to notice, and a reported fix
+  // appeared not to work. Compare this against `shipping-harness version`, which is a
+  // fresh process: if they differ, reconnect the MCP server.
+  return complete({ ...status, harnessVersion: VERSION, userView, blockerView }, userView.plainBriefText ?? (userView.summary + ` Next: ${userView.nextAction}`));
 }
 
 /** @param {string} root @param {Record<string, any>} contract @param {string | null} adapter */

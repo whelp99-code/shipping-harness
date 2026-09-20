@@ -1,16 +1,16 @@
 {
   "acceptance": [
     {
-      "id": "AC-113141",
-      "description": "Every shipping_status response reports the build that is answering, matching what initialize announced, whether or not the repository is initialized.",
+      "id": "AC-113131",
+      "description": "A planPath or stageId that cannot be met refuses with ERR_PLAN_REQUEST_UNMET and proposes nothing; a discovered plan that fails to load still degrades but the warning reaches the plain brief; the approval screen shows the scope the plan stage will lock and names the stage; an oversized brief trims facts and records the count instead of vanishing; a valid plan and a proposal with no plan are unchanged.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/mcp/running-build-visible.test.mjs",
+      "command": "node --test --test-reporter=spec test/mcp/plan-request-unmet.test.mjs test/mcp/approval-shows-locked-scope.test.mjs test/mcp/plain-brief.test.mjs test/integration/plain-brief-budget.test.mjs test/unit/decision-policy.test.mjs",
       "cwd": ".",
       "required": true,
-      "timeoutSeconds": 300
+      "timeoutSeconds": 600
     },
     {
-      "id": "AC-113142",
+      "id": "AC-113132",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -19,7 +19,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-113143",
+      "id": "AC-113133",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -162,9 +162,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "A session must be able to tell which build is answering it: a long-lived MCP server keeps serving the modules it loaded, and no response said which ones those were.",
+  "goal": "A proposal must never deliver something other than what was asked for: a plan request that cannot be met refuses, and a plan that degrades says so where a person reads.",
   "project": "shipping-harness",
-  "release": "1.13.14",
+  "release": "1.13.13",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -182,14 +182,17 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Restarting, killing, or reconnecting any MCP server process.",
-      "Changing the nine tool definitions, the frozen v1 schemas, or the protocol versions.",
-      "Reopening a closed release.",
+      "Changing what makes a plan file valid, or relaxing plan validation to accept MINOR.",
+      "Refusing a proposal when no plan was requested and none is usable.",
+      "Raising the plain brief byte budget, or trimming the canonical state or the next action.",
+      "Reopening a closed release, or changing autopilot authority.",
       "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
     ],
     "include": [
-      "shipping_status reports the harness build actually serving the call, so a session can detect a server still running pre-upgrade code.",
-      "The reported build is the same one initialize announces, and does not depend on repository state."
+      "A caller that asked for a plan stage or plan path gets a refusal rather than a proposal built from something else.",
+      "A plan discovered without being asked for still degrades to PATCH, and the degrade is stated in the plain brief a person reads.",
+      "The approval screen renders the scope of the contract that will be locked, names the bound plan stage, and falls back to the derived scope when a stage states none.",
+      "A brief that exceeds its byte budget trims facts from the end and records how many, instead of the whole projection being dropped."
     ],
     "paths": {
       "exclude": [
@@ -204,10 +207,14 @@
         "CHANGELOG.md",
         "README.md",
         "docs/HANDOVER.md",
-        "docs/planning/45-V1.13.14-WHICH-BUILD-IS-ANSWERING-DEVELOPMENT-PLAN.md",
+        "docs/planning/44-V1.13.13-A-PLAN-REQUEST-THAT-CANNOT-BE-MET-DEVELOPMENT-PLAN.md",
+        "docs/reports/v1-security-inventory.json",
         "package.json",
-        "src/mcp/handlers.mjs",
-        "test/mcp/running-build-visible.test.mjs"
+        "src/core/decision-policy.mjs",
+        "src/core/plain-brief.mjs",
+        "src/core/proposals.mjs",
+        "test/mcp/approval-shows-locked-scope.test.mjs",
+        "test/mcp/plan-request-unmet.test.mjs"
       ]
     }
   },

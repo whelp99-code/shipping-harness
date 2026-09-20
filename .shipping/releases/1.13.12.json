@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "75ef8bcda1e8ef463f8d66a76f2c8690077fd6e9",
+  "closedAt": "2026-09-20T05:54:33.308Z",
+  "closedGitSha": "70ec543d4119cb1aaeb097e319894246af8693f3",
+  "contractHash": "01af6b7e8bb08979a4863719f4a8d14baa4622a36b49b82c3655af1d195b0f40",
+  "evidenceRunId": "run-2026-09-20T05-53-55-222Z-5a5c73b2",
+  "fixCycles": 0,
+  "goal": "A write-side fix cannot heal state already on disk. A policy bound to a release that has a closure receipt is spent whatever it is named, so bindings an older build already stamped recover when they are read.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "70ec543d4119cb1aaeb097e319894246af8693f3",
+      "subject": "chore: lock shipping-harness v1.13.12"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.12",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

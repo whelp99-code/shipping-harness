@@ -2,6 +2,12 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.12] - Unreleased
+
+In progress. v1.13.11 was only half the fix, and the half that shipped was announced as if it were the whole one.
+
+- **A write-side fix does not heal state already on disk.** v1.13.11 stops a close from stamping the closing release onto a spent autopilot binding. It cannot undo a stamp already written, and the reported worktree had closed under v1.13.10, so restarting on v1.13.11 still read `enabled: true`. Worse, under the v1.13.8 rule that state never recovers: spent required the bound release to differ from the current one, and the stamp had made them equal, so the dead policy reads live forever and the next autopilot approval is refused with `ERR_AUTOPILOT_ACTIVE`. Every repository that closed under an earlier build is in that state. The closure receipt is now the whole test: a policy bound to a release that has closed is spent, whatever that release is called relative to the current one. Nothing is forgiven that was not already closed, a binding whose release has no receipt still fails closed, and no state is rewritten on read. Proven against state produced by a v1.13.10 worktree rather than by this build.
+
 ## [1.13.11] - Unreleased
 
 In progress. Found by the session that used v1.13.8 to escape the reported 1.0.3 deadlock, which noticed the closed train's hashes still sitting in the binding and asked whether that was intended. Measuring it showed one layer more.

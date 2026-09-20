@@ -35,7 +35,12 @@ for (const [token, reason] of ATTACKS) {
     const result = scopePathsForGoal(`Please also update ${token} while you are at it`, SCOPE);
     assert.deepEqual(result.added, [], `${token} widened the scope`);
     assert.deepEqual(result.refused, [{ token: token.replace(/^\.\//u, ''), reason }]);
-    assert.deepEqual(goalPathDiagnostics(result), [`GOAL_PATH_REFUSED: ${token} (${reason})`]);
+    // v1.13.15: the diagnostic now states the consequence too. The token and the reason
+    // are what this suite guards, so assert those exactly and let the consequence follow.
+    const [diagnostic, ...rest] = goalPathDiagnostics(result);
+    assert.deepEqual(rest, [], 'a refused token produces exactly one diagnostic');
+    assert.ok(diagnostic.startsWith(`GOAL_PATH_REFUSED: ${token} (${reason})`), diagnostic);
+    assert.match(diagnostic, /not added to scope\.paths\.include/u);
   });
 }
 
@@ -45,7 +50,7 @@ test('one refused path does not stop a legitimate one in the same sentence', () 
   assert.deepEqual(result.refused, [{ token: '/etc/passwd', reason: 'absolute-path' }]);
   const diagnostics = goalPathDiagnostics(result);
   assert.ok(diagnostics.includes('GOAL_PATH_ADDED: src/** (goal named "src/index.mjs")'));
-  assert.ok(diagnostics.includes('GOAL_PATH_REFUSED: /etc/passwd (absolute-path)'));
+  assert.ok(diagnostics.some((entry) => entry.startsWith('GOAL_PATH_REFUSED: /etc/passwd (absolute-path)')));
 });
 
 test('a Windows-style absolute path and a UNC path are refused too', () => {
@@ -127,8 +132,8 @@ test('a goal that names harness runtime state never puts it into the proposed sc
       assert.ok(!entry.includes('..'), `a traversal entered scope: ${entry}`);
       assert.ok(!entry.startsWith('/'), `an absolute path entered scope: ${entry}`);
     }
-    assert.ok(data.diagnostics.includes('GOAL_PATH_REFUSED: .shipping/state.json (shipping-runtime)'));
-    assert.ok(data.diagnostics.includes('GOAL_PATH_REFUSED: ../../etc/passwd (parent-traversal)'));
+    assert.ok(data.diagnostics.some((entry) => entry.startsWith('GOAL_PATH_REFUSED: .shipping/state.json (shipping-runtime)')));
+    assert.ok(data.diagnostics.some((entry) => entry.startsWith('GOAL_PATH_REFUSED: ../../etc/passwd (parent-traversal)')));
   } finally {
     await fixture.cleanup();
   }

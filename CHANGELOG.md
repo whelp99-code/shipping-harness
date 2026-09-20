@@ -2,6 +2,12 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.15] - Unreleased
+
+In progress. A reporting session named the pattern after a day of reading this product's errors.
+
+- **A diagnostic named the defect and stopped.** `ERR_PLAN_HISTORY_LOST` says what changed, what was expected, what was observed, and where the evidence is, and that session called it the most useful error it saw all day. `PLAN_FILE_INVALID` named the offending field and left the reader with no reason to suspect that one bad stage had rejected the whole plan file and the proposal in front of them was no longer plan-derived; they lost time to exactly that. It now says so, and says that fixing the file and proposing again binds the stage. `GOAL_PATH_REFUSED` carried the token and the reason but not the consequence: the path is simply absent from `scope.paths.include`, so later work there reads as scope drift with nothing connecting it back to the goal sentence that asked for it. The token and reason every refusal carries are unchanged, and the adversarial suite still pins them exactly.
+
 ## [1.13.14] - Unreleased
 
 In progress. Found while the v1.13.13 fix appeared not to work.

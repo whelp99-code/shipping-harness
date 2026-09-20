@@ -17,7 +17,7 @@ test('an acceptance command that already passes on the baseline is ALREADY_PASSI
     const output = parseCliJson(result);
     assert.equal(output.state, 'LOCKED');
     assert.deepEqual(output.acceptancePreflight, [
-      { id: 'AC-001', required: true, exitCode: 0, durationMs: output.acceptancePreflight[0].durationMs, verdict: 'ALREADY_PASSING' },
+      { id: 'AC-001', required: true, exitCode: 0, durationMs: output.acceptancePreflight[0].durationMs, timeoutSeconds: output.acceptancePreflight[0].timeoutSeconds, verdict: 'ALREADY_PASSING' },
     ]);
   } finally {
     await fixture.cleanup();
@@ -105,4 +105,43 @@ test('the timeout warning says what it costs at verify', () => {
 test('a criterion that fails as expected produces no warning', () => {
   assert.deepEqual(preflightWarnings([{ id: 'AC-003', verdict: 'FAILING_AS_EXPECTED' }]), []);
   assert.deepEqual(preflightWarnings([]), []);
+});
+
+// v1.13.18: the preflight measured every command's duration and knew its budget, and said
+// nothing unless the command had already exceeded it. A session whose suite ran 569s
+// against a 600s budget, and had just grown by 186 tests, had to work that out alone. The
+// numbers were already in hand; only the conclusion was missing.
+test('a command using most of its budget is named with both numbers', () => {
+  const [warning] = preflightWarnings([{ id: 'AC-002', verdict: 'FAILING_AS_EXPECTED', durationMs: 569000, timeoutSeconds: 600 }]);
+  assert.match(warning, /^AC-002 took 569s of its 600s budget/u, 'measured and budgeted, side by side');
+  assert.match(warning, /95% of it/u);
+  assert.match(warning, /raise timeoutSeconds or split the command/u, 'what to do');
+  assert.match(warning, /fails the release for the timeout rather than for the work/u, 'what it costs');
+});
+
+test('the near-budget warning is independent of the verdict', () => {
+  const passing = preflightWarnings([{ id: 'AC-001', verdict: 'ALREADY_PASSING', durationMs: 540000, timeoutSeconds: 600 }]);
+  assert.equal(passing.length, 2, 'already-passing and near-budget are separate facts about one criterion');
+  assert.ok(passing.some((entry) => entry.includes('already passes')));
+  assert.ok(passing.some((entry) => entry.includes('of its 600s budget')));
+  // A criterion that fails now will run longer once it is made to pass, so it warns too.
+  assert.equal(preflightWarnings([{ id: 'AC-003', verdict: 'FAILING_AS_EXPECTED', durationMs: 540000, timeoutSeconds: 600 }]).length, 1);
+});
+
+test('a command with room left, or one that already timed out, does not get the near-budget line', () => {
+  assert.deepEqual(preflightWarnings([{ id: 'AC-004', verdict: 'FAILING_AS_EXPECTED', durationMs: 5000, timeoutSeconds: 600 }]), []);
+  assert.deepEqual(preflightWarnings([{ id: 'AC-005', verdict: 'FAILING_AS_EXPECTED', durationMs: 479000, timeoutSeconds: 600 }]), [], 'just under 80% is still room');
+  const timedOut = preflightWarnings([{ id: 'AC-006', verdict: 'TIMEOUT', durationMs: 600000, timeoutSeconds: 600 }]);
+  assert.equal(timedOut.length, 1, 'a timeout is already reported; it is not also near its budget');
+  assert.match(timedOut[0], /timed out on the baseline tree/u);
+});
+
+test('a row without a usable budget produces no near-budget line rather than nonsense', () => {
+  for (const row of [
+    { id: 'AC-007', verdict: 'FAILING_AS_EXPECTED', durationMs: 900000 },
+    { id: 'AC-008', verdict: 'FAILING_AS_EXPECTED', durationMs: 900000, timeoutSeconds: 0 },
+    { id: 'AC-009', verdict: 'FAILING_AS_EXPECTED', timeoutSeconds: 600 },
+  ]) {
+    assert.deepEqual(preflightWarnings([row]), [], `${row.id} has nothing to compare`);
+  }
 });

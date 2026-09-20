@@ -200,6 +200,9 @@ export async function runAcceptancePreflight(root, contract) {
       required: criterion.required === true,
       exitCode: run.exitCode,
       durationMs: run.durationMs,
+      // v1.13.18: the budget the duration was measured against. Without it the caller can
+      // report that a command exceeded its timeout but not that it is about to.
+      timeoutSeconds: commandBudget(contract, criterion).timeoutSeconds,
       verdict: run.timedOut ? 'TIMEOUT' : run.exitCode === 0 ? 'ALREADY_PASSING' : 'FAILING_AS_EXPECTED',
     });
   }
@@ -219,9 +222,38 @@ export async function runAcceptancePreflight(root, contract) {
  * @returns {string[]} One warning per criterion that did not fail as expected.
  */
 export function preflightWarnings(preflight) {
-  return preflight
-    .filter((row) => row.verdict !== 'FAILING_AS_EXPECTED')
-    .map((row) => row.verdict === 'ALREADY_PASSING'
-      ? `${row.id} already passes on the baseline tree, so it proves nothing about work done after this lock. Expected when the implementation is already committed and this release records it; a stale criterion when the work is still ahead.`
-      : `${row.id} timed out on the baseline tree, so it may be unrunnable in this environment and verify would then fail for the environment rather than the work. Check the command and its timeout before locking.`);
+  return preflight.flatMap((row) => [
+    ...(row.verdict === 'ALREADY_PASSING'
+      ? [`${row.id} already passes on the baseline tree, so it proves nothing about work done after this lock. Expected when the implementation is already committed and this release records it; a stale criterion when the work is still ahead.`]
+      : []),
+    ...(row.verdict === 'TIMEOUT'
+      ? [`${row.id} timed out on the baseline tree, so it may be unrunnable in this environment and verify would then fail for the environment rather than the work. Check the command and its timeout before locking.`]
+      : []),
+    ...nearTimeoutWarning(row),
+  ]);
+}
+
+/**
+ * The fraction of its budget a command may use on the baseline before the remaining head
+ * room is worth naming. A suite grows between the lock and the close, so a command that
+ * already sits near its limit is the one that will cross it during verify.
+ */
+const PREFLIGHT_HEADROOM_RATIO = 0.8;
+
+/**
+ * v1.13.18: the preflight measured every command's duration and knew the budget it ran
+ * under, and said nothing unless the command had already exceeded it. A reporting session
+ * whose suite takes 569 s against a 600 s budget, and which had just grown by 186 tests,
+ * had to work out for itself that verify was about to fail for the timeout rather than
+ * for the work. The measurement was already in hand; only the conclusion was missing.
+ * @param {Record<string, any>} row One preflight row.
+ * @returns {string[]} A warning when the run used most of its budget without exceeding it.
+ */
+function nearTimeoutWarning(row) {
+  const budgetMs = Number(row.timeoutSeconds) * 1000;
+  if (row.verdict === 'TIMEOUT' || !Number.isFinite(budgetMs) || budgetMs <= 0) return [];
+  if (!Number.isFinite(row.durationMs) || row.durationMs < budgetMs * PREFLIGHT_HEADROOM_RATIO) return [];
+  const used = Math.round(row.durationMs / 1000);
+  const percent = Math.round((row.durationMs / budgetMs) * 100);
+  return [`${row.id} took ${used}s of its ${row.timeoutSeconds}s budget on the baseline tree, ${percent}% of it. A suite grows between this lock and the close, so raise timeoutSeconds or split the command now; crossing the budget at verify fails the release for the timeout rather than for the work.`];
 }

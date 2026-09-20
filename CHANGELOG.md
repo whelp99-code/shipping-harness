@@ -2,6 +2,12 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.18] - Unreleased
+
+In progress. v1.13.17 told a session what a timed-out criterion would cost; the session then measured its own and found it was about to pay.
+
+- **The preflight measured the duration and withheld the conclusion.** Every acceptance command is run once against the baseline and its duration recorded, under a budget the same function computes, and nothing was said unless the command had already exceeded it. A reporting session running 569s against a 600s budget, with a suite that had just grown by 186 tests, worked out for itself that verify was about to fail for the timeout rather than for the work. A command at or above 80% of its budget is now named with the measured and budgeted seconds side by side, what to do about it, and what crossing it costs. It does not depend on the verdict, because a criterion that fails today runs longer once it is made to pass, and a command that already timed out is still reported once. No lock is blocked by it. The same session also reported why it had never seen the timeout warning: it read the already-passing line above, judged it normal for its workflow, and stopped reading the block, which is the noise problem v1.13.17 fixed and this is its cost.
+
 ## [1.13.17] - Unreleased
 
 In progress. Raised as an observation, explicitly not a request, by a session that meets the same warning on every release of its own.

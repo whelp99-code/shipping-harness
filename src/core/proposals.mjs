@@ -19,7 +19,7 @@ import { runtimePaths } from './paths.mjs';
 import { buildShortPlan, goalScopePaths } from './project-analysis.mjs';
 import { DEFAULT_PLAN_PATH, computePlanProgress, loadShippingPlan } from './shipping-plan.mjs';
 import { recordPlanHistory } from './plan-history.mjs';
-import { applyPlanStageToContract, compilePlanTiers } from './plan-proposal.mjs';
+import { applyPlanStageToContract, compilePlanTiers, stageScopePathDiagnostics } from './plan-proposal.mjs';
 import { buildDecisionEvidence } from './decision-evidence.mjs';
 import { compileDecisionContract, composeDefaultDecision, validateDecisionPackage } from './decision-package.mjs';
 import { applyDecisionPolicy, buildApprovalBrief } from './decision-policy.mjs';
@@ -500,7 +500,7 @@ async function reuseMatchingProposal(root, ctx) {
 function bindPlanStageContract(contract, ctx) {
   const tiers = ctx.planTiers;
   if (!tiers?.stage || !tiers.projection) return contract;
-  return applyPlanStageToContract(contract, {
+  const bound = applyPlanStageToContract(contract, {
     stage: tiers.stage,
     resolved: tiers.resolved,
     analysis: ctx.analysis,
@@ -508,6 +508,10 @@ function bindPlanStageContract(contract, ctx) {
     planHash: tiers.projection.planHash,
     tier: tiers.tier,
   });
+  // The stage scope is now on the contract, so this is the first point where a file the
+  // stage names can be checked against the allowlist the gate will actually measure.
+  tiers.diagnostics = [...tiers.diagnostics, ...stageScopePathDiagnostics(tiers.stage, bound.scope?.paths ?? {})];
+  return bound;
 }
 
 /** @param {Record<string, any>} base @param {Record<string, any>} ctx @param {Record<string, any>} input */

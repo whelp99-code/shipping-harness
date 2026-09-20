@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "0804c79fcbe983519a934b16ff6651de44c80ed3",
+  "closedAt": "2026-09-20T06:33:10.769Z",
+  "closedGitSha": "3c4f6b9d25595b32218e8adb22a1d2000b95c5cb",
+  "contractHash": "bf554fae6ff2d07517c8d0331457e08845e9c6b52e8ebf74ea90930f42b0bdcf",
+  "evidenceRunId": "run-2026-09-20T06-32-40-318Z-3d338ff0",
+  "fixCycles": 0,
+  "goal": "A plan stage scope states intent and never widens the path allowlist. Where it names a path the allowlist does not cover, the proposal says so instead of leaving it to be discovered from a scope violation.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "3c4f6b9d25595b32218e8adb22a1d2000b95c5cb",
+      "subject": "chore: lock shipping-harness v1.13.16"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.16",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

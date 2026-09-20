@@ -8,6 +8,8 @@ import { invariant } from './errors.mjs';
 import { buildAcceptanceCriteria } from './project-analysis.mjs';
 import { RELEASE_TRAIN_MAX_RELEASES } from './release-train.mjs';
 import { PLAN_LIMITS, PLAN_TIER_BUDGETS, resolveAcceptanceRefs } from './shipping-plan.mjs';
+import { extractGoalPaths } from './goal-paths.mjs';
+import { matchesAnyGlob } from './glob.mjs';
 
 export const PLAN_PROJECTION_SCHEMA = 'shipping-harness/plan-projection-v1';
 
@@ -189,6 +191,40 @@ export function buildPlanProjection(input) {
     diagnostics: input.diagnostics.slice(0, 24),
   };
   return boundProjection(projection);
+}
+
+/**
+ * Path-shaped entries in a plan stage's scope statements that the contract's path
+ * allowlist does not cover.
+ *
+ * v1.13.16: `applyPlanStageToContract` replaces `scope.include` and `scope.exclude` from
+ * the stage and passes `scope.paths` straight through, so a stage that names a file in
+ * its scope changes the prose a person reads and nothing the gate measures. That division
+ * is right -- a plan file widening the path allowlist would be a far larger authority
+ * than a plan file should have -- but a reporting session wrote `uv.lock` into a stage
+ * scope, watched the contract's prose pick it up, and learned only from reading the
+ * source that the allowlist had not moved. Saying so is cheap; finding out from a scope
+ * violation later is not.
+ *
+ * Only tokens the conservative goal-path extractor accepts count, so ordinary prose
+ * produces nothing.
+ * @param {Record<string, any>} stage The bound plan stage.
+ * @param {{include?: string[], exclude?: string[]}} scopePaths The contract's path allowlist.
+ * @returns {string[]} One diagnostic per uncovered path-shaped entry.
+ */
+export function stageScopePathDiagnostics(stage, scopePaths) {
+  const statements = [...(stage?.scopeInclude ?? []), ...(stage?.scopeExclude ?? [])];
+  const include = Array.isArray(scopePaths?.include) ? scopePaths.include : [];
+  const seen = new Set();
+  const diagnostics = [];
+  for (const statement of statements) {
+    for (const token of extractGoalPaths(String(statement)).accepted) {
+      if (seen.has(token) || matchesAnyGlob(token, include)) continue;
+      seen.add(token);
+      diagnostics.push(`PLAN_SCOPE_PATH_UNCOVERED: ${token} -- named in the plan stage scope, which states intent and never widens scope.paths.include, and no allowlist entry covers it, so changes there would count as scope drift. Add it to the contract's scope.paths.include, or name it in the goal sentence.`);
+    }
+  }
+  return diagnostics;
 }
 
 /**

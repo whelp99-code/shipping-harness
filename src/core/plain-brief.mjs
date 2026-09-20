@@ -4,6 +4,9 @@ const MAX_SECTION_ITEMS = 4;
 const MAX_PLAN_STEPS = 4;
 const MAX_EVIDENCE_REFS = 8;
 const MAX_RENDERED_BYTES = 8192;
+// The facts a brief must never trim away: the canonical state and the one next action.
+// Everything after those is context the reader can lose before the projection itself.
+const MIN_BRIEF_FACTS = 2;
 
 const ALL_ACTIONS = Object.freeze([
   'WAIT_FOR_ANALYSIS',
@@ -893,11 +896,42 @@ export function compilePlainBrief(input = {}) {
     advisory: input.intelligence?.goalRecommendation ?? input.analysis?.intelligence?.goalRecommendation ?? null,
     modelAuthority: false,
   };
+  return sealBrief(fitWithinBudget(body));
+}
+
+/**
+ * Bring the brief inside its byte budget by dropping trailing facts, which
+ * `buildBriefFactGraph` emits in priority order, and saying how many went.
+ *
+ * v1.13.13: every section had an item cap but the fact graph had none, so a project with
+ * long Korean scope text produced a 9078-byte brief, failed `boundedOutput`, and
+ * `compilePlainBriefSafe` dropped the entire beginner projection. Reported from a live
+ * proposal. A projection that exists for the least technical reader must not be the one
+ * thing that disappears when the text gets long, and silently dropping facts instead
+ * would be its own lie, so the count is recorded.
+ * @param {Record<string, any>} body Brief body before hashing.
+ * @returns {Record<string, any>} A body whose sealed form fits the budget when possible.
+ */
+function fitWithinBudget(body) {
+  const facts = body.factGraph?.facts ?? [];
+  if (Buffer.byteLength(JSON.stringify(sealBrief(body))) <= MAX_RENDERED_BYTES) return body;
+  for (let keep = facts.length - 1; keep >= MIN_BRIEF_FACTS; keep -= 1) {
+    const trimmed = {
+      ...body,
+      factGraph: { ...body.factGraph, facts: facts.slice(0, keep), factsTruncated: facts.length - keep },
+    };
+    if (Buffer.byteLength(JSON.stringify(sealBrief(trimmed))) <= MAX_RENDERED_BYTES) return trimmed;
+  }
+  return body;
+}
+
+/** @param {Record<string, any>} body @returns {PlainBrief} The brief with its hashes, rendered text, and quality audit. */
+function sealBrief(body) {
   const hash = hashObject(body);
-  const provisional = { ...body, hash };
+  const provisional = /** @type {any} */ ({ ...body, hash });
   const renderedText = renderPlainBrief(provisional);
   const textHash = hashObject({ renderedText });
-  const withText = { ...provisional, renderedText, textHash };
+  const withText = /** @type {any} */ ({ ...provisional, renderedText, textHash });
   const quality = auditPlainBrief(withText);
   return { ...withText, quality };
 }

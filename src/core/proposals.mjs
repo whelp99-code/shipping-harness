@@ -167,7 +167,7 @@ export function projectProposalAuthority(input) {
   if (proposal.decision && typeof proposal.decision === 'object') {
     proposal.decision.approvalStatus = proposalAuthorityStatus(state);
     proposal.decision.hash = decisionHash(proposal.decision);
-    proposal.approvalBrief = buildApprovalBrief(proposal.decision);
+    proposal.approvalBrief = buildApprovalBrief(proposal.decision, proposal.contract ?? null);
   }
   if (planningAllowed && proposal.goalCharter?.status === 'ACCEPTED') validateGoalCharter(proposal.goalCharter);
   else proposal.goalCharter = planningAllowed && proposal.goalDiscovery?.status === 'READY' && proposal.goalDiscovery?.direction
@@ -535,8 +535,10 @@ function composeProposalDecision(base, ctx, input) {
       : 'NOT_READY';
   decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
   decision = validateDecisionPackage(ctx.evidence, decision);
-  const approvalBrief = buildApprovalBrief(decision);
+  // The contract is compiled first so the approval screen can show the scope that will
+  // actually be locked, stage binding included, rather than the pre-binding default.
   const contract = bindPlanStageContract(compileDecisionContract(base, decision), ctx);
+  const approvalBrief = buildApprovalBrief(decision, contract);
   return { decision, intentGate, goalDiscovery, approvalBrief, contract };
 }
 
@@ -928,8 +930,8 @@ function composeRefineDecision(evidenceCtx, proposal, answers) {
       : 'NOT_READY';
   decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
   decision = validateDecisionPackage(evidence, decision);
-  const approvalBrief = buildApprovalBrief(decision);
   const contract = bindPlanStageContract(compileDecisionContract(base, decision), evidenceCtx);
+  const approvalBrief = buildApprovalBrief(decision, contract);
   return { decision, intentGate, goalDiscovery, resolved, approvalBrief, contract };
 }
 

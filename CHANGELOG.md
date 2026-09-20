@@ -2,6 +2,12 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.14] - Unreleased
+
+In progress. Found while the v1.13.13 fix appeared not to work.
+
+- **Nothing said which build was answering.** A STDIO MCP server loads its modules once and keeps serving them, so replacing the installed package leaves every attached session on the old code. `initialize` carries the server version, but a session that connected days earlier has no reason to look again, and no later response said anything. Six servers were running against this repository, three started days before. A session verified the fix in the installed source, called the tool, got the old behaviour with byte-identical numbers, and had to reason from process start times and symlink semantics to explain it. `shipping_status` now carries `harnessVersion`, the build actually serving the call rather than the one on disk; comparing it with `shipping-harness version`, which is always a fresh process, shows immediately when a server needs reconnecting. No process is restarted or killed: several sessions may share one, and that is the user's decision.
+
 ## [1.13.13] - Unreleased
 
 In progress. Three reports from a live operating session in one day, all the same shape: what a person reads is not what gets locked.

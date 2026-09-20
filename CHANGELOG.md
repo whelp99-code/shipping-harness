@@ -2,6 +2,12 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.16] - Unreleased
+
+In progress. A reporting session applied v1.13.15's measurement to its own repository, got it wrong, and found something while being wrong.
+
+- **A plan stage scope names paths it cannot put in scope.** `applyPlanStageToContract` replaces `scope.include` and `scope.exclude` from the stage and passes `scope.paths` straight through, so writing `uv.lock` into a stage scope changed the prose on the contract and nothing the gate measures. That division is right, because a plan file able to widen the path allowlist would hold more authority than a plan file should, and this release does not change it. What was missing is that nothing said so: the reporter watched the contract's prose pick the name up and found out only by reading the source that the allowlist had not moved, which otherwise surfaces as a scope violation at verify. Path-shaped entries in a stage's scope are now checked against the allowlist the gate will measure, and each uncovered one says what happened, what it costs, and the two ways to put the path in scope. Only tokens the conservative goal-path extractor accepts count, so prose, fractions and URLs produce nothing, and a path an existing glob covers stays silent. It is a diagnostic, not a gate; no proposal is blocked by it.
+
 ## [1.13.15] - Unreleased
 
 In progress. A reporting session named the pattern after a day of reading this product's errors.

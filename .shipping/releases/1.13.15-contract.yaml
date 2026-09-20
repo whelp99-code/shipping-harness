@@ -1,16 +1,16 @@
 {
   "acceptance": [
     {
-      "id": "AC-113161",
-      "description": "A path-shaped entry in a plan stage scope that the contract path allowlist does not cover is reported with what happened, what it costs and how to fix it; a covered path, including through a glob, is silent; prose, fractions and URLs produce nothing; each path is reported once across scopeInclude and scopeExclude.",
+      "id": "AC-113151",
+      "description": "An invalid plan file diagnostic states that the whole file was rejected and the scope is template-derived; a refused goal path states that it is absent from the allowlist and that work there reads as scope drift; the token and reason the adversarial suite guards are unchanged.",
       "type": "command",
-      "command": "node --test --test-reporter=spec test/unit/plan-scope-path-uncovered.test.mjs test/mcp/plan-request-unmet.test.mjs test/adversarial/goal-scope-attacks.test.mjs",
+      "command": "node --test --test-reporter=spec test/unit/diagnostics-state-consequences.test.mjs test/adversarial/goal-scope-attacks.test.mjs test/mcp/plan-request-unmet.test.mjs",
       "cwd": ".",
       "required": true,
       "timeoutSeconds": 300
     },
     {
-      "id": "AC-113162",
+      "id": "AC-113152",
       "description": "Full regression and release gates pass.",
       "type": "command",
       "command": "npm run release:verify",
@@ -19,7 +19,7 @@
       "timeoutSeconds": 900
     },
     {
-      "id": "AC-113163",
+      "id": "AC-113153",
       "description": "Documentation audit passes and no whitespace errors remain.",
       "type": "command",
       "command": "npm run verify:docs && git diff --check",
@@ -162,9 +162,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "A plan stage scope states intent and never widens the path allowlist. Where it names a path the allowlist does not cover, the proposal says so instead of leaving it to be discovered from a scope violation.",
+  "goal": "A diagnostic names what is wrong and what follows from it, so a reader is not left to discover the consequence by being surprised later.",
   "project": "shipping-harness",
-  "release": "1.13.16",
+  "release": "1.13.15",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -182,15 +182,15 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Letting a plan file widen scope.paths.include.",
-      "Changing which tokens the goal-path extractor accepts, or which paths are refused.",
-      "Blocking or failing a proposal because of an uncovered path; this is a diagnostic, not a gate.",
+      "Changing which goal paths are refused, or which plan files are valid.",
+      "Rewording errors outside these two diagnostics.",
+      "Reopening a closed release.",
       "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
     ],
     "include": [
-      "A plan stage scope entry naming a path the contract allowlist does not cover is reported as a diagnostic.",
-      "The diagnostic states that a stage scope never widens scope.paths.include, that work there would read as scope drift, and the two ways to put the path in scope.",
-      "Only tokens the conservative goal-path extractor accepts are considered, and a path a glob already covers stays silent."
+      "PLAN_FILE_INVALID states that one invalid stage rejects the whole file and that the scope came from the derived template instead.",
+      "GOAL_PATH_REFUSED states that the path is not in scope.paths.include and that changes there would read as scope drift.",
+      "The token and reason carried by every refusal are unchanged, so the adversarial guarantees hold."
     ],
     "paths": {
       "exclude": [
@@ -205,12 +205,12 @@
         "CHANGELOG.md",
         "README.md",
         "docs/HANDOVER.md",
-        "docs/planning/47-V1.13.16-A-STAGE-SCOPE-IS-NOT-A-PATH-ALLOWLIST-DEVELOPMENT-PLAN.md",
-        "docs/reports/v1-security-inventory.json",
+        "docs/planning/46-V1.13.15-A-DIAGNOSTIC-STATES-ITS-CONSEQUENCE-DEVELOPMENT-PLAN.md",
         "package.json",
+        "src/core/goal-paths.mjs",
         "src/core/plan-proposal.mjs",
-        "src/core/proposals.mjs",
-        "test/unit/plan-scope-path-uncovered.test.mjs"
+        "test/adversarial/goal-scope-attacks.test.mjs",
+        "test/unit/diagnostics-state-consequences.test.mjs"
       ]
     }
   },

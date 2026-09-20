@@ -2,6 +2,12 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.19] - Unreleased
+
+In progress. Documentation only: a correction to the entry below, which states something about someone else's repository that turned out not to be true.
+
+- **The v1.13.18 entry says a reporting session "worked out for itself that verify was about to fail for the timeout".** It was not about to fail. That session measured its suite afterwards and reported `1971 passed, 3 skipped in 386.01s` against a 600s budget, 64%, comfortably under the 80% threshold the release added; no warning fires and nothing needed raising or splitting. The 569s figure it had extrapolated from came from a vault record of a different commit at a different time under unknown load, not from the tree in front of it: tests grew 10% while the time fell 32%, so the count was never the dominant variable. The gap v1.13.18 closed is real regardless, because the preflight measured every duration and knew every budget while reporting only overruns, and the same session says so; nothing in the code is reverted, and silence at 386 of 600 seconds is confirmed correct. The 1.13.18 entry is left as written. A record that claimed something false is corrected by adding to it, not by editing it out.
+
 ## [1.13.18] - Unreleased
 
 In progress. v1.13.17 told a session what a timed-out criterion would cost; the session then measured its own and found it was about to pay.

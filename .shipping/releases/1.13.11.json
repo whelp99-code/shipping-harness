@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "7864ec6310aef08b3fc59d9ccb5967460a34afc0",
+  "closedAt": "2026-09-20T05:34:47.201Z",
+  "closedGitSha": "c054b85a40809af25a44cc9ff14656949ab1d0cb",
+  "contractHash": "844f7d5a21e5a769d2fa48f462fa7b12c58d51fc398fe8e7c08e711173f43c4e",
+  "evidenceRunId": "run-2026-09-20T05-34-10-562Z-e1b7ea46",
+  "fixCycles": 0,
+  "goal": "A close records that a release closed; it never decides which release an autopilot policy is bound to. A policy that authorised nothing here must keep saying so.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "c054b85a40809af25a44cc9ff14656949ab1d0cb",
+      "subject": "chore: lock shipping-harness v1.13.11"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.11",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

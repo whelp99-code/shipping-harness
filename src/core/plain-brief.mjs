@@ -4,6 +4,9 @@ const MAX_SECTION_ITEMS = 4;
 const MAX_PLAN_STEPS = 4;
 const MAX_EVIDENCE_REFS = 8;
 const MAX_RENDERED_BYTES = 8192;
+// The facts a brief must never trim away: the canonical state and the one next action.
+// Everything after those is context the reader can lose before the projection itself.
+const MIN_BRIEF_FACTS = 2;
 
 const ALL_ACTIONS = Object.freeze([
   'WAIT_FOR_ANALYSIS',
@@ -220,7 +223,7 @@ function actionPolicyFor(state, blockerCount) {
  * The loose status bag every plain-brief entry point accepts. Callers pass whichever of these
  * documents they already hold; every field is optional and read defensively.
  * `state` carries the release state object, or the state name when a caller already flattened it.
- * @typedef {{canonicalState?: string, proposalState?: string, coreState?: string, state?: string & {state?: string, release?: string, blockerCount?: number, unknownCount?: number}, blockerCount?: number, unknownCount?: number, release?: string|null, evidenceFresh?: boolean, issues?: {counts?: Record<string, number>, items?: unknown[]}, contract?: {release?: string} & Record<string, unknown>, baseline?: {blockingCount?: number, counts?: Record<string, number>, plan?: Record<string, unknown>, entries?: unknown[]}|null, coverage?: BriefCoverage|null, intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}|null, analysis?: {intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence}|null, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence, releaseTrain?: import('./release-train.mjs').ReleaseTrain|null, intentGate?: {status?: string, defaultMode?: string, inferredMode?: string, selectedMode?: string|null, effectiveMode?: string, analysisComplete?: boolean, planningAllowed?: boolean, implementationAllowed?: boolean, autopilotAllowed?: boolean, question?: {id?: string}|null, hash?: string}|null, goalDiscovery?: {questions?: unknown[], status?: string, round?: number, recommendedCandidateId?: string|null, direction?: {hash?: string}|null}|null, goalCharter?: {status?: string, hash?: string, outcome?: string, primaryUser?: string, operatingBoundary?: string}|null, currentEvidenceSha?: string|null, contractHash?: string|null, integrity?: {ok?: boolean, level?: string, reason?: string, ledgerState?: string|null}|null, scopeWarning?: {outside?: string[], include?: string[]}|null, verifyBudget?: {verifyRuns?: number, redundantVerifyRuns?: number, maxVerifyRuns?: number}|null, shippingPlan?: {progress?: {done?: number, total?: number, nextStageId?: string|null}, program?: {title?: string, outcome?: string, stages?: Array<{id?: string, title?: string, state?: string}>}, milestone?: {stageId?: string, title?: string, tier?: string}|null, patch?: {goal?: string}|null}|null}} PlainBriefInput
+ * @typedef {{canonicalState?: string, proposalState?: string, coreState?: string, state?: string & {state?: string, release?: string, blockerCount?: number, unknownCount?: number}, blockerCount?: number, unknownCount?: number, release?: string|null, evidenceFresh?: boolean, issues?: {counts?: Record<string, number>, items?: unknown[]}, contract?: {release?: string} & Record<string, unknown>, baseline?: {blockingCount?: number, counts?: Record<string, number>, plan?: Record<string, unknown>, entries?: unknown[]}|null, coverage?: BriefCoverage|null, intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}|null, analysis?: {intelligence?: {acceptanceCoverage?: BriefCoverage, goalRecommendation?: unknown}, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence}|null, workspace?: BriefWorkspace, versionEvidence?: BriefVersionEvidence, releaseTrain?: import('./release-train.mjs').ReleaseTrain|null, intentGate?: {status?: string, defaultMode?: string, inferredMode?: string, selectedMode?: string|null, effectiveMode?: string, analysisComplete?: boolean, planningAllowed?: boolean, implementationAllowed?: boolean, autopilotAllowed?: boolean, question?: {id?: string}|null, hash?: string}|null, goalDiscovery?: {questions?: unknown[], status?: string, round?: number, recommendedCandidateId?: string|null, direction?: {hash?: string}|null}|null, goalCharter?: {status?: string, hash?: string, outcome?: string, primaryUser?: string, operatingBoundary?: string}|null, currentEvidenceSha?: string|null, contractHash?: string|null, integrity?: {ok?: boolean, level?: string, reason?: string, ledgerState?: string|null}|null, scopeWarning?: {outside?: string[], include?: string[]}|null, verifyBudget?: {verifyRuns?: number, redundantVerifyRuns?: number, maxVerifyRuns?: number}|null, shippingPlan?: {progress?: {done?: number, total?: number, nextStageId?: string|null}, program?: {title?: string, outcome?: string, stages?: Array<{id?: string, title?: string, state?: string}>}, milestone?: {stageId?: string, title?: string, tier?: string}|null, patch?: {goal?: string}|null}|null, diagnostics?: string[]|null}} PlainBriefInput
  * @typedef {{complete?: boolean, coveredPaths?: number, totalPaths?: number, uncoveredPaths?: unknown[]}} BriefCoverage
  * @typedef {{root?: string|null, ambiguous?: boolean, requested?: boolean, confidence?: string}} BriefWorkspace
  * @typedef {{baseVersion?: string|null, recommendedVersion?: string|null, confidence?: string|null}} BriefVersionEvidence
@@ -836,6 +839,18 @@ export function compilePlainBrief(input = {}) {
   const actionEnvelope = buildActionEnvelope({ ...input, state, blockerCount });
   const factGraph = buildBriefFactGraph({ ...input, state, blockerCount, unknownCount }, actionEnvelope);
   const sections = buildBriefSections(input, state, blockerCount, unknownCount);
+  // v1.13.13: when the plan file itself fails to load there is no shippingPlan projection
+  // to hang a warning on, so this reads the proposal's own diagnostics. Without it the
+  // degrade to a template PATCH was invisible to anyone who did not open `diagnostics`,
+  // and the proposal still read READY_FOR_APPROVAL.
+  const planFileInvalid = (Array.isArray(input.diagnostics) ? input.diagnostics : [])
+    .find((entry) => typeof entry === 'string' && entry.startsWith('PLAN_FILE_INVALID'));
+  if (planFileInvalid) {
+    sections.improvements = [
+      item('PLAN_FILE_INVALID', '계획 파일을 읽을 수 없어 이 제안의 범위는 계획이 아니라 일반 템플릿에서 나왔습니다. 계획 파일을 고친 뒤 다시 제안하세요.', ['diagnostics']),
+      ...(sections.improvements ?? []),
+    ];
+  }
   const driftCount = planSourceDriftCount(input.shippingPlan);
   if (driftCount > 0) {
     sections.improvements = [
@@ -881,11 +896,42 @@ export function compilePlainBrief(input = {}) {
     advisory: input.intelligence?.goalRecommendation ?? input.analysis?.intelligence?.goalRecommendation ?? null,
     modelAuthority: false,
   };
+  return sealBrief(fitWithinBudget(body));
+}
+
+/**
+ * Bring the brief inside its byte budget by dropping trailing facts, which
+ * `buildBriefFactGraph` emits in priority order, and saying how many went.
+ *
+ * v1.13.13: every section had an item cap but the fact graph had none, so a project with
+ * long Korean scope text produced a 9078-byte brief, failed `boundedOutput`, and
+ * `compilePlainBriefSafe` dropped the entire beginner projection. Reported from a live
+ * proposal. A projection that exists for the least technical reader must not be the one
+ * thing that disappears when the text gets long, and silently dropping facts instead
+ * would be its own lie, so the count is recorded.
+ * @param {Record<string, any>} body Brief body before hashing.
+ * @returns {Record<string, any>} A body whose sealed form fits the budget when possible.
+ */
+function fitWithinBudget(body) {
+  const facts = body.factGraph?.facts ?? [];
+  if (Buffer.byteLength(JSON.stringify(sealBrief(body))) <= MAX_RENDERED_BYTES) return body;
+  for (let keep = facts.length - 1; keep >= MIN_BRIEF_FACTS; keep -= 1) {
+    const trimmed = {
+      ...body,
+      factGraph: { ...body.factGraph, facts: facts.slice(0, keep), factsTruncated: facts.length - keep },
+    };
+    if (Buffer.byteLength(JSON.stringify(sealBrief(trimmed))) <= MAX_RENDERED_BYTES) return trimmed;
+  }
+  return body;
+}
+
+/** @param {Record<string, any>} body @returns {PlainBrief} The brief with its hashes, rendered text, and quality audit. */
+function sealBrief(body) {
   const hash = hashObject(body);
-  const provisional = { ...body, hash };
+  const provisional = /** @type {any} */ ({ ...body, hash });
   const renderedText = renderPlainBrief(provisional);
   const textHash = hashObject({ renderedText });
-  const withText = { ...provisional, renderedText, textHash };
+  const withText = /** @type {any} */ ({ ...provisional, renderedText, textHash });
   const quality = auditPlainBrief(withText);
   return { ...withText, quality };
 }

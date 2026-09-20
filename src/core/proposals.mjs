@@ -167,7 +167,7 @@ export function projectProposalAuthority(input) {
   if (proposal.decision && typeof proposal.decision === 'object') {
     proposal.decision.approvalStatus = proposalAuthorityStatus(state);
     proposal.decision.hash = decisionHash(proposal.decision);
-    proposal.approvalBrief = buildApprovalBrief(proposal.decision);
+    proposal.approvalBrief = buildApprovalBrief(proposal.decision, proposal.contract ?? null);
   }
   if (planningAllowed && proposal.goalCharter?.status === 'ACCEPTED') validateGoalCharter(proposal.goalCharter);
   else proposal.goalCharter = planningAllowed && proposal.goalDiscovery?.status === 'READY' && proposal.goalDiscovery?.direction
@@ -410,6 +410,15 @@ async function loadPlanTiers(root, input, analysis, goal) {
     // evidence that already exists. Degrading that to a PATCH with a diagnostic would let
     // the rewrite stand and keep proposing work from it.
     if (REFUSED_PLAN_ERRORS.has(error?.code)) throw error;
+    // v1.13.13: degrading is only honest when nobody asked for the plan. A caller that
+    // passed planPath or stageId asked for a scope derived from that stage; handing back
+    // a template PATCH marked READY_FOR_APPROVAL delivers something else under the name
+    // of what was requested, and the diagnostic explaining it never reached the brief.
+    // Reported from a live session that put MINOR in a stage size and got an approvable
+    // proposal whose scope did not come from the plan at all.
+    invariant(!input.planPath && !input.stageId, 'ERR_PLAN_REQUEST_UNMET',
+      `${input.stageId ? `Stage ${input.stageId}` : 'The plan'} cannot be used because the plan file is invalid: ${String(error?.message ?? 'unknown reason').slice(0, 200)}. Nothing was proposed. Fix the plan file, or drop planPath and stageId to propose without it.`,
+      { code: typeof error?.code === 'string' ? error.code : 'ERR_PLAN_INVALID', planPath: input.planPath ?? DEFAULT_PLAN_PATH, stageId: input.stageId ?? null });
     planError = {
       code: typeof error?.code === 'string' ? error.code : 'ERR_PLAN_INVALID',
       message: String(error?.message ?? 'Plan file could not be loaded').slice(0, 300),
@@ -526,8 +535,10 @@ function composeProposalDecision(base, ctx, input) {
       : 'NOT_READY';
   decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
   decision = validateDecisionPackage(ctx.evidence, decision);
-  const approvalBrief = buildApprovalBrief(decision);
+  // The contract is compiled first so the approval screen can show the scope that will
+  // actually be locked, stage binding included, rather than the pre-binding default.
   const contract = bindPlanStageContract(compileDecisionContract(base, decision), ctx);
+  const approvalBrief = buildApprovalBrief(decision, contract);
   return { decision, intentGate, goalDiscovery, approvalBrief, contract };
 }
 
@@ -919,8 +930,8 @@ function composeRefineDecision(evidenceCtx, proposal, answers) {
       : 'NOT_READY';
   decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
   decision = validateDecisionPackage(evidence, decision);
-  const approvalBrief = buildApprovalBrief(decision);
   const contract = bindPlanStageContract(compileDecisionContract(base, decision), evidenceCtx);
+  const approvalBrief = buildApprovalBrief(decision, contract);
   return { decision, intentGate, goalDiscovery, resolved, approvalBrief, contract };
 }
 

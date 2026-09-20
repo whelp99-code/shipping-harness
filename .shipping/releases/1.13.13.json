@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "44108e9802380af449e2c1b50acd8453f086c547",
+  "closedAt": "2026-09-20T06:11:08.213Z",
+  "closedGitSha": "92c7217f6b72a64e1029889cd3c4541e3582ddc9",
+  "contractHash": "1faabcd43854f465e3f75f40f68d5211274d05fe889cd747c7d50555fc25d8a0",
+  "evidenceRunId": "run-2026-09-20T06-10-39-065Z-c1a5bb75",
+  "fixCycles": 0,
+  "goal": "A proposal must never deliver something other than what was asked for: a plan request that cannot be met refuses, and a plan that degrades says so where a person reads.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "92c7217f6b72a64e1029889cd3c4541e3582ddc9",
+      "subject": "chore: lock shipping-harness v1.13.13"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.13",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

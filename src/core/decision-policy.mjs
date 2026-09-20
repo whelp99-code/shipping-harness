@@ -152,16 +152,31 @@ export function applyDecisionPolicy(evidence, input, options = {}) {
   return validateDecisionPackage(evidence, decision);
 }
 
-/** @param {Record<string, any>} decision */
-export function buildApprovalBrief(decision) {
+/**
+ * @param {Record<string, any>} decision Validated decision package.
+ * @param {Record<string, any> | null} [contract] The contract this approval will lock, when one has been compiled.
+ * @returns {Record<string, any>} The approval brief a person reads before approving.
+ */
+export function buildApprovalBrief(decision, contract = null) {
   invariant(['APPROVABLE', 'NEEDS_INPUT', 'BLOCKED', 'NOT_READY', 'APPROVED', 'SUPERSEDED', 'EXPIRED'].includes(decision.approvalStatus), 'ERR_DECISION_APPROVAL', 'Decision package has no valid approval status');
+  // v1.13.13: this screen is the only place the harness asks a person to decide, and the
+  // thing it must show is the scope that is about to be locked. It used to render
+  // `decision.scope`, which a plan stage binding never touches: the brief was built
+  // before the stage was applied to the contract, so a proposal bound to a stage showed
+  // three generic sentences while SCOPE_DRIFT_ZERO would later be judged against the
+  // stage's own include and exclude lists. The approver read one thing and approved
+  // another. The contract wins wherever it is known; `decision.scope` remains the answer
+  // when no contract has been compiled yet.
+  const scope = contract?.scope ?? decision.scope;
+  const planStage = typeof contract?.plan?.stageId === 'string' ? contract.plan.stageId : null;
   const brief = {
     schema: 'shipping-harness/approval-brief-v1',
     mode: decision.mode,
     status: decision.approvalStatus,
-    outcome: decision.outcome,
-    included: decision.scope.include,
-    deferred: decision.scope.exclude,
+    outcome: typeof contract?.goal === 'string' && contract.goal.trim() ? contract.goal.trim() : decision.outcome,
+    planStageId: planStage,
+    included: Array.isArray(scope?.include) && scope.include.length > 0 ? scope.include : decision.scope.include,
+    deferred: Array.isArray(scope?.exclude) && scope.exclude.length > 0 ? scope.exclude : decision.scope.exclude,
     acceptance: decision.acceptance.map((entry) => ({ id: entry.id, description: entry.description, command: entry.command, cwd: entry.cwd ?? '.' })),
     assumptions: decision.assumptions.map((entry) => ({ id: entry.id, statement: entry.statement })),
     risks: decision.risks.map((entry) => ({ id: entry.id, category: entry.category, severity: entry.severity, description: entry.description })),
@@ -170,7 +185,7 @@ export function buildApprovalBrief(decision) {
   };
   brief.text = [
     `${brief.outcome}`,
-    `Mode: ${brief.mode} | Status: ${brief.status}`,
+    `Mode: ${brief.mode} | Status: ${brief.status}${brief.planStageId ? ` | Plan stage: ${brief.planStageId}` : ''}`,
     `Included: ${brief.included.join(' | ')}`,
     `Deferred: ${brief.deferred.join(' | ')}`,
     `Acceptance: ${brief.acceptance.map((entry) => `${entry.id} [cwd=${entry.cwd}] ${entry.description}`).join(' | ')}`,

@@ -2,6 +2,14 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.13] - Unreleased
+
+In progress. Three reports from a live operating session in one day, all the same shape: what a person reads is not what gets locked.
+
+- **A plan request that could not be met produced a proposal anyway.** One stage with `MINOR` in its `size` rejects the whole plan file, and the proposal fell back to a PATCH whose scope came from a generic template while still reading `READY_FOR_APPROVAL`. Passing `planPath` or `stageId` explicitly made no difference: the request was dropped and something else was delivered under its name. That now refuses with `ERR_PLAN_REQUEST_UNMET` and says nothing was proposed. A plan nobody asked for still degrades, because proposing without one is legitimate, but the plain brief now carries an item saying the scope came from a template rather than the plan. There was nowhere for that to appear before, since a plan that fails to load has no projection to hang a warning on.
+- **The approval screen did not show the scope about to be locked.** A proposal correctly bound to a plan stage showed three generic sentences in `approvalBrief.included` and `oneScreenApproval.included`, while the contract carried the stage's own include and exclude lists, and `SCOPE_DRIFT_ZERO` is judged against that contract. The brief was built from the decision before the stage was applied to the contract. The contract is compiled first now and the brief renders its scope, names the stage in `planStageId` and in its text, and falls back to the derived scope when a stage states none. This screen is the only place the product asks a person to decide, so it was the most serious of the three.
+- **The beginner projection was the thing that disappeared when text got long.** `plainBrief` failed `boundedOutput` at 9078 bytes against a 8192 limit and was dropped entirely. Every section had an item cap; the fact graph had none, and Korean scope text grew it to 3003 bytes. It now trims facts from the end, which `buildBriefFactGraph` emits in priority order, records how many in `factsTruncated`, and never trims the canonical state or the next action. The reporter expected the repeated boilerplate goal to be the cause; measuring showed it was not, and fixing the approval screen did not shrink it.
+
 ## [1.13.12] - Unreleased
 
 In progress. v1.13.11 was only half the fix, and the half that shipped was announced as if it were the whole one.

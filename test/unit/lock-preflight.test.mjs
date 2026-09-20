@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { createFixtureRepo } from '../helpers/repo.mjs';
 import { runCli, parseCliJson } from '../helpers/cli.mjs';
 import { readJsonLines } from '../../src/core/fs.mjs';
-import { runAcceptancePreflight } from '../../src/core/contract-defect.mjs';
+import { preflightWarnings, runAcceptancePreflight } from '../../src/core/contract-defect.mjs';
 import { loadContract } from '../../src/core/contract.mjs';
 
 test('an acceptance command that already passes on the baseline is ALREADY_PASSING', async () => {
@@ -79,4 +79,30 @@ test('a criterion over its time budget is TIMEOUT', async () => {
   } finally {
     await fixture.cleanup();
   }
+});
+
+// v1.13.17: the ALREADY_PASSING warning asserted that the criterion was stale, which is
+// only true when the work is still ahead of the lock. This repository implements and then
+// locks, so it saw the warning on every criterion of every release while nothing was
+// wrong, and a reporting session doing the same reported the ambiguity. A warning that is
+// routinely correct and never actionable teaches a reader to skip warnings, including the
+// one about an unrunnable command. Which workflow is in use cannot be told from the tree,
+// so the warning states the fact once and names both readings.
+test('the already-passing warning names both readings instead of asserting a defect', () => {
+  const [warning] = preflightWarnings([{ id: 'AC-001', verdict: 'ALREADY_PASSING' }]);
+  assert.match(warning, /^AC-001 already passes on the baseline tree/u, 'the measured fact leads');
+  assert.match(warning, /proves nothing about work done after this lock/u);
+  assert.match(warning, /Expected when the implementation is already committed/u, 'implement-then-lock is normal');
+  assert.match(warning, /stale criterion when the work is still ahead/u, 'lock-then-implement is the defect');
+});
+
+test('the timeout warning says what it costs at verify', () => {
+  const [warning] = preflightWarnings([{ id: 'AC-002', verdict: 'TIMEOUT' }]);
+  assert.match(warning, /may be unrunnable in this environment/u);
+  assert.match(warning, /fail for the environment rather than the work/u, 'the consequence, not only the symptom');
+});
+
+test('a criterion that fails as expected produces no warning', () => {
+  assert.deepEqual(preflightWarnings([{ id: 'AC-003', verdict: 'FAILING_AS_EXPECTED' }]), []);
+  assert.deepEqual(preflightWarnings([]), []);
 });

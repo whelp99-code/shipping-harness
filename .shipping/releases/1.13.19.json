@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 2,
+    "requiredFailed": 0,
+    "total": 2
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "d2b81c2b6716c7acf675a8dd07a02727d070e2a8",
+  "closedAt": "2026-09-20T06:52:58.398Z",
+  "closedGitSha": "33851849741e84827ddf726e20a33702eceb2c92",
+  "contractHash": "29525ebba166c20453c2f2587383a8891b0626cc60963e6258212331efd880b3",
+  "evidenceRunId": "run-2026-09-20T06-52-21-857Z-5c376eb1",
+  "fixCycles": 0,
+  "goal": "The v1.13.18 record states as fact that a reporting session's suite was about to exceed its timeout. It was not: the measurement is 386s against a 600s budget. Correct the record without rewriting it.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "33851849741e84827ddf726e20a33702eceb2c92",
+      "subject": "chore: lock shipping-harness v1.13.19"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.19",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

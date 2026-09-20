@@ -206,11 +206,22 @@ export async function runAcceptancePreflight(root, contract) {
   return rows;
 }
 
-/** @param {Array<Record<string, any>>} preflight */
+/**
+ * v1.13.17: the ALREADY_PASSING wording asserted one reading -- that the criterion is
+ * stale -- and that is only true when the work is still ahead of the lock. A repository
+ * that implements and then locks, which is how this one records its own releases and how
+ * the reporting session records theirs, sees this on every criterion of every release
+ * while nothing is wrong. A warning that is routinely correct and never actionable is how
+ * a reader learns to skip warnings, including the one below it about an unrunnable
+ * command. The fact is stated once and both readings named, because which workflow this
+ * is cannot be told from the tree.
+ * @param {Array<Record<string, any>>} preflight Preflight rows from runAcceptancePreflight.
+ * @returns {string[]} One warning per criterion that did not fail as expected.
+ */
 export function preflightWarnings(preflight) {
   return preflight
     .filter((row) => row.verdict !== 'FAILING_AS_EXPECTED')
     .map((row) => row.verdict === 'ALREADY_PASSING'
-      ? `${row.id} already passes on the baseline tree; it proves nothing about the coming implementation`
-      : `${row.id} timed out on the baseline tree; the criterion may be unrunnable in this environment`);
+      ? `${row.id} already passes on the baseline tree, so it proves nothing about work done after this lock. Expected when the implementation is already committed and this release records it; a stale criterion when the work is still ahead.`
+      : `${row.id} timed out on the baseline tree, so it may be unrunnable in this environment and verify would then fail for the environment rather than the work. Check the command and its timeout before locking.`);
 }

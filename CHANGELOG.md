@@ -2,6 +2,12 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.13.17] - Unreleased
+
+In progress. Raised as an observation, explicitly not a request, by a session that meets the same warning on every release of its own.
+
+- **A warning that fires on every correct release taught readers to skip warnings.** The lock preflight said an already-passing criterion "proves nothing about the coming implementation", asserting that the criterion is stale. That holds only when the work is still ahead of the lock. A repository that implements and then locks sees it on every criterion of every release with nothing wrong, and this repository is one: two plan documents record me noticing exactly that and leaving the message alone. The cost is the warning below it, about a command that may be unrunnable, which genuinely needs action and gets skipped along with the noise. Which workflow produced the tree cannot be told from it, since both leave commits after the previous close, so the warning states the measured fact once and names both readings rather than pretending to detect. The timeout warning now also says what it costs: verify would fail for the environment rather than the work.
+
 ## [1.13.16] - Unreleased
 
 In progress. A reporting session applied v1.13.15's measurement to its own repository, got it wrong, and found something while being wrong.

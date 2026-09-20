@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "bf26ed476f2a163986611b44e9ea6fe1c4d6d5d0",
+  "closedAt": "2026-09-20T06:25:05.859Z",
+  "closedGitSha": "7a49014a5543c66aa8480129b2ab288675de4f55",
+  "contractHash": "2f4916080fda6d551acef0c35355baaf06dd52a1fe7855dbcf799a21e2eb11e8",
+  "evidenceRunId": "run-2026-09-20T06-24-35-089Z-c8fbce99",
+  "fixCycles": 0,
+  "goal": "A diagnostic names what is wrong and what follows from it, so a reader is not left to discover the consequence by being surprised later.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "7a49014a5543c66aa8480129b2ab288675de4f55",
+      "subject": "chore: lock shipping-harness v1.13.15"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.15",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

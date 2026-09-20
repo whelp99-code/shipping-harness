@@ -225,7 +225,15 @@ export function applyPlanStageToContract(contract, input) {
  */
 export async function compilePlanTiers(input) {
   const diagnostics = [];
-  if (input.planError) diagnostics.push(`PLAN_FILE_INVALID: ${input.planError.code}: ${input.planError.message}`);
+  // v1.13.15: this used to stop at the offending field. Naming the defect without naming
+  // what it costs leaves the reader to discover that the whole file was rejected and the
+  // scope came from somewhere else -- which is what happened to a reporting session that
+  // read "stages[2].size must be PATCH or MILESTONE" and had no reason to suspect the
+  // proposal in front of it was no longer plan-derived. ERR_PLAN_HISTORY_LOST is the
+  // shape to copy: say what changed, and say what follows from it.
+  if (input.planError) {
+    diagnostics.push(`PLAN_FILE_INVALID: ${input.planError.code}: ${input.planError.message} -- one invalid stage rejects the whole plan file, so this proposal's scope and tier come from the derived template, not from the plan. Fix the plan file and propose again to bind a stage.`);
+  }
   if (input.binding?.diagnostics) diagnostics.push(...input.binding.diagnostics);
   if (!input.binding) return { tier: 'PATCH', projection: null, stage: null, resolved: [], diagnostics };
   const { plan, planHash: hash, path: planPath } = input.binding;

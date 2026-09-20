@@ -198,6 +198,9 @@ export function scopePathsForGoal(goalText, scopePaths, root = null) {
 export function goalPathDiagnostics(result) {
   return [
     ...result.added.map((entry) => `GOAL_PATH_ADDED: ${entry.glob} (goal named "${entry.token}")`),
-    ...result.refused.map((entry) => `GOAL_PATH_REFUSED: ${entry.token} (${entry.reason})`),
+    // v1.13.15: the consequence, not only the reason. A refused token is simply absent
+    // from scope.paths.include, so changing files there later reads as scope drift with
+    // nothing connecting it back to the goal sentence that asked for them.
+    ...result.refused.map((entry) => `GOAL_PATH_REFUSED: ${entry.token} (${entry.reason}) -- not added to scope.paths.include, so changes there would count as scope drift.`),
   ];
 }

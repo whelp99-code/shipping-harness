@@ -22,6 +22,7 @@ import { analyzeRepository } from './core/project-analysis.mjs';
 import { DEFAULT_PLAN_PATH, auditPlanHistory, computePlanProgress, loadShippingPlan, resolveAcceptanceRefs } from './core/shipping-plan.mjs';
 import { ungatedStageIds, unresolvedStageIds } from './core/plan-proposal.mjs';
 import { planHistorySummary, recordPlanHistory } from './core/plan-history.mjs';
+import { evidenceEntries, loadAndValidateCore5ReleaseBundle, lockCore5ReleaseBundle } from './core/core5-bundle.mjs';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {
@@ -479,6 +480,53 @@ async function planCommand(ctx) {
   }
 }
 
+/** @param {string | null} value */
+function versionMap(value) {
+  if (!value) return {};
+  return Object.fromEntries(value.split(',').filter(Boolean).map((entry) => {
+    const [key, ...rest] = entry.split('=');
+    if (!key || rest.length === 0 || !rest.join('=')) throw new ShippingError('ERR_CORE5_BUNDLE_INPUT', `Version entry must use name=value: ${entry}`);
+    return [key, rest.join('=')];
+  }));
+}
+
+/** @param {string | null} value */
+function csv(value) { return value ? value.split(',').map((entry) => entry.trim()).filter(Boolean) : []; }
+
+/** @param {CliContext} ctx */
+async function core5BundleCommand({ root, paths, positionals, options, json }) {
+  const action = positionals[2] ?? 'check';
+  const contract = await loadContract(paths.contract);
+  const expected = { contractHash: contractHash(contract) };
+  if (action === 'lock') {
+    const criteria = positionals.length > 3 ? JSON.parse(positionals[3]) : contract.acceptance.map((entry) => ({ id: entry.id, description: entry.description, required: entry.required }));
+    const evidencePaths = csv(stringOption(options, 'evidence'));
+    const result = await lockCore5ReleaseBundle(root, {
+      release: contract.release,
+      repository: { contractHash: expected.contractHash },
+      migrationIds: csv(stringOption(options, 'migration-ids')),
+      toolVersions: versionMap(stringOption(options, 'tools')),
+      modelVersions: versionMap(stringOption(options, 'models')),
+      imageVersions: versionMap(stringOption(options, 'images')),
+      criterionVersion: stringOption(options, 'criterion-version', 'core5-criteria-v1'),
+      criteria,
+      evidenceManifest: await evidenceEntries(root, evidencePaths.length > 0 ? evidencePaths : ['.shipping/contract.yaml']),
+    });
+    if (json) printJson(result); else process.stdout.write(`Locked Core5 bundle ${result.bundle.bundleHash}\n${result.path}\n`);
+    return 0;
+  }
+  if (action !== 'check') throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown core5 bundle action: ${action}`);
+  const bundle = await loadAndValidateCore5ReleaseBundle(root, { ...expected, revision: currentGitSha(root) });
+  if (json) printJson({ valid: true, bundle }); else process.stdout.write(`Core5 bundle valid: ${bundle.bundleHash}\n`);
+  return 0;
+}
+
+/** @param {CliContext} ctx */
+async function core5Command(ctx) {
+  if (ctx.positionals[1] !== 'bundle') throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown core5 action: ${ctx.positionals[1] ?? '(missing)'}`);
+  return core5BundleCommand(ctx);
+}
+
 /** @param {CliContext} ctx */
 async function doctorCommand({ root, json }) {
   const result = await coreDoctor(root);
@@ -508,6 +556,7 @@ const COMMANDS = Object.freeze({
   close: closeCommand,
   status: statusCommand,
   plan: planCommand,
+  core5: core5Command,
   doctor: doctorCommand,
 });
 

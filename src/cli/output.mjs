@@ -80,7 +80,8 @@ export function renderHelp() {
     `  close [--allow-uncommitted]\n` +
     `  status [--json]\n` +
     `  plan status [--plan PATH] [--json]\n` +
-    `  plan check [--plan PATH] [--json]\n` +
+  `  plan check [--plan PATH] [--json]\n` +
+    `  core5 bundle lock|check [--criterion-version core5-criteria-vN] [--migration-ids ID,...] [--tools NAME=VERSION,...] [--models NAME=VERSION,...] [--images NAME=VERSION,...] [--evidence PATH,...]\n` +
     `  doctor [--json]\n` +
     `  MCP server: shipping-harness-mcp --root /absolute/project/path\n` +
     `  version\n`;

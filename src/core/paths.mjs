@@ -28,5 +28,6 @@ export function runtimePaths(root) {
     evidence: path.join(directory, 'evidence'),
     releases: path.join(directory, 'releases'),
     tmp: path.join(directory, 'tmp'),
+    core5Bundle: path.join(directory, 'core5-release-bundle.json'),
   };
 }

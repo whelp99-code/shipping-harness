@@ -1,5 +1,7 @@
 # Core5 status
 
+> BLOCKED (H02 host prerequisite): Docker is not installed on this host (`docker: command not found`), so the Testcontainers PostgreSQL acceptance runner cannot execute here. The runner fails closed and writes a BLOCKED report; H03/H04 remain independently runnable.
+
 ## H01 — committed
 
 Code checkpoint `3508271` (`feat: lock Core5 release bundle v1`). The earlier `.git` EROFS was Codex sandbox, not the disk. No push, merge, or deploy.

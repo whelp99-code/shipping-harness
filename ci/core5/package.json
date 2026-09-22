@@ -1,0 +1,14 @@
+{
+  "name": "shipping-harness-core5-ci",
+  "private": true,
+  "type": "module",
+  "scripts": { "h02": "node db-runner.mjs", "h03": "playwright test", "h04": "node eval-runner.mjs" },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@testcontainers/postgresql": "12.1.0",
+    "ajv": "8.20.0",
+    "fast-check": "4.10.2",
+    "pg": "8.23.0",
+    "promptfoo": "0.123.1"
+  }
+}

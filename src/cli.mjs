@@ -525,7 +525,7 @@ async function core5BundleCommand({ root, paths, positionals, options, json }) {
 
 /** @param {CliContext} ctx */
 async function core5DecisionCommand({ root, json }) {
-  const docker = spawnSync('command', ['-v', 'docker'], { encoding: 'utf8' });
+  const docker = spawnSync('docker', ['--version'], { encoding: 'utf8' });
   const probed = probeCore5DecisionEnv();
   const decision = decideCore5Release({
     dockerPath: docker.status === 0 ? String(docker.stdout || '').trim() : null,

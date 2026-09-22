@@ -90,6 +90,11 @@ export function createCore5ReleaseBundle(input) {
     toolVersions: stringMap(input.toolVersions ?? {}, 'toolVersions'),
     modelVersions: stringMap(input.modelVersions ?? {}, 'modelVersions'),
     imageVersions: stringMap(input.imageVersions ?? {}, 'imageVersions'),
+    supplyChain: {
+      sbom: nonEmptyString(input.supplyChain?.sbom ?? 'UNSET', 'supplyChain.sbom'),
+      licenses: nonEmptyString(input.supplyChain?.licenses ?? 'UNSET', 'supplyChain.licenses'),
+      imageDigests: nonEmptyString(input.supplyChain?.imageDigests ?? 'UNSET', 'supplyChain.imageDigests'),
+    },
     criterionVersion,
     criteria,
     criteriaHash: hashObject(criteria),

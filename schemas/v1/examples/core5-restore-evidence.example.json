@@ -1,0 +1,1 @@
+{"schema":"shipping-harness/core5-restore-evidence.v1","restoreId":"restore-2026-09-22T00:00:00Z","artifacts":[{"id":"contract","path":".shipping/contract.yaml","sha256":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}]}

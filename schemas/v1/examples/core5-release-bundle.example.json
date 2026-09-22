@@ -7,6 +7,7 @@
   "toolVersions": { "node": "22.0.0" },
   "modelVersions": { "evaluator": "baseline-1" },
   "imageVersions": { "runner": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" },
+  "supplyChain": { "sbom": "UNSET", "licenses": "UNSET", "imageDigests": "UNSET" },
   "criterionVersion": "core5-criteria-v1",
   "criteria": [{ "id": "T29", "description": "The evidence bundle is complete and immutable.", "required": true }],
   "criteriaHash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",

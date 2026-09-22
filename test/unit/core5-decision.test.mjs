@@ -35,3 +35,16 @@ test('probe defaults never enable review UI or real accounts', () => {
   assert.equal(probed.realAccountOk, false);
   assert.equal(probed.postgresImage, '');
 });
+
+test('H06 decision is SHIPPABLE only when docker, image, review UI, and real accounts all pass', () => {
+  const decision = decideCore5Release({
+    dockerPath: '/usr/bin/docker',
+    postgresImage: 'postgres@sha256:' + 'a'.repeat(64),
+    reviewUiOk: true,
+    realAccountOk: true,
+  });
+  assert.equal(decision.state, 'SHIPPABLE');
+  assert.equal(decision.releaseDecision, true);
+  assert.deepEqual(decision.blockers, []);
+  assert.equal(decision.observation, 'not-started');
+});

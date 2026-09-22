@@ -24,7 +24,7 @@ import { ungatedStageIds, unresolvedStageIds } from './core/plan-proposal.mjs';
 import { planHistorySummary, recordPlanHistory } from './core/plan-history.mjs';
 import { spawnSync } from 'node:child_process';
 import { evidenceEntries, loadAndValidateCore5ReleaseBundle, lockCore5ReleaseBundle } from './core/core5-bundle.mjs';
-import { decideCore5Release, probeCore5DecisionEnv } from './core/core5-decision.mjs';
+import { decideCore5Release, probeCore5DecisionEnv, probeCore5ReviewUi } from './core/core5-decision.mjs';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {
@@ -530,7 +530,7 @@ async function core5DecisionCommand({ root, json }) {
   const decision = decideCore5Release({
     dockerPath: docker.status === 0 ? String(docker.stdout || '').trim() : null,
     postgresImage: probed.postgresImage,
-    reviewUiOk: probed.reviewUiOk,
+    reviewUiOk: await probeCore5ReviewUi(),
     realAccountOk: probed.realAccountOk,
     revision: currentGitSha(root),
   });
@@ -539,7 +539,7 @@ async function core5DecisionCommand({ root, json }) {
     process.stdout.write(`${decision.state} releaseDecision=${decision.releaseDecision}\n`);
     for (const blocker of decision.blockers) process.stdout.write(`${blocker.id}: ${blocker.reason}\n`);
   }
-  return 2;
+  return decision.releaseDecision ? 0 : 2;
 }
 
 /** @param {CliContext} ctx */

@@ -2,7 +2,7 @@
 
 > H02 PASS (2026-09-22): Docker 29.1.3 active. `CORE5_POSTGRES_IMAGE=postgres@sha256:1a66d744c1b459e13b05a8fca341da84cb63383e99ce262210efee5a319d4551`. `node ci/core5/db-runner.mjs` rc=0, reverse/duplicate/SIGKILL/lost-ack passed. `releaseDecision` still false until H03/K04.
 >
-> BLOCKED (H03 live UI): Mail `:3010` Basic login reaches HTTP 200 (`Mail Intelligence` / draft+review copy) but has no heading `/approval|review/i` and no button `/reject|cancel/i`. `:4173` is the JARVIS dashboard. `:4176` is `PHONE_HOST_FORBIDDEN`.
+> H03 PASS (2026-09-22): authenticated Core5 review UI on `http://127.0.0.1:4174/` (Basic `core5`, not `:4173`). Unauthenticated GET is 401. `npm run h03` in `ci/core5` — 2 passed / 0 failed (inspect evidence; reject stale operation).
 >
 > H06: `core5 decision` stays `NOT_SHIPPABLE` until H03/K04. K05 observation is not started.
 

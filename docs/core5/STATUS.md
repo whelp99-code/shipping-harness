@@ -1,6 +1,8 @@
 # Core5 status
 
-> BLOCKED (H02 host prerequisite): Docker is not installed on this host (`docker: command not found`), so the Testcontainers PostgreSQL acceptance runner cannot execute here. The runner fails closed and writes a BLOCKED report; H03/H04 remain independently runnable.
+> BLOCKED (H02): `docker` is not on PATH, and `CORE5_POSTGRES_IMAGE` is unset (must be `postgres@sha256:<64 hex>`). `node ci/core5/db-runner.mjs` rc=1, report status BLOCKED, `releaseDecision: false`.
+>
+> BLOCKED (H03 live UI): Chromium installed. Against `http://127.0.0.1:4173` (HTTP 200 dashboard) both Playwright journeys fail: no heading `/approval|review/i` and no button `/reject|cancel/i`. Specs need a Core5 review surface, not this loopback page. Mail `:3010` is 401.
 
 ## H01 — committed
 

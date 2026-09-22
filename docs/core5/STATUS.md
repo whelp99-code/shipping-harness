@@ -2,7 +2,9 @@
 
 > BLOCKED (H02): `docker` is not on PATH, and `CORE5_POSTGRES_IMAGE` is unset (must be `postgres@sha256:<64 hex>`). `node ci/core5/db-runner.mjs` rc=1, report status BLOCKED, `releaseDecision: false`.
 >
-> BLOCKED (H03 live UI): Chromium installed. Against `http://127.0.0.1:4173` (HTTP 200 dashboard) both Playwright journeys fail: no heading `/approval|review/i` and no button `/reject|cancel/i`. Specs need a Core5 review surface, not this loopback page. Mail `:3010` is 401.
+> BLOCKED (H03 live UI): Chromium installed. Against `http://127.0.0.1:4173` (HTTP 200 dashboard) both Playwright journeys fail: no heading `/approval|review/i` and no button `/reject|cancel/i`. Specs need a Core5 review surface, not this loopback page. Mail `:3010` is 401. `:4176` is `PHONE_HOST_FORBIDDEN`.
+>
+> H06: `node bin/shipping-harness.mjs core5 decision --json` exits 2, `state=NOT_SHIPPABLE`, `releaseDecision=false`. Owner gates are listed in `docs/core5/OWNER_APPROVAL.md`. K05 observation is not started.
 
 ## H01 — committed
 

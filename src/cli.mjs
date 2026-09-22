@@ -22,7 +22,9 @@ import { analyzeRepository } from './core/project-analysis.mjs';
 import { DEFAULT_PLAN_PATH, auditPlanHistory, computePlanProgress, loadShippingPlan, resolveAcceptanceRefs } from './core/shipping-plan.mjs';
 import { ungatedStageIds, unresolvedStageIds } from './core/plan-proposal.mjs';
 import { planHistorySummary, recordPlanHistory } from './core/plan-history.mjs';
+import { spawnSync } from 'node:child_process';
 import { evidenceEntries, loadAndValidateCore5ReleaseBundle, lockCore5ReleaseBundle } from './core/core5-bundle.mjs';
+import { decideCore5Release, probeCore5DecisionEnv } from './core/core5-decision.mjs';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {
@@ -522,8 +524,29 @@ async function core5BundleCommand({ root, paths, positionals, options, json }) {
 }
 
 /** @param {CliContext} ctx */
+async function core5DecisionCommand({ root, json }) {
+  const docker = spawnSync('command', ['-v', 'docker'], { encoding: 'utf8' });
+  const probed = probeCore5DecisionEnv();
+  const decision = decideCore5Release({
+    dockerPath: docker.status === 0 ? String(docker.stdout || '').trim() : null,
+    postgresImage: probed.postgresImage,
+    reviewUiOk: probed.reviewUiOk,
+    realAccountOk: probed.realAccountOk,
+    revision: currentGitSha(root),
+  });
+  if (json) printJson(decision);
+  else {
+    process.stdout.write(`${decision.state} releaseDecision=${decision.releaseDecision}\n`);
+    for (const blocker of decision.blockers) process.stdout.write(`${blocker.id}: ${blocker.reason}\n`);
+  }
+  return 2;
+}
+
+/** @param {CliContext} ctx */
 async function core5Command(ctx) {
-  if (ctx.positionals[1] !== 'bundle') throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown core5 action: ${ctx.positionals[1] ?? '(missing)'}`);
+  const action = ctx.positionals[1];
+  if (action === 'decision') return core5DecisionCommand(ctx);
+  if (action !== 'bundle') throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown core5 action: ${action ?? '(missing)'}`);
   return core5BundleCommand(ctx);
 }
 

@@ -1,0 +1,50 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 5,
+    "requiredFailed": 0,
+    "total": 5
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "3e786ba98ae028d4069bca79e1b1aabbf238a8b8",
+  "closedAt": "2026-09-23T11:10:49.473Z",
+  "closedGitSha": "d70828052562e28d2d19f40feaf118bf9396a727",
+  "contractHash": "74fd910fa0df60fca7961097d7c3d360d9995f8179cdc73949040b9fda430736",
+  "evidenceRunId": "run-2026-09-23T11-09-56-589Z-0ba359e4",
+  "fixCycles": 0,
+  "goal": "Close must attest the verified in-scope tree; analysis must not mutate Git; pause must stop execution; spent agent runs and TAMPERED state must fail closed.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [
+        "package.json",
+        "src/core/gate.mjs",
+        "src/mcp/handlers.mjs"
+      ],
+      "sha": "d70828052562e28d2d19f40feaf118bf9396a727",
+      "subject": "fix(core): close stale check only restored in-scope dirt\\n\\nDeleting an in-scope plan file is still ERR_PLAN_UNAVAILABLE"
+    },
+    {
+      "paths": [
+        "test/stable/surface-freeze.test.mjs"
+      ],
+      "sha": "08cd73b5cfefce5674f0d78a311ed12b4516a018",
+      "subject": "chore: amend v1.13.20 freeze hashes and relock\\n\\nAMEND-1.13.20-001 adds test/stable/surface-freeze.test.mjs to the path"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.13.20",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 6,
+  "worker": "shipping-harness"
+}

@@ -10,6 +10,7 @@ import { ShippingError, invariant } from './errors.mjs';
  * @property {number} timeoutSeconds
  * @property {number} maxOutputBytes
  * @property {Record<string, string | undefined>} [env]
+ * @property {AbortSignal} [signal]
  */
 
 /** @param {import('node:child_process').ChildProcess} child */
@@ -84,6 +85,12 @@ export async function runBoundedCommand(request) {
   child.stdout?.on('data', (chunk) => capture('stdout', Buffer.from(chunk)));
   child.stderr?.on('data', (chunk) => capture('stderr', Buffer.from(chunk)));
 
+  const onAbort = () => terminate(child);
+  if (request.signal) {
+    if (request.signal.aborted) terminate(child);
+    else request.signal.addEventListener('abort', onAbort, { once: true });
+  }
+
   const timer = setTimeout(() => {
     timedOut = true;
     terminate(child);
@@ -101,6 +108,7 @@ export async function runBoundedCommand(request) {
     });
   });
   clearTimeout(timer);
+  request.signal?.removeEventListener('abort', onAbort);
 
   const stdoutRaw = Buffer.concat(chunks.stdout);
   const stderrRaw = Buffer.concat(chunks.stderr);

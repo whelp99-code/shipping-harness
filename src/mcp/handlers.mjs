@@ -584,6 +584,7 @@ export async function handleStatus(root, args) {
 async function evaluateExecutePolicy(root, contract, adapter) {
   const auto = await autopilotStatus(root);
   if (!auto?.enabled) return null;
+  const shipping = await readTrustedState(root);
   const command = adapter ? configuredCommand(contract.adapters?.[adapter]) : null;
   const evaluated = await evaluateAutopilotAction(root, {
     action: 'IMPLEMENT',
@@ -591,15 +592,26 @@ async function evaluateExecutePolicy(root, contract, adapter) {
     rollbackAvailable: true,
     localOnly: !adapterCommandEffects(command).includes('EXTERNAL_NETWORK_WRITE'),
     exactScope: true,
+    humanStop: shipping.humanStop === true || shipping.state === 'PAUSED' || shipping.state === 'ABORTED',
     statePatch: { phase: 'IMPLEMENTING', details: { adapter: adapter ?? 'host-agent' } },
   });
   return evaluated;
 }
 
 /** @param {string} root @param {Record<string, any>} args */
+async function assertReleaseRunnable(root) {
+  const state = await readTrustedState(root);
+  invariant(!state.humanStop && state.state !== 'PAUSED' && state.state !== 'ABORTED', 'ERR_HUMAN_STOP', 'Release execution denied by human stop', {
+    state: state.state,
+    humanStop: state.humanStop,
+  });
+  return state;
+}
+
 export async function handleExecute(root, args) {
   rejectUnknownKeys(args, ['adapter', 'verifyAfter']);
   if (args.adapter !== undefined) invariant(ADAPTERS.includes(args.adapter), 'ERR_MCP_ARGUMENTS', `Unsupported adapter: ${String(args.adapter)}`);
+  await assertReleaseRunnable(root);
   const { contract } = await assertLockedContract(root);
   const adapter = chooseConfiguredAdapter(contract, args.adapter);
   const evaluated = await evaluateExecutePolicy(root, contract, adapter);
@@ -710,6 +722,7 @@ async function evaluateFixPolicy(root, contract, requestedAdapter) {
 export async function handleFixBlockers(root, args) {
   rejectUnknownKeys(args, ['adapter', 'runConfiguredAdapter', 'verifyAfter']);
   if (args.adapter !== undefined) invariant(ADAPTERS.includes(args.adapter), 'ERR_MCP_ARGUMENTS', `Unsupported adapter: ${String(args.adapter)}`);
+  await assertReleaseRunnable(root);
   const { contract } = await assertLockedContract(root);
   const requestedAdapter = (args.runConfiguredAdapter === true || args.adapter) ? chooseConfiguredAdapter(contract, args.adapter) : null;
   const evaluated = await evaluateFixPolicy(root, contract, requestedAdapter);

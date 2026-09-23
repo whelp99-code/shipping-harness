@@ -82,10 +82,6 @@ async function verifyBudgetOutcome(root, contract, state, tree, manifest) {
   };
 }
 
-/**
- * @param {string} root
- * @param {{baselineReplay?: boolean}} [options] `baselineReplay: false` skips the contract-defect replay.
- */
 function issuesForVerify(manifest, scopeReport, budget, baselineReplay) {
   const evidenceAndScopeIssues = attachContractDefectDiagnostics([
     ...issuesFromEvidence(manifest),
@@ -99,6 +95,10 @@ function issuesForVerify(manifest, scopeReport, budget, baselineReplay) {
   ], baselineReplay);
 }
 
+/**
+ * @param {string} root
+ * @param {{baselineReplay?: boolean}} [options] `baselineReplay: false` skips the contract-defect replay.
+ */
 export async function verifyRelease(root, options = {}) {
   const { contract, lock } = await assertLockedContract(root);
   let state = await readTrustedState(root);
@@ -316,11 +316,11 @@ export async function closeRelease(root, options = {}) {
     gitSha,
   });
   const evidenceInScopeDirty = analyzeScope(manifest.dirtyPaths ?? [], contract.scope.paths).allowed;
-  const sameInScopeDirty = evidenceInScopeDirty.length === tree.inScopeDirtyPaths.length
-    && evidenceInScopeDirty.every((filePath) => tree.inScopeDirtyPaths.includes(filePath));
-  invariant(sameInScopeDirty, 'ERR_EVIDENCE_STALE', 'Evidence belongs to a different working tree', {
+  const restoredInScope = evidenceInScopeDirty.filter((filePath) => !tree.inScopeDirtyPaths.includes(filePath));
+  invariant(restoredInScope.length === 0, 'ERR_EVIDENCE_STALE', 'Evidence belongs to a different working tree', {
     expected: evidenceInScopeDirty,
     actual: tree.inScopeDirtyPaths,
+    restored: restoredInScope,
   });
   invariant(manifest.summary.requiredFailed === 0, 'ERR_ACCEPTANCE_FAILED', 'Required acceptance criteria still fail');
   const issues = await loadIssues(root);

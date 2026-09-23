@@ -598,7 +598,7 @@ async function evaluateExecutePolicy(root, contract, adapter) {
   return evaluated;
 }
 
-/** @param {string} root @param {Record<string, any>} args */
+/** @param {string} root */
 async function assertReleaseRunnable(root) {
   const state = await readTrustedState(root);
   invariant(!state.humanStop && state.state !== 'PAUSED' && state.state !== 'ABORTED', 'ERR_HUMAN_STOP', 'Release execution denied by human stop', {
@@ -608,6 +608,7 @@ async function assertReleaseRunnable(root) {
   return state;
 }
 
+/** @param {string} root @param {Record<string, any>} args */
 export async function handleExecute(root, args) {
   rejectUnknownKeys(args, ['adapter', 'verifyAfter']);
   if (args.adapter !== undefined) invariant(ADAPTERS.includes(args.adapter), 'ERR_MCP_ARGUMENTS', `Unsupported adapter: ${String(args.adapter)}`);

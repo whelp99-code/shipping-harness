@@ -39,7 +39,7 @@
     "build": "node scripts/build.mjs",
     "lint": "npm run lint:custom && npm run lint:eslint",
     "lint:custom": "node scripts/lint.mjs",
-    "lint:eslint": "eslint .",
+    "lint:eslint": "eslint src bin scripts test packages",
     "typecheck": "npm run typecheck:custom && npm run typecheck:tsc",
     "typecheck:custom": "node scripts/typecheck.mjs",
     "typecheck:tsc": "tsc -p tsconfig.json",

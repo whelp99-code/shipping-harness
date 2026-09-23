@@ -86,6 +86,19 @@ async function verifyBudgetOutcome(root, contract, state, tree, manifest) {
  * @param {string} root
  * @param {{baselineReplay?: boolean}} [options] `baselineReplay: false` skips the contract-defect replay.
  */
+function issuesForVerify(manifest, scopeReport, budget, baselineReplay) {
+  const evidenceAndScopeIssues = attachContractDefectDiagnostics([
+    ...issuesFromEvidence(manifest),
+    ...issuesFromScope(scopeReport, manifest.runId),
+  ], baselineReplay);
+  const passingRequired = manifest.summary.requiredFailed === 0
+    && !evidenceAndScopeIssues.some((item) => item.classification === 'BLOCKER');
+  return attachContractDefectDiagnostics([
+    ...evidenceAndScopeIssues,
+    ...(!passingRequired && budget.exhausted ? issuesFromVerifyBudget(budget, manifest.runId) : []),
+  ], baselineReplay);
+}
+
 export async function verifyRelease(root, options = {}) {
   const { contract, lock } = await assertLockedContract(root);
   let state = await readTrustedState(root);
@@ -109,16 +122,7 @@ export async function verifyRelease(root, options = {}) {
     : await replayFailedAcceptanceOnBaseline(root, { contract, lock, manifest: rawManifest, changedPaths, gitSha, tree });
   const manifest = await recordBaselineReplays(root, rawManifest, baselineReplay.replays);
   const budget = await verifyBudgetOutcome(root, contract, state, tree, manifest);
-  const evidenceAndScopeIssues = attachContractDefectDiagnostics([
-    ...issuesFromEvidence(manifest),
-    ...issuesFromScope(scopeReport, manifest.runId),
-  ], baselineReplay);
-  const passingRequired = manifest.summary.requiredFailed === 0
-    && !evidenceAndScopeIssues.some((item) => item.classification === 'BLOCKER');
-  const generatedIssues = attachContractDefectDiagnostics([
-    ...evidenceAndScopeIssues,
-    ...(!passingRequired && budget.exhausted ? issuesFromVerifyBudget(budget, manifest.runId) : []),
-  ], baselineReplay);
+  const generatedIssues = issuesForVerify(manifest, scopeReport, budget, baselineReplay);
   const issueDocument = await replaceGeneratedIssues(root, generatedIssues);
   const counts = countIssues(issueDocument.issues);
   const statePatch = {

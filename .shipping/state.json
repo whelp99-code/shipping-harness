@@ -1,28 +1,30 @@
 {
   "agentRuns": 0,
-  "baselineSha": "3ed1f2ebf0ea823a0574e23ade02b8d0aef70758",
-  "blockerCount": 0,
-  "contractHash": "48d060dec1d8c2f3e0c04602173e275907c0b4a454f5d92eabfbbcadc2050e9b",
+  "baselineSha": "3e786ba98ae028d4069bca79e1b1aabbf238a8b8",
+  "blockerCount": 10,
+  "contractHash": "74fd910fa0df60fca7961097d7c3d360d9995f8179cdc73949040b9fda430736",
   "createdAt": "2026-09-23T10:57:17.784Z",
-  "currentEvidenceFingerprint": null,
+  "currentEvidenceFingerprint": "4636a3b60dbebcc68465365e5df7cc4f621fc7227a153e13ebbe40308d073d1f",
   "currentEvidenceSha": null,
   "fixCycles": 0,
   "humanStop": false,
   "ignoreCount": 0,
   "integrity": {
     "algorithm": "sha256",
-    "digest": "3f9f9c047d144b90ba10134143ec7b74c45d0d9205dd9f794dda319e2d80e809",
-    "ledgerHead": "06a1f896-7e2e-4ed1-8792-87d21fb99e70"
+    "digest": "a002f723bec310c5b245ab14836fcc16025352c2ae09c4028fdf2e1a9d8b148d",
+    "ledgerHead": "d4d2a5db-2a43-4824-8076-5e516c2e347c"
   },
   "lastRunId": null,
+  "lastVerifiedAt": null,
   "nextCount": 0,
   "previousRelease": "1.13.19",
   "redundantVerifyRuns": 0,
   "release": "1.13.20",
   "resumeState": null,
   "schema": "shipping-harness/state-v1",
+  "scopeAmendmentId": "AMEND-1.13.20-001",
   "state": "LOCKED",
   "unknownCount": 0,
-  "updatedAt": "2026-09-23T10:59:59.593Z",
-  "verifyRuns": 0
+  "updatedAt": "2026-09-23T11:03:19.047Z",
+  "verifyRuns": 1
 }

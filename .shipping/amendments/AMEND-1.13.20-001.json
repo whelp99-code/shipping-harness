@@ -1,0 +1,25 @@
+{
+  "actor": "human-approved-sequential-build",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": "test/stable/surface-freeze.test.mjs"
+    }
+  ],
+  "correctedContractHash": "74fd910fa0df60fca7961097d7c3d360d9995f8179cdc73949040b9fda430736",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-1.13.20-001",
+  "kind": "post-lock-surface-freeze-path",
+  "previousContractHash": "48d060dec1d8c2f3e0c04602173e275907c0b4a454f5d92eabfbbcadc2050e9b",
+  "previousScopeRevision": 1,
+  "previousState": "TRIAGE",
+  "productionCodeChanged": false,
+  "project": "shipping-harness",
+  "reason": "AC-113205 runs test:stable. renderHelp embeds package.json version 1.13.20 and this branch already added Core5 schemas, so the freeze hashes must move. The freeze test was omitted from the locked path allowlist.",
+  "recordedAt": "2026-09-23T11:02:55.114Z",
+  "release": "1.13.20",
+  "removed": [],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticProductScopeExpansion": false,
+  "sourceGitSha": "3e786ba98ae028d4069bca79e1b1aabbf238a8b8"
+}

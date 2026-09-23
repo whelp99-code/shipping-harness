@@ -297,14 +297,21 @@ export async function closeRelease(root, options = {}) {
     gitSha,
   });
   invariant(typeof state.lastRunId === 'string' && state.lastRunId, 'ERR_EVIDENCE_MISSING', 'No accepted evidence run is recorded');
-  // Close deliberately does NOT compare the tree fingerprint: an out-of-scope dirty path
-  // must not refuse a close (fixed by test/adversarial/close-uncommitted-attacks), and the
-  // in-scope half is already refused below by ERR_CLOSE_UNCOMMITTED, with any commit of it
-  // moving HEAD and failing the evidence-SHA check above.
+  // Full-tree fingerprint is not compared here: out-of-scope dirty paths must not refuse
+  // a close (test/adversarial/close-uncommitted-attacks). In-scope dirty identity is:
+  // evidence taken against in-scope dirt that has since been restored is stale, and
+  // remaining in-scope dirt is ERR_CLOSE_UNCOMMITTED below.
   const tree = treeFingerprint(root, contract.scope.paths);
   const manifest = assertFreshEvidence(await loadEvidence(root, state.lastRunId), {
     contractHash: lock.contractHash,
     gitSha,
+  });
+  const evidenceInScopeDirty = analyzeScope(manifest.dirtyPaths ?? [], contract.scope.paths).allowed;
+  const sameInScopeDirty = evidenceInScopeDirty.length === tree.inScopeDirtyPaths.length
+    && evidenceInScopeDirty.every((filePath) => tree.inScopeDirtyPaths.includes(filePath));
+  invariant(sameInScopeDirty, 'ERR_EVIDENCE_STALE', 'Evidence belongs to a different working tree', {
+    expected: evidenceInScopeDirty,
+    actual: tree.inScopeDirtyPaths,
   });
   invariant(manifest.summary.requiredFailed === 0, 'ERR_ACCEPTANCE_FAILED', 'Required acceptance criteria still fail');
   const issues = await loadIssues(root);

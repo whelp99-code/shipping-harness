@@ -1,49 +1,22 @@
 {
   "acceptance": [
     {
-      "command": "node --test test/adversarial/close-fingerprint-attacks.test.mjs test/adversarial/close-uncommitted-attacks.test.mjs",
+      "id": "AC-113191",
+      "description": "Documentation audit passes and no whitespace errors remain.",
+      "type": "command",
+      "command": "npm run verify:docs && git diff --check",
       "cwd": ".",
-      "description": "Close refuses evidence from restored in-scope dirty bytes and still allows out-of-scope dirty close.",
-      "id": "AC-113201",
       "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
+      "timeoutSeconds": 120
     },
     {
-      "command": "node --test test/mcp/intent-gate.test.mjs test/adversarial/baseline-commit-attacks.test.mjs",
+      "id": "AC-113192",
+      "description": "Full regression and release gates pass, proving this release changes no behaviour.",
+      "type": "command",
+      "command": "npm run release:verify",
       "cwd": ".",
-      "description": "Analysis-mode start with default commitBaseline does not move HEAD; tracked .env.local refuses baseline commit.",
-      "id": "AC-113202",
       "required": true,
-      "timeoutSeconds": 120,
-      "type": "command"
-    },
-    {
-      "command": "node --test test/adversarial/pause-stop-attacks.test.mjs",
-      "cwd": ".",
-      "description": "Pause denies shipping_execute work orders; AbortSignal kills the bounded command process group.",
-      "id": "AC-113203",
-      "required": true,
-      "timeoutSeconds": 60,
-      "type": "command"
-    },
-    {
-      "command": "node --test test/adversarial/budget-tamper-attacks.test.mjs",
-      "cwd": ".",
-      "description": "Spent agent runs do not launch; TAMPERED is not laundered by pause; maxVerifyRuns 1 first pass is SHIPPABLE.",
-      "id": "AC-113204",
-      "required": true,
-      "timeoutSeconds": 60,
-      "type": "command"
-    },
-    {
-      "command": "npm run verify:docs && git diff --check && npm run release:verify",
-      "cwd": ".",
-      "description": "Documentation audit, whitespace check, and full release gates pass.",
-      "id": "AC-113205",
-      "required": true,
-      "timeoutSeconds": 900,
-      "type": "command"
+      "timeoutSeconds": 900
     }
   ],
   "adapters": {
@@ -180,9 +153,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Close must attest the verified in-scope tree; analysis must not mutate Git; pause must stop execution; spent agent runs and TAMPERED state must fail closed.",
+  "goal": "The v1.13.18 record states as fact that a reporting session's suite was about to exceed its timeout. It was not: the measurement is 386s against a 600s budget. Correct the record without rewriting it.",
   "project": "shipping-harness",
-  "release": "1.13.20",
+  "release": "1.13.19",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -200,14 +173,14 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "MVP acceptance units, liveness predicates, acceptance bootstrap, discovery-to-contract compile, plan-bound train continuation (v1.14+).",
-      "A tenth MCP tool, raw command fields, auto-confirm, auto-push, or reopening CLOSED."
+      "Editing or deleting what a closed release recorded.",
+      "Changing the near-budget threshold, the preflight, or any other behaviour.",
+      "Publishing, deployment, customer contact, purchase, credential changes, or external writes."
     ],
     "include": [
-      "Close compares in-scope dirty identity so restored dirty evidence cannot close.",
-      "Analysis-mode start does not auto-commit; tracked credential names refuse baseline commit.",
-      "Pause denies execute/fix work orders; bounded commands honor AbortSignal.",
-      "Spent agent runs do not launch; TAMPERED cannot be re-signed via pause; passing verify at maxVerifyRuns is SHIPPABLE."
+      "The CHANGELOG records that the v1.13.18 entry stated as fact something about a reporting repository that its own measurement disproved.",
+      "The correction is added; the v1.13.18 entry and its plan document are left as written.",
+      "No source changes: the behaviour v1.13.18 shipped is confirmed correct at the measured 386s of 600s."
     ],
     "paths": {
       "exclude": [
@@ -219,26 +192,11 @@
         "coverage/**"
       ],
       "include": [
-        "src/core/gate.mjs",
-        "src/core/proposals.mjs",
-        "src/core/baseline-commit.mjs",
-        "src/core/process.mjs",
-        "src/core/state.mjs",
-        "src/mcp/handlers.mjs",
-        "src/adapters/artifacts.mjs",
-        "src/adapters/runner.mjs",
-        "test/adversarial/close-fingerprint-attacks.test.mjs",
-        "test/adversarial/pause-stop-attacks.test.mjs",
-        "test/adversarial/budget-tamper-attacks.test.mjs",
-        "test/adversarial/baseline-commit-attacks.test.mjs",
-        "test/mcp/intent-gate.test.mjs",
-        "docs/planning/51-V1.13.20-FALSE-CLOSE-AND-STOP-MUST-HOLD-DEVELOPMENT-PLAN.md",
-        "docs/HANDOVER.md",
         "CHANGELOG.md",
         "README.md",
-        "BACKLOG.md",
-        "package.json",
-        ".omo/plans/v1.13.20-false-close-and-stop.md"
+        "docs/HANDOVER.md",
+        "docs/planning/50-V1.13.19-CORRECT-THE-V1-13-18-RECORD-DEVELOPMENT-PLAN.md",
+        "package.json"
       ]
     }
   },

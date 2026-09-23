@@ -4,6 +4,10 @@ Shipping Harness v1 deliberately closes with a small internal product surface. I
 
 ## Deferred product work
 
+- [ ] BACKLOG-014: Software-delivery goals must not close on lint, `git diff --check`, or documentation-only acceptance. Require a repository-owned check that launches the app or asserts a named user outcome (v1.14+; planned after v1.13.20 trust fixes).
+- [ ] BACKLOG-015: Governed acceptance-bootstrap phase so a host can author `test`/`start` under a separately approved preparation scope, then rescan, without editing `contract.yaml` by hand.
+- [ ] BACKLOG-016: Compile discovery answers into the locked goal and acceptance; bind train continuation to plan hash and stage, not version number alone; reject unrelated goals.
+
 - [ ] BACKLOG-001: Optional full YAML parser profile for repositories that require non-JSON YAML syntax.
 - [ ] BACKLOG-002: GitHub Checks, protected-branch policy, and explicit push/tag approval integration.
 - [ ] BACKLOG-003: Multi-repository release coordination under a separate bounded contract.

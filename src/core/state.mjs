@@ -161,7 +161,7 @@ export async function readTrustedState(root) {
 
 /** @param {string} root @param {string} reason */
 export async function pause(root, reason) {
-  const current = await readState(root);
+  const current = await readTrustedState(root);
   if (current.state === 'PAUSED') return current;
   invariant(!['CLOSED', 'ABORTED'].includes(current.state), 'ERR_STATE_TERMINAL', `Cannot pause ${current.state}`);
   return transitionState(root, 'PAUSED', { resumeState: current.state, humanStop: true }, reason);
@@ -169,7 +169,7 @@ export async function pause(root, reason) {
 
 /** @param {string} root @param {string} reason */
 export async function resume(root, reason) {
-  const current = await readState(root);
+  const current = await readTrustedState(root);
   invariant(current.state === 'PAUSED', 'ERR_NOT_PAUSED', 'Release is not paused');
   const target = current.resumeState || 'LOCKED';
   invariant(TRANSITIONS.PAUSED.includes(target), 'ERR_STATE_INVALID', `Cannot resume to ${target}`);
@@ -178,7 +178,7 @@ export async function resume(root, reason) {
 
 /** @param {string} root @param {string} reason */
 export async function abort(root, reason) {
-  const current = await readState(root);
+  const current = await readTrustedState(root);
   if (current.state === 'ABORTED') return current;
   if (current.state === 'CLOSED') throw new ShippingError('ERR_STATE_TERMINAL', 'A closed release cannot be aborted');
   return transitionState(root, 'ABORTED', { humanStop: true, abortReason: reason }, reason);

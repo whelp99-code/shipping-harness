@@ -39,6 +39,7 @@ export async function executeAdapter(root, request) {
   await assertContainedPath(root, cwd);
   const toolCalls = normalizeToolCalls(request.toolCalls);
   const runningState = await beginAgentRun(root, adapter.name);
+  invariant(runningState.state === 'RUNNING', 'ERR_RUN_STATE', `Cannot start an agent run from ${runningState.state}`);
   const verifyRunsAtStart = runningState.verifyRuns ?? 0;
 
   const runId = `agent-${new Date().toISOString().replace(/[:.]/gu, '-')}-${randomUUID().slice(0, 8)}`;

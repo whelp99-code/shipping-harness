@@ -109,10 +109,15 @@ export async function verifyRelease(root, options = {}) {
     : await replayFailedAcceptanceOnBaseline(root, { contract, lock, manifest: rawManifest, changedPaths, gitSha, tree });
   const manifest = await recordBaselineReplays(root, rawManifest, baselineReplay.replays);
   const budget = await verifyBudgetOutcome(root, contract, state, tree, manifest);
-  const generatedIssues = attachContractDefectDiagnostics([
+  const evidenceAndScopeIssues = attachContractDefectDiagnostics([
     ...issuesFromEvidence(manifest),
     ...issuesFromScope(scopeReport, manifest.runId),
-    ...(budget.exhausted ? issuesFromVerifyBudget(budget, manifest.runId) : []),
+  ], baselineReplay);
+  const passingRequired = manifest.summary.requiredFailed === 0
+    && !evidenceAndScopeIssues.some((item) => item.classification === 'BLOCKER');
+  const generatedIssues = attachContractDefectDiagnostics([
+    ...evidenceAndScopeIssues,
+    ...(!passingRequired && budget.exhausted ? issuesFromVerifyBudget(budget, manifest.runId) : []),
   ], baselineReplay);
   const issueDocument = await replaceGeneratedIssues(root, generatedIssues);
   const counts = countIssues(issueDocument.issues);

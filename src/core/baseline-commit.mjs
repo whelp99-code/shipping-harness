@@ -152,6 +152,28 @@ function untrackedRefusal(root, filePath) {
  * @param {string[]} paths
  * @returns {string[]} the same paths, when every one of them is safe to stage
  */
+/**
+ * Tracked modifications can be deletions; do not stat them. Refuse credential-like names.
+ * @param {string[]} paths
+ */
+function screenTrackedCredentialNames(paths) {
+  for (const filePath of paths) {
+    const segments = filePath.split('/').filter(Boolean);
+    if (segments.some((segment) => BLOCKED_SEGMENTS.has(segment))) {
+      throw new ShippingError('ERR_BASELINE_UNSAFE_UNTRACKED', `Refusing to commit the working tree: tracked file ${filePath} ${REFUSAL_SENTENCE['protected-directory']}. Nothing was staged or committed. Commit, ignore, or remove that file yourself, then start again.`, {
+        reason: 'protected-directory',
+        path: filePath,
+      });
+    }
+    if (BLOCKED_BASENAMES.has((segments.at(-1) ?? '').toLowerCase())) {
+      throw new ShippingError('ERR_BASELINE_UNSAFE_UNTRACKED', `Refusing to commit the working tree: tracked file ${filePath} ${REFUSAL_SENTENCE['credential-like-name']}. Nothing was staged or committed. Commit, ignore, or remove that file yourself, then start again.`, {
+        reason: 'credential-like-name',
+        path: filePath,
+      });
+    }
+  }
+}
+
 export function screenUntracked(root, paths) {
   invariant(paths.length <= MAX_UNTRACKED_FILES, 'ERR_BASELINE_UNSAFE_UNTRACKED', `The working tree holds ${paths.length} untracked files, over the ${MAX_UNTRACKED_FILES}-file baseline budget; commit or ignore them yourself and start again`, {
     reason: 'over-file-count-budget',
@@ -197,6 +219,7 @@ export function commitBaseline(root) {
   const changes = collectBaselineChanges(root);
   const candidates = [...new Set([...changes.stagedAdditions, ...changes.untracked])].sort();
   if (changes.trackedModified.length === 0 && candidates.length === 0) return null;
+  screenTrackedCredentialNames(changes.trackedModified);
   const untrackedIncluded = screenUntracked(root, candidates);
   const files = [...new Set([...changes.trackedModified, ...untrackedIncluded])].sort();
   // Start from HEAD so only the enumerated paths can enter the commit, whatever the
@@ -204,7 +227,7 @@ export function commitBaseline(root) {
   runGit(root, ['reset', '-q']);
   try {
     stagePaths(root, files);
-    const committed = runGit(root, ['commit', '--no-verify', '-m', baselineCommitMessage()], { allowFailure: true });
+    const committed = runGit(root, ['-c', 'core.hooksPath=/dev/null', 'commit', '--no-verify', '-m', baselineCommitMessage()], { allowFailure: true });
     if (committed.exitCode !== 0) {
       throw new ShippingError('ERR_BASELINE_COMMIT_FAILED', 'git refused to commit the working-tree baseline', {
         exitCode: committed.exitCode,

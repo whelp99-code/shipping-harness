@@ -15,6 +15,7 @@ export const BLOCKED_SEGMENTS = new Set(['.git', '.shipping', '.ssh', '.aws', '.
 /** File names that are credential material by convention. */
 export const BLOCKED_BASENAMES = new Set([
   '.env',
+  '.env.local',
   'auth.json',
   'credentials',
   'credentials.json',

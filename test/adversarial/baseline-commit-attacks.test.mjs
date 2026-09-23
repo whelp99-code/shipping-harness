@@ -62,6 +62,24 @@ for (const credential of ['.env', 'id_rsa', 'credentials.json', 'config/auth.jso
   });
 }
 
+test('a tracked .env.local modification refuses the whole baseline commit', async () => {
+  const fixture = await createFixtureRepo({
+    files: { '.env.local': 'SECRET=old\n' },
+  });
+  try {
+    await fixture.write('.env.local', 'SECRET=new\n');
+    await fixture.write('README.md', '# also dirty\n');
+    await refusesWithoutTouchingTheRepository(
+      fixture,
+      () => commitBaseline(fixture.root),
+      'ERR_BASELINE_UNSAFE_UNTRACKED',
+      /\.env\.local/u,
+    );
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
 test('an untracked file inside a credential directory refuses the whole commit', async () => {
   const fixture = await createFixtureRepo();
   try {

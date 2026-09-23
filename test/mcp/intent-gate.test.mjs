@@ -54,6 +54,24 @@ test('terse analysis request finishes read-only analysis, asks one intent questi
   }
 });
 
+test('analysis-mode shipping_start with default commitBaseline does not move HEAD', async () => {
+  const fixture = await dirtyFixture();
+  try {
+    const beforeHead = currentGitSha(fixture.root);
+    const beforeReadme = await fixture.read('README.md');
+    const started = await callShippingTool(fixture.root, 'shipping_start', {
+      goal: '이 프로젝트 분석해. 쉬핑하네스로',
+    });
+    const data = started.structuredContent;
+    assert.equal(data.intentGate.effectiveMode, 'ANALYZE_ONLY');
+    assert.equal(data.baselineCommit, null);
+    assert.equal(currentGitSha(fixture.root), beforeHead);
+    assert.equal(await fixture.read('README.md'), beforeReadme);
+  } finally {
+    await fixture.cleanup();
+  }
+});
+
 test('selecting ANALYZE_ONLY completes the same proposal without exposing approval or mutation', async () => {
   const fixture = await dirtyFixture();
   try {

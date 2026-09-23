@@ -691,7 +691,12 @@ export async function createScopeProposal(root, input) {
   invariant(input.goal.length <= 4000, 'ERR_PROPOSAL_GOAL', 'Goal exceeds 4000 characters');
   return withProposalLock(root, async () => {
     // Before repository analysis, so the proposal's baselineSha is the new commit.
-    const baselineCommit = await autoCommitBaseline(root, input.commitBaseline === true);
+    // Analysis and plan-only requests must not mutate Git even when commitBaseline defaults true.
+    const intent = compileIntentGate(input.goal);
+    const baselineCommit = await autoCommitBaseline(
+      root,
+      input.commitBaseline === true && intentAllowsImplementation(intent),
+    );
     const ctx = await loadProposalContext(root, input, baselineCommit);
     const { active, reused } = await reuseMatchingProposal(root, ctx);
     if (reused) return reused;

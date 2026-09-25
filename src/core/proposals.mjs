@@ -537,6 +537,7 @@ function composeProposalDecision(base, ctx, input) {
     : intentAllowsImplementation(intentGate)
       ? 'APPROVABLE'
       : 'NOT_READY';
+  if (goalDiscovery?.direction) decision.discoveryDirection = goalDiscovery.direction;
   decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
   decision = validateDecisionPackage(ctx.evidence, decision);
   // The contract is compiled first so the approval screen can show the scope that will
@@ -937,6 +938,7 @@ function composeRefineDecision(evidenceCtx, proposal, answers) {
     : intentAllowsImplementation(intentGate)
       ? 'APPROVABLE'
       : 'NOT_READY';
+  if (goalDiscovery?.direction) decision.discoveryDirection = goalDiscovery.direction;
   decision.hash = hashObject(Object.fromEntries(Object.entries(decision).filter(([key]) => key !== 'hash')));
   decision = validateDecisionPackage(evidence, decision);
   const contract = bindPlanStageContract(compileDecisionContract(base, decision), evidenceCtx);

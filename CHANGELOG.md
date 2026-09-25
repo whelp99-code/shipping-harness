@@ -2,6 +2,14 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.14.0] - 2026-09-25
+
+Closed. A prompt can drive a project only as far as the acceptance that proves it.
+
+- **A software goal closed on lint, `git diff --check`, or a docs audit.** Required acceptance must launch the app, satisfy a port-listen liveness predicate, or assert a named user outcome. `start` scripts are detected and are not executed as acceptance.
+- **test/start could be added only by hand-editing `contract.yaml`.** `prep approve` records a separate operator-approved scope. `prep author` writes test/start inside that scope. `prep rescan` detects them and does not write the contract. Paths outside the scope are `ERR_PREP_SCOPE`.
+- **Discovery answers stayed in the charter, and train continuation trusted the version number.** A ready direction now compiles into the locked goal and acceptance. Continuation matches plan hash and stage. An unrelated goal is rejected even when the version matches.
+
 ## [1.13.20] - 2026-09-23
 
 Closed. False CLOSE and a pause that does not stop.

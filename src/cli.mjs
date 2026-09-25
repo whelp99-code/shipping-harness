@@ -25,6 +25,7 @@ import { planHistorySummary, recordPlanHistory } from './core/plan-history.mjs';
 import { spawnSync } from 'node:child_process';
 import { evidenceEntries, loadAndValidateCore5ReleaseBundle, lockCore5ReleaseBundle } from './core/core5-bundle.mjs';
 import { decideCore5Release, probeCore5DecisionEnv, probeCore5ReviewUi } from './core/core5-decision.mjs';
+import { approvePrepScope, authorPrep, rescanPrep } from './core/prep-scope.mjs';
 
 /** @param {string | null} requested */
 function resolveRoot(requested) {
@@ -551,6 +552,43 @@ async function core5Command(ctx) {
 }
 
 /** @param {CliContext} ctx */
+async function prepCommand(ctx) {
+  const action = ctx.positionals[1];
+  if (action === 'approve') {
+    const paths = String(stringOption(ctx.options, 'path', '')).split(',').map((entry) => entry.trim()).filter(Boolean);
+    const kinds = String(stringOption(ctx.options, 'kind', 'test,start')).split(',').map((entry) => entry.trim()).filter(Boolean);
+    const approval = await approvePrepScope(ctx.root, {
+      approver: stringOption(ctx.options, 'approver', '') ?? '',
+      paths,
+      kinds,
+    });
+    if (ctx.json) printJson(approval);
+    else process.stdout.write(`approved ${approval.paths.length} path(s)\n`);
+    return 0;
+  }
+  if (action === 'author') {
+    const contentsFile = stringOption(ctx.options, 'contents-file');
+    const contents = contentsFile ? await readFile(contentsFile, 'utf8') : '';
+    const wrote = await authorPrep(ctx.root, {
+      kind: stringOption(ctx.options, 'kind', '') ?? '',
+      script: stringOption(ctx.options, 'script', '') ?? '',
+      relPath: stringOption(ctx.options, 'file'),
+      contents,
+    });
+    if (ctx.json) printJson(wrote);
+    else process.stdout.write(`wrote ${wrote.wrote.join(', ')}\n`);
+    return 0;
+  }
+  if (action === 'rescan') {
+    const found = await rescanPrep(ctx.root);
+    if (ctx.json) printJson(found);
+    else process.stdout.write(`test=${found.test ?? '-'} start=${found.start?.command ?? '-'}\n`);
+    return 0;
+  }
+  throw new ShippingError('ERR_COMMAND_UNKNOWN', `Unknown prep action: ${action ?? '(missing)'}`);
+}
+
+/** @param {CliContext} ctx */
 async function doctorCommand({ root, json }) {
   const result = await coreDoctor(root);
   if (json) printJson(result);
@@ -579,6 +617,7 @@ const COMMANDS = Object.freeze({
   close: closeCommand,
   status: statusCommand,
   plan: planCommand,
+  prep: prepCommand,
   core5: core5Command,
   doctor: doctorCommand,
 });

@@ -62,7 +62,11 @@ const EXPECTED = {
   // Previous (v1.10.0 Phase B) hash: be5c0995563e66b8cf936cd7074b1279388e7b608aa42e061612f429b7332396
   // v1.13.20: package.json version 1.13.20 is interpolated into renderHelp().
   // Previous (v1.13.0 Phase B help) hash: 5fe7d6db59280adcb85e1b4f3b12e5a669c8ee49ed1cc346a7d098e68b5b0cb2
-  help: '9252e2299cc2c4f3a0b27633869ae22edc5476c88ad86abf181ee1529b5a4057',
+  // v1.14.0: CLI help gained prep approve|author|rescan. MCP tool JSON and
+  // schemas/v1 are unchanged. Recorded in section 6 of
+  // docs/planning/52-V1.14.0-PROMPT-ONLY-RUNNABLE-MVP-DEVELOPMENT-PLAN.md.
+  // Previous (v1.13.20) hash: 9252e2299cc2c4f3a0b27633869ae22edc5476c88ad86abf181ee1529b5a4057
+  help: '5261691072c97a3c3ce9cda06feae318058ce66ae1f1cf92c8ea20f799cd060c',
   // v1.10.0 dirty-tree fix pass: schemas/v1/evidence.schema.json gained the optional
   // `treeFingerprint` and `dirtyPaths` fields, schemas/v1/state.schema.json gained the
   // optional `currentEvidenceFingerprint`, and schemas/v1/contract.schema.json gained the

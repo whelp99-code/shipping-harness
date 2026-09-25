@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/whelp99-code/shipping-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/whelp99-code/shipping-harness/actions/workflows/ci.yml)
 
-**Version:** 1.13.20
+**Version:** 1.14.0
 
 Coding agents already know how to write code. Shipping Harness decides whether the current software version is actually safe to close.
 

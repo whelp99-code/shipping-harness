@@ -1,37 +1,46 @@
 {
   "acceptance": [
     {
-      "command": "node --test test/unit/acceptance-proof.test.mjs test/unit/software-goal-gate.test.mjs",
+      "command": "node --test test/adversarial/close-fingerprint-attacks.test.mjs test/adversarial/close-uncommitted-attacks.test.mjs",
       "cwd": ".",
-      "description": "User outcome: a software goal cannot close on lint, git diff --check, or docs-only acceptance, and port listen plus start detection exist.",
-      "id": "AC-114001",
-      "required": true,
-      "timeoutSeconds": 180,
-      "type": "command"
-    },
-    {
-      "command": "node --test test/unit/prep-scope.test.mjs",
-      "cwd": ".",
-      "description": "User outcome: an approved prep scope can author test/start and rescan without editing contract.yaml.",
-      "id": "AC-114002",
+      "description": "Close refuses evidence from restored in-scope dirty bytes and still allows out-of-scope dirty close.",
+      "id": "AC-113201",
       "required": true,
       "timeoutSeconds": 120,
       "type": "command"
     },
     {
-      "command": "node --test test/unit/discovery-lock.test.mjs test/unit/train-continuity.test.mjs",
+      "command": "node --test test/mcp/intent-gate.test.mjs test/adversarial/baseline-commit-attacks.test.mjs",
       "cwd": ".",
-      "description": "User outcome: discovery answers compile into the locked goal, and train continuation follows plan hash and stage.",
-      "id": "AC-114003",
+      "description": "Analysis-mode start with default commitBaseline does not move HEAD; tracked .env.local refuses baseline commit.",
+      "id": "AC-113202",
       "required": true,
       "timeoutSeconds": 120,
+      "type": "command"
+    },
+    {
+      "command": "node --test test/adversarial/pause-stop-attacks.test.mjs",
+      "cwd": ".",
+      "description": "Pause denies shipping_execute work orders; AbortSignal kills the bounded command process group.",
+      "id": "AC-113203",
+      "required": true,
+      "timeoutSeconds": 60,
+      "type": "command"
+    },
+    {
+      "command": "node --test test/adversarial/budget-tamper-attacks.test.mjs",
+      "cwd": ".",
+      "description": "Spent agent runs do not launch; TAMPERED is not laundered by pause; maxVerifyRuns 1 first pass is SHIPPABLE.",
+      "id": "AC-113204",
+      "required": true,
+      "timeoutSeconds": 60,
       "type": "command"
     },
     {
       "command": "npm run verify:docs && git diff --check && npm run release:verify",
       "cwd": ".",
-      "description": "User outcome: documentation audit, whitespace check, and full release gates pass.",
-      "id": "AC-114004",
+      "description": "Documentation audit, whitespace check, and full release gates pass.",
+      "id": "AC-113205",
       "required": true,
       "timeoutSeconds": 900,
       "type": "command"
@@ -163,8 +172,7 @@
     "legacy-plain-brief-over-budget",
     "goal-discovery-plain-brief-over-budget",
     "action-envelope-weakening",
-    "fact-graph-authority-loss",
-    "software-goal-unproven"
+    "fact-graph-authority-loss"
   ],
   "budgets": {
     "maxAgentRuns": 2,
@@ -172,9 +180,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "프롬프트만으로 임의 프로젝트를 구동 가능한 MVP: 소프트웨어 골은 앱을 띄우거나 이름 있는 사용자 결과를 단언하는 리포 소유 검사 없이 닫히지 않고, 승인된 준비 스코프에서 test/start를 만든 뒤 rescan하며, 트레인 연속은 plan hash와 stage에 묶인다.",
+  "goal": "Close must attest the verified in-scope tree; analysis must not mutate Git; pause must stop execution; spent agent runs and TAMPERED state must fail closed.",
   "project": "shipping-harness",
-  "release": "1.14.0",
+  "release": "1.13.20",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -192,38 +200,46 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Engine-owned implementation commits.",
-      "A tenth MCP tool.",
-      "Adapter work-order protocol."
+      "MVP acceptance units, liveness predicates, acceptance bootstrap, discovery-to-contract compile, plan-bound train continuation (v1.14+).",
+      "A tenth MCP tool, raw command fields, auto-confirm, auto-push, or reopening CLOSED."
     ],
     "include": [
-      "Software goals require a repository-owned launch or named user-outcome check.",
-      "Approved prep scope can author test/start and rescan without hand-editing contract.yaml.",
-      "Discovery answers compile into the locked goal and acceptance; train continuation binds to plan hash and stage."
+      "Close compares in-scope dirty identity so restored dirty evidence cannot close.",
+      "Analysis-mode start does not auto-commit; tracked credential names refuse baseline commit.",
+      "Pause denies execute/fix work orders; bounded commands honor AbortSignal.",
+      "Spent agent runs do not launch; TAMPERED cannot be re-signed via pause; passing verify at maxVerifyRuns is SHIPPABLE."
     ],
     "paths": {
       "exclude": [
         ".shipping/contract.yaml",
         ".shipping/contract.lock",
         ".git/**",
-        "node_modules/**"
+        "node_modules/**",
+        "dist/**",
+        "coverage/**"
       ],
       "include": [
-        "src/core/**",
-        "src/cli.mjs",
-        "src/cli/**",
-        "test/unit/acceptance-proof.test.mjs",
-        "test/unit/software-goal-gate.test.mjs",
-        "test/unit/prep-scope.test.mjs",
-        "test/unit/discovery-lock.test.mjs",
-        "test/unit/train-continuity.test.mjs",
-        "test/stable/surface-freeze.test.mjs",
-        "docs/planning/52-V1.14.0-PROMPT-ONLY-RUNNABLE-MVP-DEVELOPMENT-PLAN.md",
-        "docs/HANDOVER.md",
+        ".omo/plans/v1.13.20-false-close-and-stop.md",
+        "BACKLOG.md",
         "CHANGELOG.md",
         "README.md",
-        "BACKLOG.md",
-        "package.json"
+        "docs/HANDOVER.md",
+        "docs/planning/51-V1.13.20-FALSE-CLOSE-AND-STOP-MUST-HOLD-DEVELOPMENT-PLAN.md",
+        "package.json",
+        "src/adapters/artifacts.mjs",
+        "src/adapters/runner.mjs",
+        "src/core/baseline-commit.mjs",
+        "src/core/gate.mjs",
+        "src/core/process.mjs",
+        "src/core/proposals.mjs",
+        "src/core/state.mjs",
+        "src/mcp/handlers.mjs",
+        "test/adversarial/baseline-commit-attacks.test.mjs",
+        "test/adversarial/budget-tamper-attacks.test.mjs",
+        "test/adversarial/close-fingerprint-attacks.test.mjs",
+        "test/adversarial/pause-stop-attacks.test.mjs",
+        "test/mcp/intent-gate.test.mjs",
+        "test/stable/surface-freeze.test.mjs"
       ]
     }
   },

@@ -23,6 +23,7 @@ import { invariant, ShippingError } from './errors.mjs';
 import { readState, readTrustedState, recordLedger, transitionState } from './state.mjs';
 import { goalStatusView } from './goals/status-view.mjs';
 import { assessStateIntegritySafe, stateIntegrityIssue } from './state-integrity.mjs';
+import { softwareGoalGap } from './acceptance-proof.mjs';
 import { loadShippingPlan, planStageSnapshot } from './shipping-plan.mjs';
 
 /**
@@ -82,10 +83,11 @@ async function verifyBudgetOutcome(root, contract, state, tree, manifest) {
   };
 }
 
-function issuesForVerify(manifest, scopeReport, budget, baselineReplay) {
+function issuesForVerify(manifest, scopeReport, budget, baselineReplay, contract) {
   const evidenceAndScopeIssues = attachContractDefectDiagnostics([
     ...issuesFromEvidence(manifest),
     ...issuesFromScope(scopeReport, manifest.runId),
+    ...softwareGoalGap(contract, manifest.runId),
   ], baselineReplay);
   const passingRequired = manifest.summary.requiredFailed === 0
     && !evidenceAndScopeIssues.some((item) => item.classification === 'BLOCKER');
@@ -122,7 +124,7 @@ export async function verifyRelease(root, options = {}) {
     : await replayFailedAcceptanceOnBaseline(root, { contract, lock, manifest: rawManifest, changedPaths, gitSha, tree });
   const manifest = await recordBaselineReplays(root, rawManifest, baselineReplay.replays);
   const budget = await verifyBudgetOutcome(root, contract, state, tree, manifest);
-  const generatedIssues = issuesForVerify(manifest, scopeReport, budget, baselineReplay);
+  const generatedIssues = issuesForVerify(manifest, scopeReport, budget, baselineReplay, contract);
   const issueDocument = await replaceGeneratedIssues(root, generatedIssues);
   const counts = countIssues(issueDocument.issues);
   const statePatch = {

@@ -1,4 +1,5 @@
 import { hashObject } from './crypto.mjs';
+import { isWeakCommand } from './acceptance-proof.mjs';
 
 export const PROPOSAL_STATES = Object.freeze([
   'PLANNING',
@@ -73,7 +74,8 @@ export function classifyAcceptanceStrength(analysis = {}) {
     const command = typeof entry?.command === 'string' ? entry.command.trim() : '';
     return command
       && !FALLBACK_COMMANDS.has(command)
-      && entry?.source !== 'shipping-harness-fallback';
+      && entry?.source !== 'shipping-harness-fallback'
+      && !isWeakCommand(command);
   });
   if (strong.length > 0) {
     return {

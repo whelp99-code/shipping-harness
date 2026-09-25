@@ -209,23 +209,21 @@
         "node_modules/**"
       ],
       "include": [
-        "BACKLOG.md",
-        "CHANGELOG.md",
-        "README.md",
-        "docs/HANDOVER.md",
-        "docs/planning/52-V1.14.0-PROMPT-ONLY-RUNNABLE-MVP-DEVELOPMENT-PLAN.md",
-        "docs/reports/v1-security-inventory.json",
-        "package.json",
-        "scripts/amend-v1140-security-inventory-scope.mjs",
+        "src/core/**",
         "src/cli.mjs",
         "src/cli/**",
-        "src/core/**",
-        "test/stable/surface-freeze.test.mjs",
         "test/unit/acceptance-proof.test.mjs",
-        "test/unit/discovery-lock.test.mjs",
-        "test/unit/prep-scope.test.mjs",
         "test/unit/software-goal-gate.test.mjs",
-        "test/unit/train-continuity.test.mjs"
+        "test/unit/prep-scope.test.mjs",
+        "test/unit/discovery-lock.test.mjs",
+        "test/unit/train-continuity.test.mjs",
+        "test/stable/surface-freeze.test.mjs",
+        "docs/planning/52-V1.14.0-PROMPT-ONLY-RUNNABLE-MVP-DEVELOPMENT-PLAN.md",
+        "docs/HANDOVER.md",
+        "CHANGELOG.md",
+        "README.md",
+        "BACKLOG.md",
+        "package.json"
       ]
     }
   },

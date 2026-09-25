@@ -1,28 +1,30 @@
 {
   "agentRuns": 0,
-  "baselineSha": "1301d8dcd9633c4591f2bd537a7cf96866de2271",
-  "blockerCount": 0,
-  "contractHash": "3ca522c8123b8aa3f02fdcc707ce1b05fec131a0e0955a6edd3fa0bb0e3a3b3c",
+  "baselineSha": null,
+  "blockerCount": 1,
+  "contractHash": null,
   "createdAt": "2026-09-25T15:02:18.553Z",
-  "currentEvidenceFingerprint": null,
+  "currentEvidenceFingerprint": "6eece98def8c494466b6fb20c38e5ca81eac526d357effd5ac7a0c06968b0186",
   "currentEvidenceSha": null,
   "fixCycles": 0,
   "humanStop": false,
   "ignoreCount": 0,
   "integrity": {
     "algorithm": "sha256",
-    "digest": "c36c4a8c41cf93701047d8ab13a22d2704ef557c835ff49f0fe744de82cacdbb",
-    "ledgerHead": "f8a80702-372c-489b-a721-4068df305081"
+    "digest": "1367c203142f3a27f6cf65cc025478aac753d91c24b9fa0c047285c25f22cd02",
+    "ledgerHead": "8b2e5cba-468b-4750-a076-69e88afd3db4"
   },
   "lastRunId": null,
+  "lastVerifiedAt": null,
   "nextCount": 0,
   "previousRelease": "1.13.20",
   "redundantVerifyRuns": 0,
   "release": "1.14.0",
   "resumeState": null,
   "schema": "shipping-harness/state-v1",
-  "state": "LOCKED",
+  "scopeAmendmentId": "AMEND-1.14.0-001",
+  "state": "DRAFT",
   "unknownCount": 0,
-  "updatedAt": "2026-09-25T15:21:21.973Z",
-  "verifyRuns": 0
+  "updatedAt": "2026-09-25T15:25:34.637Z",
+  "verifyRuns": 1
 }

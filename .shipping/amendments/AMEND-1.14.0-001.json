@@ -1,0 +1,28 @@
+{
+  "actor": "human-approved-sequential-build",
+  "added": [
+    {
+      "field": "scope.paths.include",
+      "value": "docs/reports/v1-security-inventory.json"
+    },
+    {
+      "field": "scope.paths.include",
+      "value": "scripts/amend-v1140-security-inventory-scope.mjs"
+    }
+  ],
+  "correctedContractHash": "ab8a8900455f71ec14969c41dbfcf233839ad48d36d8779b1b494d3e61588b54",
+  "executableAcceptanceChanged": false,
+  "id": "AMEND-1.14.0-001",
+  "kind": "post-lock-inventory-record",
+  "previousContractHash": "3ca522c8123b8aa3f02fdcc707ce1b05fec131a0e0955a6edd3fa0bb0e3a3b3c",
+  "previousState": "TRIAGE",
+  "productionCodeChanged": false,
+  "project": "shipping-harness",
+  "reason": "Locked verify failed security:inventory because src/core/autopilot.mjs changed. The inventory record lives outside the locked allowlist. This amendment adds that record and this script so the refreshed digest can be committed without a scope blocker. Acceptance commands are unchanged.",
+  "recordedAt": "2026-09-25T15:25:34.633Z",
+  "release": "1.14.0",
+  "removed": [],
+  "schema": "shipping-harness/contract-amendment-v1",
+  "semanticProductScopeExpansion": false,
+  "sourceGitSha": "00bfc7708c1e6e4149db82595d4c66ce999775c3"
+}

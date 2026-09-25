@@ -1,27 +1,11 @@
 {
   "counts": {
-    "BLOCKER": 1,
+    "BLOCKER": 0,
     "IGNORE": 0,
     "NEXT": 0,
     "UNKNOWN": 0
   },
-  "issues": [
-    {
-      "basisId": "AC-114004",
-      "classification": "BLOCKER",
-      "createdAt": "2026-09-25T15:23:02.649Z",
-      "description": "Acceptance command exited with 1.",
-      "diagnostics": [],
-      "evidenceRef": ".shipping/evidence/run-2026-09-25T15-22-00-975Z-cd7153d2/AC-114004.log",
-      "id": "ISSUE-AC-114004",
-      "path": null,
-      "requestedClassification": "BLOCKER",
-      "runId": "run-2026-09-25T15-22-00-975Z-cd7153d2",
-      "source": "acceptance",
-      "title": "AC-114004 failed",
-      "updatedAt": "2026-09-25T15:23:02.649Z"
-    }
-  ],
+  "issues": [],
   "schema": "shipping-harness/issues-v1",
-  "updatedAt": "2026-09-25T15:23:02.649Z"
+  "updatedAt": "2026-09-25T15:26:23.794Z"
 }

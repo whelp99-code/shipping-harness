@@ -1,30 +1,33 @@
 {
   "agentRuns": 0,
   "baselineSha": "2ad4ff30b82dd9116da53242498f40335aa42f96",
-  "blockerCount": 1,
+  "blockerCount": 0,
+  "closedAt": "2026-09-25T15:27:18.340Z",
+  "closedGitSha": "b58ae6c24211eb750ff84e7fbcce5a01efaf9bdf",
   "contractHash": "ab8a8900455f71ec14969c41dbfcf233839ad48d36d8779b1b494d3e61588b54",
   "createdAt": "2026-09-25T15:02:18.553Z",
-  "currentEvidenceFingerprint": "6eece98def8c494466b6fb20c38e5ca81eac526d357effd5ac7a0c06968b0186",
-  "currentEvidenceSha": null,
+  "currentEvidenceFingerprint": "11fa004378a1145cffd639714d0eeeff98e0790cccce610eeebc85737696ddf1",
+  "currentEvidenceSha": "b58ae6c24211eb750ff84e7fbcce5a01efaf9bdf",
   "fixCycles": 0,
   "humanStop": false,
   "ignoreCount": 0,
   "integrity": {
     "algorithm": "sha256",
-    "digest": "ed6fe3eaa306ebc15350800a9c20db37230093719befd5a2fd7622118e4d0a0d",
-    "ledgerHead": "d1d800ff-5128-4f94-a5d5-24c83a53b45d"
+    "digest": "5720e24fbdac8df1cd22be92f9f954ee62b9b7e53160d5417b9abed1b8f6d2d7",
+    "ledgerHead": "65c5184b-67e7-4143-8216-7b61c86aeeba"
   },
-  "lastRunId": null,
-  "lastVerifiedAt": null,
+  "lastRunId": "run-2026-09-25T15-25-57-541Z-1aba7616",
+  "lastVerifiedAt": "2026-09-25T15:26:23.796Z",
   "nextCount": 0,
   "previousRelease": "1.13.20",
   "redundantVerifyRuns": 0,
   "release": "1.14.0",
+  "releaseReceipt": ".shipping/releases/1.14.0.json",
   "resumeState": null,
   "schema": "shipping-harness/state-v1",
   "scopeAmendmentId": "AMEND-1.14.0-001",
-  "state": "LOCKED",
+  "state": "CLOSED",
   "unknownCount": 0,
-  "updatedAt": "2026-09-25T15:25:48.004Z",
-  "verifyRuns": 1
+  "updatedAt": "2026-09-25T15:27:18.351Z",
+  "verifyRuns": 2
 }

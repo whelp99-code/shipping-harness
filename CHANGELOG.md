@@ -2,9 +2,9 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.20] - Unreleased
+## [1.13.20] - 2026-09-23
 
-In progress. False CLOSE and a pause that does not stop.
+Closed. False CLOSE and a pause that does not stop.
 
 - **Close attested HEAD using evidence from a discarded working tree.** Verify on in-scope dirty passing bytes, restore HEAD, and close still succeeded because fingerprint identity was not compared. Close now compares in-scope dirty paths; out-of-scope dirt still does not refuse close.
 - **Analysis-mode `shipping_start` committed the tree by default.** Baseline auto-commit now waits until intent allows implementation. Tracked credential-like names including `.env.local` refuse the whole baseline commit. Repo hooks are disabled via `core.hooksPath`.

@@ -2,6 +2,12 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.14.1] - Unreleased
+
+In progress. Close accepted evidence from a working tree that had changed since verify (issue #1).
+
+- **A source change made after verify, without a commit, still closed on the old evidence.** HEAD does not move, and close compared only the names of in-scope dirty paths, so rewriting an already-dirty file, adding an in-scope file, deleting a tracked file, or breaking `package.json` closed through `--allow-uncommitted` and `shipping_close`; the default path refused with `ERR_CLOSE_UNCOMMITTED`, which named the wrong reason. Close now recomputes the tree fingerprint over every deviation from HEAD except out-of-scope paths that became dirty only after verify, and refuses a mismatch with `ERR_EVIDENCE_STALE`. `.shipping/` runtime files stay excluded, and an unchanged verified tree still closes.
+
 ## [1.14.0] - 2026-09-25
 
 Closed. A prompt can drive a project only as far as the acceptance that proves it.

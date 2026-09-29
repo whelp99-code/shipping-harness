@@ -132,12 +132,12 @@ test('a plan-bound release cannot close once its stage definition is gone', asyn
   try {
     const { proposal } = await createScopeProposal(fixture.root, { goal: 'Complete the fixture release' });
     await approveScopeProposal(fixture.root, { proposalId: proposal.id, proposalHash: proposal.hash, confirm: true });
-    assert.equal(runCli(fixture.root, ['verify', '--json']).exitCode, 0);
-
     const { rm } = await import('node:fs/promises');
     await rm(path.join(fixture.root, DEFAULT_PLAN_PATH));
-    // --allow-uncommitted isolates the plan check: without it the deleted in-scope file is
-    // refused earlier, by ERR_CLOSE_UNCOMMITTED.
+    // Deleted before verify, so the evidence describes this tree: a deletion after verify is
+    // refused earlier, by ERR_EVIDENCE_STALE (issue #1). --allow-uncommitted isolates the plan
+    // check: without it the deleted in-scope file is refused by ERR_CLOSE_UNCOMMITTED.
+    assert.equal(runCli(fixture.root, ['verify', '--json']).exitCode, 0);
     const closed = runCli(fixture.root, ['close', '--allow-uncommitted', '--json']);
     assert.equal(closed.exitCode, 1);
     assert.equal(parseCliJson(closed).error.code, 'ERR_PLAN_UNAVAILABLE_AT_CLOSE');

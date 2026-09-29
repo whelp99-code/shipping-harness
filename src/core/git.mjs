@@ -134,16 +134,28 @@ function workingCopyBlobShas(root, paths) {
 export function treeFingerprint(root, scopePaths = null) {
   const headSha = currentGitSha(root);
   const dirtyPaths = uncommittedPaths(root).filter((filePath) => !isShippingRuntimePath(filePath));
-  const shas = workingCopyBlobShas(root, dirtyPaths);
-  const digest = createHash('sha256');
-  digest.update(headSha);
-  for (const filePath of dirtyPaths) digest.update(`\n${filePath}\0${shas.get(filePath) ?? 'absent'}`);
   return {
-    fingerprint: digest.digest('hex'),
+    fingerprint: dirtyTreeFingerprint(root, headSha, dirtyPaths),
     headSha,
     dirtyPaths,
     inScopeDirtyPaths: scopePaths ? analyzeScope(dirtyPaths, scopePaths).allowed : [],
   };
+}
+
+/**
+ * The `treeFingerprint` digest over an explicit, sorted list of deviating paths, so a caller
+ * can recompute it for a subset of the current deviations and compare it with stored evidence.
+ * @param {string} root
+ * @param {string} headSha
+ * @param {string[]} dirtyPaths sorted repository-relative paths
+ * @returns {string}
+ */
+export function dirtyTreeFingerprint(root, headSha, dirtyPaths) {
+  const shas = workingCopyBlobShas(root, dirtyPaths);
+  const digest = createHash('sha256');
+  digest.update(headSha);
+  for (const filePath of dirtyPaths) digest.update(`\n${filePath}\0${shas.get(filePath) ?? 'absent'}`);
+  return digest.digest('hex');
 }
 
 /** @param {string} root */

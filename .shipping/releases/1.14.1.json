@@ -1,0 +1,44 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 3,
+    "requiredFailed": 0,
+    "total": 3
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "6ab6ac4dcff20e7dec155726b8995d654eb8de94",
+  "closedAt": "2026-09-29T06:01:51.582Z",
+  "closedGitSha": "3219429769d2bb288cdc74f34086a781c3d59195",
+  "contractHash": "4316cafbc2e4c10e47a867b96aa57325d5a36ea143de02ca27ca750ed72dbb2f",
+  "evidenceRunId": "run-2026-09-29T06-00-53-955Z-52027a01",
+  "fixCycles": 0,
+  "goal": "Close must refuse evidence whose tested working tree changed after verify, on every surface, while an unchanged verified tree still closes.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "3219429769d2bb288cdc74f34086a781c3d59195",
+      "subject": "Merge PR #27: close refuses stale tree evidence (fixes #1)"
+    },
+    {
+      "paths": [],
+      "sha": "38ddce7a5d1876f43109c5b517f40015dcc69625",
+      "subject": "chore: lock shipping-harness v1.14.1"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.14.1",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 1,
+  "worker": "shipping-harness"
+}

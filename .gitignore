@@ -8,3 +8,6 @@ coverage/
 *.log
 .DS_Store
 .chatgpt2codex/
+.claude/
+.omo/senpi-task/
+ci/core5/test-results/

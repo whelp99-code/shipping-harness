@@ -1,28 +1,37 @@
 {
   "acceptance": [
     {
-      "command": "node --test test/adversarial/close-fingerprint-attacks.test.mjs test/adversarial/close-uncommitted-attacks.test.mjs",
+      "command": "node --test test/unit/acceptance-proof.test.mjs test/unit/software-goal-gate.test.mjs",
       "cwd": ".",
-      "description": "User outcome: close refuses evidence once the tested source changes after verify, through core, CLI --allow-uncommitted and shipping_close, and an unchanged verified tree still closes.",
-      "id": "AC-114101",
+      "description": "User outcome: a software goal cannot close on lint, git diff --check, or docs-only acceptance, and port listen plus start detection exist.",
+      "id": "AC-114001",
       "required": true,
       "timeoutSeconds": 180,
       "type": "command"
     },
     {
-      "command": "node --test test/integration/plan-update.test.mjs",
+      "command": "node --test test/unit/prep-scope.test.mjs",
       "cwd": ".",
-      "description": "User outcome: a plan-bound release still cannot close once its stage definition is gone.",
-      "id": "AC-114102",
+      "description": "User outcome: an approved prep scope can author test/start and rescan without editing contract.yaml.",
+      "id": "AC-114002",
       "required": true,
-      "timeoutSeconds": 180,
+      "timeoutSeconds": 120,
+      "type": "command"
+    },
+    {
+      "command": "node --test test/unit/discovery-lock.test.mjs test/unit/train-continuity.test.mjs",
+      "cwd": ".",
+      "description": "User outcome: discovery answers compile into the locked goal, and train continuation follows plan hash and stage.",
+      "id": "AC-114003",
+      "required": true,
+      "timeoutSeconds": 120,
       "type": "command"
     },
     {
       "command": "npm run verify:docs && git diff --check && npm run release:verify",
       "cwd": ".",
       "description": "User outcome: documentation audit, whitespace check, and full release gates pass.",
-      "id": "AC-114103",
+      "id": "AC-114004",
       "required": true,
       "timeoutSeconds": 900,
       "type": "command"
@@ -163,9 +172,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Close must refuse evidence whose tested working tree changed after verify, on every surface, while an unchanged verified tree still closes.",
+  "goal": "프롬프트만으로 임의 프로젝트를 구동 가능한 MVP: 소프트웨어 골은 앱을 띄우거나 이름 있는 사용자 결과를 단언하는 리포 소유 검사 없이 닫히지 않고, 승인된 준비 스코프에서 test/start를 만든 뒤 rescan하며, 트레인 연속은 plan hash와 stage에 묶인다.",
   "project": "shipping-harness",
-  "release": "1.14.1",
+  "release": "1.14.0",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -183,13 +192,14 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Automatic re-verification at close.",
       "Engine-owned implementation commits.",
-      "MCP tool JSON, schemas/v1, or CLI help changes."
+      "A tenth MCP tool.",
+      "Adapter work-order protocol."
     ],
     "include": [
-      "Close compares the evidence tree fingerprint with every deviation from HEAD, except out-of-scope paths that became dirty only after verify.",
-      "Regression tests for issue #1 on core, CLI, and MCP close."
+      "Software goals require a repository-owned launch or named user-outcome check.",
+      "Approved prep scope can author test/start and rescan without hand-editing contract.yaml.",
+      "Discovery answers compile into the locked goal and acceptance; train continuation binds to plan hash and stage."
     ],
     "paths": {
       "exclude": [
@@ -199,15 +209,21 @@
         "node_modules/**"
       ],
       "include": [
+        "src/core/**",
+        "src/cli.mjs",
+        "src/cli/**",
+        "test/unit/acceptance-proof.test.mjs",
+        "test/unit/software-goal-gate.test.mjs",
+        "test/unit/prep-scope.test.mjs",
+        "test/unit/discovery-lock.test.mjs",
+        "test/unit/train-continuity.test.mjs",
+        "test/stable/surface-freeze.test.mjs",
+        "docs/planning/52-V1.14.0-PROMPT-ONLY-RUNNABLE-MVP-DEVELOPMENT-PLAN.md",
+        "docs/HANDOVER.md",
         "CHANGELOG.md",
         "README.md",
-        "docs/HANDOVER.md",
-        "docs/planning/53-V1.14.1-CLOSE-REFUSES-STALE-TREE-EVIDENCE-DEVELOPMENT-PLAN.md",
-        "package.json",
-        "src/core/gate.mjs",
-        "src/core/git.mjs",
-        "test/adversarial/close-fingerprint-attacks.test.mjs",
-        "test/integration/plan-update.test.mjs"
+        "BACKLOG.md",
+        "package.json"
       ]
     }
   },

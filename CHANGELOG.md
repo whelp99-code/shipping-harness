@@ -2,9 +2,23 @@
 
 All notable changes to Shipping Harness are documented in this file, most recent version first, in a format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.13.20] - Unreleased
+## [1.14.1] - Unreleased
 
-In progress. False CLOSE and a pause that does not stop.
+In progress. Close accepted evidence from a working tree that had changed since verify (issue #1).
+
+- **A source change made after verify, without a commit, still closed on the old evidence.** HEAD does not move, and close compared only the names of in-scope dirty paths, so rewriting an already-dirty file, adding an in-scope file, deleting a tracked file, or breaking `package.json` closed through `--allow-uncommitted` and `shipping_close`; the default path refused with `ERR_CLOSE_UNCOMMITTED`, which named the wrong reason. Close now recomputes the tree fingerprint over every deviation from HEAD except out-of-scope paths that became dirty only after verify, and refuses a mismatch with `ERR_EVIDENCE_STALE`. `.shipping/` runtime files stay excluded, and an unchanged verified tree still closes.
+
+## [1.14.0] - 2026-09-25
+
+Closed. A prompt can drive a project only as far as the acceptance that proves it.
+
+- **A software goal closed on lint, `git diff --check`, or a docs audit.** Required acceptance must launch the app, satisfy a port-listen liveness predicate, or assert a named user outcome. `start` scripts are detected and are not executed as acceptance.
+- **test/start could be added only by hand-editing `contract.yaml`.** `prep approve` records a separate operator-approved scope. `prep author` writes test/start inside that scope. `prep rescan` detects them and does not write the contract. Paths outside the scope are `ERR_PREP_SCOPE`.
+- **Discovery answers stayed in the charter, and train continuation trusted the version number.** A ready direction now compiles into the locked goal and acceptance. Continuation matches plan hash and stage. An unrelated goal is rejected even when the version matches.
+
+## [1.13.20] - 2026-09-23
+
+Closed. False CLOSE and a pause that does not stop.
 
 - **Close attested HEAD using evidence from a discarded working tree.** Verify on in-scope dirty passing bytes, restore HEAD, and close still succeeded because fingerprint identity was not compared. Close now compares in-scope dirty paths; out-of-scope dirt still does not refuse close.
 - **Analysis-mode `shipping_start` committed the tree by default.** Baseline auto-commit now waits until intent allows implementation. Tracked credential-like names including `.env.local` refuse the whole baseline commit. Repo hooks are disabled via `core.hooksPath`.

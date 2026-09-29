@@ -343,6 +343,9 @@ export function buildReleaseTrain(input) {
     releases,
     trainCompleteWhen: ['ALL_RELEASES_CLOSED', 'FINAL_VALUE_GATE_PASS', 'AUTOMATIC_RELEASED_FALSE'],
   };
+  if (input.contract?.plan?.planHash && input.contract?.plan?.stageId) {
+    body.continuity = { planHash: input.contract.plan.planHash, stageId: input.contract.plan.stageId };
+  }
   const train = { ...body, hash: hashObject(body) };
   validateReleaseTrain(train, { currentContract: input.contract ?? null });
   return train;

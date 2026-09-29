@@ -8,6 +8,7 @@ import { assertContainedPath, exists, readJson, readText, writeJsonAtomic } from
 import { currentGitSha } from './git.mjs';
 import { runtimePaths } from './paths.mjs';
 import { loadApprovedReleaseTrain, validateReleaseTrain } from './release-train.mjs';
+import { assertTrainContinuation } from './train-continuity.mjs';
 import {
   autopilotPolicySummary,
   compileAutopilotPolicy,
@@ -581,6 +582,28 @@ export async function completeAutopilotClosure(root, closeResult, decision) {
  * @param {{authorization: AutopilotDecision, previousTrain: ReleaseTrain, releaseTrain: ReleaseTrain, proposalId: string, proposalHash: string, contractHash: string, baselineSha: string, approvedAt: string}} input
  * @returns {Promise<{policy: AutopilotPolicy, state: AutopilotState, archive: Record<string, any>}>}
  */
+/**
+ * When the previous train recorded a plan, continuation must match that plan and stage.
+ * @param {Record<string, any>} input
+ * @param {{stage: string, goal: string}} expectedNext
+ */
+function assertPlanBoundContinuation(input, expectedNext) {
+  const previous = /** @type {Record<string, any>} */ (input.previousTrain);
+  if (!previous.continuity?.planHash) return;
+  const nextTrain = /** @type {Record<string, any>} */ (input.releaseTrain);
+  assertTrainContinuation({
+    planHash: previous.continuity.planHash,
+    stage: expectedNext.stage,
+    stageId: previous.continuity.stageId,
+    goal: expectedNext.goal,
+  }, {
+    planHash: input.planHash ?? nextTrain.continuity?.planHash ?? '',
+    stage: input.stage ?? nextTrain.releases[0]?.stage ?? '',
+    stageId: input.stageId ?? nextTrain.continuity?.stageId ?? null,
+    goal: input.goal ?? nextTrain.releases[0]?.goal ?? '',
+  });
+}
+
 export async function rotateAutopilotPolicy(root, input) {
   return withAutopilotLock(root, async () => {
     const currentPolicy = await loadAutopilotPolicy(root);
@@ -594,6 +617,7 @@ export async function rotateAutopilotPolicy(root, input) {
     validateReleaseTrain(input.releaseTrain);
     const expectedNext = input.previousTrain.releases[(currentState.currentIndex ?? 0) + 1] ?? null;
     invariant(expectedNext && expectedNext.version === input.releaseTrain.currentRelease, 'ERR_AUTOPILOT_ADVANCE', 'Replanned release does not match the next advisory train version');
+    assertPlanBoundContinuation(input, expectedNext);
     const policy = compileAutopilotPolicy({
       profile: currentPolicy.profile,
       proposalId: input.proposalId,

@@ -2,6 +2,8 @@ import { createDefaultContract, validateContract } from './contract.mjs';
 import { hashObject, stableStringify } from './crypto.mjs';
 import { invariant } from './errors.mjs';
 import { buildAcceptanceCriteria, buildMinimalScope } from './project-analysis.mjs';
+import { annotateProvingOutcome, isSoftwareDeliveryGoal } from './acceptance-proof.mjs';
+import { compileDiscoveryLock } from './discovery-lock.mjs';
 import { decisionModePolicy, normalizeDecisionMode } from './decision-modes.mjs';
 
 const MAX_DECISION_BYTES = 256 * 1024;
@@ -267,15 +269,23 @@ export function composeDefaultDecision(evidence, input) {
 /** @param {Record<string, any>} base @param {Record<string, any>} decision */
 export function compileDecisionContract(base, decision) {
   const starting = base ?? createDefaultContract(decision.projectName);
+  const discovered = decision.discoveryDirection ? compileDiscoveryLock(decision.discoveryDirection, decision.acceptance) : null;
+  const outcome = discovered?.goal ?? decision.outcome;
+  const acceptance = discovered?.acceptance ?? decision.acceptance;
+  const software = isSoftwareDeliveryGoal(outcome);
   const adapters = Object.fromEntries(Object.entries(starting.adapters ?? {}).map(([name, config]) => [name, { ...config, command: null }]));
+  const blockerPolicy = software
+    ? [...new Set([...(starting.blockerPolicy ?? []), 'software-goal-unproven'])]
+    : starting.blockerPolicy;
   return validateContract({
     ...starting,
     project: decision.projectName,
     worker: 'shipping-harness',
     release: decision.release,
-    goal: decision.outcome,
+    goal: outcome,
     scope: decision.scope,
-    acceptance: decision.acceptance,
+    acceptance: software ? annotateProvingOutcome(acceptance, outcome) : acceptance,
+    blockerPolicy,
     adapters,
     releasePolicy: { ...starting.releasePolicy, autoCommit: false, autoTag: false, autoPush: false, generateReport: true },
   });

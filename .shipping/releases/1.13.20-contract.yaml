@@ -3,26 +3,44 @@
     {
       "command": "node --test test/adversarial/close-fingerprint-attacks.test.mjs test/adversarial/close-uncommitted-attacks.test.mjs",
       "cwd": ".",
-      "description": "User outcome: close refuses evidence once the tested source changes after verify, through core, CLI --allow-uncommitted and shipping_close, and an unchanged verified tree still closes.",
-      "id": "AC-114101",
+      "description": "Close refuses evidence from restored in-scope dirty bytes and still allows out-of-scope dirty close.",
+      "id": "AC-113201",
       "required": true,
-      "timeoutSeconds": 180,
+      "timeoutSeconds": 120,
       "type": "command"
     },
     {
-      "command": "node --test test/integration/plan-update.test.mjs",
+      "command": "node --test test/mcp/intent-gate.test.mjs test/adversarial/baseline-commit-attacks.test.mjs",
       "cwd": ".",
-      "description": "User outcome: a plan-bound release still cannot close once its stage definition is gone.",
-      "id": "AC-114102",
+      "description": "Analysis-mode start with default commitBaseline does not move HEAD; tracked .env.local refuses baseline commit.",
+      "id": "AC-113202",
       "required": true,
-      "timeoutSeconds": 180,
+      "timeoutSeconds": 120,
+      "type": "command"
+    },
+    {
+      "command": "node --test test/adversarial/pause-stop-attacks.test.mjs",
+      "cwd": ".",
+      "description": "Pause denies shipping_execute work orders; AbortSignal kills the bounded command process group.",
+      "id": "AC-113203",
+      "required": true,
+      "timeoutSeconds": 60,
+      "type": "command"
+    },
+    {
+      "command": "node --test test/adversarial/budget-tamper-attacks.test.mjs",
+      "cwd": ".",
+      "description": "Spent agent runs do not launch; TAMPERED is not laundered by pause; maxVerifyRuns 1 first pass is SHIPPABLE.",
+      "id": "AC-113204",
+      "required": true,
+      "timeoutSeconds": 60,
       "type": "command"
     },
     {
       "command": "npm run verify:docs && git diff --check && npm run release:verify",
       "cwd": ".",
-      "description": "User outcome: documentation audit, whitespace check, and full release gates pass.",
-      "id": "AC-114103",
+      "description": "Documentation audit, whitespace check, and full release gates pass.",
+      "id": "AC-113205",
       "required": true,
       "timeoutSeconds": 900,
       "type": "command"
@@ -154,8 +172,7 @@
     "legacy-plain-brief-over-budget",
     "goal-discovery-plain-brief-over-budget",
     "action-envelope-weakening",
-    "fact-graph-authority-loss",
-    "software-goal-unproven"
+    "fact-graph-authority-loss"
   ],
   "budgets": {
     "maxAgentRuns": 2,
@@ -163,9 +180,9 @@
     "maxFixCycles": 2,
     "maxOutputBytes": 1048576
   },
-  "goal": "Close must refuse evidence whose tested working tree changed after verify, on every surface, while an unchanged verified tree still closes.",
+  "goal": "Close must attest the verified in-scope tree; analysis must not mutate Git; pause must stop execution; spent agent runs and TAMPERED state must fail closed.",
   "project": "shipping-harness",
-  "release": "1.14.1",
+  "release": "1.13.20",
   "releasePolicy": {
     "autoCommit": false,
     "autoPush": false,
@@ -183,31 +200,46 @@
   "schema": "shipping-harness/v1",
   "scope": {
     "exclude": [
-      "Automatic re-verification at close.",
-      "Engine-owned implementation commits.",
-      "MCP tool JSON, schemas/v1, or CLI help changes."
+      "MVP acceptance units, liveness predicates, acceptance bootstrap, discovery-to-contract compile, plan-bound train continuation (v1.14+).",
+      "A tenth MCP tool, raw command fields, auto-confirm, auto-push, or reopening CLOSED."
     ],
     "include": [
-      "Close compares the evidence tree fingerprint with every deviation from HEAD, except out-of-scope paths that became dirty only after verify.",
-      "Regression tests for issue #1 on core, CLI, and MCP close."
+      "Close compares in-scope dirty identity so restored dirty evidence cannot close.",
+      "Analysis-mode start does not auto-commit; tracked credential names refuse baseline commit.",
+      "Pause denies execute/fix work orders; bounded commands honor AbortSignal.",
+      "Spent agent runs do not launch; TAMPERED cannot be re-signed via pause; passing verify at maxVerifyRuns is SHIPPABLE."
     ],
     "paths": {
       "exclude": [
         ".shipping/contract.yaml",
         ".shipping/contract.lock",
         ".git/**",
-        "node_modules/**"
+        "node_modules/**",
+        "dist/**",
+        "coverage/**"
       ],
       "include": [
+        ".omo/plans/v1.13.20-false-close-and-stop.md",
+        "BACKLOG.md",
         "CHANGELOG.md",
         "README.md",
         "docs/HANDOVER.md",
-        "docs/planning/53-V1.14.1-CLOSE-REFUSES-STALE-TREE-EVIDENCE-DEVELOPMENT-PLAN.md",
+        "docs/planning/51-V1.13.20-FALSE-CLOSE-AND-STOP-MUST-HOLD-DEVELOPMENT-PLAN.md",
         "package.json",
+        "src/adapters/artifacts.mjs",
+        "src/adapters/runner.mjs",
+        "src/core/baseline-commit.mjs",
         "src/core/gate.mjs",
-        "src/core/git.mjs",
+        "src/core/process.mjs",
+        "src/core/proposals.mjs",
+        "src/core/state.mjs",
+        "src/mcp/handlers.mjs",
+        "test/adversarial/baseline-commit-attacks.test.mjs",
+        "test/adversarial/budget-tamper-attacks.test.mjs",
         "test/adversarial/close-fingerprint-attacks.test.mjs",
-        "test/integration/plan-update.test.mjs"
+        "test/adversarial/pause-stop-attacks.test.mjs",
+        "test/mcp/intent-gate.test.mjs",
+        "test/stable/surface-freeze.test.mjs"
       ]
     }
   },

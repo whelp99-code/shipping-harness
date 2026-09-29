@@ -29,5 +29,6 @@ export function runtimePaths(root) {
     releases: path.join(directory, 'releases'),
     tmp: path.join(directory, 'tmp'),
     core5Bundle: path.join(directory, 'core5-release-bundle.json'),
+    prepApproval: path.join(directory, 'prep-approval.json'),
   };
 }

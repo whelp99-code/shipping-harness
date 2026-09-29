@@ -1,0 +1,39 @@
+{
+  "acceptance": {
+    "failed": 0,
+    "passed": 4,
+    "requiredFailed": 0,
+    "total": 4
+  },
+  "agentRuns": 0,
+  "backlogCount": 0,
+  "baselineSha": "2ad4ff30b82dd9116da53242498f40335aa42f96",
+  "closedAt": "2026-09-25T15:27:18.340Z",
+  "closedGitSha": "b58ae6c24211eb750ff84e7fbcce5a01efaf9bdf",
+  "contractHash": "ab8a8900455f71ec14969c41dbfcf233839ad48d36d8779b1b494d3e61588b54",
+  "evidenceRunId": "run-2026-09-25T15-25-57-541Z-1aba7616",
+  "fixCycles": 0,
+  "goal": "프롬프트만으로 임의 프로젝트를 구동 가능한 MVP: 소프트웨어 골은 앱을 띄우거나 이름 있는 사용자 결과를 단언하는 리포 소유 검사 없이 닫히지 않고, 승인된 준비 스코프에서 test/start를 만든 뒤 rescan하며, 트레인 연속은 plan hash와 stage에 묶인다.",
+  "integrations": null,
+  "issueCounts": {
+    "BLOCKER": 0,
+    "IGNORE": 0,
+    "NEXT": 0,
+    "UNKNOWN": 0
+  },
+  "postLockCommits": [
+    {
+      "paths": [],
+      "sha": "b58ae6c24211eb750ff84e7fbcce5a01efaf9bdf",
+      "subject": "chore: relock shipping-harness v1.14.0"
+    }
+  ],
+  "project": "shipping-harness",
+  "release": "1.14.0",
+  "schema": "shipping-harness/release-v1",
+  "telemetry": {
+    "totalAgentDurationMs": 0
+  },
+  "verifyRuns": 2,
+  "worker": "shipping-harness"
+}

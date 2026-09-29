@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { detectStartScript } from './acceptance-proof.mjs';
 import { hashObject } from './crypto.mjs';
 import { assertContainedPath, exists, fileSize } from './fs.mjs';
 import { runGit } from './git.mjs';
@@ -293,6 +294,7 @@ async function inspectWorkspace(root, workspaceRoot, allFiles) {
   const stageCommands = [];
   const diagnostics = [];
   const versions = [];
+  let start = null;
   const sourceRootsRelative = detectSourceRoots(files);
   let projectName = workspaceRoot === '.' ? path.basename(root) : path.basename(workspaceRoot);
 
@@ -307,6 +309,7 @@ async function inspectWorkspace(root, workspaceRoot, allFiles) {
       const manager = has('pnpm-lock.yaml') ? 'pnpm' : has('yarn.lock') ? 'yarn' : has('bun.lock') || has('bun.lockb') ? 'bun' : 'npm';
       commands.push(...nodeCommands(packageJson.scripts ?? {}, manager, workspaceRoot));
       stageCommands.push(...nodeStageCommands(packageJson.scripts ?? {}, manager, workspaceRoot));
+      start = detectStartScript(packageJson.scripts ?? {}, manager);
     } catch (error) {
       diagnostics.push(`package.json could not be parsed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -387,6 +390,7 @@ async function inspectWorkspace(root, workspaceRoot, allFiles) {
     trackedFileCount: files.length,
     hasTests,
     candidateCommands: uniqueCommands,
+    start,
     stageCommands: [...new Map(stageCommands.map((entry) => [`${entry.cwd}\0${entry.command}`, entry])).values()].filter((entry) => !uniqueCommands.some((c) => c.command === entry.command && c.cwd === entry.cwd)),
     versions,
     readme: readmeName ? workspacePath(workspaceRoot, readmeName) : null,
@@ -426,7 +430,7 @@ function selectWorkspace(candidates, requestedId) {
 /**
  * @typedef {{id: string, description: string, command: string, cwd?: string, source?: string, confidence?: string, aggregate?: boolean, supplemental?: boolean, sideEffect?: string, isolationRequired?: boolean, deterministicOutputRequired?: boolean, automaticallyRunnable?: boolean}} CandidateCommand
  * @typedef {{name: string, type: string}} TopLevelEntry
- * @typedef {{schema: string, projectName: string, types: string[], manifests: string[], sourceRoots: string[], trackedFileCount: number, trackedFileCountTruncated: boolean, topLevel: TopLevelEntry[], candidateCommands: CandidateCommand[], stageCommands: CandidateCommand[], readme: string|null, diagnostics: string[], workspace: {id: string, root: string, score: number, confidence: string, ambiguous: boolean, requested: boolean}, workspaceCandidates: Array<{id: string, root: string, projectName: string, score: number, types: string[], manifests: string[], commandCount: number, trackedFileCount: number}>, versionEvidence: Record<string, any>, intelligence?: Record<string, any>}} ProjectAnalysis
+ * @typedef {{schema: string, projectName: string, types: string[], manifests: string[], sourceRoots: string[], trackedFileCount: number, trackedFileCountTruncated: boolean, topLevel: TopLevelEntry[], candidateCommands: CandidateCommand[], start: {detected: true, command: string, script: string, source: string} | null, stageCommands: CandidateCommand[], readme: string|null, diagnostics: string[], workspace: {id: string, root: string, score: number, confidence: string, ambiguous: boolean, requested: boolean}, workspaceCandidates: Array<{id: string, root: string, projectName: string, score: number, types: string[], manifests: string[], commandCount: number, trackedFileCount: number}>, versionEvidence: Record<string, any>, intelligence?: Record<string, any>}} ProjectAnalysis
  * @typedef {{id: string, description: string, type: string, command: string, cwd: string, required: boolean, timeoutSeconds: number, sideEffect: string, isolationRequired: boolean, deterministicOutputRequired: boolean, automaticallyRunnable: boolean}} AcceptanceCriterion
  */
 
@@ -481,6 +485,7 @@ export async function analyzeRepository(root, options = {}) {
     trackedFileCountTruncated: files.length >= MAX_TRACKED_FILES,
     topLevel: rootTopLevel,
     candidateCommands: commands,
+    start: selected.start ?? null,
     stageCommands: selected.stageCommands ?? [],
     readme: selected.readme,
     diagnostics,
